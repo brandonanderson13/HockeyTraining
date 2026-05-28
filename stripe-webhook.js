@@ -56,6 +56,9 @@ export default async function handler(req, res) {
         }
 
         // Create or update subscription record with names
+        const isAssociation = metadata.subscription_type === 'association';
+        const role = isAssociation ? 'admin' : 'player';
+        
         const { error: upsertError } = await supabase
           .from('subscriptions')
           .upsert({
@@ -63,10 +66,13 @@ export default async function handler(req, res) {
             email: customerEmail,
             first_name: metadata.first_name || null,
             last_name: metadata.last_name || null,
+            subscription_type: metadata.subscription_type || 'individual',
+            seat_limit: metadata.seat_limit ? parseInt(metadata.seat_limit) : null,
+            organization_name: metadata.organization_name || null,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
             status: 'active',
-            role: 'player'
+            role: role
           }, {
             onConflict: 'user_id'
           });
