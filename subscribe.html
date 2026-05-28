@@ -18,7 +18,7 @@
   }
   
   .container {
-    max-width: 600px;
+    max-width: 700px;
     margin: 0 auto;
     padding-top: 40px;
   }
@@ -45,6 +45,41 @@
     letter-spacing: 0.02em;
   }
   
+  .pricing-toggle {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+  
+  .pricing-toggle button {
+    flex: 1;
+    max-width: 200px;
+    background: #1a1a1a;
+    border: 2px solid #333;
+    color: rgba(255,255,255,0.6);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .pricing-toggle button.active {
+    background: #E07820;
+    border-color: #E07820;
+    color: #fff;
+  }
+  
+  .pricing-toggle button:hover:not(.active) {
+    border-color: #E07820;
+    color: rgba(255,255,255,0.85);
+  }
+  
   .card {
     background: #141414;
     border: 1px solid #222;
@@ -55,7 +90,7 @@
   
   .price {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 8px;
   }
   
   .price-amount {
@@ -70,6 +105,15 @@
     font-size: 16px;
     color: rgba(255,255,255,0.5);
     margin-top: 4px;
+  }
+  
+  .savings {
+    text-align: center;
+    font-size: 13px;
+    color: #4ade80;
+    font-weight: 600;
+    margin-bottom: 24px;
+    min-height: 20px;
   }
   
   .features {
@@ -99,11 +143,9 @@
     line-height: 1.5;
   }
   
-  .feature-text strong {
-    color: #fff;
-  }
+  .feature-text strong { color: #fff; }
   
-  button {
+  button.cta {
     width: 100%;
     background: #E07820;
     color: #fff;
@@ -119,15 +161,8 @@
     transition: background 0.2s;
   }
   
-  button:hover {
-    background: #c96819;
-  }
-  
-  button:disabled {
-    background: #444;
-    color: #888;
-    cursor: not-allowed;
-  }
+  button.cta:hover { background: #c96819; }
+  button.cta:disabled { background: #444; color: #888; cursor: not-allowed; }
   
   .subtext {
     text-align: center;
@@ -141,9 +176,7 @@
     text-decoration: none;
   }
   
-  .subtext a:hover {
-    text-decoration: underline;
-  }
+  .subtext a:hover { text-decoration: underline; }
   
   .message {
     margin-top: 16px;
@@ -169,11 +202,17 @@
     <p>12-Week Off-Ice Development Program</p>
   </div>
   
+  <div class="pricing-toggle">
+    <button id="monthlyBtn" class="active" onclick="selectPlan('monthly')">Monthly</button>
+    <button id="annualBtn" onclick="selectPlan('annual')">Annual</button>
+  </div>
+  
   <div class="card">
     <div class="price">
-      <div class="price-amount">$50</div>
-      <div class="price-period">per month</div>
+      <div class="price-amount" id="priceAmount">$19.99</div>
+      <div class="price-period" id="pricePeriod">per month</div>
     </div>
+    <div class="savings" id="savings"></div>
     
     <div class="features">
       <div class="feature">
@@ -202,7 +241,7 @@
       </div>
     </div>
     
-    <button id="subscribeBtn" onclick="createCheckout()">Subscribe Now</button>
+    <button class="cta" id="subscribeBtn" onclick="createCheckout()">Subscribe Now</button>
     
     <div id="message" class="message"></div>
     
@@ -217,6 +256,31 @@
 const STRIPE_PUBLISHABLE_KEY = 'pk_live_51Tbv35A6YZpoMmOQYZ7sPphZXQfmhmsLDXfKs6ipdNH6it60Z48Vm9jWWhS7h6SNTbpViXzsn56qfKnv9PzJx7Cb00MoRsdlWm';
 const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
 
+let currentPlan = 'monthly';
+
+function selectPlan(plan) {
+  currentPlan = plan;
+  const monthlyBtn = document.getElementById('monthlyBtn');
+  const annualBtn = document.getElementById('annualBtn');
+  const priceAmount = document.getElementById('priceAmount');
+  const pricePeriod = document.getElementById('pricePeriod');
+  const savings = document.getElementById('savings');
+  
+  if (plan === 'monthly') {
+    monthlyBtn.classList.add('active');
+    annualBtn.classList.remove('active');
+    priceAmount.textContent = '$19.99';
+    pricePeriod.textContent = 'per month';
+    savings.textContent = '';
+  } else {
+    monthlyBtn.classList.remove('active');
+    annualBtn.classList.add('active');
+    priceAmount.textContent = '$149.99';
+    pricePeriod.textContent = 'per year';
+    savings.textContent = 'Save $89.89 vs monthly (37% off)';
+  }
+}
+
 async function createCheckout() {
   const btn = document.getElementById('subscribeBtn');
   const message = document.getElementById('message');
@@ -225,14 +289,17 @@ async function createCheckout() {
   btn.textContent = 'Loading...';
   message.style.display = 'none';
   
+  const priceAmount = currentPlan === 'monthly' ? 1999 : 14999; // in cents
+  const interval = currentPlan === 'monthly' ? 'month' : 'year';
+  
   try {
-    // Call your backend to create a checkout session
     const response = await fetch('/api/create-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        priceAmount: 5000, // $50.00 in cents
-        successUrl: window.location.origin + '/login.html?session_id={CHECKOUT_SESSION_ID}',
+        priceAmount: priceAmount,
+        interval: interval,
+        successUrl: window.location.origin + '/login.html?checkout=success',
         cancelUrl: window.location.origin + '/subscribe.html'
       })
     });
@@ -241,7 +308,6 @@ async function createCheckout() {
     
     if (error) throw new Error(error);
     
-    // Redirect to Stripe Checkout
     const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
     
     if (stripeError) throw stripeError;
@@ -255,6 +321,5 @@ async function createCheckout() {
   }
 }
 </script>
-
 </body>
 </html>
