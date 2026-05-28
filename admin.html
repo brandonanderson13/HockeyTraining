@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - Delano Tigers Training</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: #0D0D0D;
+    color: #fff;
+    padding: 20px;
+  }
+  
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 24px;
+  }
+  
+  h1 span { color: #E07820; }
+  
+  .card {
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .card h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #E07820;
+    margin-bottom: 16px;
+  }
+  
+  label {
+    display: block;
+    font-size: 11px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 6px;
+    margin-top: 12px;
+  }
+  
+  label:first-of-type { margin-top: 0; }
+  
+  input, select {
+    width: 100%;
+    background: #0d0d0d;
+    border: 1px solid #333;
+    color: #fff;
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: 'Barlow', sans-serif;
+  }
+  
+  button {
+    background: #E07820;
+    color: #fff;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 14px;
+  }
+  
+  button:hover { background: #c96819; }
+  button:disabled { background: #444; color: #888; cursor: not-allowed; }
+  
+  .btn-secondary {
+    background: #333;
+    color: rgba(255,255,255,0.7);
+  }
+  
+  .btn-secondary:hover {
+    background: #444;
+  }
+  
+  .message {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    display: none;
+  }
+  
+  .message.success { background: rgba(74, 222, 128, 0.15); border: 1px solid rgba(74, 222, 128, 0.3); color: #4ade80; }
+  .message.error { background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.3); color: #f87171; }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+  }
+  
+  th {
+    text-align: left;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255,255,255,0.5);
+    padding: 8px;
+    border-bottom: 1px solid #222;
+  }
+  
+  td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #1a1a1a;
+    font-size: 13px;
+  }
+  
+  .status-active { color: #4ade80; font-weight: 600; }
+  .status-expired { color: #f87171; }
+  
+  .btn-small {
+    padding: 4px 10px;
+    font-size: 11px;
+    margin: 0;
+    background: #f87171;
+  }
+  
+  .btn-small:hover { background: #dc2626; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1><span>Admin Panel</span> — Delano Tigers Training</h1>
+  
+  <div id="authCheck" style="text-align:center;padding:40px;color:rgba(255,255,255,0.5);">
+    Loading...
+  </div>
+  
+  <div id="adminContent" style="display:none;">
+    
+    <div class="card">
+      <h2>Add New Player</h2>
+      <form id="addPlayerForm">
+        <label for="playerEmail">Player Email</label>
+        <input type="email" id="playerEmail" placeholder="player@example.com" required>
+        
+        <label for="playerName">Player Name (optional)</label>
+        <input type="text" id="playerName" placeholder="Tyler Johnson">
+        
+        <label for="expiresAt">Expiration Date (optional)</label>
+        <input type="date" id="expiresAt">
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">Leave blank for no expiration (full-season access)</div>
+        
+        <button type="submit" id="addBtn">Add Player</button>
+        <div id="addMessage" class="message"></div>
+      </form>
+    </div>
+    
+    <div class="card">
+      <h2>Active Players</h2>
+      <div id="playersList">Loading...</div>
+    </div>
+    
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// You'll need to set YOUR_ADMIN_EMAIL in the code below
+const ADMIN_EMAIL = 'brandon@example.com'; // CHANGE THIS TO YOUR EMAIL
+
+(async function init() {
+  const authCheck = document.getElementById('authCheck');
+  const adminContent = document.getElementById('adminContent');
+  
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error || !user) {
+      authCheck.innerHTML = '<a href="login.html" style="color:#E07820;">Please sign in first</a>';
+      return;
+    }
+    
+    // Check if this user is the admin
+    if (user.email !== ADMIN_EMAIL) {
+      authCheck.innerHTML = '<p style="color:#f87171;">Access denied. Admin only.</p>';
+      return;
+    }
+    
+    // Admin verified - show content
+    authCheck.style.display = 'none';
+    adminContent.style.display = 'block';
+    
+    loadPlayers();
+    
+  } catch (err) {
+    authCheck.innerHTML = '<p style="color:#f87171;">Error: ' + err.message + '</p>';
+  }
+})();
+
+document.getElementById('addPlayerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById('playerEmail').value.trim();
+  const name = document.getElementById('playerName').value.trim();
+  const expiresAt = document.getElementById('expiresAt').value;
+  const message = document.getElementById('addMessage');
+  const btn = document.getElementById('addBtn');
+  
+  btn.disabled = true;
+  btn.textContent = 'Adding...';
+  message.style.display = 'none';
+  
+  try {
+    // First, create auth user (they'll get email to set up their account)
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: email,
+      email_confirm: true
+    });
+    
+    if (authError) throw authError;
+    
+    // Add subscription record
+    const { error: subError } = await supabase
+      .from('subscriptions')
+      .insert({
+        user_id: authData.user.id,
+        email: email,
+        name: name || null,
+        status: 'active',
+        expires_at: expiresAt || null
+      });
+    
+    if (subError) throw subError;
+    
+    message.className = 'message success';
+    message.textContent = '✓ Player added! They can now sign in with: ' + email;
+    message.style.display = 'block';
+    
+    // Clear form
+    document.getElementById('playerEmail').value = '';
+    document.getElementById('playerName').value = '';
+    document.getElementById('expiresAt').value = '';
+    
+    // Reload players list
+    loadPlayers();
+    
+  } catch (error) {
+    message.className = 'message error';
+    message.textContent = 'Error: ' + error.message;
+    message.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Add Player';
+  }
+});
+
+async function loadPlayers() {
+  const container = document.getElementById('playersList');
+  container.innerHTML = 'Loading...';
+  
+  try {
+    const { data: subs, error } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    if (!subs || subs.length === 0) {
+      container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:13px;">No players yet. Add one above.</p>';
+      return;
+    }
+    
+    let html = '<table><thead><tr><th>Email</th><th>Name</th><th>Status</th><th>Expires</th><th>Actions</th></tr></thead><tbody>';
+    
+    subs.forEach(sub => {
+      const isExpired = sub.expires_at && new Date(sub.expires_at) < new Date();
+      const statusClass = isExpired ? 'status-expired' : 'status-active';
+      const statusText = isExpired ? 'Expired' : sub.status;
+      const expiresText = sub.expires_at ? new Date(sub.expires_at).toLocaleDateString() : 'No expiration';
+      
+      html += `<tr>
+        <td>${sub.email}</td>
+        <td>${sub.name || '—'}</td>
+        <td class="${statusClass}">${statusText}</td>
+        <td style="color:rgba(255,255,255,0.5);">${expiresText}</td>
+        <td><button class="btn-small" onclick="removeSub('${sub.id}','${sub.email}')">Remove</button></td>
+      </tr>`;
+    });
+    
+    html += '</tbody></table>';
+    container.innerHTML = html;
+    
+  } catch (error) {
+    container.innerHTML = '<p style="color:#f87171;">Error loading players: ' + error.message + '</p>';
+  }
+}
+
+async function removeSub(id, email) {
+  if (!confirm('Remove access for ' + email + '?')) return;
+  
+  try {
+    const { error } = await supabase
+      .from('subscriptions')
+      .delete()
+      .eq('id', id);
+    
+    if (error) throw error;
+    
+    alert('✓ Removed: ' + email);
+    loadPlayers();
+    
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+</script>
+
+</body>
+</html>

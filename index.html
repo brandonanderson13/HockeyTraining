@@ -1174,6 +1174,89 @@ select:focus{border-color:var(--or);outline:none;}
 </div><!-- /wrap -->
 
 <script>
+// ═══════════════════════════════════════════════════════════════════════════
+// SUPABASE AUTH CHECK - Verifies user is logged in with active subscription
+// ═══════════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY';
+
+// Check auth before loading program
+(async function checkAuth() {
+  // Import Supabase
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  script.onload = async () => {
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    try {
+      // Check if user is logged in
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        // Not logged in - redirect to login
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Check subscription status
+      const { data: subscription, error: subError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .single();
+      
+      if (subError && subError.code !== 'PGRST116') {
+        console.error('Subscription check error:', subError);
+      }
+      
+      if (!subscription) {
+        alert('No active subscription found. Redirecting to login...');
+        await supabase.auth.signOut();
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Check expiration
+      if (subscription.expires_at) {
+        const expiresAt = new Date(subscription.expires_at);
+        if (expiresAt < new Date()) {
+          alert('Your subscription has expired. Contact your coach to renew.');
+          await supabase.auth.signOut();
+          window.location.href = 'login.html';
+          return;
+        }
+      }
+      
+      // All checks passed - user can access the program
+      console.log('Access granted for:', user.email);
+      
+      // Add a logout button to the header
+      addLogoutButton(supabase, user);
+      
+    } catch (error) {
+      console.error('Auth error:', error);
+      window.location.href = 'login.html';
+    }
+  };
+  document.head.appendChild(script);
+})();
+
+function addLogoutButton(supabase, user) {
+  const header = document.querySelector('.hdr');
+  if (!header) return;
+  
+  const btn = document.createElement('button');
+  btn.textContent = 'Sign Out';
+  btn.style.cssText = 'position:absolute;top:12px;right:12px;background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;padding:6px 12px;border-radius:6px;font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;';
+  btn.onclick = async () => {
+    await supabase.auth.signOut();
+    window.location.href = 'login.html';
+  };
+  header.appendChild(btn);
+}
+
+
 const phases={
   1:{label:'Phase 1 — Foundation (Wks 1–4)',desc:'Build the foundation. Focus on movement quality, proper form, and consistency. Light-to-moderate loads, higher reps. Stickhandling and shooting integrated every day to build skill from the start.',color:'#60a5fa',weeks:[
     {num:1,focus:'Establishing Movement Patterns',days:[

@@ -1,0 +1,9 @@
+{
+  "name": "delano-tigers-training",
+  "version": "1.0.0",
+  "description": "Delano Tigers 12-Week Off-Ice Training Program",
+  "dependencies": {
+    "stripe": "^14.0.0",
+    "@supabase/supabase-js": "^2.39.0"
+  }
+}

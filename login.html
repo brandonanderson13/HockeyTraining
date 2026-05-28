@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delano Tigers Training - Sign In</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: #0D0D0D;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .container {
+    max-width: 440px;
+    width: 100%;
+  }
+  
+  .logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  
+  .logo h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  
+  .logo h1 span { color: #E07820; }
+  
+  .logo p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.02em;
+  }
+  
+  .card {
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 32px 28px;
+  }
+  
+  .card h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    color: #E07820;
+  }
+  
+  .card p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  
+  label {
+    display: block;
+    font-size: 11px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 6px;
+  }
+  
+  input[type="email"] {
+    width: 100%;
+    background: #0d0d0d;
+    border: 1px solid #333;
+    color: #fff;
+    font-size: 15px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-family: 'Barlow', sans-serif;
+    margin-bottom: 18px;
+  }
+  
+  input[type="email"]:focus {
+    outline: none;
+    border-color: #E07820;
+  }
+  
+  button {
+    width: 100%;
+    background: #E07820;
+    color: #fff;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 13px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  button:hover {
+    background: #c96819;
+  }
+  
+  button:disabled {
+    background: #444;
+    color: #888;
+    cursor: not-allowed;
+  }
+  
+  .message {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+    display: none;
+  }
+  
+  .message.success {
+    background: rgba(74, 222, 128, 0.15);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    color: #4ade80;
+  }
+  
+  .message.error {
+    background: rgba(248, 113, 113, 0.15);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    color: #f87171;
+  }
+  
+  .message.info {
+    background: rgba(96, 165, 250, 0.15);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    color: #60a5fa;
+  }
+  
+  .footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo">
+    <h1><span>Delano</span> Tigers Training</h1>
+    <p>12-Week Off-Ice Development Program</p>
+  </div>
+  
+  <div class="card">
+    <h2>Sign In</h2>
+    <p>Enter your email to receive a secure sign-in link. No password needed.</p>
+    <p style="font-size:12px;margin-top:8px;color:rgba(255,255,255,0.45);">Don't have an account? <a href="subscribe.html" style="color:#E07820;text-decoration:none;">Subscribe here</a></p>
+    
+    <form id="loginForm">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" placeholder="your.email@example.com" required autocomplete="email">
+      <button type="submit" id="submitBtn">Send Sign-In Link</button>
+    </form>
+    
+    <div id="message" class="message"></div>
+  </div>
+  
+  <div class="footer">
+    Delano Youth Hockey Association · Training Program
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Supabase configuration
+const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Check if user just came back from clicking magic link
+const hashParams = new URLSearchParams(window.location.hash.substring(1));
+if (hashParams.get('access_token')) {
+  // User clicked the magic link - verify subscription and redirect
+  verifyAndRedirect();
+}
+
+// Handle login form submission
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById('email').value.trim();
+  const submitBtn = document.getElementById('submitBtn');
+  const message = document.getElementById('message');
+  
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sending...';
+  message.style.display = 'none';
+  
+  try {
+    const { data, error } = await supabase.auth.signInWithOtp({
+      email: email,
+      options: {
+        emailRedirectTo: window.location.origin + window.location.pathname
+      }
+    });
+    
+    if (error) throw error;
+    
+    message.className = 'message success';
+    message.textContent = '✓ Check your email! We sent you a sign-in link.';
+    message.style.display = 'block';
+    document.getElementById('email').value = '';
+    
+  } catch (error) {
+    message.className = 'message error';
+    message.textContent = 'Error: ' + error.message;
+    message.style.display = 'block';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Send Sign-In Link';
+  }
+});
+
+async function verifyAndRedirect() {
+  const message = document.getElementById('message');
+  message.className = 'message info';
+  message.textContent = 'Verifying your access...';
+  message.style.display = 'block';
+  
+  try {
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError) throw userError;
+    if (!user) throw new Error('No user found');
+    
+    // Check if user has a subscription record (approved or pending)
+    const { data: subscription, error: subError } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+    
+    if (subError && subError.code !== 'PGRST116') {
+      console.error('Subscription check error:', subError);
+    }
+    
+    if (!subscription) {
+      // First time signing in - create a PENDING subscription
+      const { error: insertError } = await supabase
+        .from('subscriptions')
+        .insert({
+          user_id: user.id,
+          email: user.email,
+          status: 'pending',
+          created_at: new Date().toISOString()
+        });
+      
+      if (insertError) {
+        console.error('Error creating pending subscription:', insertError);
+      }
+      
+      // Show pending message
+      message.className = 'message info';
+      message.innerHTML = '<strong>Account created!</strong><br><br>Your access is pending approval. Your coach will activate your account shortly. Check back in 24-48 hours or contact your coach.';
+      message.style.display = 'block';
+      return;
+    }
+    
+    // Subscription exists - check status
+    if (subscription.status === 'pending') {
+      message.className = 'message info';
+      message.innerHTML = '<strong>Pending Approval</strong><br><br>Your account is waiting for coach approval. Contact your coach if you\'ve been waiting more than 48 hours.';
+      message.style.display = 'block';
+      return;
+    }
+    
+    if (subscription.status !== 'active') {
+      message.className = 'message error';
+      message.textContent = 'Your access has been deactivated. Contact your coach.';
+      message.style.display = 'block';
+      await supabase.auth.signOut();
+      return;
+    }
+    
+    // Check if subscription is expired
+    if (subscription.expires_at) {
+      const expiresAt = new Date(subscription.expires_at);
+      if (expiresAt < new Date()) {
+        message.className = 'message error';
+        message.textContent = 'Your subscription has expired. Contact your coach to renew.';
+        message.style.display = 'block';
+        await supabase.auth.signOut();
+        return;
+      }
+    }
+    
+    // All checks passed - redirect to training program
+    window.location.href = 'index.html';
+    
+  } catch (error) {
+    message.className = 'message error';
+    message.textContent = 'Error verifying access: ' + error.message;
+    message.style.display = 'block';
+  }
+}
+</script>
+
+</body>
+</html>

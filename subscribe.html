@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subscribe - Delano Tigers Training</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: #0D0D0D;
+    color: #fff;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-top: 40px;
+  }
+  
+  .logo {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  
+  .logo h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+  
+  .logo h1 span { color: #E07820; }
+  
+  .logo p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.02em;
+  }
+  
+  .card {
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 36px 32px;
+    margin-bottom: 20px;
+  }
+  
+  .price {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  
+  .price-amount {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 56px;
+    font-weight: 800;
+    color: #E07820;
+    line-height: 1;
+  }
+  
+  .price-period {
+    font-size: 16px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 4px;
+  }
+  
+  .features {
+    margin-bottom: 32px;
+  }
+  
+  .feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  
+  .feature:last-child { border-bottom: none; }
+  
+  .feature-icon {
+    color: #4ade80;
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  
+  .feature-text {
+    font-size: 14px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.5;
+  }
+  
+  .feature-text strong {
+    color: #fff;
+  }
+  
+  button {
+    width: 100%;
+    background: #E07820;
+    color: #fff;
+    border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 16px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  button:hover {
+    background: #c96819;
+  }
+  
+  button:disabled {
+    background: #444;
+    color: #888;
+    cursor: not-allowed;
+  }
+  
+  .subtext {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+  }
+  
+  .subtext a {
+    color: #E07820;
+    text-decoration: none;
+  }
+  
+  .subtext a:hover {
+    text-decoration: underline;
+  }
+  
+  .message {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    text-align: center;
+    display: none;
+  }
+  
+  .message.error {
+    background: rgba(248, 113, 113, 0.15);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    color: #f87171;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo">
+    <h1><span>Delano</span> Tigers Training</h1>
+    <p>12-Week Off-Ice Development Program</p>
+  </div>
+  
+  <div class="card">
+    <div class="price">
+      <div class="price-amount">$50</div>
+      <div class="price-period">per month</div>
+    </div>
+    
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">✓</div>
+        <div class="feature-text"><strong>12-week structured program</strong> with baseline and final testing</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">✓</div>
+        <div class="feature-text"><strong>Age-customized training</strong> — Squirts through High School</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">✓</div>
+        <div class="feature-text"><strong>Daily stickhandling and shooting</strong> integrated into every session</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">✓</div>
+        <div class="feature-text"><strong>Track your progress</strong> — log sessions, measure improvement</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">✓</div>
+        <div class="feature-text"><strong>Access on any device</strong> — phone, tablet, or laptop</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">✓</div>
+        <div class="feature-text"><strong>Cancel anytime</strong> — no long-term commitment</div>
+      </div>
+    </div>
+    
+    <button id="subscribeBtn" onclick="createCheckout()">Subscribe Now</button>
+    
+    <div id="message" class="message"></div>
+    
+    <div class="subtext">
+      Already have an account? <a href="login.html">Sign in here</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+const STRIPE_PUBLISHABLE_KEY = 'pk_live_51Tbv35A6YZpoMmOQYZ7sPphZXQfmhmsLDXfKs6ipdNH6it60Z48Vm9jWWhS7h6SNTbpViXzsn56qfKnv9PzJx7Cb00MoRsdlWm';
+const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+
+async function createCheckout() {
+  const btn = document.getElementById('subscribeBtn');
+  const message = document.getElementById('message');
+  
+  btn.disabled = true;
+  btn.textContent = 'Loading...';
+  message.style.display = 'none';
+  
+  try {
+    // Call your backend to create a checkout session
+    const response = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        priceAmount: 5000, // $50.00 in cents
+        successUrl: window.location.origin + '/login.html?session_id={CHECKOUT_SESSION_ID}',
+        cancelUrl: window.location.origin + '/subscribe.html'
+      })
+    });
+    
+    const { sessionId, error } = await response.json();
+    
+    if (error) throw new Error(error);
+    
+    // Redirect to Stripe Checkout
+    const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
+    
+    if (stripeError) throw stripeError;
+    
+  } catch (error) {
+    message.className = 'message error';
+    message.textContent = 'Error: ' + error.message;
+    message.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Subscribe Now';
+  }
+}
+</script>
+
+</body>
+</html>
