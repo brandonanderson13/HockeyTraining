@@ -1212,13 +1212,16 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       }
       
       // Check user role in subscriptions table
-      const { data: userSub } = await supabase
+      const { data: userSub, error: roleError } = await supabase
         .from('subscriptions')
         .select('role, status, expires_at')
         .eq('user_id', user.id)
         .single();
       
+      console.log('Role check result:', {userSub, roleError, userId: user.id});
+      
       const isAdmin = userSub && userSub.role === 'admin';
+      console.log('Is admin?', isAdmin, 'Role:', userSub?.role);
       
       // Show admin tab if user is admin
       if (isAdmin) {
