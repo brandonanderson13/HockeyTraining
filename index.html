@@ -3059,10 +3059,21 @@ async function loadAdminPanel(user) {
   // Store super admin status globally
   window._isSuperAdmin = (user.email === 'brandonanderson1393@gmail.com');
   
+  // Check if this admin is an association admin with seat limits
+  const sb = await getSupabaseClient();
+  const { data: adminSub } = await sb.from('subscriptions').select('*').eq('user_id', user.id).single();
+  window._adminSubscription = adminSub;
+  const hasSeats = adminSub && adminSub.seat_limit && adminSub.subscription_type === 'association';
+  
   content.innerHTML = `
     <div class="card" style="margin-bottom:1rem;">
       <div class="ch"><span class="cht">Quick Stats</span></div>
-      <div class="cb" id="quickStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;">
+      <div class="cb">
+        ${hasSeats ? `<div style="background:rgba(224,120,32,0.1);border:1px solid rgba(224,120,32,0.3);border-radius:8px;padding:12px;margin-bottom:12px;text-align:center;">
+          <div style="font-size:13px;color:#E07820;font-weight:700;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Association: ${adminSub.organization_name || 'Your Organization'}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;"><span id="seatsUsed">-</span> of ${adminSub.seat_limit === 999999 ? 'unlimited' : adminSub.seat_limit} seats used</div>
+        </div>` : ''}
+      <div id="quickStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;">
         <div style="text-align:center;padding:12px;background:#0d0d0d;border-radius:8px;">
           <div style="font-size:24px;font-weight:800;color:#4ade80;font-family:'Barlow Condensed',sans-serif;" id="statTotal">-</div>
           <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;">Total Players</div>
@@ -3148,6 +3159,24 @@ async function handleAddPlayer(e) {
   const msg = document.getElementById('adminAddMessage');
   
   msg.style.display = 'none';
+  
+  // Check seat limit if admin is association admin
+  if (window._adminSubscription && window._adminSubscription.seat_limit && role === 'player') {
+    const sb = await getSupabaseClient();
+    const { data: players } = await sb.from('subscriptions')
+      .select('id')
+      .eq('role', 'player'); // Only count players, not admins
+    
+    const currentPlayers = (players || []).length;
+    const limit = window._adminSubscription.seat_limit;
+    
+    if (limit !== 999999 && currentPlayers >= limit) {
+      msg.style.color = '#f87171';
+      msg.textContent = `Seat limit reached (${currentPlayers}/${limit}). Upgrade your plan to add more players.`;
+      msg.style.display = 'block';
+      return;
+    }
+  }
   
   try {
     // Create auth user
@@ -3246,6 +3275,10 @@ async function loadPlayerList(isSuperAdmin = false) {
     const statTotalMins = document.getElementById('statTotalMins');
     const statTotalWorkouts = document.getElementById('statTotalWorkouts');
     
+    const playerCount = subs.filter(s => s.role === 'player').length; // Don't count admins
+    const seatsUsedEl = document.getElementById('seatsUsed');
+    if (seatsUsedEl) seatsUsedEl.textContent = playerCount;
+    
     if (statTotal) statTotal.textContent = subs.length;
     if (statActive) statActive.textContent = subs.filter(s => s.status === 'active').length;
     
@@ -3326,6 +3359,15 @@ async function adminCancelStripe(subId, email, stripeSubId) {
 }
 
 async function adminDeletePlayer(subId, email) {
+  // Check if target is an admin
+  const sb = await getSupabaseClient();
+  const { data: targetSub } = await sb.from('subscriptions').select('role').eq('id', subId).single();
+  
+  if (targetSub && targetSub.role === 'admin' && !window._isSuperAdmin) {
+    alert('You cannot delete other admins. Only super admins can do that.');
+    return;
+  }
+  
   if (!confirm('Delete ' + email + ' from database? This does NOT cancel their Stripe subscription.')) return;
   
   try {

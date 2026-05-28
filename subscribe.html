@@ -6,144 +6,178 @@
 <title>Subscribe - Delano Tigers Training</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
-  
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-  body {
-    font-family: 'Barlow', sans-serif;
-    background: #0D0D0D;
-    color: #fff;
-    min-height: 100vh;
-    padding: 20px;
-  }
-  
-  .container {
-    max-width: 700px;
-    margin: 0 auto;
-    padding-top: 40px;
-  }
-  
-  .logo {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-  
-  .logo h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 32px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 8px;
-  }
-  
+  body { font-family: 'Barlow', sans-serif; background: #0D0D0D; color: #fff; min-height: 100vh; padding: 20px; }
+  .container { max-width: 800px; margin: 0 auto; padding-top: 40px; }
+  .logo { text-align: center; margin-bottom: 40px; }
+  .logo h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
   .logo h1 span { color: #E07820; }
+  .logo p { font-size: 14px; color: rgba(255,255,255,0.5); }
   
-  .logo p {
-    font-size: 14px;
-    color: rgba(255,255,255,0.5);
-    letter-spacing: 0.02em;
-  }
-  
-  .pricing-toggle {
+  .type-toggle {
     display: flex;
     gap: 12px;
     justify-content: center;
     margin-bottom: 32px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
   }
   
-  .pricing-toggle button {
+  .type-toggle button {
     flex: 1;
-    max-width: 200px;
     background: #1a1a1a;
     border: 2px solid #333;
     color: rgba(255,255,255,0.6);
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    padding: 12px 20px;
+    padding: 14px 20px;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
   }
   
-  .pricing-toggle button.active {
+  .type-toggle button.active {
     background: #E07820;
     border-color: #E07820;
     color: #fff;
   }
   
-  .pricing-toggle button:hover:not(.active) {
-    border-color: #E07820;
-    color: rgba(255,255,255,0.85);
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
   }
   
-  .card {
+  .price-card {
     background: #141414;
-    border: 1px solid #222;
+    border: 2px solid #222;
     border-radius: 12px;
-    padding: 36px 32px;
-    margin-bottom: 20px;
+    padding: 24px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  
+  .price-card:hover {
+    border-color: #E07820;
+    transform: translateY(-2px);
+  }
+  
+  .price-card.selected {
+    border-color: #E07820;
+    background: rgba(224,120,32,0.08);
+  }
+  
+  .price-card.popular::before {
+    content: 'MOST POPULAR';
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: #E07820;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  
+  .card-header {
+    text-align: center;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #222;
+  }
+  
+  .seats {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #E07820;
+    letter-spacing: 0.04em;
   }
   
   .price {
-    text-align: center;
-    margin-bottom: 8px;
-  }
-  
-  .price-amount {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 56px;
+    font-size: 42px;
     font-weight: 800;
-    color: #E07820;
+    color: #fff;
     line-height: 1;
+    margin: 8px 0 4px;
   }
   
-  .price-period {
-    font-size: 16px;
-    color: rgba(255,255,255,0.5);
-    margin-top: 4px;
-  }
-  
-  .savings {
-    text-align: center;
+  .period {
     font-size: 13px;
-    color: #4ade80;
-    font-weight: 600;
-    margin-bottom: 24px;
-    min-height: 20px;
+    color: rgba(255,255,255,0.5);
+  }
+  
+  .per-player {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 6px;
   }
   
   .features {
-    margin-bottom: 32px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.8;
   }
   
-  .feature {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid #1a1a1a;
+  .features div {
+    padding: 4px 0;
   }
   
-  .feature:last-child { border-bottom: none; }
-  
-  .feature-icon {
+  .features span {
     color: #4ade80;
-    font-size: 18px;
-    flex-shrink: 0;
-    margin-top: 2px;
+    margin-right: 6px;
   }
   
-  .feature-text {
+  .form-section {
+    background: #141414;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 28px 24px;
+    margin-bottom: 20px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  label {
+    display: block;
+    font-size: 11px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 6px;
+  }
+  
+  input, select {
+    width: 100%;
+    background: #0d0d0d;
+    border: 1px solid #333;
+    color: #fff;
     font-size: 14px;
-    color: rgba(255,255,255,0.75);
-    line-height: 1.5;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: 'Barlow', sans-serif;
+    margin-bottom: 14px;
   }
   
-  .feature-text strong { color: #fff; }
+  input:focus { outline: none; border-color: #E07820; }
+  
+  .name-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
   
   button.cta {
     width: 100%;
@@ -166,16 +200,12 @@
   
   .subtext {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 16px;
     font-size: 12px;
     color: rgba(255,255,255,0.4);
   }
   
-  .subtext a {
-    color: #E07820;
-    text-decoration: none;
-  }
-  
+  .subtext a { color: #E07820; text-decoration: none; }
   .subtext a:hover { text-decoration: underline; }
   
   .message {
@@ -202,64 +232,150 @@
     <p>12-Week Off-Ice Development Program</p>
   </div>
   
-  <div class="pricing-toggle">
-    <button id="monthlyBtn" class="active" onclick="selectPlan('monthly')">Monthly</button>
-    <button id="annualBtn" onclick="selectPlan('annual')">Annual</button>
+  <!-- INDIVIDUAL VS ASSOCIATION TOGGLE -->
+  <div class="type-toggle">
+    <button id="typeIndividual" class="active" onclick="selectType('individual')">Individual Player</button>
+    <button id="typeAssociation" onclick="selectType('association')">Association / Team</button>
   </div>
   
-  <div class="card">
-    <div class="price">
-      <div class="price-amount" id="priceAmount">$19.99</div>
-      <div class="price-period" id="pricePeriod">per month</div>
-    </div>
-    <div class="savings" id="savings"></div>
-    
-    <div class="features">
-      <div class="feature">
-        <div class="feature-icon">✓</div>
-        <div class="feature-text"><strong>12-week structured program</strong> with baseline and final testing</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">✓</div>
-        <div class="feature-text"><strong>Age-customized training</strong> — Squirts through High School</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">✓</div>
-        <div class="feature-text"><strong>Daily stickhandling and shooting</strong> integrated into every session</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">✓</div>
-        <div class="feature-text"><strong>Track your progress</strong> — log sessions, measure improvement</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">✓</div>
-        <div class="feature-text"><strong>Access on any device</strong> — phone, tablet, or laptop</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">✓</div>
-        <div class="feature-text"><strong>Cancel anytime</strong> — no long-term commitment</div>
-      </div>
-    </div>
-    
-    <div style="margin-bottom:24px;padding-top:16px;border-top:1px solid #222;">
-      <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:14px;font-weight:600;">Your Information</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
-        <div>
-          <label style="display:block;font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:6px;">First Name</label>
-          <input type="text" id="firstName" required placeholder="Tyler" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;font-family:'Barlow',sans-serif;">
+  <!-- INDIVIDUAL PRICING -->
+  <div id="individualPricing" style="display:block;">
+    <div class="pricing-grid" style="max-width:600px;margin:0 auto 32px;">
+      <div class="price-card" onclick="selectIndividualPlan('monthly')" id="indMonthly">
+        <div class="card-header">
+          <div class="seats">Monthly</div>
+          <div class="price">$19.99</div>
+          <div class="period">per month</div>
+          <div class="per-player">Cancel anytime</div>
         </div>
-        <div>
-          <label style="display:block;font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:6px;">Last Name</label>
-          <input type="text" id="lastName" required placeholder="Johnson" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;font-family:'Barlow',sans-serif;">
+        <div class="features">
+          <div><span>✓</span>Full program access</div>
+          <div><span>✓</span>All age tiers</div>
+          <div><span>✓</span>Progress tracking</div>
         </div>
       </div>
-      <div style="margin-bottom:14px;">
-        <label style="display:block;font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:6px;">Email Address</label>
-        <input type="email" id="email" required placeholder="tyler.johnson@example.com" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;font-family:'Barlow',sans-serif;">
+      <div class="price-card" onclick="selectIndividualPlan('annual')" id="indAnnual">
+        <div class="card-header">
+          <div class="seats">Annual</div>
+          <div class="price">$149.99</div>
+          <div class="period">per year</div>
+          <div class="per-player" style="color:#4ade80;">Save $89 (37% off)</div>
+        </div>
+        <div class="features">
+          <div><span>✓</span>Full program access</div>
+          <div><span>✓</span>All age tiers</div>
+          <div><span>✓</span>Progress tracking</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ASSOCIATION PRICING -->
+  <div id="associationPricing" style="display:none;">
+    <div class="pricing-grid">
+      <div class="price-card" onclick="selectAssociationPlan(20, 499)" id="assoc20">
+        <div class="card-header">
+          <div class="seats">20 Players</div>
+          <div class="price">$499</div>
+          <div class="period">per year</div>
+          <div class="per-player">$2.08 per player/month</div>
+        </div>
+        <div class="features">
+          <div><span>✓</span>Admin dashboard</div>
+          <div><span>✓</span>Player management</div>
+          <div><span>✓</span>Leaderboard access</div>
+        </div>
+      </div>
+      
+      <div class="price-card popular" onclick="selectAssociationPlan(50, 999)" id="assoc50">
+        <div class="card-header">
+          <div class="seats">50 Players</div>
+          <div class="price">$999</div>
+          <div class="period">per year</div>
+          <div class="per-player">$1.67 per player/month</div>
+        </div>
+        <div class="features">
+          <div><span>✓</span>Admin dashboard</div>
+          <div><span>✓</span>Player management</div>
+          <div><span>✓</span>Leaderboard access</div>
+        </div>
+      </div>
+      
+      <div class="price-card" onclick="selectAssociationPlan(100, 1299)" id="assoc100">
+        <div class="card-header">
+          <div class="seats">100 Players</div>
+          <div class="price">$1,299</div>
+          <div class="period">per year</div>
+          <div class="per-player">$1.08 per player/month</div>
+        </div>
+        <div class="features">
+          <div><span>✓</span>Admin dashboard</div>
+          <div><span>✓</span>Player management</div>
+          <div><span>✓</span>Leaderboard access</div>
+        </div>
+      </div>
+      
+      <div class="price-card" onclick="selectAssociationPlan(250, 1999)" id="assoc250">
+        <div class="card-header">
+          <div class="seats">250 Players</div>
+          <div class="price">$1,999</div>
+          <div class="period">per year</div>
+          <div class="per-player">$0.67 per player/month</div>
+        </div>
+        <div class="features">
+          <div><span>✓</span>Admin dashboard</div>
+          <div><span>✓</span>Player management</div>
+          <div><span>✓</span>Leaderboard access</div>
+        </div>
+      </div>
+      
+      <div class="price-card" onclick="selectAssociationPlan(999999, 2999)" id="assocUnlimited">
+        <div class="card-header">
+          <div class="seats">Unlimited</div>
+          <div class="price">$2,999</div>
+          <div class="period">per year</div>
+          <div class="per-player">No player limit</div>
+        </div>
+        <div class="features">
+          <div><span>✓</span>Admin dashboard</div>
+          <div><span>✓</span>Player management</div>
+          <div><span>✓</span>Leaderboard access</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- CUSTOMER INFO FORM -->
+  <div class="form-section" id="customerForm" style="display:none;">
+    <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;color:#E07820;margin-bottom:16px;text-align:center;">Your Information</h3>
+    
+    <div class="name-grid" id="nameFields">
+      <div>
+        <label>First Name</label>
+        <input type="text" id="firstName" required placeholder="Tyler">
+      </div>
+      <div>
+        <label>Last Name</label>
+        <input type="text" id="lastName" required placeholder="Johnson">
       </div>
     </div>
     
-    <button class="cta" id="subscribeBtn" onclick="createCheckout()">Subscribe Now</button>
+    <div>
+      <label>Email</label>
+      <input type="email" id="email" required placeholder="your.email@example.com">
+    </div>
+    
+    <!-- Association-specific fields -->
+    <div id="assocFields" style="display:none;">
+      <label>Association/Team Name</label>
+      <input type="text" id="orgName" placeholder="Delano Youth Hockey Association">
+    </div>
+    
+    <div id="selectedPlanSummary" style="background:rgba(224,120,32,0.1);border:1px solid rgba(224,120,32,0.3);border-radius:6px;padding:12px;margin-bottom:16px;font-size:13px;text-align:center;color:rgba(255,255,255,0.8);">
+      <!-- Populated by JS -->
+    </div>
+    
+    <button class="cta" onclick="proceedToCheckout()">Continue to Payment</button>
     
     <div id="message" class="message"></div>
     
@@ -271,91 +387,140 @@
 
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-const STRIPE_PUBLISHABLE_KEY = 'pk_live_51Tbv35A6YZpoMmOQYZ7sPphZXQfmhmsLDXfKs6ipdNH6it60Z48Vm9jWWhS7h6SNTbpViXzsn56qfKnv9PzJx7Cb00MoRsdlWm';
-const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+const STRIPE_PK = 'pk_live_51Tbv35A6YZpoMmOQYZ7sPphZXQfmhmsLDXfKs6ipdNH6it60Z48Vm9jWWhS7h6SNTbpViXzsn56qfKnv9PzJx7Cb00MoRsdlWm';
+const stripe = Stripe(STRIPE_PK);
 
-let currentPlan = 'monthly';
+let subscriptionType = 'individual'; // 'individual' or 'association'
+let selectedPlan = null;
 
-function selectPlan(plan) {
-  currentPlan = plan;
-  const monthlyBtn = document.getElementById('monthlyBtn');
-  const annualBtn = document.getElementById('annualBtn');
-  const priceAmount = document.getElementById('priceAmount');
-  const pricePeriod = document.getElementById('pricePeriod');
-  const savings = document.getElementById('savings');
+function selectType(type) {
+  subscriptionType = type;
+  document.getElementById('typeIndividual').classList.toggle('active', type === 'individual');
+  document.getElementById('typeAssociation').classList.toggle('active', type === 'association');
+  document.getElementById('individualPricing').style.display = type === 'individual' ? 'block' : 'none';
+  document.getElementById('associationPricing').style.display = type === 'association' ? 'block' : 'none';
+  document.getElementById('customerForm').style.display = 'none';
+  selectedPlan = null;
+}
+
+function selectIndividualPlan(plan) {
+  selectedPlan = { type: 'individual', plan: plan };
+  document.getElementById('indMonthly').classList.toggle('selected', plan === 'monthly');
+  document.getElementById('indAnnual').classList.toggle('selected', plan === 'annual');
+  document.getElementById('assocFields').style.display = 'none';
+  showCustomerForm();
+}
+
+function selectAssociationPlan(seats, price) {
+  selectedPlan = { type: 'association', seats: seats, price: price };
+  ['20','50','100','250','Unlimited'].forEach(s => {
+    const el = document.getElementById('assoc' + s);
+    if (el) el.classList.remove('selected');
+  });
+  const cardId = seats === 999999 ? 'assocUnlimited' : 'assoc' + seats;
+  document.getElementById(cardId).classList.add('selected');
+  document.getElementById('assocFields').style.display = 'block';
+  showCustomerForm();
+}
+
+function showCustomerForm() {
+  document.getElementById('customerForm').style.display = 'block';
+  document.getElementById('customerForm').scrollIntoView({ behavior: 'smooth' });
   
-  if (plan === 'monthly') {
-    monthlyBtn.classList.add('active');
-    annualBtn.classList.remove('active');
-    priceAmount.textContent = '$19.99';
-    pricePeriod.textContent = 'per month';
-    savings.textContent = '';
+  const summary = document.getElementById('selectedPlanSummary');
+  if (selectedPlan.type === 'individual') {
+    const price = selectedPlan.plan === 'monthly' ? '$19.99/month' : '$149.99/year';
+    summary.textContent = `Selected: Individual ${selectedPlan.plan === 'monthly' ? 'Monthly' : 'Annual'} — ${price}`;
   } else {
-    monthlyBtn.classList.remove('active');
-    annualBtn.classList.add('active');
-    priceAmount.textContent = '$149.99';
-    pricePeriod.textContent = 'per year';
-    savings.textContent = 'Save $89.89 vs monthly (37% off)';
+    const seatLabel = selectedPlan.seats === 999999 ? 'Unlimited' : selectedPlan.seats;
+    summary.textContent = `Selected: Association ${seatLabel} Players — $${selectedPlan.price}/year`;
   }
 }
 
-async function createCheckout() {
-  const btn = document.getElementById('subscribeBtn');
-  const message = document.getElementById('message');
-  
-  // Validate name fields
-  const firstName = document.getElementById('firstName').value.trim();
-  const lastName = document.getElementById('lastName').value.trim();
-  const email = document.getElementById('email').value.trim();
-  
-  if (!firstName || !lastName || !email) {
-    message.className = 'message error';
-    message.textContent = 'Please fill in all fields';
-    message.style.display = 'block';
+async function proceedToCheckout() {
+  if (!selectedPlan) {
+    alert('Please select a plan first');
     return;
   }
   
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const orgName = document.getElementById('orgName').value.trim();
+  
+  if (!firstName || !lastName || !email) {
+    const msg = document.getElementById('message');
+    msg.className = 'message error';
+    msg.textContent = 'Please fill in all required fields';
+    msg.style.display = 'block';
+    return;
+  }
+  
+  if (selectedPlan.type === 'association' && !orgName) {
+    const msg = document.getElementById('message');
+    msg.className = 'message error';
+    msg.textContent = 'Please enter your association/team name';
+    msg.style.display = 'block';
+    return;
+  }
+  
+  const btn = document.querySelector('.cta');
   btn.disabled = true;
   btn.textContent = 'Loading...';
-  message.style.display = 'none';
-  
-  const priceAmount = currentPlan === 'monthly' ? 1999 : 14999; // in cents
-  const interval = currentPlan === 'monthly' ? 'month' : 'year';
   
   try {
+    let priceAmount, interval, metadata;
+    
+    if (selectedPlan.type === 'individual') {
+      priceAmount = selectedPlan.plan === 'monthly' ? 1999 : 14999;
+      interval = selectedPlan.plan === 'monthly' ? 'month' : 'year';
+      metadata = {
+        first_name: firstName,
+        last_name: lastName,
+        subscription_type: 'individual'
+      };
+    } else {
+      priceAmount = selectedPlan.price * 100; // convert to cents
+      interval = 'year';
+      metadata = {
+        first_name: firstName,
+        last_name: lastName,
+        subscription_type: 'association',
+        seat_limit: selectedPlan.seats,
+        organization_name: orgName
+      };
+    }
+    
     const response = await fetch('/api/create-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        priceAmount: priceAmount,
-        interval: interval,
+        priceAmount,
+        interval,
         customerEmail: email,
         customerName: firstName + ' ' + lastName,
-        metadata: {
-          first_name: firstName,
-          last_name: lastName
-        },
+        metadata,
         successUrl: window.location.origin + '/login.html?checkout=success',
         cancelUrl: window.location.origin + '/subscribe.html'
       })
     });
     
     const { sessionId, error } = await response.json();
-    
     if (error) throw new Error(error);
     
     const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
-    
     if (stripeError) throw stripeError;
     
   } catch (error) {
-    message.className = 'message error';
-    message.textContent = 'Error: ' + error.message;
-    message.style.display = 'block';
+    const msg = document.getElementById('message');
+    msg.className = 'message error';
+    msg.textContent = 'Error: ' + error.message;
+    msg.style.display = 'block';
     btn.disabled = false;
-    btn.textContent = 'Subscribe Now';
+    btn.textContent = 'Continue to Payment';
   }
 }
 </script>
+
 </body>
 </html>
