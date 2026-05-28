@@ -1256,6 +1256,32 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       const isAdmin = userSub && userSub.role === 'admin';
       console.log('Is admin?', isAdmin, 'Role:', userSub?.role);
       
+      // Check subscription status for EVERYONE (admins and players)
+      if (!userSub) {
+        alert('No subscription found. Redirecting to subscribe page...');
+        await supabase.auth.signOut();
+        window.location.href = 'subscribe.html';
+        return;
+      }
+      
+      if (userSub.status !== 'active') {
+        alert('Your subscription is not active. Please contact support or renew.');
+        await supabase.auth.signOut();
+        window.location.href = 'subscribe.html';
+        return;
+      }
+      
+      // Check expiration for EVERYONE (admins and players)
+      if (userSub.expires_at) {
+        const expiresAt = new Date(userSub.expires_at);
+        if (expiresAt < new Date()) {
+          alert('Your subscription has expired. Please renew.');
+          await supabase.auth.signOut();
+          window.location.href = 'subscribe.html';
+          return;
+        }
+      }
+      
       // Show admin tab if user is admin
       if (isAdmin) {
         const adminTab = document.getElementById('adminTab');
@@ -1264,38 +1290,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
           console.log('Admin access granted');
         }
         loadAdminPanel(user);
-      }
-      
-      if (!isAdmin) {
-        // Not an admin - check subscription status
-        const { data: subscription, error: subError } = await supabase
-          .from('subscriptions')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .single();
-        
-        if (subError && subError.code !== 'PGRST116') {
-          console.error('Subscription check error:', subError);
-        }
-        
-        if (!subscription) {
-          alert('No active subscription found. Redirecting to subscribe page...');
-          await supabase.auth.signOut();
-          window.location.href = 'subscribe.html';
-          return;
-        }
-        
-        // Check expiration for non-admins
-        if (subscription.expires_at) {
-          const expiresAt = new Date(subscription.expires_at);
-          if (expiresAt < new Date()) {
-            alert('Your subscription has expired. Please renew.');
-            await supabase.auth.signOut();
-            window.location.href = 'subscribe.html';
-            return;
-          }
-        }
       } else {
         console.log('Admin access granted for:', user.email);
       }
