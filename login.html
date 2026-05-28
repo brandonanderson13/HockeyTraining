@@ -244,33 +244,45 @@ async function resetPassword(email) {
 // Handle login form submission
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+  console.log('Login form submitted');
   
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const submitBtn = document.getElementById('submitBtn');
   const message = document.getElementById('message');
   
+  console.log('Email:', email);
+  
   submitBtn.disabled = true;
   submitBtn.textContent = 'Signing in...';
   message.style.display = 'none';
   
   try {
+    console.log('Attempting sign in...');
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password
     });
     
+    console.log('Sign in response:', data, error);
+    
     if (error) throw error;
+    
+    console.log('Sign in successful, verifying subscription...');
     
     // Check subscription and redirect
     await verifyAndRedirect();
     
   } catch (error) {
+    console.error('Login error:', error);
     message.className = 'message error';
     message.textContent = 'Error: ' + error.message;
     message.style.display = 'block';
     submitBtn.disabled = false;
     submitBtn.textContent = 'Sign In';
+    
+    // Keep the form values so user can see what they entered
+    document.getElementById('email').value = email;
   }
 });
 
