@@ -3115,9 +3115,15 @@ async function loadAdminPanel(user) {
             </div>
           </div>
         </div>
-        <div style="margin-bottom:14px;">
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Organization</div>
-          <div style="font-size:14px;color:rgba(255,255,255,0.75);font-weight:600;">${adminSub.organization_name || 'Not set'}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+          <div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Organization</div>
+            <div style="font-size:14px;color:rgba(255,255,255,0.75);font-weight:600;">${adminSub.organization_name || 'Not set'}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Renews</div>
+            <div style="font-size:14px;color:rgba(255,255,255,0.75);font-weight:600;" id="renewalDate">-</div>
+          </div>
         </div>
         <a href="https://billing.stripe.com/p/login/14AcN4fnrf2y4DBdiadjO00" target="_blank" class="btn-o" style="display:inline-block;text-decoration:none;text-align:center;margin:0;">Manage Subscription / Upgrade Plan</a>
         <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:10px;line-height:1.5;">Need more seats? Click "Manage Subscription" to upgrade your tier. Stripe will pro-rate the difference automatically.</div>
@@ -3177,6 +3183,19 @@ async function loadAdminPanel(user) {
   }
   
   loadPlayerList(window._isSuperAdmin);
+  
+  // Update renewal date if available
+  if (hasSeats) {
+    const renewalEl = document.getElementById('renewalDate');
+    if (renewalEl && adminSub.expires_at) {
+      const renewalDate = new Date(adminSub.expires_at);
+      renewalEl.textContent = renewalDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } else if (renewalEl) {
+      renewalEl.textContent = 'Contact admin';
+      renewalEl.style.fontSize = '12px';
+      renewalEl.style.color = 'rgba(255,255,255,0.4)';
+    }
+  }
 }
 
 async function handleAddPlayer(e) {
@@ -3405,6 +3424,19 @@ async function loadPlayerList(isSuperAdmin = false) {
 
 function refreshPlayerList() {
   loadPlayerList(window._isSuperAdmin);
+  
+  // Update renewal date if available
+  if (hasSeats) {
+    const renewalEl = document.getElementById('renewalDate');
+    if (renewalEl && adminSub.expires_at) {
+      const renewalDate = new Date(adminSub.expires_at);
+      renewalEl.textContent = renewalDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } else if (renewalEl) {
+      renewalEl.textContent = 'Contact admin';
+      renewalEl.style.fontSize = '12px';
+      renewalEl.style.color = 'rgba(255,255,255,0.4)';
+    }
+  }
 }
 
 async function adminCancelStripe(subId, email, stripeSubId) {
