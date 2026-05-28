@@ -6,125 +6,25 @@
 <title>Sign In - Delano Tigers Training</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
-  
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-  body {
-    font-family: 'Barlow', sans-serif;
-    background: #0D0D0D;
-    color: #fff;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  
+  body { font-family: 'Barlow', sans-serif; background: #0D0D0D; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
   .container { max-width: 440px; width: 100%; }
   .logo { text-align: center; margin-bottom: 32px; }
-  
-  .logo h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 28px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 6px;
-  }
-  
+  .logo h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
   .logo h1 span { color: #E07820; }
   .logo p { font-size: 13px; color: rgba(255,255,255,0.5); }
-  
-  .card {
-    background: #141414;
-    border: 1px solid #222;
-    border-radius: 12px;
-    padding: 32px 28px;
-  }
-  
-  .card h2 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 8px;
-    color: #E07820;
-  }
-  
-  .card p {
-    font-size: 13px;
-    color: rgba(255,255,255,0.6);
-    line-height: 1.6;
-    margin-bottom: 16px;
-  }
-  
-  label {
-    display: block;
-    font-size: 11px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(255,255,255,0.5);
-    margin-bottom: 6px;
-  }
-  
-  input[type="email"],
-  input[type="password"] {
-    width: 100%;
-    background: #0d0d0d;
-    border: 1px solid #333;
-    color: #fff;
-    font-size: 15px;
-    padding: 12px 14px;
-    border-radius: 8px;
-    font-family: 'Barlow', sans-serif;
-    margin-bottom: 18px;
-  }
-  
+  .card { background: #141414; border: 1px solid #222; border-radius: 12px; padding: 32px 28px; }
+  .card h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; color: #E07820; }
+  .card p { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.6; margin-bottom: 16px; }
+  label { display: block; font-size: 11px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
+  input[type="email"], input[type="password"] { width: 100%; background: #0d0d0d; border: 1px solid #333; color: #fff; font-size: 15px; padding: 12px 14px; border-radius: 8px; font-family: 'Barlow', sans-serif; margin-bottom: 18px; }
   input:focus { outline: none; border-color: #E07820; }
-  
-  button {
-    width: 100%;
-    background: #E07820;
-    color: #fff;
-    border: none;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 13px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  
+  button { width: 100%; background: #E07820; color: #fff; border: none; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 13px 20px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
   button:hover { background: #c96819; }
   button:disabled { background: #444; color: #888; cursor: not-allowed; }
-  
-  .message {
-    margin-top: 16px;
-    padding: 12px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    text-align: center;
-    display: none;
-  }
-  
-  .message.success {
-    background: rgba(74, 222, 128, 0.15);
-    border: 1px solid rgba(74, 222, 128, 0.3);
-    color: #4ade80;
-  }
-  
-  .message.error {
-    background: rgba(248, 113, 113, 0.15);
-    border: 1px solid rgba(248, 113, 113, 0.3);
-    color: #f87171;
-  }
-  
+  .message { margin-top: 16px; padding: 12px 14px; border-radius: 8px; font-size: 13px; text-align: center; display: none; }
+  .message.success { background: rgba(74, 222, 128, 0.15); border: 1px solid rgba(74, 222, 128, 0.3); color: #4ade80; }
+  .message.error { background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.3); color: #f87171; }
   .link { color: #E07820; text-decoration: none; font-size: 12px; }
   .link:hover { text-decoration: underline; }
 </style>
@@ -169,7 +69,7 @@
 (function() {
   const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -189,36 +89,7 @@
       if (error) throw error;
       if (!data.user) throw new Error('Login failed');
       
-      if (ADMIN_EMAILS.includes(email)) {
-        window.location.href = 'index.html';
-        return;
-      }
-      
-      const { data: sub, error: subError } = await sb
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', data.user.id)
-        .eq('status', 'active')
-        .single();
-      
-      if (!sub || subError) {
-        message.className = 'message error';
-        message.textContent = 'No active subscription. Please subscribe to access.';
-        message.style.display = 'block';
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Sign In';
-        return;
-      }
-      
-      if (sub.expires_at && new Date(sub.expires_at) < new Date()) {
-        message.className = 'message error';
-        message.textContent = 'Subscription expired. Please renew.';
-        message.style.display = 'block';
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Sign In';
-        return;
-      }
-      
+      // Just redirect to index.html - let it handle subscription/role checks
       window.location.href = 'index.html';
       
     } catch (error) {
