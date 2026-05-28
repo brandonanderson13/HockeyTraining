@@ -3191,6 +3191,33 @@ async function loadPlayerList(isSuperAdmin = false) {
     const { data: subs, error } = await sb.from('subscriptions').select('*').order('created_at', {ascending: false});
     if (error) throw error;
     
+    // Query workout stats for all players FIRST
+    const { data: shootingSessions } = await sb.from('shooting_sessions').select('user_id, total_shots');
+    const { data: stickSessions } = await sb.from('stickhandling_sessions').select('user_id, minutes');
+    const { data: completions } = await sb.from('exercise_completions').select('user_id');
+    
+    // Aggregate by user
+    const statsByUser = {};
+    if (shootingSessions) {
+      shootingSessions.forEach(s => {
+        if (!statsByUser[s.user_id]) statsByUser[s.user_id] = {shots:0, mins:0, workouts:0};
+        statsByUser[s.user_id].shots += s.total_shots || 0;
+      });
+    }
+    if (stickSessions) {
+      stickSessions.forEach(s => {
+        if (!statsByUser[s.user_id]) statsByUser[s.user_id] = {shots:0, mins:0, workouts:0};
+        statsByUser[s.user_id].mins += s.minutes || 0;
+      });
+    }
+    if (completions) {
+      completions.forEach(c => {
+        if (!statsByUser[c.user_id]) statsByUser[c.user_id] = {shots:0, mins:0, workouts:0};
+        statsByUser[c.user_id].workouts += 1;
+      });
+    }
+    
+    // NOW update the stats display
     const statTotal = document.getElementById('statTotal');
     const statActive = document.getElementById('statActive');
     const statTotalShots = document.getElementById('statTotalShots');
@@ -3215,32 +3242,6 @@ async function loadPlayerList(isSuperAdmin = false) {
     if (!subs || subs.length === 0) {
       container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:13px;padding:20px;text-align:center;">No players yet</p>';
       return;
-    }
-    
-    // Query workout stats for all players
-    const { data: shootingSessions } = await sb.from('shooting_sessions').select('user_id, total_shots');
-    const { data: stickSessions } = await sb.from('stickhandling_sessions').select('user_id, minutes');
-    const { data: completions } = await sb.from('exercise_completions').select('user_id');
-    
-    // Aggregate by user
-    const statsByUser = {};
-    if (shootingSessions) {
-      shootingSessions.forEach(s => {
-        if (!statsByUser[s.user_id]) statsByUser[s.user_id] = {shots:0, mins:0, workouts:0};
-        statsByUser[s.user_id].shots += s.total_shots || 0;
-      });
-    }
-    if (stickSessions) {
-      stickSessions.forEach(s => {
-        if (!statsByUser[s.user_id]) statsByUser[s.user_id] = {shots:0, mins:0, workouts:0};
-        statsByUser[s.user_id].mins += s.minutes || 0;
-      });
-    }
-    if (completions) {
-      completions.forEach(c => {
-        if (!statsByUser[c.user_id]) statsByUser[c.user_id] = {shots:0, mins:0, workouts:0};
-        statsByUser[c.user_id].workouts += 1;
-      });
     }
     
     let html = '<table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr style="border-bottom:1px solid #222;"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Email</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Role</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Status</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Shots</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Stick Min</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Workouts</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Actions</th></tr></thead><tbody>';
