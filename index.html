@@ -1262,7 +1262,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       console.log('Organization:', window._userOrgId, 'Super admin:', window._isSuperAdmin);
       
       // Apply branding based on organization
-      applyBranding(window._userOrgId);
+      // applyBranding(window._userOrgId); // DISABLED - using static Delano branding for now
       
       // Check subscription status for EVERYONE (admins and players)
       if (!userSub) {
