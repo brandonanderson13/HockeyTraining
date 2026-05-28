@@ -69,6 +69,7 @@ export default async function handler(req, res) {
             subscription_type: metadata.subscription_type || 'individual',
             seat_limit: metadata.seat_limit ? parseInt(metadata.seat_limit) : null,
             organization_name: metadata.organization_name || null,
+            organization_id: metadata.organization_id || 'individual',
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
             status: 'active',
