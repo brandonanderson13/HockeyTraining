@@ -1,12 +1,9 @@
-// Vercel Serverless Function - Stripe Webhook Handler
-// Handles checkout.session.completed and customer.subscription.deleted events
-
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY // Use service key for admin operations
+  process.env.SUPABASE_SERVICE_KEY
 );
 
 export default async function handler(req, res) {
@@ -20,7 +17,6 @@ export default async function handler(req, res) {
   let event;
 
   try {
-    // Verify webhook signature
     event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
@@ -32,10 +28,10 @@ export default async function handler(req, res) {
       case 'checkout.session.completed': {
         const session = event.data.object;
         
-        // Extract customer info
         const customerEmail = session.customer_email || session.customer_details?.email;
         const customerId = session.customer;
         const subscriptionId = session.subscription;
+        const metadata = session.metadata || {};
         
         if (!customerEmail) {
           console.error('No email found in checkout session');
@@ -47,7 +43,6 @@ export default async function handler(req, res) {
         let userId = existingUsers?.users?.find(u => u.email === customerEmail)?.id;
         
         if (!userId) {
-          // Create new auth user
           const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
             email: customerEmail,
             email_confirm: true
@@ -60,16 +55,24 @@ export default async function handler(req, res) {
           userId = newUser.user.id;
         }
 
-        // Create or update subscription record
+        // Create or update subscription record with names
+        const isAssociation = metadata.subscription_type === 'association';
+        const role = isAssociation ? 'admin' : 'player';
+        
         const { error: upsertError } = await supabase
           .from('subscriptions')
           .upsert({
             user_id: userId,
             email: customerEmail,
+            first_name: metadata.first_name || null,
+            last_name: metadata.last_name || null,
+            subscription_type: metadata.subscription_type || 'individual',
+            seat_limit: metadata.seat_limit ? parseInt(metadata.seat_limit) : null,
+            organization_name: metadata.organization_name || null,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
             status: 'active',
-            expires_at: null // null = active recurring subscription
+            role: role
           }, {
             onConflict: 'user_id'
           });
@@ -77,7 +80,7 @@ export default async function handler(req, res) {
         if (upsertError) {
           console.error('Error upserting subscription:', upsertError);
         } else {
-          console.log('✓ Subscription activated for:', customerEmail);
+          console.log('✓ Subscription activated for:', customerEmail, metadata.first_name, metadata.last_name);
         }
         break;
       }
@@ -86,7 +89,6 @@ export default async function handler(req, res) {
         const subscription = event.data.object;
         const subscriptionId = subscription.id;
 
-        // Mark subscription as cancelled in database
         const { error: updateError } = await supabase
           .from('subscriptions')
           .update({ status: 'cancelled' })
