@@ -361,6 +361,14 @@
     </div>
     
     <div>
+      <label>Select Your Association</label>
+      <select id="organizationId" required style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;font-family:'Barlow',sans-serif;margin-bottom:14px;">
+        <option value="delano">Delano Youth Hockey Association</option>
+        <option value="individual">Individual (No Association)</option>
+      </select>
+    </div>
+    
+    <div>
       <label>Email</label>
       <input type="email" id="email" required placeholder="your.email@example.com">
     </div>
@@ -471,23 +479,27 @@ async function proceedToCheckout() {
   try {
     let priceAmount, interval, metadata;
     
+    const organizationId = document.getElementById('organizationId').value;
+    
     if (selectedPlan.type === 'individual') {
       priceAmount = selectedPlan.plan === 'monthly' ? 1999 : 14999;
       interval = selectedPlan.plan === 'monthly' ? 'month' : 'year';
       metadata = {
         first_name: firstName,
         last_name: lastName,
-        subscription_type: 'individual'
+        subscription_type: 'individual',
+        organization_id: organizationId
       };
     } else {
-      priceAmount = selectedPlan.price * 100; // convert to cents
+      priceAmount = selectedPlan.price * 100;
       interval = 'year';
       metadata = {
         first_name: firstName,
         last_name: lastName,
         subscription_type: 'association',
         seat_limit: selectedPlan.seats,
-        organization_name: orgName
+        organization_name: orgName,
+        organization_id: organizationId
       };
     }
     

@@ -42,7 +42,7 @@
 
 <div class="container">
   <div class="header">
-    <h1><span>Delano</span> Tigers Leaderboard</h1>
+    <h1><span id="orgName">Delano</span> <span id="teamName">Tigers</span> Leaderboard</h1>
     <p>Top performers — updated live</p>
   </div>
   
@@ -65,17 +65,31 @@ const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY';
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Get organization from URL parameter
+const urlParams = new URLSearchParams(window.location.search);
+const orgId = urlParams.get('org') || 'delano'; // Default to delano for this deployment
+
 let currentBoard = 'shots';
 
 async function loadLeaderboard() {
   const content = document.getElementById('leaderboardContent');
   
+  // Update header based on org
+  if (orgId === 'delano') {
+    document.getElementById('orgName').textContent = 'Delano';
+    document.getElementById('teamName').textContent = 'Tigers';
+  } else if (orgId === 'individual') {
+    document.getElementById('orgName').textContent = 'Individual';
+    document.getElementById('teamName').textContent = 'Players';
+  }
+  
   try {
     let players = [];
     
     if (currentBoard === 'shots') {
-      const { data: sessions } = await sb.from('shooting_sessions').select('user_id, total_shots');
-      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active');
+      const { data: sessions } = await sb.from('shooting_sessions').select('user_id, total_shots').eq('organization_id', orgId);
+      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('organization_id', orgId);
       
       const shotsByUser = {};
       if (sessions) {
@@ -94,8 +108,8 @@ async function loadLeaderboard() {
           .sort((a, b) => b.value - a.value);
       }
     } else if (currentBoard === 'stickhandling') {
-      const { data: sessions } = await sb.from('stickhandling_sessions').select('user_id, minutes');
-      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active');
+      const { data: sessions } = await sb.from('stickhandling_sessions').select('user_id, minutes').eq('organization_id', orgId);
+      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('organization_id', orgId);
       
       const minsByUser = {};
       if (sessions) {
@@ -114,8 +128,8 @@ async function loadLeaderboard() {
           .sort((a, b) => b.value - a.value);
       }
     } else if (currentBoard === 'workouts') {
-      const { data: completions } = await sb.from('exercise_completions').select('user_id');
-      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active');
+      const { data: completions } = await sb.from('exercise_completions').select('user_id').eq('organization_id', orgId);
+      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('organization_id', orgId);
       
       const workoutsByUser = {};
       if (completions) {

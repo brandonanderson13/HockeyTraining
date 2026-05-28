@@ -1197,7 +1197,7 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- LEADERBOARD -->
 <div id="leaderboard" class="sec">
-  <iframe src="leaderboard.html" style="width:100%;height:calc(100vh - 180px);border:none;border-radius:8px;"></iframe>
+  <iframe id="leaderboardFrame" src="" style="width:100%;height:calc(100vh - 180px);border:none;border-radius:8px;"></iframe>
 </div>
 
 <!-- ADMIN PANEL -->
@@ -1255,6 +1255,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       
       const isAdmin = userSub && userSub.role === 'admin';
       console.log('Is admin?', isAdmin, 'Role:', userSub?.role);
+      
+      // Store user's organization_id globally for filtering
+      window._userOrgId = userSub?.organization_id || 'individual';
+      window._isSuperAdmin = (user.email === 'brandonanderson1393@gmail.com');
+      console.log('Organization:', window._userOrgId, 'Super admin:', window._isSuperAdmin);
       
       // Check subscription status for EVERYONE (admins and players)
       if (!userSub) {
@@ -1520,6 +1525,15 @@ function showSec(id){
   if (id === 'account') {
     loadAccountDetails();
   }
+  
+  // Load leaderboard with org parameter
+  if (id === 'leaderboard') {
+    const frame = document.getElementById('leaderboardFrame');
+    if (frame && !frame.src) {
+      const orgParam = window._userOrgId || 'individual';
+      frame.src = `leaderboard.html?org=${orgParam}`;
+    }
+  }
 }
 
 // ---------- SHOT LOG ----------
@@ -1555,6 +1569,7 @@ async function syncShootingSession(sessionData) {
     
     await sb.from('shooting_sessions').insert({
       user_id: user.id,
+      organization_id: window._userOrgId || 'individual',
       session_date: sessionData.date,
       wrist_shots: sessionData.wrist || 0,
       snap_shots: sessionData.snap || 0,
@@ -1576,6 +1591,7 @@ async function syncStickhandlingSession(sessionData) {
     
     await sb.from('stickhandling_sessions').insert({
       user_id: user.id,
+      organization_id: window._userOrgId || 'individual',
       session_date: sessionData.date,
       minutes: sessionData.mins || 0,
       drills: sessionData.drills || [],
@@ -1596,6 +1612,7 @@ async function syncExerciseCompletion(weekNum, dayName, exerciseName, completed,
     if (completed) {
       await sb.from('exercise_completions').upsert({
         user_id: user.id,
+        organization_id: window._userOrgId || 'individual',
         completion_date: date,
         week_number: weekNum,
         day_name: dayName,
@@ -1624,6 +1641,7 @@ async function syncBaselineResults(results, testType) {
     
     await sb.from('baseline_results').upsert({
       user_id: user.id,
+      organization_id: window._userOrgId || 'individual',
       test_type: testType,
       test_date: new Date().toISOString().split('T')[0],
       sprint_30m: results[0] || null,
@@ -3304,6 +3322,7 @@ async function handleAddPlayer(e) {
       email: email,
       first_name: firstName,
       last_name: lastName,
+      organization_id: window._userOrgId || 'individual',
       status: 'active',
       role: role
     });
@@ -3340,13 +3359,28 @@ async function loadPlayerList(isSuperAdmin = false) {
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY'
     );
     
-    const { data: subs, error } = await sb.from('subscriptions').select('*').order('created_at', {ascending: false});
+    // Query subscriptions - super admin sees all, regular admin sees only their org
+    let query = sb.from('subscriptions').select('*');
+    if (!window._isSuperAdmin && window._userOrgId) {
+      query = query.eq('organization_id', window._userOrgId);
+    }
+    const { data: subs, error } = await query.order('created_at', {ascending: false});
     if (error) throw error;
     
-    // Query workout stats for all players FIRST
-    const { data: shootingSessions } = await sb.from('shooting_sessions').select('user_id, total_shots');
-    const { data: stickSessions } = await sb.from('stickhandling_sessions').select('user_id, minutes');
-    const { data: completions } = await sb.from('exercise_completions').select('user_id');
+    // Query workout stats - filter by org unless super admin
+    let shootingQuery = sb.from('shooting_sessions').select('user_id, total_shots');
+    let stickQuery = sb.from('stickhandling_sessions').select('user_id, minutes');
+    let completionsQuery = sb.from('exercise_completions').select('user_id');
+    
+    if (!window._isSuperAdmin && window._userOrgId) {
+      shootingQuery = shootingQuery.eq('organization_id', window._userOrgId);
+      stickQuery = stickQuery.eq('organization_id', window._userOrgId);
+      completionsQuery = completionsQuery.eq('organization_id', window._userOrgId);
+    }
+    
+    const { data: shootingSessions } = await shootingQuery;
+    const { data: stickSessions } = await stickQuery;
+    const { data: completions } = await completionsQuery;
     
     // Aggregate by user
     const statsByUser = {};
@@ -3451,7 +3485,13 @@ async function loadPlayerList(isSuperAdmin = false) {
         <td style="padding:10px 8px;color:rgba(255,255,255,0.5);font-size:11px;">${sub.email}</td>
         <td style="padding:10px 8px;color:${roleColor};font-weight:600;">${sub.role || 'player'}</td>
         <td style="padding:10px 8px;color:${statusColor};font-weight:600;">${statusText}</td>
-        <td style="padding:10px 8px;text-align:center;font-size:10px;color:rgba(255,255,255,0.5);">${sub.role === 'admin' && sub.seat_limit ? (sub.seat_limit === 999999 ? '∞' : sub.seat_limit + ' max') : '—'}</td>
+        <td style="padding:10px 8px;text-align:center;font-size:10px;">
+          ${sub.role === 'admin' ? 
+            (sub.seat_limit ? 
+              (sub.seat_limit === 999999 ? '<span style="color:#4ade80;font-weight:700;">∞</span>' : '<span style="color:rgba(255,255,255,0.6);font-weight:600;">' + sub.seat_limit + ' seats</span>') 
+              : '<span style="color:rgba(255,255,255,0.3);">No seats</span>')
+            : '<span style="color:rgba(255,255,255,0.25);">—</span>'}
+        </td>
         <td style="padding:10px 8px;text-align:right;color:#4ade80;font-weight:600;">${stats.shots.toLocaleString()}</td>
         <td style="padding:10px 8px;text-align:right;color:#60a5fa;font-weight:600;">${stats.mins}</td>
         <td style="padding:10px 8px;text-align:right;color:#fb923c;font-weight:600;">${stats.workouts}</td>
