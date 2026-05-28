@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Delano Tigers Training - Sign In</title>
+<title>Sign In - Delano Tigers Training</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
   
@@ -20,15 +20,9 @@
     padding: 20px;
   }
   
-  .container {
-    max-width: 440px;
-    width: 100%;
-  }
+  .container { max-width: 440px; width: 100%; }
   
-  .logo {
-    text-align: center;
-    margin-bottom: 32px;
-  }
+  .logo { text-align: center; margin-bottom: 32px; }
   
   .logo h1 {
     font-family: 'Barlow Condensed', sans-serif;
@@ -41,11 +35,7 @@
   
   .logo h1 span { color: #E07820; }
   
-  .logo p {
-    font-size: 13px;
-    color: rgba(255,255,255,0.5);
-    letter-spacing: 0.02em;
-  }
+  .logo p { font-size: 13px; color: rgba(255,255,255,0.5); }
   
   .card {
     background: #141414;
@@ -68,7 +58,7 @@
     font-size: 13px;
     color: rgba(255,255,255,0.6);
     line-height: 1.6;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
   }
   
   label {
@@ -95,8 +85,7 @@
     margin-bottom: 18px;
   }
   
-  input[type="email"]:focus,
-  input[type="password"]:focus {
+  input:focus {
     outline: none;
     border-color: #E07820;
   }
@@ -117,15 +106,8 @@
     transition: background 0.2s;
   }
   
-  button:hover {
-    background: #c96819;
-  }
-  
-  button:disabled {
-    background: #444;
-    color: #888;
-    cursor: not-allowed;
-  }
+  button:hover { background: #c96819; }
+  button:disabled { background: #444; color: #888; cursor: not-allowed; }
   
   .message {
     margin-top: 16px;
@@ -148,19 +130,13 @@
     color: #f87171;
   }
   
-  .message.info {
-    background: rgba(96, 165, 250, 0.15);
-    border: 1px solid rgba(96, 165, 250, 0.3);
-    color: #60a5fa;
-  }
-
-  
-  .footer {
-    text-align: center;
-    margin-top: 24px;
+  .link {
+    color: #E07820;
+    text-decoration: none;
     font-size: 12px;
-    color: rgba(255,255,255,0.35);
   }
+  
+  .link:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -173,209 +149,132 @@
   
   <div class="card">
     <h2>Sign In</h2>
-    <p style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px;line-height:1.5;">Sign in with your email and password.</p>
-    <p style="font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.45);">Don't have an account? <a href="subscribe.html" style="color:#E07820;text-decoration:none;font-weight:600;">Subscribe here</a></p>
+    <p>Sign in with your email and password.</p>
+    <p style="font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.45);">Don't have an account? <a href="subscribe.html" class="link" style="font-weight:600;">Subscribe here</a></p>
     
     <form id="loginForm">
       <label for="email">Email Address</label>
       <input type="email" id="email" placeholder="your.email@example.com" required autocomplete="email">
+      
       <label for="password">Password</label>
       <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+      
       <button type="submit" id="submitBtn">Sign In</button>
     </form>
     
     <div style="text-align:center;margin-top:14px;">
-      <a href="#" onclick="showForgotPassword();return false;" style="font-size:12px;color:rgba(255,255,255,0.5);text-decoration:none;">Forgot password?</a>
+      <a href="#" onclick="showForgotPassword();return false;" class="link">Forgot password?</a>
     </div>
     
     <div id="message" class="message"></div>
   </div>
   
-  <div class="footer">
-    Delano Youth Hockey Association · Training Program
+  <div style="text-align:center;margin-top:24px;font-size:12px;color:rgba(255,255,255,0.35);">
+    Delano Youth Hockey Association
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Supabase configuration
 const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY';
+const ADMIN_EMAILS = ['brandonanderson1393@gmail.com'];
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Check if user just came back from clicking magic link
-const hashParams = new URLSearchParams(window.location.hash.substring(1));
-if (hashParams.get('access_token')) {
-  // User clicked the magic link - verify subscription and redirect
-  verifyAndRedirect();
-}
-
-
-// Handle forgot password
-function showForgotPassword() {
-  const email = prompt('Enter your email address to receive a password reset link:');
-  if (!email) return;
-  
-  resetPassword(email);
-}
-
-async function resetPassword(email) {
-  try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/login.html'
-    });
-    
-    if (error) throw error;
-    
-    const message = document.getElementById('message');
-    message.className = 'message success';
-    message.textContent = '✓ Password reset link sent! Check your email.';
-    message.style.display = 'block';
-    
-  } catch (error) {
-    const message = document.getElementById('message');
-    message.className = 'message error';
-    message.textContent = 'Error: ' + error.message;
-    message.style.display = 'block';
-  }
-}
-
-// Handle login form submission
+// Handle login
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  console.log('Login form submitted');
   
   const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const submitBtn = document.getElementById('submitBtn');
   const message = document.getElementById('message');
   
-  console.log('Email:', email);
-  
   submitBtn.disabled = true;
   submitBtn.textContent = 'Signing in...';
   message.style.display = 'none';
   
   try {
-    console.log('Attempting sign in...');
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password
     });
     
-    console.log('Sign in response:', data, error);
-    
     if (error) throw error;
+    if (!data.user) throw new Error('Login failed');
     
-    console.log('Sign in successful, verifying subscription...');
+    // Admin bypass
+    if (ADMIN_EMAILS.includes(email)) {
+      window.location.href = 'index.html';
+      return;
+    }
     
-    // Check subscription and redirect
-    await verifyAndRedirect();
+    // Check subscription
+    const { data: sub, error: subError } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', data.user.id)
+      .eq('status', 'active')
+      .single();
+    
+    if (subError && subError.code !== 'PGRST116') {
+      console.error('Sub error:', subError);
+    }
+    
+    if (!sub) {
+      message.className = 'message error';
+      message.textContent = 'No active subscription. Please subscribe to access.';
+      message.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sign In';
+      return;
+    }
+    
+    if (sub.expires_at && new Date(sub.expires_at) < new Date()) {
+      message.className = 'message error';
+      message.textContent = 'Subscription expired. Please renew.';
+      message.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sign In';
+      return;
+    }
+    
+    window.location.href = 'index.html';
     
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Error:', error);
     message.className = 'message error';
     message.textContent = 'Error: ' + error.message;
     message.style.display = 'block';
     submitBtn.disabled = false;
     submitBtn.textContent = 'Sign In';
-    
-    // Keep the form values so user can see what they entered
-    document.getElementById('email').value = email;
   }
 });
 
-async function verifyAndRedirect() {
+// Forgot password
+function showForgotPassword() {
+  const email = prompt('Enter your email for password reset:');
+  if (!email) return;
+  resetPassword(email);
+}
+
+async function resetPassword(email) {
   const message = document.getElementById('message');
-  message.className = 'message info';
-  message.textContent = 'Verifying your access...';
-  message.style.display = 'block';
-  
   try {
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError) throw userError;
-    if (!user) throw new Error('No user found');
-    
-    // Admin bypass
-    const ADMIN_EMAILS = ['brandonanderson1393@gmail.com'];
-    if (ADMIN_EMAILS.includes(user.email)) {
-      window.location.href = 'index.html';
-      return;
-    }
-    
-    // Check if user has a subscription record (approved or pending)
-    const { data: subscription, error: subError } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-    
-    if (subError && subError.code !== 'PGRST116') {
-      console.error('Subscription check error:', subError);
-    }
-    
-    if (!subscription) {
-      // First time signing in - create a PENDING subscription
-      const { error: insertError } = await supabase
-        .from('subscriptions')
-        .insert({
-          user_id: user.id,
-          email: user.email,
-          status: 'pending',
-          created_at: new Date().toISOString()
-        });
-      
-      if (insertError) {
-        console.error('Error creating pending subscription:', insertError);
-      }
-      
-      // Show pending message
-      message.className = 'message info';
-      message.innerHTML = '<strong>Account created!</strong><br><br>Your access is pending approval. Your coach will activate your account shortly. Check back in 24-48 hours or contact your coach.';
-      message.style.display = 'block';
-      return;
-    }
-    
-    // Subscription exists - check status
-    if (subscription.status === 'pending') {
-      message.className = 'message info';
-      message.innerHTML = '<strong>Pending Approval</strong><br><br>Your account is waiting for coach approval. Contact your coach if you\'ve been waiting more than 48 hours.';
-      message.style.display = 'block';
-      return;
-    }
-    
-    if (subscription.status !== 'active') {
-      message.className = 'message error';
-      message.textContent = 'Your access has been deactivated. Contact your coach.';
-      message.style.display = 'block';
-      await supabase.auth.signOut();
-      return;
-    }
-    
-    // Check if subscription is expired
-    if (subscription.expires_at) {
-      const expiresAt = new Date(subscription.expires_at);
-      if (expiresAt < new Date()) {
-        message.className = 'message error';
-        message.textContent = 'Your subscription has expired. Contact your coach to renew.';
-        message.style.display = 'block';
-        await supabase.auth.signOut();
-        return;
-      }
-    }
-    
-    // All checks passed - redirect to training program
-    window.location.href = 'index.html';
-    
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/login.html'
+    });
+    if (error) throw error;
+    message.className = 'message success';
+    message.textContent = '✓ Reset link sent! Check your email.';
+    message.style.display = 'block';
   } catch (error) {
     message.className = 'message error';
-    message.textContent = 'Error verifying access: ' + error.message;
+    message.textContent = 'Error: ' + error.message;
     message.style.display = 'block';
   }
 }
 </script>
-
 </body>
 </html>
