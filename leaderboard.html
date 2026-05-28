@@ -6,165 +6,36 @@
 <title>Leaderboard - Delano Tigers Training</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
-  
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-  body {
-    font-family: 'Barlow', sans-serif;
-    background: #0D0D0D;
-    color: #fff;
-    padding: 20px;
-    min-height: 100vh;
-  }
-  
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-  }
-  
-  .header {
-    text-align: center;
-    margin-bottom: 32px;
-    padding: 24px;
-    background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
-    border: 1px solid #222;
-    border-radius: 12px;
-  }
-  
-  .header h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 32px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 8px;
-  }
-  
+  body { font-family: 'Barlow', sans-serif; background: #0D0D0D; color: #fff; padding: 20px; min-height: 100vh; }
+  .container { max-width: 900px; margin: 0 auto; }
+  .header { text-align: center; margin-bottom: 32px; padding: 24px; background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%); border: 1px solid #222; border-radius: 12px; }
+  .header h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
   .header h1 span { color: #E07820; }
-  
-  .header p {
-    font-size: 14px;
-    color: rgba(255,255,255,0.5);
-  }
-  
-  .reset-info {
-    text-align: center;
-    font-size: 12px;
-    color: rgba(255,255,255,0.4);
-    margin-bottom: 24px;
-  }
-  
-  .tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-    justify-content: center;
-  }
-  
-  .tab-btn {
-    background: #1a1a1a;
-    border: 1px solid #333;
-    color: rgba(255,255,255,0.6);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .tab-btn.active {
-    background: #E07820;
-    border-color: #E07820;
-    color: #fff;
-  }
-  
-  .tab-btn:hover:not(.active) {
-    border-color: #E07820;
-  }
-  
-  .leaderboard {
-    background: #141414;
-    border: 1px solid #222;
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  thead {
-    background: #1a1a1a;
-  }
-  
-  th {
-    text-align: left;
-    padding: 14px 16px;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(255,255,255,0.5);
-    border-bottom: 1px solid #222;
-  }
-  
+  .header p { font-size: 14px; color: rgba(255,255,255,0.5); }
+  .reset-info { text-align: center; font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 24px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; justify-content: center; }
+  .tab-btn { background: #1a1a1a; border: 1px solid #333; color: rgba(255,255,255,0.6); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 10px 20px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+  .tab-btn.active { background: #E07820; border-color: #E07820; color: #fff; }
+  .tab-btn:hover:not(.active) { border-color: #E07820; }
+  .leaderboard { background: #141414; border: 1px solid #222; border-radius: 12px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: #1a1a1a; }
+  th { text-align: left; padding: 14px 16px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.5); border-bottom: 1px solid #222; }
   th.num { text-align: center; width: 60px; }
   th.stat { text-align: right; }
-  
-  td {
-    padding: 14px 16px;
-    border-bottom: 1px solid #1a1a1a;
-    font-size: 14px;
-  }
-  
-  td.rank {
-    text-align: center;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 18px;
-    font-weight: 800;
-    width: 60px;
-  }
-  
-  td.name {
-    font-weight: 600;
-    color: rgba(255,255,255,0.9);
-  }
-  
-  td.stat {
-    text-align: right;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-  }
-  
+  td { padding: 14px 16px; border-bottom: 1px solid #1a1a1a; font-size: 14px; }
+  td.rank { text-align: center; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; width: 60px; }
+  td.name { font-weight: 600; color: rgba(255,255,255,0.9); }
+  td.stat { text-align: right; font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; }
   tr.top1 { background: rgba(255, 215, 0, 0.08); }
   tr.top1 td.rank { color: #ffd700; }
-  
   tr.top2 { background: rgba(192, 192, 192, 0.06); }
   tr.top2 td.rank { color: #c0c0c0; }
-  
   tr.top3 { background: rgba(205, 127, 50, 0.06); }
   tr.top3 td.rank { color: #cd7f32; }
-  
-  .empty {
-    text-align: center;
-    padding: 60px 20px;
-    color: rgba(255,255,255,0.4);
-    font-size: 14px;
-  }
-  
-  .loading {
-    text-align: center;
-    padding: 60px 20px;
-    color: rgba(255,255,255,0.5);
-    font-size: 14px;
-  }
+  .empty { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.4); font-size: 14px; }
+  .loading { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.5); font-size: 14px; }
 </style>
 </head>
 <body>
@@ -175,7 +46,7 @@
     <p>Top performers — updated live</p>
   </div>
   
-  <div class="reset-info" id="resetInfo">Loading...</div>
+  <div class="reset-info" id="resetInfo">Current period: May 2026</div>
   
   <div class="tabs">
     <button class="tab-btn active" onclick="switchBoard('shots')" id="tabShots">Most Shots</button>
@@ -184,7 +55,7 @@
   </div>
   
   <div class="leaderboard">
-    <div id="leaderboardContent" class="loading">Loading leaderboard...</div>
+    <div id="leaderboardContent" class="loading">Loading...</div>
   </div>
 </div>
 
@@ -193,33 +64,19 @@
 const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY';
 
-const sbLeaderboard = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentBoard = 'shots';
 
 async function loadLeaderboard() {
   const content = document.getElementById('leaderboardContent');
-  const resetInfo = document.getElementById('resetInfo');
   
   try {
-    // Get leaderboard reset date from a settings table or hardcode for now
-    // For MVP, we'll track this in a simple way
-    resetInfo.textContent = 'Current period: May 2026';
-    
-    // Query based on current board type
     let players = [];
     
     if (currentBoard === 'shots') {
-      const { data: sessions } = await supabase
-        .from('shooting_sessions')
-        .select('user_id, total_shots');
+      const { data: sessions } = await sb.from('shooting_sessions').select('user_id, total_shots');
+      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active');
       
-      const { data: subs } = await supabase
-        .from('subscriptions')
-        .select('user_id, first_name, last_name')
-        .eq('status', 'active');
-      
-      // Aggregate shots by user
       const shotsByUser = {};
       if (sessions) {
         sessions.forEach(s => {
@@ -227,7 +84,6 @@ async function loadLeaderboard() {
         });
       }
       
-      // Build player list with names
       if (subs) {
         players = subs
           .filter(s => shotsByUser[s.user_id] > 0)
@@ -238,14 +94,8 @@ async function loadLeaderboard() {
           .sort((a, b) => b.value - a.value);
       }
     } else if (currentBoard === 'stickhandling') {
-      const { data: sessions } = await supabase
-        .from('stickhandling_sessions')
-        .select('user_id, minutes');
-      
-      const { data: subs } = await supabase
-        .from('subscriptions')
-        .select('user_id, first_name, last_name')
-        .eq('status', 'active');
+      const { data: sessions } = await sb.from('stickhandling_sessions').select('user_id, minutes');
+      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active');
       
       const minsByUser = {};
       if (sessions) {
@@ -264,14 +114,8 @@ async function loadLeaderboard() {
           .sort((a, b) => b.value - a.value);
       }
     } else if (currentBoard === 'workouts') {
-      const { data: completions } = await supabase
-        .from('exercise_completions')
-        .select('user_id');
-      
-      const { data: subs } = await supabase
-        .from('subscriptions')
-        .select('user_id, first_name, last_name')
-        .eq('status', 'active');
+      const { data: completions } = await sb.from('exercise_completions').select('user_id');
+      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active');
       
       const workoutsByUser = {};
       if (completions) {
@@ -291,13 +135,10 @@ async function loadLeaderboard() {
       }
     }
     
-    // Render leaderboard
     if (!players || players.length === 0) {
       content.innerHTML = '<div class="empty">No data yet — start logging sessions to see the leaderboard!</div>';
       return;
     }
-    
-    const unit = currentBoard === 'shots' ? 'shots' : (currentBoard === 'stickhandling' ? 'minutes' : 'exercises');
     
     let html = '<table><thead><tr><th class="num">#</th><th>Player</th><th class="stat">' + (currentBoard === 'shots' ? 'Shots' : (currentBoard === 'stickhandling' ? 'Minutes' : 'Workouts')) + '</th></tr></thead><tbody>';
     
@@ -315,27 +156,21 @@ async function loadLeaderboard() {
     content.innerHTML = html;
     
   } catch (error) {
-    console.error('Error loading leaderboard:', error);
-    content.innerHTML = '<div class="empty">Error loading leaderboard: ' + error.message + '</div>';
+    console.error('Leaderboard error:', error);
+    content.innerHTML = '<div class="empty">Error loading: ' + error.message + '</div>';
   }
 }
 
 function switchBoard(type) {
   currentBoard = type;
-  
   document.getElementById('tabShots').classList.toggle('active', type === 'shots');
   document.getElementById('tabStick').classList.toggle('active', type === 'stickhandling');
   document.getElementById('tabWorkouts').classList.toggle('active', type === 'workouts');
-  
   loadLeaderboard();
 }
 
-// Load on page load
 loadLeaderboard();
-
-// Auto-refresh every 30 seconds
 setInterval(loadLeaderboard, 30000);
 </script>
-
 </body>
 </html>
