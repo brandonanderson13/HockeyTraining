@@ -3120,7 +3120,10 @@ async function loadAdminPanel(user) {
     </div>` : ''}
     
     <div class="card" style="margin-bottom:1rem;" id="superAdminPanel">
-      <div class="ch"><span class="cht">Add New Player (Super Admin Only)</span></div>
+      <div class="ch">
+        <span class="cht">Add New Player</span>
+        ${hasSeats && adminSub.seat_limit !== 999999 ? '<span id="seatsRemaining" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.4);font-weight:400;text-transform:none;letter-spacing:normal;"></span>' : ''}
+      </div>
       <div class="cb">
         <form id="adminAddPlayerForm" onsubmit="handleAddPlayer(event)" style="display:grid;gap:12px;">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
@@ -3150,7 +3153,7 @@ async function loadAdminPanel(user) {
               </select>
             </div>
           </div>
-          <button class="btn-o" type="submit" style="margin:0;">Add Player</button>
+          <button class="btn-o" type="submit" style="margin:0;" id="addPlayerBtn">Add Player</button>
         </form>
         <div id="adminAddMessage" style="margin-top:10px;font-size:12px;display:none;"></div>
       </div>
@@ -3162,9 +3165,9 @@ async function loadAdminPanel(user) {
     </div>
   `;
   
-  // Hide add player form if not super admin
+  // Hide add player form if not super admin AND not association admin
   const superPanel = document.getElementById('superAdminPanel');
-  if (superPanel && !window._isSuperAdmin) {
+  if (superPanel && !window._isSuperAdmin && !hasSeats) {
     superPanel.style.display = 'none';
   }
   
@@ -3194,8 +3197,15 @@ async function handleAddPlayer(e) {
     
     if (limit !== 999999 && currentPlayers >= limit) {
       msg.style.color = '#f87171';
-      msg.textContent = `Seat limit reached (${currentPlayers}/${limit}). Upgrade your plan to add more players.`;
+      msg.textContent = `Seat limit reached (${currentPlayers}/${limit}). Click "Manage Subscription / Upgrade Plan" above to add more seats.`;
       msg.style.display = 'block';
+      
+      // Disable the add button
+      const btn = document.getElementById('addPlayerBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Seat Limit Reached';
+      }
       return;
     }
   }
@@ -3300,8 +3310,22 @@ async function loadPlayerList(isSuperAdmin = false) {
     const playerCount = subs.filter(s => s.role === 'player').length; // Don't count admins
     const seatsUsedEl = document.getElementById('seatsUsed');
     const seatsUsedDetailEl = document.getElementById('seatsUsedDetail');
+    const seatsRemainingEl = document.getElementById('seatsRemaining');
+    
     if (seatsUsedEl) seatsUsedEl.textContent = playerCount;
     if (seatsUsedDetailEl) seatsUsedDetailEl.textContent = playerCount;
+    
+    // Calculate and show remaining seats
+    if (seatsRemainingEl && window._adminSubscription && window._adminSubscription.seat_limit) {
+      const limit = window._adminSubscription.seat_limit;
+      if (limit !== 999999) {
+        const remaining = limit - playerCount;
+        seatsRemainingEl.textContent = remaining > 0 
+          ? `${remaining} seat${remaining === 1 ? '' : 's'} remaining`
+          : 'At seat limit — upgrade to add more';
+        seatsRemainingEl.style.color = remaining > 0 ? 'rgba(255,255,255,0.4)' : '#f87171';
+      }
+    }
     
     if (statTotal) statTotal.textContent = subs.length;
     if (statActive) statActive.textContent = subs.filter(s => s.status === 'active').length;
