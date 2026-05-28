@@ -2910,6 +2910,9 @@ async function loadAdminPanel(user) {
   const content = document.getElementById('adminContent');
   if (!content) return;
   
+  // Store super admin status globally
+  window._isSuperAdmin = (user.email === 'brandonanderson1393@gmail.com');
+  
   content.innerHTML = `
     <div class="card" style="margin-bottom:1rem;">
       <div class="ch"><span class="cht">Quick Stats</span></div>
@@ -2929,8 +2932,8 @@ async function loadAdminPanel(user) {
       </div>
     </div>
     
-    <div class="card" style="margin-bottom:1rem;">
-      <div class="ch"><span class="cht">Add New Player</span></div>
+    <div class="card" style="margin-bottom:1rem;" id="superAdminPanel">
+      <div class="ch"><span class="cht">Add New Player (Super Admin Only)</span></div>
       <div class="cb">
         <form id="adminAddPlayerForm" onsubmit="handleAddPlayer(event)" style="display:grid;gap:12px;">
           <div>
@@ -2962,7 +2965,13 @@ async function loadAdminPanel(user) {
     </div>
   `;
   
-  loadPlayerList();
+  // Hide add player form if not super admin
+  const superPanel = document.getElementById('superAdminPanel');
+  if (superPanel && !window._isSuperAdmin) {
+    superPanel.style.display = 'none';
+  }
+  
+  loadPlayerList(window._isSuperAdmin);
 }
 
 async function handleAddPlayer(e) {
@@ -3007,7 +3016,7 @@ async function handleAddPlayer(e) {
     msg.textContent = '✓ Player added! Temp password: ' + password;
     msg.style.display = 'block';
     document.getElementById('adminEmail').value = '';
-    loadPlayerList();
+    loadPlayerList(window._isSuperAdmin);
     
   } catch (error) {
     msg.style.color = '#f87171';
@@ -3016,7 +3025,7 @@ async function handleAddPlayer(e) {
   }
 }
 
-async function loadPlayerList() {
+async function loadPlayerList(isSuperAdmin = false) {
   const container = document.getElementById('playerListContainer');
   if (!container) return;
   container.innerHTML = 'Loading...';
@@ -3091,7 +3100,7 @@ async function loadPlayerList() {
         <td style="padding:10px 8px;text-align:right;color:#fb923c;font-weight:600;">${stats.workouts}</td>
         <td style="padding:10px 8px;">
           ${sub.stripe_subscription_id ? '<button onclick="adminCancelStripe(\''+sub.id+'\',\''+sub.email+'\',\''+sub.stripe_subscription_id+'\')" style="background:#fb923c;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Cancel</button>' : ''}
-          <button onclick="adminDeletePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Delete</button>
+          ${isSuperAdmin ? '<button onclick="adminDeletePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Delete</button>' : ''}
         </td>
       </tr>`;
     });
@@ -3105,7 +3114,7 @@ async function loadPlayerList() {
 }
 
 function refreshPlayerList() {
-  loadPlayerList();
+  loadPlayerList(window._isSuperAdmin);
 }
 
 async function adminCancelStripe(subId, email, stripeSubId) {
@@ -3120,7 +3129,7 @@ async function adminCancelStripe(subId, email, stripeSubId) {
     const result = await resp.json();
     if (result.error) throw new Error(result.error);
     alert('✓ Subscription cancelled for: ' + email);
-    loadPlayerList();
+    loadPlayerList(window._isSuperAdmin);
   } catch (error) {
     alert('Error: ' + error.message);
   }
@@ -3142,7 +3151,7 @@ async function adminDeletePlayer(subId, email) {
     const { error } = await sb.from('subscriptions').delete().eq('id', subId);
     if (error) throw error;
     alert('✓ Deleted: ' + email);
-    loadPlayerList();
+    loadPlayerList(window._isSuperAdmin);
   } catch (error) {
     alert('Error: ' + error.message);
   }
