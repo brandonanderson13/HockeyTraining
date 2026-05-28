@@ -1520,6 +1520,11 @@ function showSec(id){
   document.getElementById(id).classList.add('active');
   const ids=['overview','baseline','schedule','nutrition','sticklog','shotlog','tracker','final'];
   document.querySelectorAll('.nb').forEach((b,i)=>b.classList.toggle('active',i===ids.indexOf(id)));
+  
+  // Load account details when Account tab is shown
+  if (id === 'account') {
+    loadAccountDetails();
+  }
 }
 
 // ---------- SHOT LOG ----------
