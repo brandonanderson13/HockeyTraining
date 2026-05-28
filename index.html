@@ -1246,14 +1246,28 @@ function addLogoutButton(supabase, user) {
   const header = document.querySelector('.hdr');
   if (!header) return;
   
+  const container = document.createElement('div');
+  container.style.cssText = 'position:absolute;top:12px;right:12px;display:flex;gap:8px;align-items:center;';
+  
+  // Manage Subscription link
+  const manageBtn = document.createElement('a');
+  manageBtn.href = 'https://billing.stripe.com/p/login/test_00000000000000000000000'; // You'll need to replace with your actual portal link
+  manageBtn.target = '_blank';
+  manageBtn.textContent = 'Manage Subscription';
+  manageBtn.style.cssText = 'background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;padding:6px 12px;border-radius:6px;font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;text-decoration:none;';
+  
+  // Sign out button
   const btn = document.createElement('button');
   btn.textContent = 'Sign Out';
-  btn.style.cssText = 'position:absolute;top:12px;right:12px;background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;padding:6px 12px;border-radius:6px;font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;';
+  btn.style.cssText = 'background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;padding:6px 12px;border-radius:6px;font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;';
   btn.onclick = async () => {
     await supabase.auth.signOut();
     window.location.href = 'login.html';
   };
-  header.appendChild(btn);
+  
+  container.appendChild(manageBtn);
+  container.appendChild(btn);
+  header.appendChild(container);
 }
 
 

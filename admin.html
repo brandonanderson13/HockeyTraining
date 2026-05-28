@@ -326,7 +326,7 @@ async function loadPlayers() {
 }
 
 async function removeSub(id, email) {
-  if (!confirm('Remove access for ' + email + '?')) return;
+  if (!confirm('Remove access for ' + email + '? This deletes their record but does NOT cancel their Stripe subscription. Cancel in Stripe separately if needed.')) return;
   
   try {
     const { error } = await supabase
@@ -336,7 +336,56 @@ async function removeSub(id, email) {
     
     if (error) throw error;
     
-    alert('✓ Removed: ' + email);
+    alert('✓ Removed from database: ' + email);
+    loadPlayers();
+    
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+async function cancelStripeSubscription(subId, email, stripeSubId) {
+  if (!confirm('Cancel Stripe subscription for ' + email + '? This will stop future billing and mark them as cancelled.')) return;
+  
+  try {
+    // Call backend to cancel the Stripe subscription
+    const response = await fetch('/api/cancel-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stripeSubscriptionId: stripeSubId })
+    });
+    
+    const result = await response.json();
+    
+    if (result.error) throw new Error(result.error);
+    
+    alert('✓ Subscription cancelled in Stripe for: ' + email + '\n\nThey will lose access at the end of the current billing period.');
+    loadPlayers();
+    
+  } catch (error) {
+    alert('Error cancelling subscription: ' + error.message);
+  }
+}
+
+async function extendSubscription(subId, email) {
+  const months = prompt('Extend subscription for ' + email + ' by how many months?', '1');
+  if (!months || isNaN(months)) return;
+  
+  const monthsNum = parseInt(months);
+  const newExpiry = new Date();
+  newExpiry.setMonth(newExpiry.getMonth() + monthsNum);
+  
+  if (!confirm('Set expiration to: ' + newExpiry.toLocaleDateString() + '?')) return;
+  
+  try {
+    const { error } = await supabase
+      .from('subscriptions')
+      .update({ expires_at: newExpiry.toISOString() })
+      .eq('id', subId);
+    
+    if (error) throw error;
+    
+    alert('✓ Extended subscription for: ' + email);
     loadPlayers();
     
   } catch (error) {

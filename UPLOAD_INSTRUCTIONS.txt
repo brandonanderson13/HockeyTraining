@@ -1,0 +1,11 @@
+UPLOAD THESE 3 FILES TO GITHUB:
+
+1. admin.html → upload to ROOT (replace existing)
+2. index.html → upload to ROOT (replace existing)  
+3. api/cancel-subscription.js → upload to api folder
+
+After uploading, Vercel will auto-deploy in 1-2 minutes.
+
+Then continue with:
+- Activating Stripe Customer Portal
+- Testing the payment flow
