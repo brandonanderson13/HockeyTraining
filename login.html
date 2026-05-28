@@ -21,7 +21,6 @@
   }
   
   .container { max-width: 440px; width: 100%; }
-  
   .logo { text-align: center; margin-bottom: 32px; }
   
   .logo h1 {
@@ -34,7 +33,6 @@
   }
   
   .logo h1 span { color: #E07820; }
-  
   .logo p { font-size: 13px; color: rgba(255,255,255,0.5); }
   
   .card {
@@ -85,10 +83,7 @@
     margin-bottom: 18px;
   }
   
-  input:focus {
-    outline: none;
-    border-color: #E07820;
-  }
+  input:focus { outline: none; border-color: #E07820; }
   
   button {
     width: 100%;
@@ -130,12 +125,7 @@
     color: #f87171;
   }
   
-  .link {
-    color: #E07820;
-    text-decoration: none;
-    font-size: 12px;
-  }
-  
+  .link { color: #E07820; text-decoration: none; font-size: 12px; }
   .link:hover { text-decoration: underline; }
 </style>
 </head>
@@ -163,7 +153,7 @@
     </form>
     
     <div style="text-align:center;margin-top:14px;">
-      <a href="#" onclick="showForgotPassword();return false;" class="link">Forgot password?</a>
+      <a href="#" onclick="handleForgotPassword();return false;" class="link">Forgot password?</a>
     </div>
     
     <div id="message" class="message"></div>
@@ -176,105 +166,92 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY';
-const ADMIN_EMAILS = ['brandonanderson1393@gmail.com'];
+(function() {
+  const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY';
+  const ADMIN_EMAILS = ['brandonanderson1393@gmail.com'];
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Handle login
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  const submitBtn = document.getElementById('submitBtn');
-  const message = document.getElementById('message');
-  
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Signing in...';
-  message.style.display = 'none';
-  
-  try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password
-    });
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
     
-    if (error) throw error;
-    if (!data.user) throw new Error('Login failed');
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const submitBtn = document.getElementById('submitBtn');
+    const message = document.getElementById('message');
     
-    // Admin bypass
-    if (ADMIN_EMAILS.includes(email)) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Signing in...';
+    message.style.display = 'none';
+    
+    try {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
+      
+      if (error) throw error;
+      if (!data.user) throw new Error('Login failed');
+      
+      if (ADMIN_EMAILS.includes(email)) {
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      const { data: sub, error: subError } = await sb
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', data.user.id)
+        .eq('status', 'active')
+        .single();
+      
+      if (!sub || subError) {
+        message.className = 'message error';
+        message.textContent = 'No active subscription. Please subscribe to access.';
+        message.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign In';
+        return;
+      }
+      
+      if (sub.expires_at && new Date(sub.expires_at) < new Date()) {
+        message.className = 'message error';
+        message.textContent = 'Subscription expired. Please renew.';
+        message.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign In';
+        return;
+      }
+      
       window.location.href = 'index.html';
-      return;
-    }
-    
-    // Check subscription
-    const { data: sub, error: subError } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', data.user.id)
-      .eq('status', 'active')
-      .single();
-    
-    if (subError && subError.code !== 'PGRST116') {
-      console.error('Sub error:', subError);
-    }
-    
-    if (!sub) {
+      
+    } catch (error) {
       message.className = 'message error';
-      message.textContent = 'No active subscription. Please subscribe to access.';
+      message.textContent = 'Error: ' + error.message;
       message.style.display = 'block';
       submitBtn.disabled = false;
       submitBtn.textContent = 'Sign In';
-      return;
     }
+  });
+
+  window.handleForgotPassword = async function() {
+    const email = prompt('Enter your email for password reset:');
+    if (!email) return;
     
-    if (sub.expires_at && new Date(sub.expires_at) < new Date()) {
-      message.className = 'message error';
-      message.textContent = 'Subscription expired. Please renew.';
+    const message = document.getElementById('message');
+    try {
+      const { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/login.html'
+      });
+      if (error) throw error;
+      message.className = 'message success';
+      message.textContent = '✓ Reset link sent! Check your email.';
       message.style.display = 'block';
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Sign In';
-      return;
+    } catch (error) {
+      message.className = 'message error';
+      message.textContent = 'Error: ' + error.message;
+      message.style.display = 'block';
     }
-    
-    window.location.href = 'index.html';
-    
-  } catch (error) {
-    console.error('Error:', error);
-    message.className = 'message error';
-    message.textContent = 'Error: ' + error.message;
-    message.style.display = 'block';
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Sign In';
-  }
-});
-
-// Forgot password
-function showForgotPassword() {
-  const email = prompt('Enter your email for password reset:');
-  if (!email) return;
-  resetPassword(email);
-}
-
-async function resetPassword(email) {
-  const message = document.getElementById('message');
-  try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/login.html'
-    });
-    if (error) throw error;
-    message.className = 'message success';
-    message.textContent = '✓ Reset link sent! Check your email.';
-    message.style.display = 'block';
-  } catch (error) {
-    message.className = 'message error';
-    message.textContent = 'Error: ' + error.message;
-    message.style.display = 'block';
-  }
-}
+  };
+})();
 </script>
 </body>
 </html>
