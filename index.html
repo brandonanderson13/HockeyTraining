@@ -3097,6 +3097,28 @@ async function loadAdminPanel(user) {
       </div>
     </div>
     
+    ${hasSeats ? `<div class="card" style="margin-bottom:1rem;">
+      <div class="ch"><span class="cht">My Subscription</span></div>
+      <div class="cb">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+          <div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Plan</div>
+            <div style="font-size:14px;color:#E07820;font-weight:700;">${adminSub.seat_limit === 999999 ? 'Unlimited' : adminSub.seat_limit + ' Players'}</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Seats Used</div>
+            <div style="font-size:14px;color:#4ade80;font-weight:700;"><span id="seatsUsedDetail">-</span> of ${adminSub.seat_limit === 999999 ? '∞' : adminSub.seat_limit}</div>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Organization</div>
+          <div style="font-size:14px;color:rgba(255,255,255,0.75);font-weight:600;">${adminSub.organization_name || 'Not set'}</div>
+        </div>
+        <a href="https://billing.stripe.com/p/login/14AcN4fnrf2y4DBdiadjO00" target="_blank" class="btn-o" style="display:inline-block;text-decoration:none;text-align:center;margin:0;">Manage Subscription / Upgrade Plan</a>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:10px;line-height:1.5;">Need more seats? Click "Manage Subscription" to upgrade your tier. Stripe will pro-rate the difference automatically.</div>
+      </div>
+    </div>` : ''}
+    
     <div class="card" style="margin-bottom:1rem;" id="superAdminPanel">
       <div class="ch"><span class="cht">Add New Player (Super Admin Only)</span></div>
       <div class="cb">
@@ -3277,7 +3299,9 @@ async function loadPlayerList(isSuperAdmin = false) {
     
     const playerCount = subs.filter(s => s.role === 'player').length; // Don't count admins
     const seatsUsedEl = document.getElementById('seatsUsed');
+    const seatsUsedDetailEl = document.getElementById('seatsUsedDetail');
     if (seatsUsedEl) seatsUsedEl.textContent = playerCount;
+    if (seatsUsedDetailEl) seatsUsedDetailEl.textContent = playerCount;
     
     if (statTotal) statTotal.textContent = subs.length;
     if (statActive) statActive.textContent = subs.filter(s => s.status === 'active').length;
@@ -3321,8 +3345,9 @@ async function loadPlayerList(isSuperAdmin = false) {
         <td style="padding:10px 8px;text-align:right;color:#4ade80;font-weight:600;">${stats.shots.toLocaleString()}</td>
         <td style="padding:10px 8px;text-align:right;color:#60a5fa;font-weight:600;">${stats.mins}</td>
         <td style="padding:10px 8px;text-align:right;color:#fb923c;font-weight:600;">${stats.workouts}</td>
-        <td style="padding:10px 8px;">
+        <td style="padding:10px 8px;white-space:nowrap;">
           ${sub.stripe_subscription_id ? '<button onclick="adminCancelStripe(\''+sub.id+'\',\''+sub.email+'\',\''+sub.stripe_subscription_id+'\')" style="background:#fb923c;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Cancel</button>' : ''}
+          ${isSuperAdmin && sub.role === 'admin' && sub.seat_limit ? '<button onclick="editSeats(\''+sub.id+'\',\''+sub.email+'\','+sub.seat_limit+')" style="background:#60a5fa;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Edit Seats</button>' : ''}
           ${isSuperAdmin ? '<button onclick="adminDeletePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Delete</button>' : ''}
         </td>
       </tr>`;
@@ -3389,6 +3414,33 @@ async function adminDeletePlayer(subId, email) {
   }
 }
 
+
+async function editSeats(subId, email, currentLimit) {
+  const newLimit = prompt(`Current seat limit for ${email}: ${currentLimit === 999999 ? 'Unlimited' : currentLimit}\n\nEnter new seat limit (or 999999 for unlimited):`, currentLimit);
+  if (!newLimit) return;
+  
+  const limitNum = parseInt(newLimit);
+  if (isNaN(limitNum) || limitNum < 0) {
+    alert('Invalid number');
+    return;
+  }
+  
+  if (!confirm(`Set seat limit to ${limitNum === 999999 ? 'UNLIMITED' : limitNum} for ${email}?`)) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('subscriptions')
+      .update({ seat_limit: limitNum })
+      .eq('id', subId);
+    
+    if (error) throw error;
+    
+    alert(`✓ Seat limit updated to ${limitNum === 999999 ? 'unlimited' : limitNum}`);
+    loadPlayerList(window._isSuperAdmin);
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
 </script>
 </body>
 </html>
