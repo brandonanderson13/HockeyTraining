@@ -5,11 +5,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { priceAmount, interval, successUrl, cancelUrl } = req.body;
+  const { priceAmount, interval, customerEmail, customerName, metadata, successUrl, cancelUrl } = req.body;
 
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
+      customer_email: customerEmail,
       line_items: [{
         price_data: {
           currency: 'usd',
@@ -27,6 +28,10 @@ export default async function handler(req, res) {
       cancel_url: cancelUrl,
       allow_promotion_codes: true,
       billing_address_collection: 'required',
+      metadata: metadata || {},
+      subscription_data: {
+        metadata: metadata || {}
+      }
     });
 
     res.status(200).json({ sessionId: session.id });
