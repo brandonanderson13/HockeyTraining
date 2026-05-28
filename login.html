@@ -82,7 +82,8 @@
     margin-bottom: 6px;
   }
   
-  input[type="email"] {
+  input[type="email"],
+  input[type="password"] {
     width: 100%;
     background: #0d0d0d;
     border: 1px solid #333;
@@ -94,7 +95,8 @@
     margin-bottom: 18px;
   }
   
-  input[type="email"]:focus {
+  input[type="email"]:focus,
+  input[type="password"]:focus {
     outline: none;
     border-color: #E07820;
   }
@@ -151,11 +153,7 @@
     border: 1px solid rgba(96, 165, 250, 0.3);
     color: #60a5fa;
   }
-  
-  .tab-btn.active {
-    color: #E07820 !important;
-    border-bottom-color: #E07820 !important;
-  }
+
   
   .footer {
     text-align: center;
@@ -175,34 +173,20 @@
   
   <div class="card">
     <h2>Sign In</h2>
-    <p style="margin-bottom:16px;">Don't have an account? <a href="subscribe.html" style="color:#E07820;text-decoration:none;font-weight:600;">Subscribe here</a></p>
+    <p style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px;line-height:1.5;">Sign in with your email and password.</p>
+    <p style="font-size:12px;margin-bottom:16px;color:rgba(255,255,255,0.45);">Don't have an account? <a href="subscribe.html" style="color:#E07820;text-decoration:none;font-weight:600;">Subscribe here</a></p>
     
-    <!-- TAB NAVIGATION -->
-    <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid #222;">
-      <button type="button" class="tab-btn active" onclick="switchTab('password')" id="tabPassword" style="flex:1;background:transparent;border:none;color:rgba(255,255,255,0.5);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:10px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;">Email &amp; Password</button>
-      <button type="button" class="tab-btn" onclick="switchTab('magic')" id="tabMagic" style="flex:1;background:transparent;border:none;color:rgba(255,255,255,0.5);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:10px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;">Magic Link</button>
-    </div>
-    
-    <!-- PASSWORD LOGIN FORM -->
-    <form id="passwordForm" style="display:block;">
-      <p style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px;line-height:1.5;">Sign in with your email and password.</p>
-      <label for="emailPassword">Email Address</label>
-      <input type="email" id="emailPassword" placeholder="your.email@example.com" required autocomplete="email">
+    <form id="loginForm">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" placeholder="your.email@example.com" required autocomplete="email">
       <label for="password">Password</label>
       <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
-      <button type="submit" id="passwordBtn">Sign In</button>
-      <div style="margin-top:12px;text-align:center;">
-        <a href="#" onclick="switchTab('magic');return false;" style="font-size:12px;color:rgba(255,255,255,0.5);text-decoration:none;">Forgot password? Use magic link instead</a>
-      </div>
+      <button type="submit" id="submitBtn">Sign In</button>
     </form>
     
-    <!-- MAGIC LINK FORM -->
-    <form id="magicForm" style="display:none;">
-      <p style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px;line-height:1.5;">Enter your email to receive a secure sign-in link. No password needed.</p>
-      <label for="emailMagic">Email Address</label>
-      <input type="email" id="emailMagic" placeholder="your.email@example.com" required autocomplete="email">
-      <button type="submit" id="magicBtn">Send Sign-In Link</button>
-    </form>
+    <div style="text-align:center;margin-top:14px;">
+      <a href="#" onclick="showForgotPassword();return false;" style="font-size:12px;color:rgba(255,255,255,0.5);text-decoration:none;">Forgot password?</a>
+    </div>
     
     <div id="message" class="message"></div>
   </div>
@@ -227,36 +211,43 @@ if (hashParams.get('access_token')) {
   verifyAndRedirect();
 }
 
-// Tab switching
-function switchTab(tab) {
-  const passwordForm = document.getElementById('passwordForm');
-  const magicForm = document.getElementById('magicForm');
-  const tabPassword = document.getElementById('tabPassword');
-  const tabMagic = document.getElementById('tabMagic');
-  const message = document.getElementById('message');
+
+// Handle forgot password
+function showForgotPassword() {
+  const email = prompt('Enter your email address to receive a password reset link:');
+  if (!email) return;
   
-  message.style.display = 'none';
-  
-  if (tab === 'password') {
-    passwordForm.style.display = 'block';
-    magicForm.style.display = 'none';
-    tabPassword.classList.add('active');
-    tabMagic.classList.remove('active');
-  } else {
-    passwordForm.style.display = 'none';
-    magicForm.style.display = 'block';
-    tabPassword.classList.remove('active');
-    tabMagic.classList.add('active');
+  resetPassword(email);
+}
+
+async function resetPassword(email) {
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/login.html'
+    });
+    
+    if (error) throw error;
+    
+    const message = document.getElementById('message');
+    message.className = 'message success';
+    message.textContent = '✓ Password reset link sent! Check your email.';
+    message.style.display = 'block';
+    
+  } catch (error) {
+    const message = document.getElementById('message');
+    message.className = 'message error';
+    message.textContent = 'Error: ' + error.message;
+    message.style.display = 'block';
   }
 }
 
-// Handle password login
-document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+// Handle login form submission
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  const email = document.getElementById('emailPassword').value.trim();
+  const email = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
-  const submitBtn = document.getElementById('passwordBtn');
+  const submitBtn = document.getElementById('submitBtn');
   const message = document.getElementById('message');
   
   submitBtn.disabled = true;
@@ -280,43 +271,6 @@ document.getElementById('passwordForm').addEventListener('submit', async (e) => 
     message.style.display = 'block';
     submitBtn.disabled = false;
     submitBtn.textContent = 'Sign In';
-  }
-});
-
-// Handle magic link login
-document.getElementById('magicForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const email = document.getElementById('emailMagic').value.trim();
-  const submitBtn = document.getElementById('magicBtn');
-  const message = document.getElementById('message');
-  
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Sending...';
-  message.style.display = 'none';
-  
-  try {
-    const { data, error } = await supabase.auth.signInWithOtp({
-      email: email,
-      options: {
-        emailRedirectTo: window.location.origin + window.location.pathname
-      }
-    });
-    
-    if (error) throw error;
-    
-    message.className = 'message success';
-    message.textContent = '✓ Check your email! We sent you a sign-in link.';
-    message.style.display = 'block';
-    document.getElementById('emailMagic').value = '';
-    
-  } catch (error) {
-    message.className = 'message error';
-    message.textContent = 'Error: ' + error.message;
-    message.style.display = 'block';
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Send Sign-In Link';
   }
 });
 
