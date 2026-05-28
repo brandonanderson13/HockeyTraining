@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--or:#E07820;--orl:#FF8C30;--bk:#0D0D0D;--ch:#1a1a1a;--g2:#222;--g3:#2a2a2a;--white:#fff;}
+:root{--or:var(--primary-color);--orl:#FF8C30;--bk:#0D0D0D;--ch:#1a1a1a;--g2:#222;--g3:#2a2a2a;--white:#fff;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh;}
 .wrap{max-width:860px;margin:0 auto;padding:1.5rem;}
@@ -56,7 +56,7 @@ body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh
 .pw{font-size:11px;color:rgba(255,255,255,0.32);margin-top:1px;}
 .pcb{padding:9px 12px;}
 .ptag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:3px;margin:2px 2px 0 0;background:var(--g3);color:rgba(255,255,255,0.52);}
-.ptago{background:rgba(224,120,32,0.15);color:var(--or);}
+.ptago{background:rgba(var(--primary-rgb),0.15);color:var(--or);}
 
 /* SPLIT TABLE */
 .dr{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start;}
@@ -64,7 +64,7 @@ body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh
 .dtag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:3px;margin-right:3px;margin-bottom:2px;font-weight:500;}
 .ts{background:rgba(59,130,246,0.15);color:#60a5fa;}
 .ta{background:rgba(34,197,94,0.12);color:#4ade80;}
-.tk{background:rgba(224,120,32,0.15);color:var(--or);}
+.tk{background:rgba(var(--primary-rgb),0.15);color:var(--or);}
 .tc{background:rgba(239,68,68,0.12);color:#f87171;}
 .tr{background:var(--g3);color:rgba(255,255,255,0.35);}
 
@@ -110,7 +110,7 @@ body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh
 .btn-o:hover{background:var(--orl);}
 
 /* NUTRITION */
-.nut-hero{background:linear-gradient(135deg,#1a0a00,#2a1200);border:1px solid rgba(224,120,32,0.25);border-radius:12px;padding:1.1rem 1.3rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem;}
+.nut-hero{background:linear-gradient(135deg,#1a0a00,#2a1200);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:12px;padding:1.1rem 1.3rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem;}
 .nut-icon{font-size:36px;flex-shrink:0;}
 .nut-hero-text h2{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--or);margin-bottom:3px;}
 .nut-hero-text p{font-size:12px;color:rgba(255,255,255,0.45);line-height:1.5;}
@@ -141,7 +141,7 @@ body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh
 .meal-slot-label{font-size:10px;font-weight:600;color:var(--or);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
 .meal-slot-text{font-size:11px;color:rgba(255,255,255,0.55);line-height:1.4;}
 .expect-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
-.eitem{background:rgba(224,120,32,0.08);border:1px solid rgba(224,120,32,0.18);border-radius:8px;padding:10px 12px;}
+.eitem{background:rgba(var(--primary-rgb),0.08);border:1px solid rgba(var(--primary-rgb),0.18);border-radius:8px;padding:10px 12px;}
 .elbl{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--or);margin-bottom:4px;}
 .etxt{font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;}
 
@@ -150,17 +150,17 @@ select{background:#1a1a1a;border:1px solid #333;color:#fff;font-size:12px;paddin
 select:focus{border-color:var(--or);outline:none;}
 .cust-check,.cust-radio{display:flex;align-items:center;gap:7px;font-size:12px;color:rgba(255,255,255,0.62);cursor:pointer;padding:4px 6px;border-radius:4px;margin-bottom:2px;}
 .cust-check:hover,.cust-radio:hover{background:rgba(255,255,255,0.04);}
-.cust-check input,.cust-radio input{accent-color:#E07820;width:14px;height:14px;flex-shrink:0;}
+.cust-check input,.cust-radio input{accent-color:var(--primary-color);width:14px;height:14px;flex-shrink:0;}
 .day-toggle{display:inline-flex;flex-direction:column;align-items:center;cursor:pointer;}
 .day-toggle input{display:none;}
 .day-toggle span{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:5px 10px;border-radius:5px;border:1px solid #333;background:#1a1a1a;color:rgba(255,255,255,0.35);transition:all .15s;}
-.day-toggle input:checked+span{background:rgba(224,120,32,0.15);border-color:rgba(224,120,32,0.4);color:#E07820;}
+.day-toggle input:checked+span{background:rgba(var(--primary-rgb),0.15);border-color:rgba(var(--primary-rgb),0.4);color:var(--primary-color);}
 .log-btn{font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:4px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:3px;}
 .log-btn.stick{background:rgba(96,165,250,0.15);color:#60a5fa;border:1px solid rgba(96,165,250,0.2);}
 .log-btn.stick:hover{background:rgba(96,165,250,0.28);}
 .log-btn.shot{background:rgba(74,222,128,0.12);color:#4ade80;border:1px solid rgba(74,222,128,0.2);}
 .log-btn.shot:hover{background:rgba(74,222,128,0.22);}
-.skills-quicklog{background:#0d0d0d;border:1px solid rgba(224,120,32,0.18);border-radius:6px;margin:6px 0 4px 0;padding:8px 10px;}
+.skills-quicklog{background:#0d0d0d;border:1px solid rgba(var(--primary-rgb),0.18);border-radius:6px;margin:6px 0 4px 0;padding:8px 10px;}
 .sql-title{font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.3);margin-bottom:6px;}
 .sql-drills{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px;}
 .sql-drill-chip{font-size:11px;color:rgba(255,255,255,0.55);background:#1a1a1a;border:1px solid #2a2a2a;border-radius:4px;padding:2px 7px;cursor:default;}
@@ -170,9 +170,9 @@ select:focus{border-color:var(--or);outline:none;}
 .xl{display:flex;flex-direction:column;border-bottom:1px solid #1a1a1a;}
 .xl:last-child{border-bottom:none;}
 .xl-header{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:5px 0;cursor:pointer;user-select:none;gap:8px;}
-.xl-header:hover .xln{color:#E07820;}
+.xl-header:hover .xln{color:var(--primary-color);}
 .xl-check{flex-shrink:0;width:18px;height:18px;border:2px solid #333;border-radius:4px;background:#0d0d0d;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
-.xl-check:hover{border-color:#E07820;}
+.xl-check:hover{border-color:var(--primary-color);}
 .xl-check.checked{background:#4ade80;border-color:#4ade80;}
 .xl-check.checked::after{content:'\2713';color:#0d0d0d;font-size:13px;font-weight:bold;line-height:1;}
 .xl.completed .xln{text-decoration:line-through;color:rgba(255,255,255,0.35) !important;}
@@ -187,11 +187,11 @@ select:focus{border-color:var(--or);outline:none;}
 .xl-link{font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:4px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;}
 .xl-link.yt{background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.2);}
 .xl-link.yt:hover{background:rgba(239,68,68,0.22);}
-.xl-link.tip{background:rgba(224,120,32,0.1);color:#E07820;border:1px solid rgba(224,120,32,0.2);}
+.xl-link.tip{background:rgba(var(--primary-rgb),0.1);color:var(--primary-color);border:1px solid rgba(var(--primary-rgb),0.2);}
 
 .drill-check{display:flex;align-items:center;gap:7px;font-size:12px;color:rgba(255,255,255,0.6);cursor:pointer;padding:4px 6px;border-radius:4px;transition:background .1s;}
 .drill-check:hover{background:rgba(255,255,255,0.04);}
-.drill-check input[type=checkbox]{accent-color:#E07820;width:14px;height:14px;flex-shrink:0;}
+.drill-check input[type=checkbox]{accent-color:var(--primary-color);width:14px;height:14px;flex-shrink:0;}
 
 
 /* FOOTER */
@@ -235,17 +235,17 @@ select:focus{border-color:var(--or);outline:none;}
   <span style="width:1px;height:20px;background:#333;margin:0 8px;"></span>
   <button class="nb" onclick="showSec('account')">Account</button>
   <button class="nb" onclick="showSec('leaderboard')">Leaderboard</button>
-  <button class="nb" id="adminTab" onclick="showSec('admin')" style="display:none;margin-left:8px;background:rgba(224,120,32,0.1);border-color:#E07820;">Admin</button>
+  <button class="nb" id="adminTab" onclick="showSec('admin')" style="display:none;margin-left:8px;background:rgba(var(--primary-rgb),0.1);border-color:var(--primary-color);">Admin</button>
 </div>
 
 <!-- OVERVIEW -->
 <div id="overview" class="sec active">
   <div class="ibox"><strong>Program Goal:</strong> Build hockey-ready athletes over 12 weeks of structured off-ice training.
     <div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,0.65);line-height:1.6;">
-      <strong style="color:#E07820;">How it works:</strong> Three progressive 4-week phases. <strong>Foundation</strong> builds movement quality and clean technique. <strong>Development</strong> adds strength, volume, and advanced skills. <strong>Performance</strong> converts everything into game-speed power.
+      <strong style="color:var(--primary-color);">How it works:</strong> Three progressive 4-week phases. <strong>Foundation</strong> builds movement quality and clean technique. <strong>Development</strong> adds strength, volume, and advanced skills. <strong>Performance</strong> converts everything into game-speed power.
     </div>
     <div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,0.65);line-height:1.6;">
-      <strong style="color:#E07820;">Why it works:</strong> Every session pairs strength or conditioning with hockey-specific skills — stickhandling and shooting are integrated into every training day so the gains transfer directly to the ice. Volume and intensity progress week by week to drive real adaptation. Customizable by age, available days, and goals so each player trains at the right level.
+      <strong style="color:var(--primary-color);">Why it works:</strong> Every session pairs strength or conditioning with hockey-specific skills — stickhandling and shooting are integrated into every training day so the gains transfer directly to the ice. Volume and intensity progress week by week to drive real adaptation. Customizable by age, available days, and goals so each player trains at the right level.
     </div>
   </div>
   <div class="g3">
@@ -264,8 +264,8 @@ select:focus{border-color:var(--or);outline:none;}
         <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:14px;line-height:1.6;">Pick your age group first — it adjusts exercises and loads to be appropriate. Then customize the rest. Hit Apply Settings to save.</div>
 
         <!-- AGE GROUP SELECTOR (most important setting) -->
-        <div style="background:rgba(224,120,32,0.06);border:1px solid rgba(224,120,32,0.25);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
-          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#E07820;margin-bottom:8px;">&#x1F3D2; Age Group <span style="color:rgba(255,255,255,0.4);font-weight:400;">(adjusts exercises &amp; loads)</span></div>
+        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:8px;">&#x1F3D2; Age Group <span style="color:rgba(255,255,255,0.4);font-weight:400;">(adjusts exercises &amp; loads)</span></div>
           <select id="cust-age" onchange="updateAgeDescription()" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;font-family:'Barlow',sans-serif;font-weight:600;">
             <option value="squirt">Squirts &mdash; 10U &mdash; Bodyweight only, focus on movement quality</option>
             <option value="peewee">Peewee &mdash; 12U &mdash; Bodyweight + light dumbbells (5-10 lb)</option>
@@ -339,8 +339,8 @@ select:focus{border-color:var(--or);outline:none;}
 <div id="baseline" class="sec">
   <div class="ibox"><strong>Baseline Testing — Week 0:</strong> Do these tests before Day 1 and record your results right here. Hit <strong>Save Results</strong> when done — they'll carry over to the Progress Tracker automatically. Retest at Week 12 to measure your gains.</div>
 
-  <div style="background:#141414;border:1px solid rgba(224,120,32,0.3);border-radius:10px;padding:12px 14px;margin-bottom:1rem;font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;">
-    <span style="color:#E07820;font-weight:600;">How to use:</span> Complete each test below, type your result in the box, then click <strong style="color:#fff;">Save Results</strong> at the bottom. Your numbers will appear in the Progress Tracker tab automatically.
+  <div style="background:#141414;border:1px solid rgba(var(--primary-rgb),0.3);border-radius:10px;padding:12px 14px;margin-bottom:1rem;font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;">
+    <span style="color:var(--primary-color);font-weight:600;">How to use:</span> Complete each test below, type your result in the box, then click <strong style="color:#fff;">Save Results</strong> at the bottom. Your numbers will appear in the Progress Tracker tab automatically.
   </div>
 
   <!-- SPEED & CONDITIONING -->
@@ -350,14 +350,14 @@ select:focus{border-color:var(--or);outline:none;}
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">30m Sprint</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Sprint 30 meters max effort. Two attempts, record best time.</div>
-      <label style="font-size:10px;color:#E07820;text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (seconds)</label>
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (seconds)</label>
       <input type="number" step="0.1" id="bt_0" placeholder="e.g. 4.8" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">30-Second Burpee Test</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Max burpees in 30 seconds. Full ROM — chest to floor each rep.</div>
-      <label style="font-size:10px;color:#E07820;text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (reps)</label>
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (reps)</label>
       <input type="number" step="1" id="bt_1" placeholder="e.g. 12" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
@@ -370,14 +370,14 @@ select:focus{border-color:var(--or);outline:none;}
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">5-10-5 Shuttle</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Sprint 5 yds right, touch ground, sprint 10 yds left, touch, sprint 5 yds back. Best of 2.</div>
-      <label style="font-size:10px;color:#E07820;text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (seconds — lower is better)</label>
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (seconds — lower is better)</label>
       <input type="number" step="0.01" id="bt_2" placeholder="e.g. 5.2" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Broad Jump</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Standing start. Jump forward for max distance. Best of 2 attempts.</div>
-      <label style="font-size:10px;color:#E07820;text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (inches)</label>
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (inches)</label>
       <input type="number" step="1" id="bt_3" placeholder="e.g. 62" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
@@ -390,28 +390,28 @@ select:focus{border-color:var(--or);outline:none;}
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Push-Up Max</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Max push-ups in one unbroken set. Full ROM — chest near floor each rep.</div>
-      <label style="font-size:10px;color:#E07820;text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (reps)</label>
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (reps)</label>
       <input type="number" step="1" id="bt_4" placeholder="e.g. 18" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Wall Sit Hold</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Back flat on wall, 90° knee angle. Hold as long as possible.</div>
-      <label style="font-size:10px;color:#E07820;text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (seconds)</label>
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (seconds)</label>
       <input type="number" step="1" id="bt_5" placeholder="e.g. 45" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Bodyweight Squat (60 sec)</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Max full-depth squats in 60 seconds. Controlled on the way down.</div>
-      <label style="font-size:10px;color:#E07820;text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (reps)</label>
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (reps)</label>
       <input type="number" step="1" id="bt_6" placeholder="e.g. 35" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Dead Hang</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Hang from a bar, straight arms, no kipping. Hold as long as possible.</div>
-      <label style="font-size:10px;color:#E07820;text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (seconds)</label>
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (seconds)</label>
       <input type="number" step="1" id="bt_7" placeholder="e.g. 30" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
@@ -424,14 +424,14 @@ select:focus{border-color:var(--or);outline:none;}
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Stickhandling — 30 sec Touch Count</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">On a shooting pad: forehand/backhand touches for 30 seconds. Count every touch.</div>
-      <label style="font-size:10px;color:#E07820;text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (total touches)</label>
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (total touches)</label>
       <input type="number" step="1" id="bt_8" placeholder="e.g. 72" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Shooting Accuracy (10 shots)</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Set corner and 5-hole targets. 10 wrist shots from 15 ft. Count targets hit.</div>
-      <label style="font-size:10px;color:#E07820;text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (hits out of 10)</label>
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (hits out of 10)</label>
       <input type="number" step="1" min="0" max="10" id="bt_9" placeholder="e.g. 4" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
@@ -563,7 +563,7 @@ select:focus{border-color:var(--or);outline:none;}
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;">
     <div style="background:#141414;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
       <div style="font-size:11px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-bottom:4px;">Total Minutes</div>
-      <div id="sh-stat-total" style="font-size:26px;font-weight:700;color:#E07820;font-family:'Barlow Condensed',sans-serif;">0</div>
+      <div id="sh-stat-total" style="font-size:26px;font-weight:700;color:var(--primary-color);font-family:'Barlow Condensed',sans-serif;">0</div>
     </div>
     <div style="background:#141414;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
       <div style="font-size:11px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-bottom:4px;">Sessions</div>
@@ -603,13 +603,13 @@ select:focus{border-color:var(--or);outline:none;}
 
   <!-- DRILL REFERENCE with SVG diagrams -->
   <div style="margin-bottom:1rem;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px;"><span style="display:block;width:4px;height:16px;background:#E07820;border-radius:2px;"></span>Drill Reference — With Diagrams</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px;"><span style="display:block;width:4px;height:16px;background:var(--primary-color);border-radius:2px;"></span>Drill Reference — With Diagrams</div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
         <div style="background:#141414;padding:8px 12px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#E07820;text-transform:uppercase;letter-spacing:.04em;">Side-to-Side Soft Touch</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--primary-color);text-transform:uppercase;letter-spacing:.04em;">Side-to-Side Soft Touch</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;">Beginner · Foundation</div>
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.3);background:#1a1a1a;padding:2px 7px;border-radius:3px;white-space:nowrap;">3×60 sec</div>
@@ -619,8 +619,8 @@ select:focus{border-color:var(--or);outline:none;}
             <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
               <defs><marker id="arS" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#4ade80"/></marker></defs>
       <!-- player feet -->
-      <ellipse cx="100" cy="55" rx="22" ry="9" fill="none" stroke="#E07820" stroke-width="2" stroke-dasharray="3,3"/>
-      <text x="100" y="36" text-anchor="middle" font-size="11" fill="#E07820" font-family="Barlow Condensed" font-weight="700">PLAYER</text>
+      <ellipse cx="100" cy="55" rx="22" ry="9" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-dasharray="3,3"/>
+      <text x="100" y="36" text-anchor="middle" font-size="11" fill="var(--primary-color)" font-family="Barlow Condensed" font-weight="700">PLAYER</text>
       <!-- puck -->
       <circle cx="100" cy="105" r="8" fill="#1a1a1a" stroke="#4ade80" stroke-width="2.5"/>
       <!-- arrows side to side -->
@@ -631,13 +631,13 @@ select:focus{border-color:var(--or);outline:none;}
             </svg>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;">Stand in hockey stance. Alternate tapping puck forehand to backhand in a steady rhythm. Eyes up. Soft hands, wrist roll on every touch.</div>
-          <div style="font-size:10px;color:#E07820;margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Cup the puck, don't slap it</div>
+          <div style="font-size:10px;color:var(--primary-color);margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Cup the puck, don't slap it</div>
         </div>
       </div>
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
         <div style="background:#141414;padding:8px 12px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#E07820;text-transform:uppercase;letter-spacing:.04em;">Figure 8 — Horizontal</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--primary-color);text-transform:uppercase;letter-spacing:.04em;">Figure 8 — Horizontal</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;">Beginner · Wrist Control</div>
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.3);background:#1a1a1a;padding:2px 7px;border-radius:3px;white-space:nowrap;">3×60 sec</div>
@@ -654,7 +654,7 @@ select:focus{border-color:var(--or);outline:none;}
       <path d="M 100,80 C 100,40 20,40 20,80 C 20,120 100,120 100,80 C 100,40 180,40 180,80 C 180,120 100,120 100,80 Z"
             fill="none" stroke="#4ade80" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round"/>
       <!-- center crossover -->
-      <circle cx="100" cy="80" r="4" fill="#E07820"/>
+      <circle cx="100" cy="80" r="4" fill="var(--primary-color)"/>
       <!-- direction arrows on each loop -->
       <polygon points="22,72 16,80 28,80" fill="#4ade80"/>
       <polygon points="178,88 184,80 172,80" fill="#4ade80"/>
@@ -662,7 +662,7 @@ select:focus{border-color:var(--or);outline:none;}
             </svg>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;">Place two pucks shoulder-width apart. Stickhandle in a figure-8 around them using forehand and backhand.</div>
-          <div style="font-size:10px;color:#E07820;margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Smooth — let the puck flow around each puck</div>
+          <div style="font-size:10px;color:var(--primary-color);margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Smooth — let the puck flow around each puck</div>
         </div>
       </div>
     </div>
@@ -670,7 +670,7 @@ select:focus{border-color:var(--or);outline:none;}
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
         <div style="background:#141414;padding:8px 12px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#E07820;text-transform:uppercase;letter-spacing:.04em;">Figure 8 — Vertical</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--primary-color);text-transform:uppercase;letter-spacing:.04em;">Figure 8 — Vertical</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;">Beginner · Reach Extension</div>
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.3);background:#1a1a1a;padding:2px 7px;border-radius:3px;white-space:nowrap;">3×60 sec</div>
@@ -679,8 +679,8 @@ select:focus{border-color:var(--or);outline:none;}
           <div style="background:#080808;border:1px solid #1a1a1a;border-radius:8px;padding:10px;margin-bottom:10px;">
             <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
               <!-- player at bottom -->
-      <ellipse cx="100" cy="145" rx="22" ry="8" fill="none" stroke="#E07820" stroke-width="2" stroke-dasharray="3,3"/>
-      <text x="100" y="138" text-anchor="middle" font-size="9" fill="#E07820" font-family="Barlow Condensed" font-weight="700">PLAYER</text>
+      <ellipse cx="100" cy="145" rx="22" ry="8" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-dasharray="3,3"/>
+      <text x="100" y="138" text-anchor="middle" font-size="9" fill="var(--primary-color)" font-family="Barlow Condensed" font-weight="700">PLAYER</text>
       <!-- two stationary pucks stacked vertically -->
       <circle cx="100" cy="40" r="9" fill="#444" stroke="#aaa" stroke-width="1.5"/>
       <circle cx="100" cy="90" r="9" fill="#444" stroke="#aaa" stroke-width="1.5"/>
@@ -689,18 +689,18 @@ select:focus{border-color:var(--or);outline:none;}
       <!-- TRUE vertical figure 8 -->
       <path d="M 100,65 C 60,65 60,15 100,15 C 140,15 140,65 100,65 C 60,65 60,115 100,115 C 140,115 140,65 100,65 Z"
             fill="none" stroke="#60a5fa" stroke-width="3" stroke-dasharray="6,4" stroke-linecap="round"/>
-      <circle cx="100" cy="65" r="4" fill="#E07820"/>
+      <circle cx="100" cy="65" r="4" fill="var(--primary-color)"/>
       <polygon points="138,20 145,25 140,17" fill="#60a5fa"/>
             </svg>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;">Place two pucks vertically in front of you — one near, one far. Figure-8 around them. Builds reach and arm extension.</div>
-          <div style="font-size:10px;color:#E07820;margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Reach fully on the far puck</div>
+          <div style="font-size:10px;color:var(--primary-color);margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Reach fully on the far puck</div>
         </div>
       </div>
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
         <div style="background:#141414;padding:8px 12px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#E07820;text-transform:uppercase;letter-spacing:.04em;">Around the World</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--primary-color);text-transform:uppercase;letter-spacing:.04em;">Around the World</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;">Beginner · 360° Control</div>
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.3);background:#1a1a1a;padding:2px 7px;border-radius:3px;white-space:nowrap;">3×60 sec</div>
@@ -709,8 +709,8 @@ select:focus{border-color:var(--or);outline:none;}
           <div style="background:#080808;border:1px solid #1a1a1a;border-radius:8px;padding:10px;margin-bottom:10px;">
             <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
               <!-- player center -->
-      <circle cx="100" cy="80" r="16" fill="#1a1a1a" stroke="#E07820" stroke-width="2.5"/>
-      <text x="100" y="84" text-anchor="middle" font-size="10" fill="#E07820" font-family="Barlow Condensed" font-weight="700">YOU</text>
+      <circle cx="100" cy="80" r="16" fill="#1a1a1a" stroke="var(--primary-color)" stroke-width="2.5"/>
+      <text x="100" y="84" text-anchor="middle" font-size="10" fill="var(--primary-color)" font-family="Barlow Condensed" font-weight="700">YOU</text>
       <!-- full circle path around body -->
       <circle cx="100" cy="80" r="50" fill="none" stroke="#4ade80" stroke-width="3" stroke-dasharray="6,4"/>
       <!-- 4 arrows around -->
@@ -726,7 +726,7 @@ select:focus{border-color:var(--or);outline:none;}
             </svg>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;">Stickhandle puck in a full 360° circle around your body — forehand, behind, backhand, and around the front.</div>
-          <div style="font-size:10px;color:#E07820;margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Eyes up — feel the puck around</div>
+          <div style="font-size:10px;color:var(--primary-color);margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Eyes up — feel the puck around</div>
         </div>
       </div>
     </div>
@@ -734,7 +734,7 @@ select:focus{border-color:var(--or);outline:none;}
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
         <div style="background:#141414;padding:8px 12px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#E07820;text-transform:uppercase;letter-spacing:.04em;">Puck Protection</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--primary-color);text-transform:uppercase;letter-spacing:.04em;">Puck Protection</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;">Intermediate · Shielding</div>
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.3);background:#1a1a1a;padding:2px 7px;border-radius:3px;white-space:nowrap;">3×45 sec</div>
@@ -747,10 +747,10 @@ select:focus{border-color:var(--or);outline:none;}
       <ellipse cx="100" cy="30" rx="22" ry="9" fill="none" stroke="#f87171" stroke-width="2" stroke-dasharray="3,3"/>
       <text x="100" y="18" text-anchor="middle" font-size="10" fill="#f87171" font-family="Barlow Condensed" font-weight="700">DEFENDER</text>
       <!-- your player -->
-      <ellipse cx="100" cy="85" rx="22" ry="9" fill="none" stroke="#E07820" stroke-width="2" stroke-dasharray="3,3"/>
-      <text x="100" y="100" text-anchor="middle" font-size="10" fill="#E07820" font-family="Barlow Condensed" font-weight="700">YOU</text>
+      <ellipse cx="100" cy="85" rx="22" ry="9" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-dasharray="3,3"/>
+      <text x="100" y="100" text-anchor="middle" font-size="10" fill="var(--primary-color)" font-family="Barlow Condensed" font-weight="700">YOU</text>
       <!-- body between defender and puck (shield bar) -->
-      <line x1="78" y1="85" x2="122" y2="85" stroke="#E07820" stroke-width="4" stroke-linecap="round"/>
+      <line x1="78" y1="85" x2="122" y2="85" stroke="var(--primary-color)" stroke-width="4" stroke-linecap="round"/>
       <!-- puck protected behind body -->
       <circle cx="100" cy="125" r="9" fill="#1a1a1a" stroke="#4ade80" stroke-width="2.5"/>
       <text x="120" y="129" font-size="10" fill="#4ade80" font-family="Barlow Condensed" font-weight="700">PUCK</text>
@@ -765,13 +765,13 @@ select:focus{border-color:var(--or);outline:none;}
             </svg>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;">Keep the puck behind your body, away from the imaginary defender in front of you. Stickhandle in tight space — small, controlled touches. Use your body to shield. Move side to side and pivot.</div>
-          <div style="font-size:10px;color:#E07820;margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Body between defender and puck</div>
+          <div style="font-size:10px;color:var(--primary-color);margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Body between defender and puck</div>
         </div>
       </div>
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
         <div style="background:#141414;padding:8px 12px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#E07820;text-transform:uppercase;letter-spacing:.04em;">Triangle Drill</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--primary-color);text-transform:uppercase;letter-spacing:.04em;">Triangle Drill</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;">Intermediate · Direction Change</div>
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.3);background:#1a1a1a;padding:2px 7px;border-radius:3px;white-space:nowrap;">4×30 sec</div>
@@ -795,7 +795,7 @@ select:focus{border-color:var(--or);outline:none;}
             </svg>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;">3 markers in a triangle. Stickhandle puck around them in a figure-8 pattern. Forces tight turns and quick transitions both directions.</div>
-          <div style="font-size:10px;color:#E07820;margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Tight turns at each marker</div>
+          <div style="font-size:10px;color:var(--primary-color);margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Tight turns at each marker</div>
         </div>
       </div>
     </div>
@@ -803,7 +803,7 @@ select:focus{border-color:var(--or);outline:none;}
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
         <div style="background:#141414;padding:8px 12px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#E07820;text-transform:uppercase;letter-spacing:.04em;">Cone Weave</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--primary-color);text-transform:uppercase;letter-spacing:.04em;">Cone Weave</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;">Intermediate · Speed + Control</div>
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.3);background:#1a1a1a;padding:2px 7px;border-radius:3px;white-space:nowrap;">5 runs timed</div>
@@ -829,13 +829,13 @@ select:focus{border-color:var(--or);outline:none;}
             </svg>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;">6 cones 2 feet apart. Weave through as fast as possible. Forehand-first then backhand-first. Time every run.</div>
-          <div style="font-size:10px;color:#E07820;margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Head up — feel the puck</div>
+          <div style="font-size:10px;color:var(--primary-color);margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Head up — feel the puck</div>
         </div>
       </div>
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
         <div style="background:#141414;padding:8px 12px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#E07820;text-transform:uppercase;letter-spacing:.04em;">Top Hand Only</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--primary-color);text-transform:uppercase;letter-spacing:.04em;">Top Hand Only</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;">Beginner · Wrist Strength</div>
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.3);background:#1a1a1a;padding:2px 7px;border-radius:3px;white-space:nowrap;">3×30 sec</div>
@@ -845,8 +845,8 @@ select:focus{border-color:var(--or);outline:none;}
             <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
               <defs><marker id="arH" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#4ade80"/></marker></defs>
       <!-- player at top -->
-      <ellipse cx="100" cy="30" rx="20" ry="7" fill="none" stroke="#E07820" stroke-width="2" stroke-dasharray="3,3"/>
-      <text x="100" y="18" text-anchor="middle" font-size="9" fill="#E07820" font-family="Barlow Condensed" font-weight="700">PLAYER</text>
+      <ellipse cx="100" cy="30" rx="20" ry="7" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-dasharray="3,3"/>
+      <text x="100" y="18" text-anchor="middle" font-size="9" fill="var(--primary-color)" font-family="Barlow Condensed" font-weight="700">PLAYER</text>
       <!-- stick down -->
       <line x1="100" y1="40" x2="100" y2="100" stroke="#888" stroke-width="3"/>
       <!-- TOP HAND -->
@@ -866,7 +866,7 @@ select:focus{border-color:var(--or);outline:none;}
             </svg>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;">Remove bottom hand. Dribble puck side-to-side using only the top hand. Builds the wrist strength behind all stickhandling.</div>
-          <div style="font-size:10px;color:#E07820;margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Bottom hand completely off the stick</div>
+          <div style="font-size:10px;color:var(--primary-color);margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Bottom hand completely off the stick</div>
         </div>
       </div>
     </div>
@@ -874,7 +874,7 @@ select:focus{border-color:var(--or);outline:none;}
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
         <div style="background:#141414;padding:8px 12px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#E07820;text-transform:uppercase;letter-spacing:.04em;">Hand Switches</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--primary-color);text-transform:uppercase;letter-spacing:.04em;">Hand Switches</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;">Intermediate · Grip Control</div>
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.3);background:#1a1a1a;padding:2px 7px;border-radius:3px;white-space:nowrap;">3×30 sec</div>
@@ -884,8 +884,8 @@ select:focus{border-color:var(--or);outline:none;}
             <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
               <defs><marker id="arHS" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#4ade80"/></marker></defs>
       <!-- player at top -->
-      <ellipse cx="100" cy="25" rx="22" ry="8" fill="none" stroke="#E07820" stroke-width="2" stroke-dasharray="3,3"/>
-      <text x="100" y="13" text-anchor="middle" font-size="9" fill="#E07820" font-family="Barlow Condensed" font-weight="700">PLAYER</text>
+      <ellipse cx="100" cy="25" rx="22" ry="8" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-dasharray="3,3"/>
+      <text x="100" y="13" text-anchor="middle" font-size="9" fill="var(--primary-color)" font-family="Barlow Condensed" font-weight="700">PLAYER</text>
       <!-- LEFT POSITION: stick on forehand side -->
       <g>
         <text x="50" y="48" text-anchor="middle" font-size="10" fill="#4ade80" font-family="Barlow Condensed" font-weight="700">FOREHAND</text>
@@ -894,9 +894,9 @@ select:focus{border-color:var(--or);outline:none;}
         <circle cx="50" cy="115" r="7" fill="#1a1a1a" stroke="#4ade80" stroke-width="2"/>
       </g>
       <!-- SWITCH arrow in middle -->
-      <path d="M 78,80 L 122,80" stroke="#E07820" stroke-width="3" stroke-dasharray="5,3" fill="none" marker-end="url(#arHS)"/>
-      <text x="100" y="74" text-anchor="middle" font-size="10" fill="#E07820" font-family="Barlow Condensed" font-weight="700">SWITCH</text>
-      <text x="100" y="95" text-anchor="middle" font-size="10" fill="#E07820" font-family="Barlow Condensed" font-weight="700">GRIP</text>
+      <path d="M 78,80 L 122,80" stroke="var(--primary-color)" stroke-width="3" stroke-dasharray="5,3" fill="none" marker-end="url(#arHS)"/>
+      <text x="100" y="74" text-anchor="middle" font-size="10" fill="var(--primary-color)" font-family="Barlow Condensed" font-weight="700">SWITCH</text>
+      <text x="100" y="95" text-anchor="middle" font-size="10" fill="var(--primary-color)" font-family="Barlow Condensed" font-weight="700">GRIP</text>
       <!-- RIGHT POSITION: stick on backhand side -->
       <g>
         <text x="150" y="48" text-anchor="middle" font-size="10" fill="#60a5fa" font-family="Barlow Condensed" font-weight="700">BACKHAND</text>
@@ -910,13 +910,13 @@ select:focus{border-color:var(--or);outline:none;}
             </svg>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;">Stand in hockey stance. Rapidly switch grip from forehand to backhand and back — moving the puck side-to-side as you switch. Builds wrist agility and hand coordination. Start slow, focus on clean transitions.</div>
-          <div style="font-size:10px;color:#E07820;margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Clean transitions — no fumbles</div>
+          <div style="font-size:10px;color:var(--primary-color);margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Clean transitions — no fumbles</div>
         </div>
       </div>
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
         <div style="background:#141414;padding:8px 12px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#E07820;text-transform:uppercase;letter-spacing:.04em;">Wide Dribble</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--primary-color);text-transform:uppercase;letter-spacing:.04em;">Wide Dribble</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;">Beginner-Int · Reach</div>
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.3);background:#1a1a1a;padding:2px 7px;border-radius:3px;white-space:nowrap;">3×45 sec</div>
@@ -926,8 +926,8 @@ select:focus{border-color:var(--or);outline:none;}
             <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
               <defs><marker id="arW" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#4ade80"/></marker></defs>
       <!-- player center -->
-      <ellipse cx="100" cy="50" rx="20" ry="8" fill="none" stroke="#E07820" stroke-width="2" stroke-dasharray="3,3"/>
-      <text x="100" y="34" text-anchor="middle" font-size="10" fill="#E07820" font-family="Barlow Condensed" font-weight="700">PLAYER</text>
+      <ellipse cx="100" cy="50" rx="20" ry="8" fill="none" stroke="var(--primary-color)" stroke-width="2" stroke-dasharray="3,3"/>
+      <text x="100" y="34" text-anchor="middle" font-size="10" fill="var(--primary-color)" font-family="Barlow Condensed" font-weight="700">PLAYER</text>
       <!-- vertical center reference -->
       <line x1="100" y1="65" x2="100" y2="125" stroke="#333" stroke-width="1" stroke-dasharray="2,3"/>
       <!-- wide zone markers (vertical dashed lines at far sides) -->
@@ -944,7 +944,7 @@ select:focus{border-color:var(--or);outline:none;}
             </svg>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;">Pull puck as wide as possible to each side. Full arm extension on both forehand and backhand. Critical for protecting the puck.</div>
-          <div style="font-size:10px;color:#E07820;margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Full arm extension on both sides</div>
+          <div style="font-size:10px;color:var(--primary-color);margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Full arm extension on both sides</div>
         </div>
       </div>
     </div>
@@ -952,7 +952,7 @@ select:focus{border-color:var(--or);outline:none;}
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
         <div style="background:#141414;padding:8px 12px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#E07820;text-transform:uppercase;letter-spacing:.04em;">Speed Taps (30s)</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--primary-color);text-transform:uppercase;letter-spacing:.04em;">Speed Taps (30s)</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;">All Levels · Baseline Test</div>
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.3);background:#1a1a1a;padding:2px 7px;border-radius:3px;white-space:nowrap;">4×30 sec</div>
@@ -961,8 +961,8 @@ select:focus{border-color:var(--or);outline:none;}
           <div style="background:#080808;border:1px solid #1a1a1a;border-radius:8px;padding:10px;margin-bottom:10px;">
             <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
               <!-- big timer circle -->
-      <circle cx="100" cy="55" r="34" fill="#1a1a1a" stroke="#E07820" stroke-width="3"/>
-      <text x="100" y="55" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="#E07820" font-weight="bold" font-family="Barlow Condensed">30s</text>
+      <circle cx="100" cy="55" r="34" fill="#1a1a1a" stroke="var(--primary-color)" stroke-width="3"/>
+      <text x="100" y="55" text-anchor="middle" dominant-baseline="middle" font-size="24" fill="var(--primary-color)" font-weight="bold" font-family="Barlow Condensed">30s</text>
       <text x="100" y="103" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.6)" font-family="Barlow Condensed" font-weight="700">MAX TOUCHES</text>
       <!-- multi-tap visualization -->
       <circle cx="40" cy="130" r="6" fill="#1a1a1a" stroke="#4ade80" stroke-width="2"/>
@@ -977,13 +977,13 @@ select:focus{border-color:var(--or);outline:none;}
             </svg>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;">Maximum forehand/backhand taps in 30 seconds. Count every touch. Your baseline metric — track improvement over 12 weeks.</div>
-          <div style="font-size:10px;color:#E07820;margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Count every touch — log below</div>
+          <div style="font-size:10px;color:var(--primary-color);margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Count every touch — log below</div>
         </div>
       </div>
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
         <div style="background:#141414;padding:8px 12px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:#E07820;text-transform:uppercase;letter-spacing:.04em;">Stickhandling Under Fatigue</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;color:var(--primary-color);text-transform:uppercase;letter-spacing:.04em;">Stickhandling Under Fatigue</div>
             <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:1px;">Advanced · Game Sim</div>
           </div>
           <div style="font-size:10px;color:rgba(255,255,255,0.3);background:#1a1a1a;padding:2px 7px;border-radius:3px;white-space:nowrap;">4 rounds</div>
@@ -991,28 +991,28 @@ select:focus{border-color:var(--or);outline:none;}
         <div style="padding:12px;">
           <div style="background:#080808;border:1px solid #1a1a1a;border-radius:8px;padding:10px;margin-bottom:10px;">
             <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block;">
-              <defs><marker id="arF" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#E07820"/></marker></defs>
+              <defs><marker id="arF" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="var(--primary-color)"/></marker></defs>
       <!-- Box 1: burpees -->
       <rect x="10" y="25" width="78" height="70" rx="6" fill="#1a1a1a" stroke="#f87171" stroke-width="2"/>
       <text x="49" y="44" text-anchor="middle" font-size="10" fill="#f87171" font-weight="bold" font-family="Barlow Condensed">STEP 1</text>
       <text x="49" y="68" text-anchor="middle" font-size="22" fill="#fff" font-weight="bold" font-family="Barlow Condensed">10</text>
       <text x="49" y="86" text-anchor="middle" font-size="11" fill="#f87171" font-family="Barlow Condensed" font-weight="700">BURPEES</text>
       <!-- arrow no rest -->
-      <line x1="93" y1="60" x2="115" y2="60" stroke="#E07820" stroke-width="3" marker-end="url(#arF)"/>
-      <text x="104" y="50" text-anchor="middle" font-size="9" fill="#E07820" font-family="Barlow Condensed" font-weight="700">NO REST</text>
+      <line x1="93" y1="60" x2="115" y2="60" stroke="var(--primary-color)" stroke-width="3" marker-end="url(#arF)"/>
+      <text x="104" y="50" text-anchor="middle" font-size="9" fill="var(--primary-color)" font-family="Barlow Condensed" font-weight="700">NO REST</text>
       <!-- Box 2: stickhandle -->
       <rect x="120" y="25" width="78" height="70" rx="6" fill="#1a1a1a" stroke="#4ade80" stroke-width="2"/>
       <text x="159" y="44" text-anchor="middle" font-size="10" fill="#4ade80" font-weight="bold" font-family="Barlow Condensed">STEP 2</text>
       <text x="159" y="68" text-anchor="middle" font-size="22" fill="#fff" font-weight="bold" font-family="Barlow Condensed">60s</text>
       <text x="159" y="86" text-anchor="middle" font-size="10" fill="#4ade80" font-family="Barlow Condensed" font-weight="700">STICKHANDLE</text>
       <!-- repeat -->
-      <path d="M 100,108 L 100,135" stroke="#E07820" stroke-width="2" stroke-dasharray="4,3" fill="none"/>
-      <polygon points="94,133 100,143 106,133" fill="#E07820"/>
-      <text x="100" y="155" text-anchor="middle" font-size="10" fill="#E07820" font-family="Barlow Condensed" font-weight="700">REPEAT × 4 ROUNDS</text>
+      <path d="M 100,108 L 100,135" stroke="var(--primary-color)" stroke-width="2" stroke-dasharray="4,3" fill="none"/>
+      <polygon points="94,133 100,143 106,133" fill="var(--primary-color)"/>
+      <text x="100" y="155" text-anchor="middle" font-size="10" fill="var(--primary-color)" font-family="Barlow Condensed" font-weight="700">REPEAT × 4 ROUNDS</text>
             </svg>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:1.55;">10 burpees, then immediately 60 sec stickhandling. No rest. Simulates late-shift puck control.</div>
-          <div style="font-size:10px;color:#E07820;margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Maintain form when breathing hard</div>
+          <div style="font-size:10px;color:var(--primary-color);margin-top:8px;font-weight:600;letter-spacing:.02em;">▸ Maintain form when breathing hard</div>
         </div>
       </div>
     </div>
@@ -1086,7 +1086,7 @@ select:focus{border-color:var(--or);outline:none;}
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;">
     <div style="background:#141414;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
       <div style="font-size:11px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-bottom:4px;">Total Pucks</div>
-      <div id="stat-total" style="font-size:26px;font-weight:700;color:#E07820;font-family:'Barlow Condensed',sans-serif;">0</div>
+      <div id="stat-total" style="font-size:26px;font-weight:700;color:var(--primary-color);font-family:'Barlow Condensed',sans-serif;">0</div>
     </div>
     <div style="background:#141414;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
       <div style="font-size:11px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;margin-bottom:4px;">Sessions</div>
@@ -1146,8 +1146,8 @@ select:focus{border-color:var(--or);outline:none;}
 <!-- FINAL TEST -->
 <div id="final" class="sec">
   <div class="ibox"><strong>Final Testing — Week 12:</strong> Same tests as Week 0, identical conditions. Rest the full day before testing. Record everything in the Progress tab.</div>
-  <div class="card" style="border-color:rgba(224,120,32,0.3);">
-    <div class="ch" style="background:rgba(224,120,32,0.08);border-color:rgba(224,120,32,0.18);"><span class="cht" style="color:var(--or);">What to Expect After 12 Weeks</span></div>
+  <div class="card" style="border-color:rgba(var(--primary-rgb),0.3);">
+    <div class="ch" style="background:rgba(var(--primary-rgb),0.08);border-color:rgba(var(--primary-rgb),0.18);"><span class="cht" style="color:var(--or);">What to Expect After 12 Weeks</span></div>
     <div class="cb">
       <div class="expect-grid">
         <div class="eitem"><div class="elbl">Speed</div><div class="etxt">5–10% improvement in sprint times. Better first-step quickness from stronger glutes and hamstrings.</div></div>
@@ -1173,7 +1173,7 @@ select:focus{border-color:var(--or);outline:none;}
 <!-- ACCOUNT -->
 <div id="account" class="sec">
   <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
-    <span style="display:block;width:4px;height:20px;background:#E07820;border-radius:2px;"></span>
+    <span style="display:block;width:4px;height:20px;background:var(--primary-color);border-radius:2px;"></span>
     My Account
   </div>
   
@@ -1203,7 +1203,7 @@ select:focus{border-color:var(--or);outline:none;}
 <!-- ADMIN PANEL -->
 <div id="admin" class="sec">
   <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
-    <span style="display:block;width:4px;height:20px;background:#E07820;border-radius:2px;"></span>
+    <span style="display:block;width:4px;height:20px;background:var(--primary-color);border-radius:2px;"></span>
     Admin Dashboard
   </div>
   
@@ -1260,6 +1260,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       window._userOrgId = userSub?.organization_id || 'individual';
       window._isSuperAdmin = (user.email === 'brandonanderson1393@gmail.com');
       console.log('Organization:', window._userOrgId, 'Super admin:', window._isSuperAdmin);
+      
+      // Apply branding based on organization
+      applyBranding(window._userOrgId);
       
       // Check subscription status for EVERYONE (admins and players)
       if (!userSub) {
@@ -1511,7 +1514,7 @@ function calcDiffs(){
   if(tot>0){
     document.getElementById('summaryBox').style.display='block';
     const msg=imp>=tot*.75?'Outstanding — Tigers strong! 🏒':imp>=tot*.5?'Solid improvement across the board 💪':'Keep building — great foundation 📈';
-    document.getElementById('summaryContent').innerHTML=`<div style="font-size:13px;color:rgba(255,255,255,0.68);line-height:2;">Tests completed: <strong style="color:#fff;">${tot}</strong><br>Improved: <strong style="color:#4ade80;">${imp} of ${tot}</strong><br><span style="color:#E07820;font-size:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${msg}</span></div>`;
+    document.getElementById('summaryContent').innerHTML=`<div style="font-size:13px;color:rgba(255,255,255,0.68);line-height:2;">Tests completed: <strong style="color:#fff;">${tot}</strong><br>Improved: <strong style="color:#4ade80;">${imp} of ${tot}</strong><br><span style="color:var(--primary-color);font-size:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${msg}</span></div>`;
   }
 }
 
@@ -1540,6 +1543,55 @@ function showSec(id){
 let shotLog = JSON.parse(localStorage.getItem('tigersShotLog') || '[]');
 let weeklyGoal = parseInt(localStorage.getItem('tigersShotGoal') || '0');
 
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DYNAMIC BRANDING - Changes colors/text based on organization
+// ═══════════════════════════════════════════════════════════════════════════
+
+const BRANDING = {
+  delano: {
+    name: 'Delano',
+    fullName: 'Delano Youth Hockey',
+    team: 'Tigers',
+    color: 'var(--primary-color)',
+    colorRgb: 'var(--primary-rgb)'
+  },
+  individual: {
+    name: 'Hockey',
+    fullName: 'Hockey Training',
+    team: 'Training',
+    color: '#3b82f6', // blue
+    colorRgb: '59, 130, 246'
+  }
+};
+
+function applyBranding(orgId) {
+  const brand = BRANDING[orgId] || BRANDING.individual;
+  
+  // Set CSS variables for theming
+  document.documentElement.style.setProperty('--primary-color', brand.color);
+  document.documentElement.style.setProperty('--primary-rgb', brand.colorRgb);
+  
+  // Update header text
+  const orgNameEl = document.querySelector('.hn .org-name');
+  const teamNameEl = document.querySelector('.hn .team-name');
+  if (orgNameEl) orgNameEl.textContent = brand.name.toUpperCase();
+  if (teamNameEl) teamNameEl.textContent = brand.team.toUpperCase();
+  
+  // Update logo if element exists
+  const logoImg = document.querySelector('.hlogo img');
+  if (logoImg) {
+    logoImg.src = brand.logo || '';
+    logoImg.alt = brand.name + ' Logo';
+  }
+  
+  // Update footer
+  const footer = document.querySelector('.ftr');
+  if (footer) {
+    footer.textContent = brand.fullName;
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SUPABASE SYNC HELPERS - Dual-write to localStorage + Supabase
@@ -1750,7 +1802,7 @@ function renderShotLog(){
       const gpct = weeklyGoal>0 ? Math.min(100, Math.round(weeklyGoal/maxVol*100)) : 0;
       const hit  = weeklyGoal>0 ? v>=weeklyGoal : false;
       const label= new Date(k+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      const statusColor = hit?'#4ade80':'#E07820';
+      const statusColor = hit?'#4ade80':'var(--primary-color)';
       const statusText  = weeklyGoal>0
         ? (hit ? v+' pucks — Goal hit! ✓' : v+' / '+weeklyGoal+' pucks')
         : v+' pucks';
@@ -1784,7 +1836,7 @@ function renderShotLog(){
       +'<td style="color:#4ade80;text-align:right;">'+(e.snap||'—')+'</td>'
       +'<td style="color:#fb923c;text-align:right;">'+(e.slap||'—')+'</td>'
       +'<td style="color:#f87171;text-align:right;">'+(e.back||'—')+'</td>'
-      +'<td style="font-weight:700;color:#E07820;text-align:right;">'+e.total+'</td>'
+      +'<td style="font-weight:700;color:var(--primary-color);text-align:right;">'+e.total+'</td>'
       +'<td style="color:rgba(255,255,255,0.38);font-size:11px;">'+(e.notes||'')+'</td>'
       +'<td><button onclick="deleteShotEntry('+i+')" style="background:none;border:none;color:rgba(255,255,255,0.25);cursor:pointer;font-size:14px;padding:0 4px;">✕</button></td>'
       +'</tr>';
@@ -2820,7 +2872,7 @@ function renderWeeks(){
         warmupItems.forEach(([n,v])=>{
           warmupHTML += `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted rgba(255,255,255,0.06);font-size:11px;">
             <span style="color:rgba(255,255,255,0.75);">${n}</span>
-            <span style="color:rgba(224,120,32,0.7);font-family:'Barlow Condensed',sans-serif;font-weight:600;white-space:nowrap;margin-left:10px;">${v}</span>
+            <span style="color:rgba(var(--primary-rgb),0.7);font-family:'Barlow Condensed',sans-serif;font-weight:600;white-space:nowrap;margin-left:10px;">${v}</span>
           </div>`;
         });
 
@@ -3052,7 +3104,7 @@ function renderStickLog(){
       const gpct = stickGoal>0 ? Math.min(100, Math.round(stickGoal/maxVol*100)) : 0;
       const hit  = stickGoal>0 ? v>=stickGoal : false;
       const label= new Date(k+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      const sc   = hit?'#4ade80':'#E07820';
+      const sc   = hit?'#4ade80':'var(--primary-color)';
       const st   = stickGoal>0 ? (hit?v+' min — Goal hit! ✓':v+' / '+stickGoal+' min') : v+' min';
       const gm   = stickGoal>0 ? '<div style="position:absolute;top:-3px;bottom:-3px;left:'+gpct+'%;width:2px;background:rgba(255,255,255,0.25);border-radius:2px;"></div>' : '';
       return '<div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px;"><span style="color:rgba(255,255,255,0.5);">Week of '+label+'</span><span style="color:'+sc+';font-weight:600;">'+st+'</span></div><div style="background:#1a1a1a;border-radius:4px;height:12px;overflow:visible;position:relative;"><div style="height:12px;width:'+pct+'%;background:'+sc+';border-radius:4px;"></div>'+gm+'</div></div>';
@@ -3070,7 +3122,7 @@ function renderStickLog(){
     const drillStr = e.drills&&e.drills.length ? e.drills.join(', ') : '—';
     return '<tr>'
       +'<td style="white-space:nowrap;">'+ds+'</td>'
-      +'<td style="color:#E07820;font-weight:700;text-align:right;">'+e.mins+'</td>'
+      +'<td style="color:var(--primary-color);font-weight:700;text-align:right;">'+e.mins+'</td>'
       +'<td style="color:#4ade80;text-align:right;">'+(e.touches||'—')+'</td>'
       +'<td style="font-size:11px;color:rgba(255,255,255,0.45);max-width:200px;">'+drillStr+'</td>'
       +'<td style="font-size:11px;color:rgba(255,255,255,0.38);">'+(e.notes||'')+'</td>'
@@ -3113,8 +3165,8 @@ async function loadAdminPanel(user) {
     <div class="card" style="margin-bottom:1rem;">
       <div class="ch"><span class="cht">Quick Stats</span></div>
       <div class="cb">
-        ${hasSeats ? `<div style="background:rgba(224,120,32,0.1);border:1px solid rgba(224,120,32,0.3);border-radius:8px;padding:12px;margin-bottom:12px;text-align:center;">
-          <div style="font-size:13px;color:#E07820;font-weight:700;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Association: ${adminSub.organization_name || 'Your Organization'}</div>
+        ${hasSeats ? `<div style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:12px;margin-bottom:12px;text-align:center;">
+          <div style="font-size:13px;color:var(--primary-color);font-weight:700;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Association: ${adminSub.organization_name || 'Your Organization'}</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;"><span id="seatsUsed">-</span> of ${adminSub.seat_limit === 999999 ? 'unlimited' : adminSub.seat_limit} seats used</div>
         </div>` : ''}
       <div id="quickStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;">
@@ -3147,7 +3199,7 @@ async function loadAdminPanel(user) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
           <div>
             <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Plan</div>
-            <div style="font-size:14px;color:#E07820;font-weight:700;">${adminSub.seat_limit === 999999 ? 'Unlimited' : adminSub.seat_limit + ' Players'}</div>
+            <div style="font-size:14px;color:var(--primary-color);font-weight:700;">${adminSub.seat_limit === 999999 ? 'Unlimited' : adminSub.seat_limit + ' Players'}</div>
           </div>
           <div>
             <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Seats</div>
@@ -3472,7 +3524,7 @@ async function loadPlayerList(isSuperAdmin = false) {
       const isExpired = sub.expires_at && new Date(sub.expires_at) < new Date();
       const statusColor = sub.status === 'active' && !isExpired ? '#4ade80' : (sub.status === 'pending' ? '#fb923c' : '#f87171');
       const statusText = isExpired ? 'Expired' : sub.status;
-      const roleColor = sub.role === 'admin' ? '#E07820' : 'rgba(255,255,255,0.5)';
+      const roleColor = sub.role === 'admin' ? 'var(--primary-color)' : 'rgba(255,255,255,0.5)';
       
       const stats = statsByUser[sub.user_id] || {shots:0, mins:0, workouts:0};
       
@@ -3663,7 +3715,7 @@ async function loadAccountDetails() {
     if (isAssoc) {
       html += `<div>
         <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Plan</div>
-        <div style="font-size:14px;color:#E07820;font-weight:600;">Association — ${sub.seat_limit === 999999 ? 'Unlimited' : sub.seat_limit + ' Players'}</div>
+        <div style="font-size:14px;color:var(--primary-color);font-weight:600;">Association — ${sub.seat_limit === 999999 ? 'Unlimited' : sub.seat_limit + ' Players'}</div>
       </div>`;
       
       if (sub.organization_name) {
@@ -3675,7 +3727,7 @@ async function loadAccountDetails() {
     } else {
       html += `<div>
         <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Plan</div>
-        <div style="font-size:14px;color:#E07820;font-weight:600;">Individual Player</div>
+        <div style="font-size:14px;color:var(--primary-color);font-weight:600;">Individual Player</div>
       </div>`;
     }
     

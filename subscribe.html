@@ -5,13 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Subscribe - Delano Tigers Training</title>
 <style>
+  :root {
+    --primary-color: #3b82f6;
+    --primary-rgb: 59, 130, 246;
+  }
+  
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Barlow', sans-serif; background: #0D0D0D; color: #fff; min-height: 100vh; padding: 20px; }
   .container { max-width: 800px; margin: 0 auto; padding-top: 40px; }
   .logo { text-align: center; margin-bottom: 40px; }
   .logo h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
-  .logo h1 span { color: #E07820; }
+  .logo h1 span { color: var(--primary-color); }
   .logo p { font-size: 14px; color: rgba(255,255,255,0.5); }
   
   .type-toggle {
@@ -41,8 +46,8 @@
   }
   
   .type-toggle button.active {
-    background: #E07820;
-    border-color: #E07820;
+    background: var(--primary-color);
+    border-color: var(--primary-color);
     color: #fff;
   }
   
@@ -64,13 +69,13 @@
   }
   
   .price-card:hover {
-    border-color: #E07820;
+    border-color: var(--primary-color);
     transform: translateY(-2px);
   }
   
   .price-card.selected {
-    border-color: #E07820;
-    background: rgba(224,120,32,0.08);
+    border-color: var(--primary-color);
+    background: rgba(var(--primary-rgb),0.08);
   }
   
   .price-card.popular::before {
@@ -78,7 +83,7 @@
     position: absolute;
     top: -10px;
     right: 20px;
-    background: #E07820;
+    background: var(--primary-color);
     color: #fff;
     font-size: 9px;
     font-weight: 800;
@@ -99,7 +104,7 @@
     font-size: 16px;
     font-weight: 800;
     text-transform: uppercase;
-    color: #E07820;
+    color: var(--primary-color);
     letter-spacing: 0.04em;
   }
   
@@ -171,7 +176,7 @@
     margin-bottom: 14px;
   }
   
-  input:focus { outline: none; border-color: #E07820; }
+  input:focus { outline: none; border-color: var(--primary-color); }
   
   .name-grid {
     display: grid;
@@ -181,7 +186,7 @@
   
   button.cta {
     width: 100%;
-    background: #E07820;
+    background: var(--primary-color);
     color: #fff;
     border: none;
     font-family: 'Barlow Condensed', sans-serif;
@@ -205,7 +210,7 @@
     color: rgba(255,255,255,0.4);
   }
   
-  .subtext a { color: #E07820; text-decoration: none; }
+  .subtext a { color: var(--primary-color); text-decoration: none; }
   .subtext a:hover { text-decoration: underline; }
   
   .message {
@@ -228,7 +233,7 @@
 
 <div class="container">
   <div class="logo">
-    <h1><span>Delano</span> Tigers Training</h1>
+    <h1><span id="subOrgName">Hockey</span> <span id="subTeamName">Training</span></h1>
     <p>12-Week Off-Ice Development Program</p>
   </div>
   
@@ -347,7 +352,7 @@
   
   <!-- CUSTOMER INFO FORM -->
   <div class="form-section" id="customerForm" style="display:none;">
-    <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;color:#E07820;margin-bottom:16px;text-align:center;">Your Information</h3>
+    <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;color:var(--primary-color);margin-bottom:16px;text-align:center;">Your Information</h3>
     
     <div class="name-grid" id="nameFields">
       <div>
@@ -362,7 +367,7 @@
     
     <div>
       <label>Select Your Association</label>
-      <select id="organizationId" required style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;font-family:'Barlow',sans-serif;margin-bottom:14px;">
+      <select id="organizationId" required onchange="updateSubscribeBranding()" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;font-family:'Barlow',sans-serif;margin-bottom:14px;">
         <option value="delano">Delano Youth Hockey Association</option>
         <option value="individual">Individual (No Association)</option>
       </select>
@@ -379,7 +384,7 @@
       <input type="text" id="orgName" placeholder="Delano Youth Hockey Association">
     </div>
     
-    <div id="selectedPlanSummary" style="background:rgba(224,120,32,0.1);border:1px solid rgba(224,120,32,0.3);border-radius:6px;padding:12px;margin-bottom:16px;font-size:13px;text-align:center;color:rgba(255,255,255,0.8);">
+    <div id="selectedPlanSummary" style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:6px;padding:12px;margin-bottom:16px;font-size:13px;text-align:center;color:rgba(255,255,255,0.8);">
       <!-- Populated by JS -->
     </div>
     
@@ -532,6 +537,24 @@ async function proceedToCheckout() {
     btn.textContent = 'Continue to Payment';
   }
 }
+
+
+function updateSubscribeBranding() {
+  const orgId = document.getElementById('organizationId').value;
+  
+  if (orgId === 'delano') {
+    document.documentElement.style.setProperty('--primary-color', '#E07820');
+    document.documentElement.style.setProperty('--primary-rgb', '224, 120, 32');
+    document.getElementById('subOrgName').textContent = 'Delano';
+    document.getElementById('subTeamName').textContent = 'Tigers Training';
+  } else {
+    document.documentElement.style.setProperty('--primary-color', '#3b82f6');
+    document.documentElement.style.setProperty('--primary-rgb', '59, 130, 246');
+    document.getElementById('subOrgName').textContent = 'Hockey';
+    document.getElementById('subTeamName').textContent = 'Training';
+  }
+}
+
 </script>
 
 </body>
