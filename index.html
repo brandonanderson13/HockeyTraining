@@ -232,6 +232,7 @@ select:focus{border-color:var(--or);outline:none;}
   <button class="nb" onclick="showSec('shotlog')">Shot Log</button>
   <button class="nb" onclick="showSec('tracker')">Progress</button>
   <button class="nb" onclick="showSec('final')">Final Test</button>
+  <button class="nb" onclick="showSec('account')">Account</button>
   <button class="nb" onclick="showSec('leaderboard')">Leaderboard</button>
   <button class="nb" id="adminTab" onclick="showSec('admin')" style="display:none;margin-left:auto;background:rgba(224,120,32,0.1);border-color:#E07820;">Admin</button>
 </div>
@@ -1165,6 +1166,31 @@ select:focus{border-color:var(--or);outline:none;}
   </div>
   <div style="text-align:center;margin-top:1rem;">
     <button class="btn-o" onclick="showSec('tracker')">Enter Week 12 Results →</button>
+  </div>
+</div>
+
+<!-- ACCOUNT -->
+<div id="account" class="sec">
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+    <span style="display:block;width:4px;height:20px;background:#E07820;border-radius:2px;"></span>
+    My Account
+  </div>
+  
+  <div id="accountContent">
+    <div class="card">
+      <div class="ch"><span class="cht">Subscription Details</span></div>
+      <div class="cb" id="accountSubDetails">Loading...</div>
+    </div>
+    
+    <div class="card">
+      <div class="ch"><span class="cht">Manage Subscription</span></div>
+      <div class="cb">
+        <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">
+          Update your payment method, view invoices, or cancel your subscription through the Stripe Customer Portal.
+        </p>
+        <a href="https://billing.stripe.com/p/login/14AcN4fnrf2y4DBdiadjO00" target="_blank" class="btn-o" style="display:inline-block;text-decoration:none;text-align:center;margin:0;">Open Customer Portal</a>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -3515,6 +3541,84 @@ async function editSeats(subId, email, currentLimit) {
     alert('Error: ' + error.message);
   }
 }
+
+
+async function loadAccountDetails() {
+  const container = document.getElementById('accountSubDetails');
+  if (!container) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    
+    const { data: sub } = await sb.from('subscriptions').select('*').eq('user_id', user.id).single();
+    
+    if (!sub) {
+      container.innerHTML = '<p style="color:rgba(255,255,255,0.5);">No subscription found</p>';
+      return;
+    }
+    
+    const isAssoc = sub.subscription_type === 'association';
+    const renewalDate = sub.expires_at ? new Date(sub.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+    
+    let html = '<div style="display:grid;gap:14px;">';
+    
+    // Name
+    if (sub.first_name || sub.last_name) {
+      html += `<div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Name</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.85);">${sub.first_name || ''} ${sub.last_name || ''}</div>
+      </div>`;
+    }
+    
+    // Email
+    html += `<div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Email</div>
+      <div style="font-size:14px;color:rgba(255,255,255,0.85);">${sub.email}</div>
+    </div>`;
+    
+    // Status
+    const statusColor = sub.status === 'active' ? '#4ade80' : '#f87171';
+    html += `<div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Status</div>
+      <div style="font-size:14px;color:${statusColor};font-weight:700;text-transform:uppercase;">${sub.status}</div>
+    </div>`;
+    
+    // Plan type
+    if (isAssoc) {
+      html += `<div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Plan</div>
+        <div style="font-size:14px;color:#E07820;font-weight:600;">Association — ${sub.seat_limit === 999999 ? 'Unlimited' : sub.seat_limit + ' Players'}</div>
+      </div>`;
+      
+      if (sub.organization_name) {
+        html += `<div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Organization</div>
+          <div style="font-size:14px;color:rgba(255,255,255,0.85);">${sub.organization_name}</div>
+        </div>`;
+      }
+    } else {
+      html += `<div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Plan</div>
+        <div style="font-size:14px;color:#E07820;font-weight:600;">Individual Player</div>
+      </div>`;
+    }
+    
+    // Renewal date
+    html += `<div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Renews</div>
+      <div style="font-size:14px;color:rgba(255,255,255,0.85);">${renewalDate}</div>
+    </div>`;
+    
+    html += '</div>';
+    container.innerHTML = html;
+    
+  } catch (error) {
+    container.innerHTML = '<p style="color:#f87171;">Error loading details: ' + error.message + '</p>';
+  }
+}
+
 </script>
 </body>
 </html>
