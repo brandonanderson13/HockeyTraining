@@ -1434,8 +1434,11 @@ const testRows=[
 function saveBaselineResults(){
   const ids=[0,1,2,3,4,5,6,7,8,9];
   let filled=0;
+  const results = [];
   ids.forEach(i=>{
     const el=document.getElementById('bt_'+i);
+    const val = el && el.value ? parseFloat(el.value) : null;
+    results.push(val);
     if(el&&el.value){
       const target=document.getElementById('base_'+i);
       if(target) target.value=el.value;
@@ -1443,6 +1446,10 @@ function saveBaselineResults(){
     }
   });
   if(filled===0){alert('Enter at least one result before saving.');return;}
+  
+  // Sync to Supabase
+  syncBaselineResults(results, 'baseline');
+  
   const msg=document.getElementById('baseline-saved-msg');
   msg.style.display='inline';
   setTimeout(()=>msg.style.display='none',3000);
@@ -1487,6 +1494,122 @@ function showSec(id){
 let shotLog = JSON.parse(localStorage.getItem('tigersShotLog') || '[]');
 let weeklyGoal = parseInt(localStorage.getItem('tigersShotGoal') || '0');
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SUPABASE SYNC HELPERS - Dual-write to localStorage + Supabase
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function getSupabaseClient() {
+  if (window._sbClient) return window._sbClient;
+  
+  if (!window.supabase) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    await new Promise(r => { script.onload = r; document.head.appendChild(script); });
+  }
+  
+  window._sbClient = window.supabase.createClient(
+    'https://sfkdwprzwtegfkohqsdy.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY'
+  );
+  return window._sbClient;
+}
+
+async function syncShootingSession(sessionData) {
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return; // Not logged in, skip sync
+    
+    await sb.from('shooting_sessions').insert({
+      user_id: user.id,
+      session_date: sessionData.date,
+      wrist_shots: sessionData.wrist || 0,
+      snap_shots: sessionData.snap || 0,
+      slap_shots: sessionData.slap || 0,
+      backhand_shots: sessionData.back || 0,
+      notes: sessionData.notes || ''
+    });
+  } catch (error) {
+    console.error('Failed to sync shooting session:', error);
+    // Don't block the user - they can still save locally
+  }
+}
+
+async function syncStickhandlingSession(sessionData) {
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    
+    await sb.from('stickhandling_sessions').insert({
+      user_id: user.id,
+      session_date: sessionData.date,
+      minutes: sessionData.mins || 0,
+      drills: sessionData.drills || [],
+      touch_count: sessionData.touches || null,
+      notes: sessionData.notes || ''
+    });
+  } catch (error) {
+    console.error('Failed to sync stickhandling session:', error);
+  }
+}
+
+async function syncExerciseCompletion(weekNum, dayName, exerciseName, completed, date) {
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    
+    if (completed) {
+      await sb.from('exercise_completions').upsert({
+        user_id: user.id,
+        completion_date: date,
+        week_number: weekNum,
+        day_name: dayName,
+        exercise_name: exerciseName,
+        completed: true
+      }, { onConflict: 'user_id,completion_date,week_number,day_name,exercise_name' });
+    } else {
+      // Remove completion
+      await sb.from('exercise_completions').delete()
+        .eq('user_id', user.id)
+        .eq('completion_date', date)
+        .eq('week_number', weekNum)
+        .eq('day_name', dayName)
+        .eq('exercise_name', exerciseName);
+    }
+  } catch (error) {
+    console.error('Failed to sync exercise completion:', error);
+  }
+}
+
+async function syncBaselineResults(results, testType) {
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    
+    await sb.from('baseline_results').upsert({
+      user_id: user.id,
+      test_type: testType,
+      test_date: new Date().toISOString().split('T')[0],
+      sprint_30m: results[0] || null,
+      burpee_30s: results[1] || null,
+      shuttle_5_10_5: results[2] || null,
+      broad_jump: results[3] || null,
+      pushup_max: results[4] || null,
+      wall_sit: results[5] || null,
+      squat_60s: results[6] || null,
+      dead_hang: results[7] || null,
+      stickhandling_30s: results[8] || null,
+      shooting_accuracy: results[9] || null
+    }, { onConflict: 'user_id,test_type' });
+  } catch (error) {
+    console.error('Failed to sync baseline results:', error);
+  }
+}
+
 function saveShotLog(){ try{ localStorage.setItem('tigersShotLog', JSON.stringify(shotLog)); }catch(e){} }
 
 function saveGoal(){
@@ -1512,8 +1635,11 @@ function addShotEntry(){
   const notes = document.getElementById('sl-notes').value.trim();
   const total = wrist+snap+slap+back;
   if(total===0){ alert('Enter at least one shot type.'); return; }
-  shotLog.unshift({date,wrist,snap,slap,back,total,notes});
+  const newEntry = {date,wrist,snap,slap,back,total,notes};
+  shotLog.unshift(newEntry);
   saveShotLog();
+  // Sync to Supabase
+  syncShootingSession(newEntry);
   document.getElementById('sl-wrist').value='';
   document.getElementById('sl-snap').value='';
   document.getElementById('sl-slap').value='';
@@ -2093,6 +2219,17 @@ function toggleExComplete(checkbox){
       localStorage.removeItem(key);
     }
     updateDayCompletionBadge(xl);
+    
+    // Parse key to extract week, day, exercise for Supabase sync
+    // Key format: ex_${wk.num}_${day.n}_${name}_${today}
+    const parts = key.split('_');
+    if (parts.length >= 4 && parts[0] === 'ex') {
+      const weekNum = parseInt(parts[1]);
+      const dayName = parts[2];
+      const today = parts[parts.length - 1];
+      const exerciseName = parts.slice(3, -1).join('_');
+      syncExerciseCompletion(weekNum, dayName, exerciseName, isCompleted, today);
+    }
   }catch(e){}
 }
 
@@ -2798,8 +2935,11 @@ function addStickEntry(){
   const touches = parseInt(document.getElementById('sh-touches').value)||0;
   const notes   = document.getElementById('sh-notes').value.trim();
   const drills  = Array.from(document.querySelectorAll('#drill-checks input:checked')).map(c=>c.value);
-  stickLog.unshift({date, mins, touches, notes, drills});
+  const newEntry = {date, mins, touches, notes, drills};
+  stickLog.unshift(newEntry);
   try{ localStorage.setItem('tigersStickLog', JSON.stringify(stickLog)); }catch(e){}
+  // Sync to Supabase
+  syncStickhandlingSession(newEntry);
   // clear
   document.getElementById('sh-mins').value='';
   document.getElementById('sh-touches').value='';
@@ -2916,18 +3056,26 @@ async function loadAdminPanel(user) {
   content.innerHTML = `
     <div class="card" style="margin-bottom:1rem;">
       <div class="ch"><span class="cht">Quick Stats</span></div>
-      <div class="cb" id="quickStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;">
+      <div class="cb" id="quickStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;">
         <div style="text-align:center;padding:12px;background:#0d0d0d;border-radius:8px;">
-          <div style="font-size:28px;font-weight:800;color:#4ade80;font-family:'Barlow Condensed',sans-serif;" id="statTotal">-</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;">Total Players</div>
+          <div style="font-size:24px;font-weight:800;color:#4ade80;font-family:'Barlow Condensed',sans-serif;" id="statTotal">-</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;">Total Players</div>
         </div>
         <div style="text-align:center;padding:12px;background:#0d0d0d;border-radius:8px;">
-          <div style="font-size:28px;font-weight:800;color:#60a5fa;font-family:'Barlow Condensed',sans-serif;" id="statActive">-</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;">Active Subs</div>
+          <div style="font-size:24px;font-weight:800;color:#60a5fa;font-family:'Barlow Condensed',sans-serif;" id="statActive">-</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;">Active Subs</div>
         </div>
         <div style="text-align:center;padding:12px;background:#0d0d0d;border-radius:8px;">
-          <div style="font-size:28px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;" id="statPending">-</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;">Pending</div>
+          <div style="font-size:24px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;" id="statTotalShots">-</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;">Total Shots</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:#0d0d0d;border-radius:8px;">
+          <div style="font-size:24px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;" id="statTotalMins">-</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;">Stick Minutes</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:#0d0d0d;border-radius:8px;">
+          <div style="font-size:24px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;" id="statTotalWorkouts">-</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;">Total Workouts</div>
         </div>
       </div>
     </div>
@@ -3045,10 +3193,24 @@ async function loadPlayerList(isSuperAdmin = false) {
     
     const statTotal = document.getElementById('statTotal');
     const statActive = document.getElementById('statActive');
-    const statPending = document.getElementById('statPending');
+    const statTotalShots = document.getElementById('statTotalShots');
+    const statTotalMins = document.getElementById('statTotalMins');
+    const statTotalWorkouts = document.getElementById('statTotalWorkouts');
+    
     if (statTotal) statTotal.textContent = subs.length;
     if (statActive) statActive.textContent = subs.filter(s => s.status === 'active').length;
-    if (statPending) statPending.textContent = subs.filter(s => s.status === 'pending').length;
+    
+    // Calculate grand totals
+    let grandTotalShots = 0, grandTotalMins = 0, grandTotalWorkouts = 0;
+    Object.values(statsByUser).forEach(s => {
+      grandTotalShots += s.shots;
+      grandTotalMins += s.mins;
+      grandTotalWorkouts += s.workouts;
+    });
+    
+    if (statTotalShots) statTotalShots.textContent = grandTotalShots.toLocaleString();
+    if (statTotalMins) statTotalMins.textContent = grandTotalMins.toLocaleString();
+    if (statTotalWorkouts) statTotalWorkouts.textContent = grandTotalWorkouts.toLocaleString();
     
     if (!subs || subs.length === 0) {
       container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:13px;padding:20px;text-align:center;">No players yet</p>';
