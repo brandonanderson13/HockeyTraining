@@ -1198,35 +1198,43 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         return;
       }
       
-      // Check subscription status
-      const { data: subscription, error: subError } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'active')
-        .single();
+      // ADMIN BYPASS - Add your admin email here
+      const ADMIN_EMAILS = ['brandonanderson1393@gmail.com']; // Add more admin emails as needed
       
-      if (subError && subError.code !== 'PGRST116') {
-        console.error('Subscription check error:', subError);
-      }
-      
-      if (!subscription) {
-        alert('No active subscription found. Redirecting to login...');
-        await supabase.auth.signOut();
-        window.location.href = 'login.html';
-        return;
-      }
-      
-      // Check expiration
-      if (subscription.expires_at) {
-        const expiresAt = new Date(subscription.expires_at);
-        if (expiresAt < new Date()) {
-          alert('Your subscription has expired. Contact your coach to renew.');
+      if (!ADMIN_EMAILS.includes(user.email)) {
+        // Not an admin - check subscription status
+        const { data: subscription, error: subError } = await supabase
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .single();
+        
+        if (subError && subError.code !== 'PGRST116') {
+          console.error('Subscription check error:', subError);
+        }
+        
+        if (!subscription) {
+          alert('No active subscription found. Redirecting to subscribe page...');
           await supabase.auth.signOut();
-          window.location.href = 'login.html';
+          window.location.href = 'subscribe.html';
           return;
         }
+        
+        // Check expiration for non-admins
+        if (subscription.expires_at) {
+          const expiresAt = new Date(subscription.expires_at);
+          if (expiresAt < new Date()) {
+            alert('Your subscription has expired. Please renew.');
+            await supabase.auth.signOut();
+            window.location.href = 'subscribe.html';
+            return;
+          }
+        }
+      } else {
+        console.log('Admin access granted for:', user.email);
       }
+
       
       // All checks passed - user can access the program
       console.log('Access granted for:', user.email);
