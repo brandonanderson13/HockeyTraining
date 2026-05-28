@@ -3106,8 +3106,13 @@ async function loadAdminPanel(user) {
             <div style="font-size:14px;color:#E07820;font-weight:700;">${adminSub.seat_limit === 999999 ? 'Unlimited' : adminSub.seat_limit + ' Players'}</div>
           </div>
           <div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Seats Used</div>
-            <div style="font-size:14px;color:#4ade80;font-weight:700;"><span id="seatsUsedDetail">-</span> of ${adminSub.seat_limit === 999999 ? '∞' : adminSub.seat_limit}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Seats</div>
+            <div style="font-size:14px;font-weight:700;">
+              <span id="seatsUsedDetail" style="color:#4ade80;">-</span>
+              <span style="color:rgba(255,255,255,0.3);"> / </span>
+              <span style="color:rgba(255,255,255,0.6);">${adminSub.seat_limit === 999999 ? '∞' : adminSub.seat_limit}</span>
+              <span id="seatsRemainingText" style="display:block;font-size:11px;color:rgba(255,255,255,0.4);font-weight:400;margin-top:2px;">- remaining</span>
+            </div>
           </div>
         </div>
         <div style="margin-bottom:14px;">
@@ -3316,14 +3321,27 @@ async function loadPlayerList(isSuperAdmin = false) {
     if (seatsUsedDetailEl) seatsUsedDetailEl.textContent = playerCount;
     
     // Calculate and show remaining seats
-    if (seatsRemainingEl && window._adminSubscription && window._adminSubscription.seat_limit) {
+    if (window._adminSubscription && window._adminSubscription.seat_limit) {
       const limit = window._adminSubscription.seat_limit;
       if (limit !== 999999) {
         const remaining = limit - playerCount;
-        seatsRemainingEl.textContent = remaining > 0 
-          ? `${remaining} seat${remaining === 1 ? '' : 's'} remaining`
-          : 'At seat limit — upgrade to add more';
-        seatsRemainingEl.style.color = remaining > 0 ? 'rgba(255,255,255,0.4)' : '#f87171';
+        
+        // Update Add Player header
+        if (seatsRemainingEl) {
+          seatsRemainingEl.textContent = remaining > 0 
+            ? `${remaining} seat${remaining === 1 ? '' : 's'} remaining`
+            : 'At seat limit — upgrade to add more';
+          seatsRemainingEl.style.color = remaining > 0 ? 'rgba(255,255,255,0.4)' : '#f87171';
+        }
+        
+        // Update My Subscription card
+        const seatsRemainingTextEl = document.getElementById('seatsRemainingText');
+        if (seatsRemainingTextEl) {
+          seatsRemainingTextEl.textContent = remaining > 0
+            ? `${remaining} remaining`
+            : 'At limit';
+          seatsRemainingTextEl.style.color = remaining > 0 ? 'rgba(255,255,255,0.4)' : '#f87171';
+        }
       }
     }
     
