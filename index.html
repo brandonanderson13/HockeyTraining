@@ -232,6 +232,7 @@ select:focus{border-color:var(--or);outline:none;}
   <button class="nb" onclick="showSec('shotlog')">Shot Log</button>
   <button class="nb" onclick="showSec('tracker')">Progress</button>
   <button class="nb" onclick="showSec('final')">Final Test</button>
+  <button class="nb" onclick="showSec('leaderboard')">Leaderboard</button>
   <button class="nb" id="adminTab" onclick="showSec('admin')" style="display:none;margin-left:auto;background:rgba(224,120,32,0.1);border-color:#E07820;">Admin</button>
 </div>
 
@@ -1165,6 +1166,11 @@ select:focus{border-color:var(--or);outline:none;}
   <div style="text-align:center;margin-top:1rem;">
     <button class="btn-o" onclick="showSec('tracker')">Enter Week 12 Results →</button>
   </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="leaderboard" class="sec">
+  <iframe src="leaderboard.html" style="width:100%;height:calc(100vh - 180px);border:none;border-radius:8px;"></iframe>
 </div>
 
 <!-- ADMIN PANEL -->
@@ -3084,6 +3090,16 @@ async function loadAdminPanel(user) {
       <div class="ch"><span class="cht">Add New Player (Super Admin Only)</span></div>
       <div class="cb">
         <form id="adminAddPlayerForm" onsubmit="handleAddPlayer(event)" style="display:grid;gap:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div>
+              <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">First Name</label>
+              <input type="text" id="adminFirstName" required style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+            </div>
+            <div>
+              <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Last Name</label>
+              <input type="text" id="adminLastName" required style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+            </div>
+          </div>
           <div>
             <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Email</label>
             <input type="email" id="adminEmail" required style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
@@ -3124,6 +3140,8 @@ async function loadAdminPanel(user) {
 
 async function handleAddPlayer(e) {
   e.preventDefault();
+  const firstName = document.getElementById('adminFirstName').value.trim();
+  const lastName = document.getElementById('adminLastName').value.trim();
   const email = document.getElementById('adminEmail').value.trim();
   const password = document.getElementById('adminPassword').value;
   const role = document.getElementById('adminRole').value;
@@ -3154,6 +3172,8 @@ async function handleAddPlayer(e) {
     const { error: subError } = await sb.from('subscriptions').insert({
       user_id: authData.userId,
       email: email,
+      first_name: firstName,
+      last_name: lastName,
       status: 'active',
       role: role
     });
@@ -3163,6 +3183,8 @@ async function handleAddPlayer(e) {
     msg.style.color = '#4ade80';
     msg.textContent = '✓ Player added! Temp password: ' + password;
     msg.style.display = 'block';
+    document.getElementById('adminFirstName').value = '';
+    document.getElementById('adminLastName').value = '';
     document.getElementById('adminEmail').value = '';
     loadPlayerList(window._isSuperAdmin);
     
@@ -3244,7 +3266,7 @@ async function loadPlayerList(isSuperAdmin = false) {
       return;
     }
     
-    let html = '<table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr style="border-bottom:1px solid #222;"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Email</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Role</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Status</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Shots</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Stick Min</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Workouts</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Actions</th></tr></thead><tbody>';
+    let html = '<table style="width:100%;border-collapse:collapse;font-size:11px;"><thead><tr style="border-bottom:1px solid #222;"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Name</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Email</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Role</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Status</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Shots</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Stick Min</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Workouts</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Actions</th></tr></thead><tbody>';
     
     subs.forEach(sub => {
       const isExpired = sub.expires_at && new Date(sub.expires_at) < new Date();
@@ -3254,8 +3276,13 @@ async function loadPlayerList(isSuperAdmin = false) {
       
       const stats = statsByUser[sub.user_id] || {shots:0, mins:0, workouts:0};
       
+      const displayName = (sub.first_name || sub.last_name) 
+        ? `${sub.first_name || ''} ${sub.last_name || ''}`.trim()
+        : '—';
+      
       html += `<tr style="border-bottom:1px solid #1a1a1a;">
-        <td style="padding:10px 8px;color:rgba(255,255,255,0.75);">${sub.email}</td>
+        <td style="padding:10px 8px;color:rgba(255,255,255,0.85);font-weight:600;">${displayName}</td>
+        <td style="padding:10px 8px;color:rgba(255,255,255,0.5);font-size:11px;">${sub.email}</td>
         <td style="padding:10px 8px;color:${roleColor};font-weight:600;">${sub.role || 'player'}</td>
         <td style="padding:10px 8px;color:${statusColor};font-weight:600;">${statusText}</td>
         <td style="padding:10px 8px;text-align:right;color:#4ade80;font-weight:600;">${stats.shots.toLocaleString()}</td>
