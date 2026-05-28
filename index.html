@@ -232,6 +232,7 @@ select:focus{border-color:var(--or);outline:none;}
   <button class="nb" onclick="showSec('shotlog')">Shot Log</button>
   <button class="nb" onclick="showSec('tracker')">Progress</button>
   <button class="nb" onclick="showSec('final')">Final Test</button>
+  <button class="nb" id="adminTab" onclick="showSec('admin')" style="display:none;margin-left:auto;background:rgba(224,120,32,0.1);border-color:#E07820;">Admin</button>
 </div>
 
 <!-- OVERVIEW -->
@@ -1166,6 +1167,18 @@ select:focus{border-color:var(--or);outline:none;}
   </div>
 </div>
 
+<!-- ADMIN PANEL -->
+<div id="admin" class="sec">
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+    <span style="display:block;width:4px;height:20px;background:#E07820;border-radius:2px;"></span>
+    Admin Dashboard
+  </div>
+  
+  <div id="adminContent" style="color:rgba(255,255,255,0.5);">
+    Loading admin panel...
+  </div>
+</div>
+
 <div class="ftr">
   <div class="ftr-brand">Delano Youth Hockey Association</div>
   <div class="ftr-copy">Delano Tigers · Training Program</div>
@@ -1198,10 +1211,26 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         return;
       }
       
-      // ADMIN BYPASS - Add your admin email here
-      const ADMIN_EMAILS = ['brandonanderson1393@gmail.com']; // Add more admin emails as needed
+      // Check user role in subscriptions table
+      const { data: userSub } = await supabase
+        .from('subscriptions')
+        .select('role, status, expires_at')
+        .eq('user_id', user.id)
+        .single();
       
-      if (!ADMIN_EMAILS.includes(user.email)) {
+      const isAdmin = userSub && userSub.role === 'admin';
+      
+      // Show admin tab if user is admin
+      if (isAdmin) {
+        const adminTab = document.getElementById('adminTab');
+        if (adminTab) {
+          adminTab.style.display = 'block';
+          console.log('Admin access granted');
+        }
+        loadAdminPanel(user);
+      }
+      
+      if (!isAdmin) {
         // Not an admin - check subscription status
         const { data: subscription, error: subError } = await supabase
           .from('subscriptions')
@@ -1240,7 +1269,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       console.log('Access granted for:', user.email);
       
       // Add a logout button to the header
-      addLogoutButton(supabase, user);
+      addLogoutButton(supabase, user, isAdmin);
       
     } catch (error) {
       console.error('Auth error:', error);
@@ -1250,19 +1279,22 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   document.head.appendChild(script);
 })();
 
-function addLogoutButton(supabase, user) {
+function addLogoutButton(supabase, user, isAdmin) {
   const header = document.querySelector('.hdr');
   if (!header) return;
   
   const container = document.createElement('div');
   container.style.cssText = 'position:absolute;top:12px;right:12px;display:flex;gap:8px;align-items:center;';
   
-  // Manage Subscription link
-  const manageBtn = document.createElement('a');
-  manageBtn.href = 'https://billing.stripe.com/p/login/14AcN4fnrf2y4DBdiadjO00';
-  manageBtn.target = '_blank';
-  manageBtn.textContent = 'Manage Subscription';
-  manageBtn.style.cssText = 'background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;padding:6px 12px;border-radius:6px;font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;text-decoration:none;';
+  // Only show Manage Subscription for non-admins
+  if (!isAdmin) {
+    const manageBtn = document.createElement('a');
+    manageBtn.href = 'https://billing.stripe.com/p/login/14AcN4fnrf2y4DBdiadjO00';
+    manageBtn.target = '_blank';
+    manageBtn.textContent = 'Manage Subscription';
+    manageBtn.style.cssText = 'background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;padding:6px 12px;border-radius:6px;font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;text-decoration:none;';
+    container.appendChild(manageBtn);
+  }
   
   // Sign out button
   const btn = document.createElement('button');
@@ -1273,7 +1305,6 @@ function addLogoutButton(supabase, user) {
     window.location.href = 'login.html';
   };
   
-  container.appendChild(manageBtn);
   container.appendChild(btn);
   header.appendChild(container);
 }
@@ -2866,6 +2897,225 @@ renderWeeks();
 updateOverview(null);
 renderShotLog();
 renderStickLog();
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ADMIN PANEL FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function loadAdminPanel(user) {
+  const content = document.getElementById('adminContent');
+  if (!content) return;
+  
+  content.innerHTML = `
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="ch"><span class="cht">Quick Stats</span></div>
+      <div class="cb" id="quickStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;">
+        <div style="text-align:center;padding:12px;background:#0d0d0d;border-radius:8px;">
+          <div style="font-size:28px;font-weight:800;color:#4ade80;font-family:'Barlow Condensed',sans-serif;" id="statTotal">-</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;">Total Players</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:#0d0d0d;border-radius:8px;">
+          <div style="font-size:28px;font-weight:800;color:#60a5fa;font-family:'Barlow Condensed',sans-serif;" id="statActive">-</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;">Active Subs</div>
+        </div>
+        <div style="text-align:center;padding:12px;background:#0d0d0d;border-radius:8px;">
+          <div style="font-size:28px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;" id="statPending">-</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;">Pending</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="ch"><span class="cht">Add New Player</span></div>
+      <div class="cb">
+        <form id="adminAddPlayerForm" onsubmit="handleAddPlayer(event)" style="display:grid;gap:12px;">
+          <div>
+            <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Email</label>
+            <input type="email" id="adminEmail" required style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+              <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Password (temp)</label>
+              <input type="text" id="adminPassword" value="Tigers2026!" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+            </div>
+            <div>
+              <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Role</label>
+              <select id="adminRole" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+                <option value="player">Player</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-o" type="submit" style="margin:0;">Add Player</button>
+        </form>
+        <div id="adminAddMessage" style="margin-top:10px;font-size:12px;display:none;"></div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="ch"><span class="cht">All Players</span><button onclick="refreshPlayerList()" style="margin-left:auto;background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.5);font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;">Refresh</button></div>
+      <div class="cb" id="playerListContainer">Loading...</div>
+    </div>
+  `;
+  
+  loadPlayerList();
+}
+
+async function handleAddPlayer(e) {
+  e.preventDefault();
+  const email = document.getElementById('adminEmail').value.trim();
+  const password = document.getElementById('adminPassword').value;
+  const role = document.getElementById('adminRole').value;
+  const msg = document.getElementById('adminAddMessage');
+  
+  msg.style.display = 'none';
+  
+  try {
+    // Create auth user
+    const authResp = await fetch('/api/admin-create-user', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ email, password })
+    });
+    const authData = await authResp.json();
+    if (authData.error) throw new Error(authData.error);
+    
+    // Create subscription record
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    await new Promise(r => { script.onload = r; document.head.appendChild(script); });
+    
+    const sb = window.supabase.createClient(
+      'https://sfkdwprzwtegfkohqsdy.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY'
+    );
+    
+    const { error: subError } = await sb.from('subscriptions').insert({
+      user_id: authData.userId,
+      email: email,
+      status: 'active',
+      role: role
+    });
+    
+    if (subError) throw subError;
+    
+    msg.style.color = '#4ade80';
+    msg.textContent = '✓ Player added! Temp password: ' + password;
+    msg.style.display = 'block';
+    document.getElementById('adminEmail').value = '';
+    loadPlayerList();
+    
+  } catch (error) {
+    msg.style.color = '#f87171';
+    msg.textContent = 'Error: ' + error.message;
+    msg.style.display = 'block';
+  }
+}
+
+async function loadPlayerList() {
+  const container = document.getElementById('playerListContainer');
+  if (!container) return;
+  container.innerHTML = 'Loading...';
+  
+  try {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    if (!window.supabase) await new Promise(r => { script.onload = r; document.head.appendChild(script); });
+    
+    const sb = window.supabase.createClient(
+      'https://sfkdwprzwtegfkohqsdy.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY'
+    );
+    
+    const { data: subs, error } = await sb.from('subscriptions').select('*').order('created_at', {ascending: false});
+    if (error) throw error;
+    
+    const statTotal = document.getElementById('statTotal');
+    const statActive = document.getElementById('statActive');
+    const statPending = document.getElementById('statPending');
+    if (statTotal) statTotal.textContent = subs.length;
+    if (statActive) statActive.textContent = subs.filter(s => s.status === 'active').length;
+    if (statPending) statPending.textContent = subs.filter(s => s.status === 'pending').length;
+    
+    if (!subs || subs.length === 0) {
+      container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:13px;padding:20px;text-align:center;">No players yet</p>';
+      return;
+    }
+    
+    let html = '<table style="width:100%;border-collapse:collapse;font-size:12px;"><thead><tr style="border-bottom:1px solid #222;"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Email</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Role</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Status</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Expires</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Actions</th></tr></thead><tbody>';
+    
+    subs.forEach(sub => {
+      const isExpired = sub.expires_at && new Date(sub.expires_at) < new Date();
+      const statusColor = sub.status === 'active' && !isExpired ? '#4ade80' : (sub.status === 'pending' ? '#fb923c' : '#f87171');
+      const statusText = isExpired ? 'Expired' : sub.status;
+      const expiresText = sub.expires_at ? new Date(sub.expires_at).toLocaleDateString() : '—';
+      const roleColor = sub.role === 'admin' ? '#E07820' : 'rgba(255,255,255,0.5)';
+      
+      html += `<tr style="border-bottom:1px solid #1a1a1a;">
+        <td style="padding:10px 8px;color:rgba(255,255,255,0.75);">${sub.email}</td>
+        <td style="padding:10px 8px;color:${roleColor};font-weight:600;">${sub.role || 'player'}</td>
+        <td style="padding:10px 8px;color:${statusColor};font-weight:600;">${statusText}</td>
+        <td style="padding:10px 8px;color:rgba(255,255,255,0.5);">${expiresText}</td>
+        <td style="padding:10px 8px;">
+          ${sub.stripe_subscription_id ? '<button onclick="adminCancelStripe(\''+sub.id+'\',\''+sub.email+'\',\''+sub.stripe_subscription_id+'\')" style="background:#fb923c;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Cancel</button>' : ''}
+          <button onclick="adminDeletePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Delete</button>
+        </td>
+      </tr>`;
+    });
+    
+    html += '</tbody></table>';
+    container.innerHTML = html;
+    
+  } catch (error) {
+    container.innerHTML = '<p style="color:#f87171;padding:20px;">Error: ' + error.message + '</p>';
+  }
+}
+
+function refreshPlayerList() {
+  loadPlayerList();
+}
+
+async function adminCancelStripe(subId, email, stripeSubId) {
+  if (!confirm('Cancel Stripe subscription for ' + email + '? This stops future billing.')) return;
+  
+  try {
+    const resp = await fetch('/api/cancel-subscription', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ stripeSubscriptionId: stripeSubId })
+    });
+    const result = await resp.json();
+    if (result.error) throw new Error(result.error);
+    alert('✓ Subscription cancelled for: ' + email);
+    loadPlayerList();
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+async function adminDeletePlayer(subId, email) {
+  if (!confirm('Delete ' + email + ' from database? This does NOT cancel their Stripe subscription.')) return;
+  
+  try {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    if (!window.supabase) await new Promise(r => { script.onload = r; document.head.appendChild(script); });
+    
+    const sb = window.supabase.createClient(
+      'https://sfkdwprzwtegfkohqsdy.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY'
+    );
+    
+    const { error } = await sb.from('subscriptions').delete().eq('id', subId);
+    if (error) throw error;
+    alert('✓ Deleted: ' + email);
+    loadPlayerList();
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
 </script>
 </body>
 </html>
