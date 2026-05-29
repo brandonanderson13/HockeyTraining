@@ -1639,24 +1639,35 @@ function saveBaselineResults(){
   const ids=[0,1,2,3,4,5,6,7,8,9];
   let filled=0;
   const results = [];
+  const resultsObj = {};
+  
   ids.forEach(i=>{
     const el=document.getElementById('bt_'+i);
     const val = el && el.value ? parseFloat(el.value) : null;
     results.push(val);
-    if(el&&el.value){
-      const target=document.getElementById('base_'+i);
-      if(target) target.value=el.value;
+    if(val) {
+      resultsObj['bt_'+i] = val;
       filled++;
     }
   });
-  if(filled===0){alert('Enter at least one result before saving.');return;}
+  
+  if(filled===0){
+    alert('Enter at least one result before saving.');
+    return;
+  }
+  
+  // Save to localStorage
+  try {
+    localStorage.setItem('tigersBaseline', JSON.stringify(resultsObj));
+  } catch(e) {}
   
   // Sync to Supabase
   syncBaselineResults(results, 'baseline');
   
   const msg=document.getElementById('baseline-saved-msg');
+  msg.textContent = `✓ Baseline saved (${filled} tests)`;
   msg.style.display='inline';
-  setTimeout(()=>msg.style.display='none',3000);
+  setTimeout(()=>msg.style.display='none',2500);
 }
 
 function buildTracker(){
@@ -4356,25 +4367,34 @@ function updateTestImprovement(testId, direction) {
 
 
 async function saveRetestResults() {
-  const results = {};
+  const results = [];
+  const resultsObj = {};
+  let filled = 0;
+  
   for (let i = 0; i < 10; i++) {
     const val = parseFloat(document.getElementById('bt_' + i).value);
-    if (val) results['bt_' + i] = val;
+    if (!isNaN(val) && val > 0) {
+      results[i] = val;
+      resultsObj['bt_' + i] = val;
+      filled++;
+    } else {
+      results[i] = null;
+    }
   }
   
-  if (Object.keys(results).length === 0) {
+  if (filled === 0) {
     alert('Please enter at least one test result.');
     return;
   }
   
   try {
-    localStorage.setItem('tigersLatestTest', JSON.stringify(results));
+    localStorage.setItem('tigersLatestTest', JSON.stringify(resultsObj));
   } catch (e) {}
   
-  await syncBaselineResults('retest');
+  await syncBaselineResults(results, 'retest');
   
   const msg = document.getElementById('baseline-saved-msg');
-  msg.textContent = `✓ Latest test saved (${Object.keys(results).length} tests)`;
+  msg.textContent = `✓ Latest test saved (${filled} tests)`;
   msg.style.display = 'block';
   setTimeout(() => msg.style.display = 'none', 2500);
 }
