@@ -1744,12 +1744,19 @@ function showSec(id){
     setTimeout(updateProgramStatus, 100);
   }
   
-  // Load leaderboard with org parameter
+  // Load leaderboard with org parameter and date filters if set
   if (id === 'leaderboard') {
     const frame = document.getElementById('leaderboardFrame');
     if (frame) {
       const orgParam = window._userOrgId || 'delano';
-      frame.src = `leaderboard.html?org=${orgParam}`;
+      const startDate = document.getElementById('leaderboardStart')?.value || '';
+      const endDate = document.getElementById('leaderboardEnd')?.value || '';
+      
+      let url = `leaderboard.html?org=${orgParam}`;
+      if (startDate) url += `&start=${startDate}`;
+      if (endDate) url += `&end=${endDate}`;
+      
+      frame.src = url + '&t=' + Date.now();
     }
   }
 }
