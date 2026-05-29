@@ -269,9 +269,9 @@ select:focus{border-color:var(--or);outline:none;}
     </div>
   </div>
   <div class="g3">
-    <div class="pc"><div class="pct"><div class="pn">Phase 1 · Weeks 1–4</div><div class="pt">Foundation</div><div class="pw">Movement quality first</div></div><div class="pcb"><span class="ptag ptago">Movement Patterns</span><span class="ptag">Basic Agility</span><span class="ptag ptago">Shot Mechanics</span></div></div>
-    <div class="pc"><div class="pct"><div class="pn">Phase 2 · Weeks 5–8</div><div class="pt">Development</div><div class="pw">Load and intensity up</div></div><div class="pcb"><span class="ptag ptago">Strength Build</span><span class="ptag">Speed &amp; Quickness</span><span class="ptag ptago">Shot Mechanics</span></div></div>
-    <div class="pc"><div class="pct"><div class="pn">Phase 3 · Weeks 9–12</div><div class="pt">Performance</div><div class="pw">Game-speed training</div></div><div class="pcb"><span class="ptag ptago">Power Output</span><span class="ptag">Game Speed</span><span class="ptago">High-Volume Shooting</span></div></div>
+    <div class="pc"><div class="pct"><div class="pn">Off-Season Program</div><div class="pt">Maximum Development</div><div class="pw">6 days/week · Full volume</div></div><div class="pcb"><span class="ptag ptago">Strength Building</span><span class="ptag">Power Development</span><span class="ptag ptago">High Volume</span></div></div>
+    <div class="pc"><div class="pct"><div class="pn">Pre-Season Program</div><div class="pt">Intensity Ramp</div><div class="pw">5 days/week · Peak preparation</div></div><div class="pcb"><span class="ptag ptago">Game Speed</span><span class="ptag">Conditioning Focus</span><span class="ptag ptago">Power Output</span></div></div>
+    <div class="pc"><div class="pct"><div class="pn">In-Season Program</div><div class="pt">Maintenance</div><div class="pw">3 days/week · Reduced volume</div></div><div class="pcb"><span class="ptag ptago">Strength Maintenance</span><span class="ptag">Injury Prevention</span><span class="ptag ptago">Recovery Focus</span></div></div>
   </div>
   <!-- CUSTOMIZATION PANEL -->
   <div class="card" style="margin-bottom:1rem;">
@@ -327,7 +327,7 @@ select:focus{border-color:var(--or);outline:none;}
             <label class="day-toggle"><input type="checkbox" value="Saturday" checked><span>Sat</span></label>
             <label class="day-toggle"><input type="checkbox" value="Sunday"><span>Sun</span></label>
           </div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;">Pick how many training days you have available. Day 1 is your first workout of the week, Day 2 is your second, etc. Flexibility built in — train on any calendar days you want.</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;" id="dayCountHelp">Off-Season requires 6 days. Pick any 6 calendar days that work for you.</div>
         </div>
         <div style="margin-top:18px;padding-top:14px;border-top:1px solid #1f1f1f;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
           <button class="btn-o" style="margin-top:0;" onclick="applyCustomization()">Apply Settings</button>
@@ -2551,9 +2551,25 @@ function toggleCustomize(){
 function applyCustomization(){
   console.log('applyCustomization called');
   
+  const season = (document.getElementById('cust-season')||{}).value || 'offseason';
+  const selectedDays = Array.from(document.querySelectorAll('.day-toggle input:checked'));
+  
+  // Validate day count based on season
+  const requiredDays = {
+    'offseason': 6,
+    'preseason': 5,
+    'inseason': 3
+  };
+  
+  const required = requiredDays[season];
+  if (selectedDays.length !== required) {
+    alert(`${season === 'offseason' ? 'Off-Season' : season === 'preseason' ? 'Pre-Season' : 'In-Season'} requires exactly ${required} training days. You have ${selectedDays.length} selected. Please select ${required} days.`);
+    return;
+  }
+  
   const settings = {
     age: (document.getElementById('cust-age')||{}).value || 'bantam',
-    season: (document.getElementById('cust-season')||{}).value || 'offseason',
+    season: season,
     strength: document.getElementById('cust-strength').checked,
     agility: document.getElementById('cust-agility').checked,
     skills: document.getElementById('cust-skills').checked,
@@ -4112,13 +4128,17 @@ function showCopied(el) {
 function updateSeasonDescription() {
   const season = document.getElementById('cust-season').value;
   const desc = document.getElementById('season-description');
+  const dayHelp = document.getElementById('dayCountHelp');
   
   if (season === 'offseason') {
     desc.innerHTML = '<strong>Full volume, maximum gains.</strong> Follow the program as written. This is when you build the foundation for next season.';
+    if (dayHelp) dayHelp.textContent = 'Off-Season requires 6 training days. Pick any 6 calendar days that work for you.';
   } else if (season === 'preseason') {
-    desc.innerHTML = '<strong>Ramp up intensity.</strong> 4-5 training days, full volumes. Use Weeks 9-12 (Performance phase) to peak before season starts.';
+    desc.innerHTML = '<strong>Ramp up intensity.</strong> Full volumes, building toward peak. Use Weeks 9-12 (Performance phase) to be ready for season start.';
+    if (dayHelp) dayHelp.textContent = 'Pre-Season requires 5 training days. Pick any 5 calendar days that work for you.';
   } else if (season === 'inseason') {
-    desc.innerHTML = '<strong>Maintain strength, don\'t add fatigue.</strong> Automatically reduces to 2-3 days/week (Mon/Thu/Sat). All sets reduced by 1 (4 sets → 3 sets). Use Weeks 1-4 exercises only.';
+    desc.innerHTML = '<strong>Maintain strength, don\'t add fatigue.</strong> All sets reduced by 1 (4 sets → 3 sets). Use Weeks 1-4 exercises for maintenance.';
+    if (dayHelp) dayHelp.textContent = 'In-Season requires 3 training days. Recommended: Mon/Thu/Sat (auto-selected, but you can change).';
     
     // Auto-select in-season training days (Mon/Thu/Sat)
     document.querySelectorAll('.day-toggle input').forEach(cb => {
