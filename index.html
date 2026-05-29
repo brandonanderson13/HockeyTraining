@@ -1668,6 +1668,34 @@ function saveBaselineResults(){
   msg.textContent = `✓ Baseline saved (${filled} tests)`;
   msg.style.display='inline';
   setTimeout(()=>msg.style.display='none',2500);
+  
+  // Clear inputs and update progress displays
+  ids.forEach(i => {
+    const input = document.getElementById('bt_' + i);
+    const progressDiv = document.getElementById('bt_' + i + '_progress');
+    
+    if (input && input.value) {
+      // Flash green border
+      input.style.borderColor = '#4ade80';
+      setTimeout(() => input.style.borderColor = '#333', 500);
+      
+      // Clear the input after a moment
+      setTimeout(() => {
+        input.value = '';
+      }, 600);
+    }
+    
+    if (progressDiv && resultsObj['bt_' + i]) {
+      // Show saved baseline in progress display
+      progressDiv.style.display = 'block';
+      progressDiv.style.background = 'rgba(74,222,128,0.08)';
+      progressDiv.style.color = '#4ade80';
+      progressDiv.innerHTML = `<strong>Baseline saved:</strong> ${resultsObj['bt_' + i]} ✓`;
+      
+      // Hide after a moment
+      setTimeout(() => progressDiv.style.display = 'none', 2000);
+    }
+  });
 }
 
 function buildTracker(){
@@ -4397,6 +4425,18 @@ async function saveRetestResults() {
   msg.textContent = `✓ Latest test saved (${filled} tests)`;
   msg.style.display = 'block';
   setTimeout(() => msg.style.display = 'none', 2500);
+  
+  // Clear inputs after saving and show confirmation in progress displays
+  for (let i = 0; i < 10; i++) {
+    const input = document.getElementById('bt_' + i);
+    const progressDiv = document.getElementById('bt_' + i + '_progress');
+    
+    if (input && input.value) {
+      input.style.borderColor = '#60a5fa';
+      setTimeout(() => input.style.borderColor = '#333', 500);
+      setTimeout(() => input.value = '', 600);
+    }
+  }
 }
 
 function resetAllTests() {
