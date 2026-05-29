@@ -233,14 +233,13 @@ select:focus{border-color:var(--or);outline:none;}
 
 <div class="nav">
   <button class="nb active" onclick="showSec('overview')">Overview</button>
-  <button class="nb" onclick="showSec('baseline')">Baseline Test</button>
+  <button class="nb" onclick="showSec('baseline')">Testing</button>
   <button class="nb" onclick="showSec('schedule')">Training Plan</button>
   <button class="nb" onclick="showSec('nutrition')">Nutrition</button>
   <button class="nb" onclick="showSec('mobility')">Mobility</button>
   <button class="nb" onclick="showSec('sticklog')">Stickhandling Log</button>
   <button class="nb" onclick="showSec('shotlog')">Shot Log</button>
   <button class="nb" onclick="showSec('tracker')">Progress</button>
-  <button class="nb" onclick="showSec('final')">Final Test</button>
   <span style="width:1px;height:20px;background:#333;margin:0 8px;"></span>
   <button class="nb" onclick="showSec('account')">Account</button>
   <button class="nb" onclick="showSec('leaderboard')">Leaderboard</button>
@@ -256,7 +255,7 @@ select:focus{border-color:var(--or);outline:none;}
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button onclick="document.getElementById('customize-panel').scrollIntoView({behavior:'smooth'});" style="background:var(--primary-color);color:#fff;border:none;font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Go to Customize ↓</button>
-      <button onclick="showSec('baseline');" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Start Baseline Test →</button>
+      <button onclick="showSec('baseline');" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Start Testing →</button>
     </div>
   </div>
   
@@ -269,9 +268,53 @@ select:focus{border-color:var(--or);outline:none;}
     </div>
   </div>
   <div class="g3">
-    <div class="pc"><div class="pct"><div class="pn">Off-Season Program</div><div class="pt">Maximum Development</div><div class="pw">6 days/week · Full volume</div></div><div class="pcb"><span class="ptag ptago">Strength Building</span><span class="ptag">Power Development</span><span class="ptag ptago">High Volume</span></div></div>
-    <div class="pc"><div class="pct"><div class="pn">Pre-Season Program</div><div class="pt">Intensity Ramp</div><div class="pw">5 days/week · Peak preparation</div></div><div class="pcb"><span class="ptag ptago">Game Speed</span><span class="ptag">Conditioning Focus</span><span class="ptag ptago">Power Output</span></div></div>
-    <div class="pc"><div class="pct"><div class="pn">In-Season Program</div><div class="pt">Maintenance</div><div class="pw">3 days/week · Reduced volume</div></div><div class="pcb"><span class="ptag ptago">Strength Maintenance</span><span class="ptag">Injury Prevention</span><span class="ptag ptago">Recovery Focus</span></div></div>
+    <div class="pc">
+      <div class="pct">
+        <div class="pn">Off-Season Program</div>
+        <div class="pt">Maximum Development</div>
+        <div class="pw">6 days/week · Full volume</div>
+      </div>
+      <div class="pcb">
+        <span class="ptag ptago">Strength Building</span>
+        <span class="ptag">Power Development</span>
+        <span class="ptag ptago">High Volume</span>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">
+        This is when you make the biggest gains. Train 6 days/week with full volumes. Progress through all 12 weeks, then restart the cycle. Use the heavier weights and push intensity in Weeks 9-12.
+      </div>
+    </div>
+    
+    <div class="pc">
+      <div class="pct">
+        <div class="pn">Pre-Season Program</div>
+        <div class="pt">Intensity Ramp</div>
+        <div class="pw">5 days/week · Peak preparation</div>
+      </div>
+      <div class="pcb">
+        <span class="ptag ptago">Game Speed</span>
+        <span class="ptag">Conditioning Peak</span>
+        <span class="ptag ptago">Power Focus</span>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">
+        4-6 weeks before season starts, ramp up intensity. Train 5 days/week. Focus on Weeks 9-12 exercises (performance phase) to peak your power and conditioning right before games begin.
+      </div>
+    </div>
+    
+    <div class="pc">
+      <div class="pct">
+        <div class="pn">In-Season Program</div>
+        <div class="pt">Maintenance</div>
+        <div class="pw">3 days/week · Reduced volume</div>
+      </div>
+      <div class="pcb">
+        <span class="ptag ptago">Strength Maintenance</span>
+        <span class="ptag">Injury Prevention</span>
+        <span class="ptag ptago">Recovery Focus</span>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">
+        During games, train 3 days/week (Mon/Thu/Sat recommended). All volumes automatically reduce by 1 set. Use Weeks 1-4 exercises only. Goal: maintain strength without adding fatigue.
+      </div>
+    </div>
   </div>
   <!-- CUSTOMIZATION PANEL -->
   <div class="card" style="margin-bottom:1rem;">
@@ -358,7 +401,7 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- BASELINE TEST -->
 <div id="baseline" class="sec">
-  <div class="ibox"><strong>Baseline Testing:</strong> Do these tests before you start training and record your results. Hit <strong>Save Results</strong> when done — they'll carry over to the Progress Tracker automatically. Retest every 4-6 weeks or at the end of a training cycle to measure your gains.</div>
+  <div class="ibox"><strong>Baseline Testing:</strong> Do these tests before you start training. Hit <strong>Save Baseline</strong> when done. Retest every 4-6 weeks and save as your retest — the Progress tab will show your improvements over time.</div>
 
   <div style="background:#141414;border:1px solid rgba(var(--primary-rgb),0.3);border-radius:10px;padding:12px 14px;margin-bottom:1rem;font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;">
     <span style="color:var(--primary-color);font-weight:600;">How to use:</span> Complete each test below, type your result in the box, then click <strong style="color:#fff;">Save Results</strong> at the bottom. Your numbers will appear in the Progress Tracker tab automatically.
@@ -1276,33 +1319,6 @@ select:focus{border-color:var(--or);outline:none;}
   </div>
 </div>
 
-<!-- FINAL TEST -->
-<div id="final" class="sec">
-  <div class="ibox"><strong>Retest:</strong> Same tests as your baseline, identical conditions. Rest the full day before testing. Retest every 4-6 weeks, at the end of off-season training, or whenever you want to measure progress. Record everything in the Progress tab.</div>
-  <div class="card" style="border-color:rgba(var(--primary-rgb),0.3);">
-    <div class="ch" style="background:rgba(var(--primary-rgb),0.08);border-color:rgba(var(--primary-rgb),0.18);"><span class="cht" style="color:var(--or);">What to Expect After 12 Weeks</span></div>
-    <div class="cb">
-      <div class="expect-grid">
-        <div class="eitem"><div class="elbl">Speed</div><div class="etxt">5–10% improvement in sprint times. Better first-step quickness from stronger glutes and hamstrings.</div></div>
-        <div class="eitem"><div class="elbl">Agility</div><div class="etxt">Measurable drops in shuttle and T-drill times. Sharper, more confident direction changes on ice.</div></div>
-        <div class="eitem"><div class="elbl">Strength</div><div class="etxt">Push-up max up 30–50%. Wall sit and squat endurance significantly improved across the board.</div></div>
-        <div class="eitem"><div class="elbl">Hockey Skills</div><div class="etxt">Faster stickhandling, better shot accuracy, quicker release from consistent dedicated skill work.</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="ch"><span class="cht">Final Test Checklist</span></div>
-    <div class="cb" style="font-size:12px;color:rgba(255,255,255,0.52);line-height:2.1;">
-      ☐ 30m Sprint &nbsp;&nbsp; ☐ Burpee Test (30 sec) &nbsp;&nbsp; ☐ 5-10-5 Shuttle<br>
-      ☐ Broad Jump &nbsp;&nbsp; ☐ Push-Up Max &nbsp;&nbsp; ☐ Wall Sit &nbsp;&nbsp; ☐ Squat 60 sec &nbsp;&nbsp; ☐ Dead Hang<br>
-      ☐ Stickhandling (30 sec) &nbsp;&nbsp; ☐ Shooting Accuracy (10 shots)
-    </div>
-  </div>
-  <div style="text-align:center;margin-top:1rem;">
-    <button class="btn-o" onclick="showSec('tracker')">Enter Retest Results →</button>
-  </div>
-</div>
-
 <!-- ACCOUNT -->
 <div id="account" class="sec">
   <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
@@ -1567,7 +1583,7 @@ const phases={
       {n:'Friday',t:'Peak Skills Circuit',items:[['Stickhandling — Cone Weave — narrow spacing','6 runs — timed'],['Stickhandling — Stickhandling Under Fatigue','4 rounds'],['Stickhandling — Speed Taps (30s)','4 sets — count and record'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Backhand Shots — roof drill','3×15 shots'],['All-positions shooting drill','15 shots — log total'],['Lateral Bound Intervals — Tabata','8 rounds']]},
       {n:'Saturday',t:'Total Body Peak + Shooting',items:[['Power circuit — all explosive moves','4 rounds'],['Box Jump + Broad Jump superset','4×6'],['Wrist Shot — 75-shot session','Log total'],['Stickhandling — Speed Taps (30s)','4 sets — count and record']]}
     ]},
-    {num:11,focus:'Taper — Sharpen for Final Test',days:[
+    {num:11,focus:'Taper Week — Prep for Testing',days:[
       {n:'Monday',t:'Lower Strength — Moderate',items:[['Goblet Squat','4×8'],['Romanian Deadlift','3×10'],['Lateral Lunge','3×10 each'],['5-10-5 Shuttle','4 runs — timed'],['Stickhandling — Cone Weave — narrow','4 runs — timed'],['Stickhandling — Hand Switches','3×30 sec']]},
       {n:'Tuesday',t:'Skills + Shooting Focus',items:[['Stickhandling — Around the World','5 min'],['Stickhandling — Cone Weave — forehand + backhand','4 runs each — timed'],['Stickhandling — Speed Taps (30s)','4 sets — count and record'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Backhand Shots','3×12 shots']]},
       {n:'Wednesday',t:'Full Rest',items:[['Full rest',''],['Stickhandling — Around the World','5 min — very easy'],['Prepare mentally for final test','']]},
