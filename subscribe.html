@@ -425,12 +425,6 @@
       <input type="email" id="email" required placeholder="your.email@example.com">
     </div>
     
-    <!-- Association-specific fields -->
-    <div id="assocFields" style="display:none;">
-      <label>Association/Team Name</label>
-      <input type="text" id="orgName" placeholder="Delano Youth Hockey Association">
-    </div>
-    
     <div id="selectedPlanSummary" style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:6px;padding:12px;margin-bottom:16px;font-size:13px;text-align:center;color:rgba(255,255,255,0.8);">
       <!-- Populated by JS -->
     </div>
@@ -484,9 +478,7 @@ function selectAssociationPlan(seats, price, interval) {
   const card = document.getElementById(cardId);
   if (card) card.classList.add('selected');
   
-  // Show association fields and form
-  const assocFields = document.getElementById('assocFields');
-  if (assocFields) assocFields.style.display = 'block';
+  // Organization name derived from dropdown
   
   showCustomerForm();
 }
@@ -514,7 +506,8 @@ async function proceedToCheckout() {
   const firstName = document.getElementById('firstName').value.trim();
   const lastName = document.getElementById('lastName').value.trim();
   const email = document.getElementById('email').value.trim();
-  const orgName = document.getElementById('orgName').value.trim();
+  const organizationId = document.getElementById('organizationId').value;
+  const orgName = organizationId === 'delano' ? 'Delano Youth Hockey Association' : 'Individual';
   
   if (!firstName || !lastName || !email) {
     const msg = document.getElementById('message');
