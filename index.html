@@ -413,15 +413,17 @@ select:focus{border-color:var(--or);outline:none;}
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">30m Sprint</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Sprint 30 meters max effort. Two attempts, record best time.</div>
-      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (seconds)</label>
-      <input type="number" step="0.1" id="bt_0" placeholder="e.g. 4.8" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Current Result (seconds)</label>
+      <input type="number" step="0.1" id="bt_0" placeholder="e.g. 4.8" oninput="updateTestImprovement('bt_0', 'lower')" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <div id="bt_0_progress" style="font-size:11px;margin-top:6px;padding:6px 8px;border-radius:4px;display:none;"></div>
     </div>
 
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">30-Second Burpee Test</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Max burpees in 30 seconds. Full ROM — chest to floor each rep.</div>
-      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (reps)</label>
-      <input type="number" step="1" id="bt_1" placeholder="e.g. 12" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Current Result (reps)</label>
+      <input type="number" step="1" id="bt_1" placeholder="e.g. 12" oninput="updateTestImprovement('bt_1', 'higher')" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <div id="bt_1_progress" style="font-size:11px;margin-top:6px;padding:6px 8px;border-radius:4px;display:none;"></div>
     </div>
 
   </div>
@@ -433,15 +435,17 @@ select:focus{border-color:var(--or);outline:none;}
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">5-10-5 Shuttle</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Sprint 5 yds right, touch ground, sprint 10 yds left, touch, sprint 5 yds back. Best of 2.</div>
-      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (seconds — lower is better)</label>
-      <input type="number" step="0.01" id="bt_2" placeholder="e.g. 5.2" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Current Result (seconds)</label>
+      <input type="number" step="0.01" id="bt_2" placeholder="e.g. 5.2" oninput="updateTestImprovement('bt_2', 'lower')" style="width:100%;background:#1a1a1a;border:1px solid#333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <div id="bt_2_progress" style="font-size:11px;margin-top:6px;padding:6px 8px;border-radius:4px;display:none;"></div>
     </div>
 
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Broad Jump</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Standing start. Jump forward for max distance. Best of 2 attempts.</div>
-      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (inches)</label>
-      <input type="number" step="1" id="bt_3" placeholder="e.g. 62" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Current Result (inches)</label>
+      <input type="number" step="1" id="bt_3" placeholder="e.g. 62" oninput="updateTestImprovement('bt_3', 'higher')" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <div id="bt_3_progress" style="font-size:11px;margin-top:6px;padding:6px 8px;border-radius:4px;display:none;"></div>
     </div>
 
   </div>
@@ -453,29 +457,30 @@ select:focus{border-color:var(--or);outline:none;}
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Push-Up Max</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Max push-ups in one unbroken set. Full ROM — chest near floor each rep.</div>
-      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (reps)</label>
-      <input type="number" step="1" id="bt_4" placeholder="e.g. 18" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Current Result (reps)</label>
+      <input type="number" step="1" id="bt_4" oninput="updateTestImprovement('bt_4', 'higher')" placeholder="e.g. 18" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Wall Sit Hold</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Back flat on wall, 90° knee angle. Hold as long as possible.</div>
-      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (seconds)</label>
-      <input type="number" step="1" id="bt_5" placeholder="e.g. 45" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Current Result (seconds)</label>
+      <input type="number" step="1" id="bt_5" oninput="updateTestImprovement('bt_5', 'higher')" placeholder="e.g. 45" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Bodyweight Squat (60 sec)</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Max full-depth squats in 60 seconds. Controlled on the way down.</div>
-      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (reps)</label>
-      <input type="number" step="1" id="bt_6" placeholder="e.g. 35" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Current Result (reps)</label>
+      <input type="number" step="1" id="bt_6" oninput="updateTestImprovement('bt_6', 'higher')" placeholder="e.g. 35" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Dead Hang</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Hang from a bar, straight arms, no kipping. Hold as long as possible.</div>
-      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (seconds)</label>
-      <input type="number" step="1" id="bt_7" placeholder="e.g. 30" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Current Result (seconds)</label>
+      <input type="number" step="1" id="bt_7" oninput="updateTestImprovement('bt_7', 'higher')" placeholder="e.g. 30" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <div id="bt_4_progress" style="font-size:11px;margin-top:6px;padding:6px 8px;border-radius:4px;display:none;"></div>
     </div>
 
   </div>
@@ -487,38 +492,26 @@ select:focus{border-color:var(--or);outline:none;}
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Stickhandling — 30 sec Touch Count</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">On a shooting pad: forehand/backhand touches for 30 seconds. Count every touch.</div>
-      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (total touches)</label>
-      <input type="number" step="1" id="bt_8" placeholder="e.g. 72" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Current Result (total touches)</label>
+      <input type="number" step="1" id="bt_8" oninput="updateTestImprovement('bt_8', 'higher')" placeholder="e.g. 72" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
     </div>
 
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px 14px;">
       <div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">Shooting Accuracy (10 shots)</div>
       <div style="font-size:11px;color:rgba(255,255,255,0.42);line-height:1.4;margin-bottom:10px;">Set corner and 5-hole targets. 10 wrist shots from 15 ft. Count targets hit.</div>
-      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Your Result (hits out of 10)</label>
-      <input type="number" step="1" min="0" max="10" id="bt_9" placeholder="e.g. 4" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <label style="font-size:10px;color:var(--primary-color);text-transform:uppercase;letter-spacing:.05em;font-family:'Barlow Condensed',sans-serif;font-weight:700;display:block;margin-bottom:4px;">Current Result (hits out of 10)</label>
+      <input type="number" step="1" min="0" max="10" id="bt_9" oninput="updateTestImprovement('bt_9', 'higher')" placeholder="e.g. 4" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:16px;padding:7px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;">
+      <div id="bt_5_progress" style="font-size:11px;margin-top:6px;padding:6px 8px;border-radius:4px;display:none;"></div>
     </div>
 
   </div>
 
   <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-    <button class="btn-o" onclick="saveBaselineResults()">Save Results &#8594; Progress Tracker</button>
+    <button class="btn-o" onclick="saveBaselineResults()">Save as Baseline</button>
     <div id="baseline-saved-msg" style="font-size:12px;color:#4ade80;display:none;">&#10003; Results saved! Check the Progress Tracker tab.</div>
   </div>
   
-  <div style="margin:2.5rem 0;border-top:2px solid #222;position:relative;">
-    <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#0D0D0D;padding:0 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.3);">Progress Comparison</div>
-  </div>
-  
-  <div class="ibox"><strong>Progress Tracker:</strong> Enter your retest results below and click Calculate Improvement to see how much you've gained since your baseline test.</div>
-  <div class="card">
-    <div class="ch"><span class="cht">Results Comparison</span></div>
-    <div class="cb" style="padding:0;"><table class="trtable"><thead><tr><th>Test</th><th>Baseline</th><th>Retest</th><th>Change</th></tr></thead><tbody id="trackerBody"></tbody></table></div>
-  </div>
-  <button class="btn-o" onclick="calcDiffs()">Calculate Improvement</button>
-  <div id="summaryBox" style="display:none;margin-top:1rem;" class="card">
-    <div class="ch"><span class="cht">🏆 Summary</span></div>
-    <div class="cb"><div id="summaryContent"></div></div>
-  </div>
+
 </div>
 
 <!-- SCHEDULE -->
@@ -3646,6 +3639,60 @@ setTimeout(() => {
     setCurrentMonth();
   }
 }, 500);
+
+
+function updateTestImprovement(testId, direction) {
+  const input = document.getElementById(testId);
+  const progressDiv = document.getElementById(testId + '_progress');
+  
+  if (!input || !progressDiv) return;
+  
+  const currentValue = parseFloat(input.value);
+  if (isNaN(currentValue) || currentValue === 0) {
+    progressDiv.style.display = 'none';
+    return;
+  }
+  
+  // Get baseline from localStorage
+  const baseline = JSON.parse(localStorage.getItem('tigersBaseline') || '{}');
+  const baselineValue = baseline[testId];
+  
+  if (!baselineValue || baselineValue === 0) {
+    // No baseline yet - this IS the baseline
+    progressDiv.style.display = 'block';
+    progressDiv.style.background = 'rgba(59, 130, 246, 0.1)';
+    progressDiv.style.color = '#60a5fa';
+    progressDiv.innerHTML = 'This will be your baseline';
+    return;
+  }
+  
+  // Calculate improvement
+  const diff = currentValue - baselineValue;
+  const isImprovement = (direction === 'higher' && diff > 0) || (direction === 'lower' && diff < 0);
+  const absDiff = Math.abs(diff);
+  
+  // Format the difference nicely
+  let diffText = '';
+  if (direction === 'lower') {
+    // For time-based tests (lower is better)
+    diffText = diff < 0 ? `-${absDiff.toFixed(2)}s faster!` : `+${absDiff.toFixed(2)}s slower`;
+  } else {
+    // For performance tests (higher is better)
+    diffText = diff > 0 ? `+${absDiff.toFixed(0)} improvement!` : `-${absDiff.toFixed(0)} decline`;
+  }
+  
+  // Show with color coding
+  progressDiv.style.display = 'block';
+  if (isImprovement) {
+    progressDiv.style.background = 'rgba(74, 222, 128, 0.1)';
+    progressDiv.style.color = '#4ade80';
+    progressDiv.innerHTML = `🎯 ${diffText} <span style="font-size:10px;color:rgba(74,222,128,0.6);margin-left:4px;">(Baseline: ${baselineValue})</span>`;
+  } else {
+    progressDiv.style.background = 'rgba(248, 113, 113, 0.1)';
+    progressDiv.style.color = '#f87171';
+    progressDiv.innerHTML = `${diffText} <span style="font-size:10px;color:rgba(248,113,113,0.6);margin-left:4px;">(Baseline: ${baselineValue})</span>`;
+  }
+}
 
 </script>
 </body>
