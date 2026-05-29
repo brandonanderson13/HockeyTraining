@@ -523,6 +523,11 @@ select:focus{border-color:var(--or);outline:none;}
 <!-- SCHEDULE -->
 <div id="schedule" class="sec">
   
+  <div id="currentProgramBanner" style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:14px 16px;margin-bottom:1rem;">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);">Current Program</div>
+    <div id="programStatus" style="font-size:14px;color:#fff;font-weight:600;margin-top:4px;">Loading...</div>
+  </div>
+  
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:10px;">
     <select id="phaseSelect" onchange="renderWeeks()" style="flex:1;min-width:250px;">
     <option value="1">Phase 1 &#8212; Foundation (Weeks 1&#8211;4)</option>
@@ -2445,6 +2450,9 @@ function adjustVol(vol, mod){
     const newNum = Math.max(2, roundClean(parseInt(num) * mod, false));
     return `${newNum} ${unit}`;
   });
+  
+  // Update program status banner
+  updateProgramStatus();
 }
 
 function updateEquipment(age){
@@ -2980,6 +2988,26 @@ function adjustVolumeForSeason(volumeStr) {
   return volumeStr; // Return unchanged if format doesn't match
 }
 
+
+function updateProgramStatus() {
+  const settings = getCustSettings();
+  const season = (document.getElementById('cust-season')||{}).value || 'offseason';
+  const statusDiv = document.getElementById('programStatus');
+  
+  if (!statusDiv) return;
+  
+  const seasonNames = {
+    'offseason': 'Off-Season — Maximum Development',
+    'preseason': 'Pre-Season — Intensity Ramp',
+    'inseason': 'In-Season — Maintenance Mode'
+  };
+  
+  const dayCount = settings.activeDays.length;
+  const volumeNote = season === 'inseason' ? ' (volumes reduced)' : '';
+  
+  statusDiv.innerHTML = `${seasonNames[season] || 'Off-Season'} · ${dayCount} days/week${volumeNote}`;
+}
+
 function renderWeeks(){
   _schedulePhase=parseInt(document.getElementById('phaseSelect').value);
   const p=phases[_schedulePhase];
@@ -3056,7 +3084,8 @@ function renderWeeks(){
 
       // Skip this day entirely if no exercises remain after filtering
       if(filteredItems.length === 0){
-        return; // Don't render empty days
+        // Don't render this day - it would be empty
+        return;
       }
 
       if(filteredItems.length){
