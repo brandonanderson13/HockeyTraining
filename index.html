@@ -1033,9 +1033,12 @@ function calcDiffs(){
 
 function showSec(id){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  const ids=['overview','baseline','schedule','nutrition','mobility','sticklog','shotlog','tracker','final'];
-  document.querySelectorAll('.nb').forEach((b,i)=>b.classList.toggle('active',i===ids.indexOf(id)));
+  const sec = document.getElementById(id);
+  if(sec) sec.classList.add('active');
+  
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  const btn = document.querySelector(`.nb[onclick*="${id}"]`);
+  if(btn) btn.classList.add('active');
   
   // Load account details when Account tab is shown
   if (id === 'account') {
@@ -3736,6 +3739,43 @@ async function saveRetestResults() {
 
 function resetAllTests() {
   if (!confirm('⚠️ This will permanently delete all your saved test results (baseline and latest tests). Are you sure you want to reset everything?')) {
+    return;
+  }
+  
+  // Clear from localStorage
+  try {
+    localStorage.removeItem('tigersBaseline');
+    localStorage.removeItem('tigersLatestTest');
+  } catch (e) {}
+  
+  // Clear all input fields
+  for (let i = 0; i < 10; i++) {
+    const input = document.getElementById('bt_' + i);
+    if (input) input.value = '';
+    
+    const progressDiv = document.getElementById('bt_' + i + '_progress');
+    if (progressDiv) progressDiv.style.display = 'none';
+  }
+  
+  // Show confirmation
+  const msg = document.getElementById('baseline-saved-msg');
+  msg.textContent = '✓ All tests reset';
+  msg.style.color = '#fb923c';
+  msg.style.display = 'block';
+  setTimeout(() => {
+    msg.style.display = 'none';
+    msg.style.color = '#4ade80';
+  }, 2500);
+}
+
+
+function resetAllTests() {
+  if (!confirm('⚠️ WARNING: This will permanently delete all your saved test results (baseline and latest tests).\n\nAre you absolutely sure you want to reset everything?')) {
+    return;
+  }
+  
+  // Double confirmation
+  if (!confirm('Last chance! All your test history will be lost. Continue?')) {
     return;
   }
   
