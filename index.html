@@ -1655,34 +1655,44 @@ async function syncStickhandlingSession(sessionData) {
   }
 }
 
-async function syncExerciseCompletion(weekNum, dayName, exerciseName, completed, date) {
+async function syncCompletedWorkout(dex) {
   try {
+    // Extract week and day from the dex element
+    const weekEl = dex.closest('.wdiv');
+    if (!weekEl) return;
+    
+    const weekMatch = weekEl.querySelector('.wh')?.textContent.match(/Week (\d+)/);
+    const dayMatch = dex.previousElementSibling?.textContent.match(/^(\w+)/);
+    
+    if (!weekMatch || !dayMatch) return;
+    
+    const weekNum = parseInt(weekMatch[1]);
+    const dayName = dayMatch[1];
+    const today = new Date().toISOString().split('T')[0];
+    
     const sb = await getSupabaseClient();
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return;
     
-    if (completed) {
-      await sb.from('exercise_completions').upsert({
-        user_id: user.id,
-        organization_id: window._userOrgId || 'individual',
-        completion_date: date,
-        week_number: weekNum,
-        day_name: dayName,
-        exercise_name: exerciseName,
-        completed: true
-      }, { onConflict: 'user_id,completion_date,week_number,day_name,exercise_name' });
-    } else {
-      // Remove completion
-      await sb.from('exercise_completions').delete()
-        .eq('user_id', user.id)
-        .eq('completion_date', date)
-        .eq('week_number', weekNum)
-        .eq('day_name', dayName)
-        .eq('exercise_name', exerciseName);
-    }
+    // Record this as one completed workout
+    await sb.from('exercise_completions').upsert({
+      user_id: user.id,
+      organization_id: window._userOrgId || 'delano',
+      completion_date: today,
+      week_number: weekNum,
+      day_name: dayName,
+      exercise_name: 'FULL_DAY_COMPLETED', // Special marker for full day
+      completed: true
+    }, { onConflict: 'user_id,completion_date,week_number,day_name,exercise_name' });
+    
   } catch (error) {
-    console.error('Failed to sync exercise completion:', error);
+    console.error('Failed to sync completed workout:', error);
   }
+}
+
+// Keep the old function but don't call it from toggleExComplete anymore
+async function syncExerciseCompletion_UNUSED(weekNum, dayName, exerciseName, completed, date) {
+  // This function is no longer used - we only sync full day completions now
 }
 
 async function syncBaselineResults(results, testType) {
@@ -2321,17 +2331,7 @@ function toggleExComplete(checkbox){
       localStorage.removeItem(key);
     }
     updateDayCompletionBadge(xl);
-    
-    // Parse key to extract week, day, exercise for Supabase sync
-    // Key format: ex_${wk.num}_${day.n}_${name}_${today}
-    const parts = key.split('_');
-    if (parts.length >= 4 && parts[0] === 'ex') {
-      const weekNum = parseInt(parts[1]);
-      const dayName = parts[2];
-      const today = parts[parts.length - 1];
-      const exerciseName = parts.slice(3, -1).join('_');
-      syncExerciseCompletion(weekNum, dayName, exerciseName, isCompleted, today);
-    }
+    // Note: We only sync to Supabase when the FULL day is completed, not individual exercises
   }catch(e){}
 }
 
@@ -2351,13 +2351,21 @@ function updateDayCompletionBadge(xl){
   }
   if(badge){
     const total = all.length;
+    const wasComplete = badge.textContent.includes(total + '/' + total);
+    const isNowComplete = (done === total);
+    
     badge.textContent = done + '/' + total + ' DONE';
     if(done === 0){
       badge.style.background = '#1a1a1a';
       badge.style.color = 'rgba(255,255,255,0.4)';
-    } else if(done === total){
+    } else if(isNowComplete){
       badge.style.background = '#4ade80';
       badge.style.color = '#0d0d0d';
+      
+      // Day just completed - sync to Supabase as a completed workout
+      if (!wasComplete) {
+        syncCompletedWorkout(dex);
+      }
     } else {
       badge.style.background = 'rgba(74,222,128,0.15)';
       badge.style.color = '#4ade80';
@@ -3422,7 +3430,7 @@ async function loadPlayerList(isSuperAdmin = false) {
     // Query workout stats - filter by org unless super admin
     let shootingQuery = sb.from('shooting_sessions').select('user_id, total_shots');
     let stickQuery = sb.from('stickhandling_sessions').select('user_id, minutes');
-    let completionsQuery = sb.from('exercise_completions').select('user_id');
+    let completionsQuery = sb.from('exercise_completions').select('user_id, exercise_name');
     
     if (!window._isSuperAdmin && window._userOrgId) {
       shootingQuery = shootingQuery.eq('organization_id', window._userOrgId);
@@ -3449,7 +3457,9 @@ async function loadPlayerList(isSuperAdmin = false) {
       });
     }
     if (completions) {
-      completions.forEach(c => {
+      // Only count full day completions, not individual exercises
+      const fullDayCompletions = completions.filter(c => c.exercise_name === 'FULL_DAY_COMPLETED');
+      fullDayCompletions.forEach(c => {
         if (!statsByUser[c.user_id]) statsByUser[c.user_id] = {shots:0, mins:0, workouts:0};
         statsByUser[c.user_id].workouts += 1;
       });
