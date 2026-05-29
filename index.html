@@ -346,7 +346,7 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- BASELINE TEST -->
 <div id="baseline" class="sec">
-  <div class="ibox"><strong>Baseline Testing — Week 0:</strong> Do these tests before Day 1 and record your results right here. Hit <strong>Save Results</strong> when done — they'll carry over to the Progress Tracker automatically. Retest at Week 12 to measure your gains.</div>
+  <div class="ibox"><strong>Baseline Testing:</strong> Do these tests before you start training and record your results. Hit <strong>Save Results</strong> when done — they'll carry over to the Progress Tracker automatically. Retest every 4-6 weeks or at the end of a training cycle to measure your gains.</div>
 
   <div style="background:#141414;border:1px solid rgba(var(--primary-rgb),0.3);border-radius:10px;padding:12px 14px;margin-bottom:1rem;font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;">
     <span style="color:var(--primary-color);font-weight:600;">How to use:</span> Complete each test below, type your result in the box, then click <strong style="color:#fff;">Save Results</strong> at the bottom. Your numbers will appear in the Progress Tracker tab automatically.
@@ -614,7 +614,7 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- STICKHANDLING LOG -->
 <div id="sticklog" class="sec">
-  <div class="ibox"><strong>Stickhandling Log:</strong> Track every stickhandling session. Log drills completed, minutes practiced, and your 30-second touch count. Consistency — even 10 minutes a day — creates measurable improvement over 12 weeks.</div>
+  <div class="ibox"><strong>Stickhandling Log:</strong> Track every stickhandling session. Log drills completed, minutes practiced, and your 30-second touch count. Consistency — even 10 minutes a day — creates measurable improvement over time.</div>
 
   <!-- WEEKLY GOAL -->
   <div class="card" style="margin-bottom:1rem;">
@@ -1252,7 +1252,7 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- TRACKER -->
 <div id="tracker" class="sec">
-  <div class="ibox"><strong>Progress Tracker:</strong> Enter baseline results after Week 0 testing. After Week 12, enter final results and hit Calculate to see your improvement.</div>
+  <div class="ibox"><strong>Progress Tracker:</strong> Test yourself when you start the program (baseline) and retest periodically (4 weeks, 8 weeks, 12 weeks, or whenever you want to measure progress). Enter both test dates and results to see your improvement over time.</div>
   <div class="card">
     <div class="ch"><span class="cht">Results Comparison</span></div>
     <div class="cb" style="padding:0;"><table class="trtable"><thead><tr><th>Test</th><th>Baseline (Wk 0)</th><th>Final (Wk 12)</th><th>Change</th></tr></thead><tbody id="trackerBody"></tbody></table></div>
@@ -1266,7 +1266,7 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- FINAL TEST -->
 <div id="final" class="sec">
-  <div class="ibox"><strong>Final Testing — Week 12:</strong> Same tests as Week 0, identical conditions. Rest the full day before testing. Record everything in the Progress tab.</div>
+  <div class="ibox"><strong>Retest:</strong> Same tests as your baseline, identical conditions. Rest the full day before testing. Retest every 4-6 weeks, at the end of off-season training, or whenever you want to measure progress. Record everything in the Progress tab.</div>
   <div class="card" style="border-color:rgba(var(--primary-rgb),0.3);">
     <div class="ch" style="background:rgba(var(--primary-rgb),0.08);border-color:rgba(var(--primary-rgb),0.18);"><span class="cht" style="color:var(--or);">What to Expect After 12 Weeks</span></div>
     <div class="cb">
@@ -1274,7 +1274,7 @@ select:focus{border-color:var(--or);outline:none;}
         <div class="eitem"><div class="elbl">Speed</div><div class="etxt">5–10% improvement in sprint times. Better first-step quickness from stronger glutes and hamstrings.</div></div>
         <div class="eitem"><div class="elbl">Agility</div><div class="etxt">Measurable drops in shuttle and T-drill times. Sharper, more confident direction changes on ice.</div></div>
         <div class="eitem"><div class="elbl">Strength</div><div class="etxt">Push-up max up 30–50%. Wall sit and squat endurance significantly improved across the board.</div></div>
-        <div class="eitem"><div class="elbl">Hockey Skills</div><div class="etxt">Faster stickhandling, better shot accuracy, quicker release from 12 weeks of dedicated skill work.</div></div>
+        <div class="eitem"><div class="elbl">Hockey Skills</div><div class="etxt">Faster stickhandling, better shot accuracy, quicker release from consistent dedicated skill work.</div></div>
       </div>
     </div>
   </div>
@@ -1287,7 +1287,7 @@ select:focus{border-color:var(--or);outline:none;}
     </div>
   </div>
   <div style="text-align:center;margin-top:1rem;">
-    <button class="btn-o" onclick="showSec('tracker')">Enter Week 12 Results →</button>
+    <button class="btn-o" onclick="showSec('tracker')">Enter Retest Results →</button>
   </div>
 </div>
 
@@ -2074,7 +2074,7 @@ const exDB={
   'Top Hand Only': {desc:'Remove your bottom hand from the stick completely. Dribble the puck forehand-to-backhand using only your top hand. This is the single most important drill for building wrist and forearm strength — the engine of your stickhandling. CHALLENGE PROGRESSION: 30 sec → 60 sec → add a toe drag using only top hand → walk forward while doing it → 90-second non-stop set.',cue:''},
   'Hand Switches': {desc:'Rapidly switch grip from forehand to backhand and back, moving the puck side-to-side as you transition. Builds wrist agility and the hand coordination needed for tight-area handling. Start slow with clean transitions, then build speed. CHALLENGE PROGRESSION: 30 sec at moderate pace → speed up while maintaining clean transitions → add eyes up (no looking at hands) → 60 sec without fumbling → mix in a wide pull on every other switch.',cue:'Clean transitions — no fumbles'},
   'Wide Dribble': {desc:'Pull the puck as wide as possible to each side — full arm extension on both forehand and backhand. Avoids \'hip lock\' where the top hand stays glued to your hip. Critical for protecting the puck from defenders. CHALLENGE PROGRESSION: 30 sec at moderate pace → 45 sec → arms fully extended on every pull → add a toe drag at the widest point → 60 sec non-stop.',cue:''},
-  'Speed Taps (30s)': {desc:'Forehand/backhand taps as FAST as possible for exactly 30 seconds. Count every touch. This is your baseline test metric — run it at the start of every session and log the count in the Stickhandling Log. Watch the number climb over 12 weeks. CHALLENGE PROGRESSION: Baseline = your starting number → +10 touches every 2 weeks → break 100 touches in 30 seconds → break 130 → eyes closed for half the set.',cue:''},
+  'Speed Taps (30s)': {desc:'Forehand/backhand taps as FAST as possible for exactly 30 seconds. Count every touch. This is your baseline test metric — run it at the start of every session and log the count in the Stickhandling Log. Track your number over time and watch it climb. CHALLENGE PROGRESSION: Baseline = your starting number → +10 touches every 2 weeks → break 100 touches in 30 seconds → break 130 → eyes closed for half the set.',cue:''},
   'Stickhandling Under Fatigue': {desc:'Do 10 burpees immediately followed by 60 seconds of stickhandling — no rest between. Simulates late-shift puck control when your legs are burning. Game skill that breaks down under fatigue is not real skill. CHALLENGE PROGRESSION: 3 rounds → 4 rounds → 15 burpees instead of 10 → add a shot after each stickhandling set → 5 full rounds back-to-back.',cue:''},
   'Stickhandling — Side-to-Side Soft Touch': {desc:'Stand in hockey stance on a shooting pad. Alternate tapping puck forehand-to-backhand in a steady rhythm. Keep eyes up — practice looking around the room while you go. Cup the puck with your blade on every touch, don\'t slap it. CHALLENGE PROGRESSION: Start at 1 touch per second for 30 sec → speed up to 2/sec → close your eyes for 30 sec → add a dribble between sides → do 100 touches without stopping.',cue:''},
   'Stickhandling — Figure 8 — Horizontal': {desc:'Place two pucks or cones shoulder-width apart. Weave the puck in a figure-8 pattern around them using forehand and backhand. Cup the puck — minimize touches by using the heel of the blade on each pass. CHALLENGE PROGRESSION: Start with 10 reps in one direction → switch directions every 5 reps → narrow spacing to 6 inches → use a golf ball instead of puck → do 50 figure-8s without a single miss.',cue:''},
@@ -2093,7 +2093,7 @@ const exDB={
   'Stickhandling — Hand Switches': {desc:'Rapidly switch grip from forehand to backhand and back, moving the puck side-to-side as you transition. Builds wrist agility and hand coordination. CHALLENGE PROGRESSION: 30 sec slow → speed up cleanly → eyes up → 60 sec without fumbling → mix in wide pulls.',cue:'Clean transitions — no fumbles'},
   'Stickhandling — Hand Switches — intro': {desc:'First introduction to hand switch drills. Slow, deliberate grip transitions from forehand to backhand and back. Focus on clean motion before speed. CHALLENGE PROGRESSION: 20 sec slow → 30 sec → speed up gradually → 45 sec without dropping.',cue:'Slow and clean first'},
   'Stickhandling — Wide Dribble': {desc:'Pull the puck as wide as possible to each side — full arm extension on both forehand and backhand. Avoids \'hip lock\' where the top hand stays glued to your hip. Critical for protecting the puck from defenders. CHALLENGE PROGRESSION: 30 sec at moderate pace → 45 sec → arms fully extended on every pull → add a toe drag at the widest point → 60 sec non-stop.',cue:''},
-  'Stickhandling — Speed Taps (30s)': {desc:'Forehand/backhand taps as FAST as possible for exactly 30 seconds. Count every touch. This is your baseline test metric — run it at the start of every session and log the count in the Stickhandling Log. Watch the number climb over 12 weeks. CHALLENGE PROGRESSION: Baseline = your starting number → +10 touches every 2 weeks → break 100 touches in 30 seconds → break 130 → eyes closed for half the set.',cue:''},
+  'Stickhandling — Speed Taps (30s)': {desc:'Forehand/backhand taps as FAST as possible for exactly 30 seconds. Count every touch. This is your baseline test metric — run it at the start of every session and log the count in the Stickhandling Log. Track your number over time and watch it climb. CHALLENGE PROGRESSION: Baseline = your starting number → +10 touches every 2 weeks → break 100 touches in 30 seconds → break 130 → eyes closed for half the set.',cue:''},
   'Stickhandling — Stickhandling Under Fatigue': {desc:'Do 10 burpees immediately followed by 60 seconds of stickhandling — no rest between. Simulates late-shift puck control when your legs are burning. Game skill that breaks down under fatigue is not real skill. CHALLENGE PROGRESSION: 3 rounds → 4 rounds → 15 burpees instead of 10 → add a shot after each stickhandling set → 5 full rounds back-to-back.',cue:''},
   'Stickhandling — Around the World + Figure 8': {desc:'Combine the Around the World drill with figure-8 patterns. 30 sec Around the World, then 30 sec figure-8, alternate. Builds 360° puck feel plus tight-space control in one combo. CHALLENGE PROGRESSION: 4 min total → 6 min → eyes up entire time → switch every 15 sec instead of 30 → add toe drags into the figure-8.',cue:''},
   'Stickhandling — Figure 8 — Horizontal + Vertical combo': {desc:'Set up horizontal pucks AND vertical pucks. Alternate doing figure-8 patterns through each layout. Forces multi-direction puck control. CHALLENGE PROGRESSION: 5 horizontal then 5 vertical → no pause between transitions → narrow the spacings → blindfold for the easier set.',cue:''},
