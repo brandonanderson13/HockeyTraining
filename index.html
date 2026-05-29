@@ -232,7 +232,7 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <div class="nav">
-  <button class="nb active" onclick="showSec('overview')">Overview</button>
+  <button class="nb active" onclick="showSec('overview')">Create Plan</button>
   <button class="nb" onclick="showSec('baseline')">Testing & Progress</button>
   <button class="nb" onclick="showSec('schedule')">Training Plan</button>
   <button class="nb" onclick="showSec('nutrition')">Nutrition</button>
@@ -1737,6 +1737,11 @@ function showSec(id){
   // Load account details when Account tab is shown
   if (id === 'account') {
     loadAccountDetails();
+  }
+  
+  // Update program status when Training Plan is shown
+  if (id === 'schedule') {
+    setTimeout(updateProgramStatus, 100);
   }
   
   // Load leaderboard with org parameter
