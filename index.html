@@ -1781,15 +1781,15 @@ async function syncCompletedWorkout(dex) {
     console.log('syncCompletedWorkout called', dex);
     
     // Extract week and day from the dex element
-    const weekEl = dex.closest('.wdiv');
+    const weekEl = dex.closest('.swk');
     console.log('weekEl:', weekEl);
     
     if (!weekEl) {
-      console.error('Could not find .wdiv parent');
+      console.error('Could not find .swk parent');
       return;
     }
     
-    const weekMatch = weekEl.querySelector('.wh')?.textContent.match(/Week (\d+)/);
+    const weekMatch = weekEl.querySelector('.wnum')?.textContent.match(/WEEK (\d+)/);
     const dayMatch = dex.previousElementSibling?.textContent.match(/^(\w+)/);
     
     console.log('weekMatch:', weekMatch, 'dayMatch:', dayMatch);
