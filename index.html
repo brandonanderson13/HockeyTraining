@@ -3355,29 +3355,6 @@ async function loadAdminPanel(user) {
       </div>
     </div>` : ''}
     
-    <div class="card" style="margin-bottom:1rem;">
-      <div class="ch"><span class="cht">Embed Leaderboard on Your Website</span></div>
-      <div class="cb">
-        <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">
-          Add the live leaderboard to your association website. Players and parents can see rankings without logging in.
-        </p>
-        
-        <div style="margin-bottom:14px;">
-          <label style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block;">Direct Link (share this URL)</label>
-          <input type="text" readonly value="https://hockey-training.vercel.app/leaderboard.html?org=${window._userOrgId || 'delano'}" onclick="this.select()" style="width:100%;background:#0d0d0d;border:1px solid #333;color:rgba(255,255,255,0.7);font-size:12px;padding:8px 10px;border-radius:4px;font-family:monospace;cursor:pointer;">
-          <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:4px;">Click to select and copy</div>
-        </div>
-        
-        <div style="margin-bottom:14px;">
-          <label style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block;">Embed Code (paste into your website HTML)</label>
-          <textarea readonly onclick="this.select()" style="width:100%;background:#0d0d0d;border:1px solid #333;color:rgba(255,255,255,0.7);font-size:11px;padding:10px;border-radius:4px;font-family:monospace;cursor:pointer;resize:vertical;height:80px;line-height:1.5;"><iframe src="https://hockey-training.vercel.app/leaderboard.html?org=${window._userOrgId || 'delano'}" width="100%" height="600" frameborder="0" style="border:none;border-radius:8px;"></iframe></textarea>
-          <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:4px;">Click to select and copy</div>
-        </div>
-        
-        <a href="https://hockey-training.vercel.app/leaderboard.html?org=${window._userOrgId || 'delano'}" target="_blank" class="btn-o" style="display:inline-block;text-decoration:none;text-align:center;margin:0;">Preview Leaderboard</a>
-      </div>
-    </div>
-    
     <div class="card" style="margin-bottom:1rem;" id="superAdminPanel">
       <div class="ch">
         <span class="cht">Add New Player</span>
@@ -3968,6 +3945,17 @@ function sortPlayers(column) {
   });
   
   filterPlayers();
+}
+
+
+function showCopied(el) {
+  const original = el.nextElementSibling.textContent;
+  el.nextElementSibling.textContent = '✓ Copied to clipboard!';
+  el.nextElementSibling.style.color = '#4ade80';
+  setTimeout(() => {
+    el.nextElementSibling.textContent = original;
+    el.nextElementSibling.style.color = 'rgba(255,255,255,0.35)';
+  }, 2000);
 }
 
 </script>
