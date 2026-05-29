@@ -522,12 +522,15 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- SCHEDULE -->
 <div id="schedule" class="sec">
-
-  <select id="phaseSelect" onchange="renderWeeks()">
+  
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:10px;">
+    <select id="phaseSelect" onchange="renderWeeks()" style="flex:1;min-width:250px;">
     <option value="1">Phase 1 &#8212; Foundation (Weeks 1&#8211;4)</option>
     <option value="2">Phase 2 &#8212; Development (Weeks 5&#8211;8)</option>
     <option value="3">Phase 3 &#8212; Performance (Weeks 9&#8211;12)</option>
   </select>
+    <button onclick="startNewCycle()" style="background:rgba(var(--primary-rgb),0.15);border:1px solid var(--primary-color);color:var(--primary-color);font-size:11px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">🔄 Start New Cycle</button>
+  </div>
   <div style="font-size:11px;color:rgba(255,255,255,0.38);margin-bottom:8px;">Tap any exercise for description + YouTube. Skills sessions have quick-log buttons to log directly into Stickhandling Log or Shot Log.</div>
   <div id="phaseInfo"></div>
   <div id="weeksContainer"></div>
@@ -4406,6 +4409,31 @@ function resetAllTests() {
     msg.style.display = 'none';
     msg.style.color = '#4ade80';
   }, 2500);
+}
+
+
+function startNewCycle() {
+  const checkboxCount = document.querySelectorAll('.xl.completed').length;
+  
+  if (!confirm(`🔄 Start New Training Cycle?\n\nThis will uncheck all ${checkboxCount} completed exercises so you can start fresh.\n\nYour workout history and stats will be SAVED — your total workouts completed won't reset.\n\nContinue?`)) {
+    return;
+  }
+  
+  // Clear all exercise completion checkboxes from localStorage
+  const keys = Object.keys(localStorage);
+  let cleared = 0;
+  keys.forEach(key => {
+    if (key.startsWith('ex_')) {
+      localStorage.removeItem(key);
+      cleared++;
+    }
+  });
+  
+  // Refresh the display
+  renderWeeks();
+  
+  // Show confirmation
+  alert(`✓ New cycle started!\n\n${cleared} exercises unmarked. Your ${checkboxCount} completed workouts are still saved in your history.`);
 }
 
 </script>
