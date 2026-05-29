@@ -466,15 +466,23 @@ function selectIndividualPlan(plan) {
   showCustomerForm();
 }
 
-function selectAssociationPlan(seats, price) {
-  selectedPlan = { type: 'association', players: players, price: price };
-  ['20','50','100','250','Unlimited'].forEach(s => {
-    const el = document.getElementById('assoc' + s);
-    if (el) el.classList.remove('selected');
-  });
-  const cardId = players === 999999 ? 'assocUnlimited' : 'assoc' + players;
-  document.getElementById(cardId).classList.add('selected');
-  document.getElementById('assocFields').style.display = 'block';
+function selectAssociationPlan(seats, price, interval) {
+  interval = interval || 'annual';
+  selectedPlan = { type: 'association', players: seats, price: price, interval: interval };
+  
+  // Remove selected class from all cards
+  document.querySelectorAll('.price-card').forEach(card => card.classList.remove('selected'));
+  
+  // Add selected to clicked card
+  const tierPrefix = seats === 30 ? 'select' : (seats === 75 ? 'elite' : 'premier');
+  const cardId = tierPrefix + '-' + interval;
+  const card = document.getElementById(cardId);
+  if (card) card.classList.add('selected');
+  
+  // Show association fields and form
+  const assocFields = document.getElementById('assocFields');
+  if (assocFields) assocFields.style.display = 'block';
+  
   showCustomerForm();
 }
 
