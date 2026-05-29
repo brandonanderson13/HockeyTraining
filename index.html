@@ -1653,8 +1653,8 @@ function showSec(id){
   // Load leaderboard with org parameter
   if (id === 'leaderboard') {
     const frame = document.getElementById('leaderboardFrame');
-    if (frame && !frame.src) {
-      const orgParam = window._userOrgId || 'individual';
+    if (frame) {
+      const orgParam = window._userOrgId || 'delano';
       frame.src = `leaderboard.html?org=${orgParam}`;
     }
   }
