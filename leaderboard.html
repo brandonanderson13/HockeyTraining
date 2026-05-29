@@ -150,7 +150,11 @@ async function loadLeaderboard() {
           .sort((a, b) => b.value - a.value);
       }
     } else if (currentBoard === 'workouts') {
-      const { data: completions } = await sb.from('exercise_completions').select('user_id').eq('organization_id', orgId);
+      let query = sb.from('exercise_completions').select('user_id').eq('organization_id', orgId);
+      if (startDate) query = query.gte('completion_date', startDate);
+      if (endDate) query = query.lte('completion_date', endDate);
+      const { data: completions } = await query;
+      
       const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('organization_id', orgId);
       
       const workoutsByUser = {};
