@@ -510,6 +510,7 @@ select:focus{border-color:var(--or);outline:none;}
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
       <button class="btn-o" onclick="saveBaselineResults()">Save as Baseline</button>
       <button class="btn-o" onclick="saveRetestResults()" style="background:#60a5fa;">Save as Latest Test</button>
+      <button onclick="resetAllTests()" style="background:transparent;border:1px solid #f87171;color:#f87171;font-size:11px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;margin-left:auto;">Reset All Tests</button>
       <div id="baseline-saved-msg" style="font-size:12px;color:#4ade80;display:none;">&#10003; Results saved!</div>
     </div>
   </div>
@@ -3651,21 +3652,30 @@ function updateTestImprovement(testId, direction) {
   if (!input || !progressDiv) return;
   
   const currentValue = parseFloat(input.value);
-  if (isNaN(currentValue) || currentValue === 0) {
-    progressDiv.style.display = 'none';
-    return;
-  }
   
-  // Get baseline from localStorage
+  // Get baseline and latest from localStorage
   const baseline = JSON.parse(localStorage.getItem('tigersBaseline') || '{}');
   const baselineValue = baseline[testId];
   
   if (!baselineValue || baselineValue === 0) {
-    // No baseline yet - this IS the baseline
+    // No baseline yet
+    if (isNaN(currentValue) || currentValue === 0) {
+      progressDiv.style.display = 'none';
+    } else {
+      progressDiv.style.display = 'block';
+      progressDiv.style.background = 'rgba(59, 130, 246, 0.1)';
+      progressDiv.style.color = '#60a5fa';
+      progressDiv.innerHTML = '<strong>Baseline:</strong> Not set yet';
+    }
+    return;
+  }
+  
+  if (isNaN(currentValue) || currentValue === 0) {
+    // Show baseline only
     progressDiv.style.display = 'block';
-    progressDiv.style.background = 'rgba(59, 130, 246, 0.1)';
-    progressDiv.style.color = '#60a5fa';
-    progressDiv.innerHTML = 'This will be your baseline';
+    progressDiv.style.background = 'rgba(255, 255, 255, 0.03)';
+    progressDiv.style.color = 'rgba(255,255,255,0.5)';
+    progressDiv.innerHTML = `<strong>Baseline:</strong> ${baselineValue}`;
     return;
   }
   
@@ -3674,26 +3684,27 @@ function updateTestImprovement(testId, direction) {
   const isImprovement = (direction === 'higher' && diff > 0) || (direction === 'lower' && diff < 0);
   const absDiff = Math.abs(diff);
   
-  // Format the difference nicely
+  // Format
   let diffText = '';
+  let unit = '';
+  
   if (direction === 'lower') {
-    // For time-based tests (lower is better)
-    diffText = diff < 0 ? `-${absDiff.toFixed(2)}s faster!` : `+${absDiff.toFixed(2)}s slower`;
+    diffText = diff < 0 ? `${absDiff.toFixed(2)} faster` : `${absDiff.toFixed(2)} slower`;
+    unit = 's';
   } else {
-    // For performance tests (higher is better)
-    diffText = diff > 0 ? `+${absDiff.toFixed(0)} improvement!` : `-${absDiff.toFixed(0)} decline`;
+    diffText = diff > 0 ? `+${diff.toFixed(0)}` : `${diff.toFixed(0)}`;
   }
   
-  // Show with color coding
+  // Show all three values
   progressDiv.style.display = 'block';
   if (isImprovement) {
-    progressDiv.style.background = 'rgba(74, 222, 128, 0.1)';
+    progressDiv.style.background = 'rgba(74, 222, 128, 0.12)';
     progressDiv.style.color = '#4ade80';
-    progressDiv.innerHTML = `🎯 ${diffText} <span style="font-size:10px;color:rgba(74,222,128,0.6);margin-left:4px;">(Baseline: ${baselineValue})</span>`;
+    progressDiv.innerHTML = `<strong>Baseline:</strong> ${baselineValue} | <strong>Latest:</strong> ${currentValue} | <strong style="color:#4ade80;">🎯 ${diffText}${unit}</strong>`;
   } else {
     progressDiv.style.background = 'rgba(248, 113, 113, 0.1)';
     progressDiv.style.color = '#f87171';
-    progressDiv.innerHTML = `${diffText} <span style="font-size:10px;color:rgba(248,113,113,0.6);margin-left:4px;">(Baseline: ${baselineValue})</span>`;
+    progressDiv.innerHTML = `<strong>Baseline:</strong> ${baselineValue} | <strong>Latest:</strong> ${currentValue} | <strong style="color:#f87171;">${diffText}${unit}</strong>`;
   }
 }
 
@@ -3705,10 +3716,7 @@ async function saveRetestResults() {
     if (val) results['bt_' + i] = val;
   }
   
-  if (Object.keys(results).length < 10) {
-    alert('Please complete all 10 tests before saving.');
-    return;
-  }
+  // Allow partial saves - don't require all 10 tests
   
   // Save to localStorage
   try {
@@ -3720,9 +3728,41 @@ async function saveRetestResults() {
   
   // Show confirmation
   const msg = document.getElementById('baseline-saved-msg');
-  msg.textContent = '✓ Latest test saved! Improvements shown above.';
+  msg.textContent = `✓ Latest test saved (${Object.keys(results).length} tests recorded)`;
   msg.style.display = 'block';
   setTimeout(() => msg.style.display = 'none', 3000);
+}
+
+
+function resetAllTests() {
+  if (!confirm('⚠️ This will permanently delete all your saved test results (baseline and latest tests). Are you sure you want to reset everything?')) {
+    return;
+  }
+  
+  // Clear from localStorage
+  try {
+    localStorage.removeItem('tigersBaseline');
+    localStorage.removeItem('tigersLatestTest');
+  } catch (e) {}
+  
+  // Clear all input fields
+  for (let i = 0; i < 10; i++) {
+    const input = document.getElementById('bt_' + i);
+    if (input) input.value = '';
+    
+    const progressDiv = document.getElementById('bt_' + i + '_progress');
+    if (progressDiv) progressDiv.style.display = 'none';
+  }
+  
+  // Show confirmation
+  const msg = document.getElementById('baseline-saved-msg');
+  msg.textContent = '✓ All tests reset';
+  msg.style.color = '#fb923c';
+  msg.style.display = 'block';
+  setTimeout(() => {
+    msg.style.display = 'none';
+    msg.style.color = '#4ade80';
+  }, 2500);
 }
 
 </script>
