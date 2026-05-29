@@ -249,6 +249,17 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- OVERVIEW -->
 <div id="overview" class="sec active">
+  <div style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:16px;margin-bottom:1rem;">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);margin-bottom:8px;">⚡ Quick Start</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:10px;">
+      First time? <strong>Scroll down to "Customize Your Program"</strong> and select your age group and season phase. The program will automatically adjust for you.
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button onclick="document.getElementById('customize-panel').scrollIntoView({behavior:'smooth'});" style="background:var(--primary-color);color:#fff;border:none;font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Go to Customize ↓</button>
+      <button onclick="showSec('baseline');" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Start Baseline Test →</button>
+    </div>
+  </div>
+  
   <div class="ibox"><strong>Program Goal:</strong> Build hockey-ready athletes year-round with cyclable training phases of structured off-ice training.
     <div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,0.65);line-height:1.6;">
       <strong style="color:var(--primary-color);">How it works:</strong> Three progressive 4-week phases. <strong>Foundation</strong> builds movement quality and clean technique. <strong>Development</strong> adds strength, volume, and advanced skills. <strong>Performance</strong> converts everything into game-speed power.
@@ -268,7 +279,7 @@ select:focus{border-color:var(--or);outline:none;}
       <span class="cht">&#9881; Customize Your Program</span>
       <span id="customize-arrow" style="font-size:12px;color:rgba(255,255,255,0.35);transition:transform .2s;display:inline-block;">&#9654;</span>
     </div>
-    <div id="customize-panel" style="display:none;">
+    <div id="customize-panel" style="display:block;">
       <div class="cb">
         <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:14px;line-height:1.6;">Pick your age group first — it adjusts exercises and loads to be appropriate. Then customize the rest. Hit Apply Settings to save.</div>
 
@@ -283,7 +294,19 @@ select:focus{border-color:var(--or);outline:none;}
           </select>
           <div id="age-description" style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:8px;line-height:1.5;"></div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+        
+        <!-- SEASON PHASE SELECTOR -->
+        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:8px;">🏒 Season Phase <span style="color:rgba(255,255,255,0.4);font-weight:400;">(adjusts volume &amp; frequency)</span></div>
+          <select id="cust-season" onchange="updateSeasonDescription()" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;font-family:'Barlow',sans-serif;font-weight:600;">
+            <option value="offseason" selected>Off-Season — Full Program (5-6 days/week)</option>
+            <option value="preseason">Pre-Season — Ramp Up (4-5 days/week)</option>
+            <option value="inseason">In-Season — Maintenance (2-3 days/week, reduced volume)</option>
+          </select>
+          <div id="season-description" style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:8px;line-height:1.5;"></div>
+        </div>
+        
+        <div style="margin-bottom:14px;">
           <div>
             <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:8px;">Include in My Program</div>
             <label class="cust-check"><input type="checkbox" id="cust-strength" checked> Strength Training</label>
@@ -291,13 +314,7 @@ select:focus{border-color:var(--or);outline:none;}
             <label class="cust-check"><input type="checkbox" id="cust-skills" checked> Stickhandling &amp; Shooting</label>
             <label class="cust-check"><input type="checkbox" id="cust-conditioning" checked> Conditioning</label>
           </div>
-          <div>
-            <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:8px;">Primary Focus</div>
-            <label class="cust-radio"><input type="radio" name="focus" value="balanced" checked> Balanced (default)</label>
-            <label class="cust-radio"><input type="radio" name="focus" value="skills"> Skills-Heavy</label>
-            <label class="cust-radio"><input type="radio" name="focus" value="strength"> Strength-Heavy</label>
-            <label class="cust-radio"><input type="radio" name="focus" value="conditioning"> Conditioning-Heavy</label>
-          </div>
+
         </div>
         <div style="margin-bottom:14px;">
           <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:8px;">Available Training Days</div>
@@ -311,11 +328,6 @@ select:focus{border-color:var(--or);outline:none;}
             <label class="day-toggle"><input type="checkbox" value="Sunday"><span>Sun</span></label>
           </div>
           <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;">Workouts redistribute across whatever days you pick. Pick fewer days = more concentrated, pick more = spread out.</div>
-        </div>
-        <div>
-          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:6px;">Player Name</div>
-          <input type="text" id="cust-name" placeholder="e.g. Tyler" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:7px 10px;border-radius:6px;font-family:'Barlow',sans-serif;width:200px;">
-          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;">Personalizes the program header — "Tyler's Training Program."</div>
         </div>
         <div style="margin-top:18px;padding-top:14px;border-top:1px solid #1f1f1f;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
           <button class="btn-o" style="margin-top:0;" onclick="applyCustomization()">Apply Settings</button>
@@ -1472,62 +1484,62 @@ function addLogoutButton(supabase, user, isAdmin) {
 const phases={
   1:{label:'Phase 1 — Foundation (Wks 1–4)',desc:'Build the foundation. Focus on movement quality, proper form, and consistency. Light-to-moderate loads, higher reps. Stickhandling and shooting integrated every day to build skill from the start.',color:'#60a5fa',weeks:[
     {num:1,focus:'Establishing Movement Patterns',days:[
-      {n:'Monday',t:'Lower Body + Agility',items:[['Goblet Squat','4×10'],['Romanian Deadlift','3×10'],['Lateral Lunge','3×10 each'],['Calf Raises','3×20'],['Cone Shuffle','3×30s'],['Crossover Run','3×20 yds'],['Stickhandling — Side-to-Side Soft Touch','5 min'],['Stickhandling — Around the World','2×60s']]},
-      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — Mechanics Focus','3×20 shots'],['Snap Shot — Short Backswing','2×15 shots'],['Backhand Shots','2×10 shots'],['Stickhandling — Figure 8 — Horizontal','3×60s'],['Speed Taps (30s)','3 sets — count and record'],['Shuttle Runs','4 rounds'],['Jump Rope','3×1 min']]},
-      {n:'Wednesday',t:'Active Recovery',items:[['Light walk or bike','20 min'],['Stickhandling — Around the World','3×60s — easy'],['Foam roll — legs and hips','10 min']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','4×10'],['Bent-Over Row','4×10'],['Shoulder Press','3×10'],['Plank','3×30s'],['Dead Bug','3×12 each'],['Russian Twists','3×16'],['Stickhandling — Top Hand Only','3×30s'],['Stickhandling — Wide Dribble','3×45s']]},
-      {n:'Friday',t:'Full Skills + Shooting',items:[['Stickhandling — Figure 8 — Vertical','3×60s'],['Stickhandling — Puck Protection','3×45 sec'],['Cone Weave with Puck','5 runs — timed'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Lateral Bound Intervals','6 rounds'],['Shuttle Runs','3 rounds']]},
-      {n:'Saturday',t:'Total Body + Shooting',items:[['Goblet Squat','3×12'],['Push-Up','3×10'],['Bent-Over Row','4×8'],['Wrist Shot — 30-shot session','Log total'],['Stickhandling — Speed Taps (30s)','4 sets — count and record'],['Side Plank','2×20s each']]}
+      {n:'Monday',t:'Lower Body + Agility',items:[['Goblet Squat','3×10'],['Romanian Deadlift','3×10'],['Lateral Lunge','3×10 each'],['Calf Raises','3×20'],['Cone Shuffle','3×30s'],['Crossover Run','3×20 yds']]},
+      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — Mechanics Focus','3×20 shots'],['Snap Shot — Short Backswing','3×15 shots'],['Backhand Shots','2×10 shots'],['Speed Taps (30s)','3 sets — count and record'],['Shuttle Runs','4 rounds'],['Burpees','3×10']]},
+      {n:'Wednesday',t:'Active Recovery',items:[['Light walk or bike','20 min'],['Foam roll — legs and hips','10 min'],['Mobility routine','10 min']]},
+      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','3×10'],['Bent-Over Row','3×10'],['Shoulder Press','3×10'],['Plank','3×40s'],['Dead Bug','3×12 each'],['Russian Twists','3×20']]},
+      {n:'Friday',t:'Full Skills + Shooting',items:[['Cone Weave with Puck','5 runs — timed'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Snap Shot','3×15 shots'],['Lateral Bound Intervals','6 rounds'],['Shuttle Runs','4 rounds'],['Burpees','3×8']]},
+      {n:'Saturday',t:'Total Body + Shooting',items:[['Goblet Squat','3×12'],['Push-Up','3×12'],['Bent-Over Row','3×10'],['Wrist Shot — 40-shot session','Log total'],['Speed Taps (30s)','4 sets — count and record'],['Side Plank','3×25s each']]}
     ]},
     {num:2,focus:'Adding Volume & Consistency',days:[
-      {n:'Monday',t:'Lower Body + Agility',items:[['Goblet Squat','4×12'],['Romanian Deadlift','4×10'],['Step-Up with Knee Drive','3×8 each'],['Calf Raises','3×20'],['Box Drill','4×60s'],['Crossover Run','4×20 yds'],['Stickhandling — Figure 8 — Horizontal','3×60s'],['Stickhandling — Puck Protection','2×45 sec']]},
-      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Backhand Shots','2×12 shots'],['Stickhandling — Wide Dribble','3×45s'],['Stickhandling — Figure 8 — Vertical','2×60s'],['Speed Taps (30s)','4 sets — count and record'],['Shuttle Runs','5 rounds']]},
-      {n:'Wednesday',t:'Active Recovery',items:[['Light movement','25 min'],['Stickhandling — Around the World','5 min — easy'],['Stickhandling — Top Hand Only','2×30s'],['Hip mobility drills','10 min']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','4×10'],['Renegade Row','3×6 each'],['Shoulder Press','3×10'],['Plank','3×35s'],['Dead Bug','3×12 each'],['Russian Twists','3×18'],['Stickhandling — Figure 8 — Vertical','3×60s'],['Stickhandling — Triangle Drill','3×30s']]},
-      {n:'Friday',t:'Full Skills + Shooting',items:[['Stickhandling — Cone Weave','5 runs — timed'],['Stickhandling — Puck Protection','3×45 sec'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Snap Shot','3×15 shots'],['Backhand Shots','2×12 shots'],['Lateral Bound Intervals','6 rounds'],['Shuttle Runs','4 rounds']]},
-      {n:'Saturday',t:'Total Body + Shooting',items:[['Bulgarian Split Squat','3×8 each'],['Push-Up','3×12'],['Bent-Over Row','3×12'],['Wrist Shot — 40-shot session','Log total'],['Stickhandling — Speed Taps (30s)','4 sets — count and record'],['Side Plank','2×25s each']]}
+      {n:'Monday',t:'Lower Body + Agility',items:[['Goblet Squat','3×12'],['Romanian Deadlift','3×10'],['Step-Up with Knee Drive','3×10 each'],['Calf Raises','3×20'],['Box Drill','4×60s'],['Lateral Bound','3×8 each']]},
+      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','3×10 shots — log score'],['Snap Shot','3×15 shots'],['Backhand Shots','3×12 shots'],['Speed Taps (30s)','4 sets — count and record'],['Shuttle Runs','5 rounds'],['Burpees','3×10']]},
+      {n:'Wednesday',t:'Active Recovery',items:[['Light movement','25 min'],['Mobility routine','10 min'],['Foam rolling','10 min']]},
+      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','3×10'],['Renegade Row','3×8 each'],['Shoulder Press','3×10'],['Plank','3×40s'],['Dead Bug','3×12 each'],['Russian Twists','3×20'],['Burpees','3×8']]},
+      {n:'Friday',t:'Full Skills + Shooting',items:[['Cone Weave with Puck','5 runs — timed'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Snap Shot','3×15 shots'],['Backhand Shots','3×12 shots'],['Lateral Bound Intervals','6 rounds'],['Shuttle Runs','4 rounds'],['Jump Rope','3×1 min']]},
+      {n:'Saturday',t:'Total Body + Shooting',items:[['Bulgarian Split Squat','3×10 each'],['Push-Up','3×12'],['Bent-Over Row','3×12'],['Wrist Shot — 50-shot session','Log total'],['Speed Taps (30s)','4 sets — count and record'],['Side Plank','3×30s each']]}
     ]},
     {num:3,focus:'Building Strength & Control',days:[
-      {n:'Monday',t:'Lower Body + Agility',items:[['Bulgarian Split Squat','4×8 each'],['Romanian Deadlift','4×10'],['Lateral Lunge','3×12 each'],['Ladder Drills','3×full'],['5-10-5 Shuttle','4 runs — timed'],['Stickhandling — Figure 8 — Horizontal','4×60s'],['Stickhandling — Triangle Drill','3×30s']]},
-      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','3×10 shots — log score'],['Backhand Shots','3×12 shots'],['Slap Shot — Mechanics','2×12 shots'],['Stickhandling — Cone Weave','5 runs — timed'],['Speed Taps (30s)','4 sets — count and record'],['Shuttle Runs','5 rounds']]},
-      {n:'Wednesday',t:'Active Recovery',items:[['Recovery walk or bike','25 min'],['Stickhandling — Around the World','5 min'],['Stickhandling — Wide Dribble','3×45s']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','4×10'],['Bent-Over Row','4×10'],['Bicep Curl','3×12'],['Tricep Kickback','3×12'],['Plank','3×40s'],['Side Plank','3×25s each'],['Russian Twists','3×20'],['Stickhandling — Top Hand Only','3×30s'],['Stickhandling — Figure 8 — Vertical','3×60s']]},
-      {n:'Friday',t:'Full Skills + Shooting',items:[['Stickhandling — Cone Weave','5 runs — timed'],['Stickhandling — Puck Protection','3×45 sec'],['Stickhandling — Triangle Drill','4×30s'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Backhand Shots','3×12 shots'],['Lateral Bound Intervals','8 rounds']]},
-      {n:'Saturday',t:'Total Body + Shooting',items:[['Goblet Squat','4×12'],['Push-Up','4×10'],['Renegade Row','3×6 each'],['Wrist Shot — 50-shot session','Log total'],['Stickhandling — Speed Taps (30s)','4 sets — count and record'],['Ab Wheel','3×8']]}
+      {n:'Monday',t:'Lower Body + Agility',items:[['Bulgarian Split Squat','3×10 each'],['Romanian Deadlift','3×10'],['Lateral Lunge','3×12 each'],['Ladder Drills','4×full'],['5-10-5 Shuttle','4 runs — timed'],['Box Jump','3×6']]},
+      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','3×10 shots — log score'],['Snap Shot','3×15 shots'],['Backhand Shots','3×12 shots'],['Slap Shot — Mechanics','3×12 shots'],['Speed Taps (30s)','4 sets — count and record'],['Shuttle Runs','5 rounds'],['Burpees','3×10']]},
+      {n:'Wednesday',t:'Active Recovery',items:[['Recovery walk or bike','25 min'],['Mobility routine','12 min'],['Light stretching','8 min']]},
+      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','3×10'],['Bent-Over Row','3×10'],['Bicep Curl','3×12'],['Tricep Kickback','3×12'],['Plank','3×45s'],['Side Plank','3×30s each'],['Russian Twists','3×22'],['Mountain Climbers','3×20']]},
+      {n:'Friday',t:'Full Skills + Shooting',items:[['Cone Weave with Puck','5 runs — timed'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Snap Shot','3×15 shots'],['Backhand Shots','3×12 shots'],['Lateral Bound Intervals','8 rounds'],['Jump Rope','3×90s']]},
+      {n:'Saturday',t:'Total Body + Shooting',items:[['Goblet Squat','3×12'],['Push-Up','3×12'],['Renegade Row','3×8 each'],['Wrist Shot — 60-shot session','Log total'],['Speed Taps (30s)','4 sets — count and record'],['Ab Wheel','3×10']]}
     ]},
     {num:4,focus:'Foundation Peak — Prep for Phase 2',days:[
-      {n:'Monday',t:'Lower Body + Agility',items:[['Bulgarian Split Squat','5×8 each'],['Romanian Deadlift','4×10'],['Step-Up with Knee Drive','3×10 each'],['5-10-5 Shuttle','5 runs — timed'],['Box Drill','4×60s'],['Stickhandling — Figure 8 — Horizontal','4×60s'],['Stickhandling — Puck Protection','3×45 sec']]},
-      {n:'Tuesday',t:'Shooting Focus Day',items:[['Wrist Shot — 100-shot session','Log all types'],['Backhand Shots','3×15 shots'],['Slap Shot','3×12 shots'],['Stickhandling — Speed Taps (30s)','4 sets — count and record'],['Stickhandling — Cone Weave','5 runs — timed'],['Shuttle Runs','6 rounds']]},
-      {n:'Wednesday',t:'Active Recovery',items:[['Full rest or light walk',''],['Stickhandling — Around the World','5 min'],['Review Weeks 1–4 progress','']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','4×10'],['Bent-Over Row','4×10'],['Shoulder Press','4×10'],['Ab Wheel','3×8'],['Dead Bug','3×10 each'],['Plank','3×45s'],['Stickhandling — Top Hand Only','3×30s'],['Stickhandling — Triangle Drill','4×30s']]},
-      {n:'Friday',t:'Full Skills + Shooting',items:[['Stickhandling — Cone Weave','5 runs — timed'],['Stickhandling — Hand Switches — intro','3×20 sec'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Shuttle Runs','6 rounds'],['Jump Rope','5×1 min']]},
-      {n:'Saturday',t:'Full Body + Shooting Volume',items:[['Full body circuit — all muscle groups','3×10-12 each'],['Wrist Shot — 50-shot session','Log total'],['Stickhandling — Speed Taps (30s)','4 sets — count and record']]}
+      {n:'Monday',t:'Lower Body + Agility',items:[['Bulgarian Split Squat','3×10 each'],['Romanian Deadlift','3×10'],['Step-Up with Knee Drive','3×10 each'],['5-10-5 Shuttle','5 runs — timed'],['Box Drill','4×60s'],['Box Jump','4×6']]},
+      {n:'Tuesday',t:'Shooting Focus Day',items:[['Wrist Shot — 100-shot session','Log all types'],['Snap Shot','3×20 shots'],['Backhand Shots','3×15 shots'],['Slap Shot','3×12 shots'],['Speed Taps (30s)','4 sets — count and record'],['Shuttle Runs','6 rounds'],['Burpees','3×12']]},
+      {n:'Wednesday',t:'Active Recovery',items:[['Full rest or light walk',''],['Mobility routine','12 min'],['Review Weeks 1–4 progress','']]},
+      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','3×10'],['Bent-Over Row','3×10'],['Shoulder Press','3×10'],['Ab Wheel','3×10'],['Dead Bug','3×12 each'],['Plank','3×50s'],['Mountain Climbers','3×20']]},
+      {n:'Friday',t:'Full Skills + Shooting',items:[['Cone Weave with Puck','5 runs — timed'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Snap Shot','3×20 shots'],['Backhand Shots','3×15 shots'],['Shuttle Runs','6 rounds'],['Jump Rope','4×90s'],['Burpees','3×10']]},
+      {n:'Saturday',t:'Full Body + Shooting Volume',items:[['Goblet Squat','3×12'],['Dumbbell Bench Press','3×10'],['Bent-Over Row','3×10'],['Plank','3×50s'],['Wrist Shot — 60-shot session','Log total'],['Speed Taps (30s)','4 sets — count and record']]}
     ]}
   ]},
   2:{label:'Phase 2 — Development (Wks 5–8)',desc:'Build strength and develop skills. Loads increase, skills get more advanced — dekes, backhand toe drags. Shooting volume ramps up. The bridge from foundation to game-ready.',color:'#4ade80',weeks:[
     {num:5,focus:'Strength Building — Phase 2 Begins',days:[
-      {n:'Monday',t:'Lower Body + Speed',items:[['Goblet Squat','4×10'],['Romanian Deadlift','3×10'],['Lateral Lunge','3×10 each'],['Box Drill','4×60s'],['Reactive Drop Step','4×10 each'],['Stickhandling — Cone Weave','5 runs — timed'],['Stickhandling — Triangle Drill','3×45s']]},
-      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','3×10 shots — log score'],['Backhand Shots','3×15 shots'],['Slap Shot','3×12 shots'],['Stickhandling — Hand Switches','3×30 sec'],['Speed Taps (30s)','4 sets — count and record'],['Interval sprints with puck','8 rounds']]},
-      {n:'Wednesday',t:'Active Recovery',items:[['Light jog','20 min'],['Stickhandling — Around the World','5 min'],['Stickhandling — Wide Dribble','3×45s']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','4×10'],['Renegade Row','4×6 each'],['Shoulder Press','4×10'],['Plank','3×45s'],['Russian Twists','3×20'],['Dead Bug','3×12 each'],['Stickhandling — Top Hand Only','4×30s'],['Stickhandling — Cone Weave','3 runs — timed']]},
-      {n:'Friday',t:'Full Skills + Shooting',items:[['Stickhandling — Cone Weave','5 runs — timed'],['Stickhandling — Hand Switches','3×30 sec'],['Stickhandling — Speed Taps (30s)','4 sets — count and record'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Snap Shot','3×15 shots'],['Lateral Bound Intervals — Tabata','8 rounds']]},
-      {n:'Saturday',t:'Power Circuit + Shooting',items:[['Bulgarian Split Squat','4×8 each'],['Box Jump','4×6'],['Dumbbell Bench Press','4×10'],['Bent-Over Row','4×10'],['Wrist Shot — 40-shot session','Log total'],['Stickhandling — Speed Taps (30s)','4 sets — count and record']]}
+      {n:'Monday',t:'Lower Body + Speed',items:[['Goblet Squat','4×8'],['Romanian Deadlift','4×10'],['Lateral Lunge','4×10 each'],['Box Drill','4×60s'],['Reactive Drop Step','4×10 each'],['Box Jump','4×6']]},
+      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','3×10 shots — log score'],['Snap Shot','4×15 shots'],['Backhand Shots','3×15 shots'],['Slap Shot','3×12 shots'],['Speed Taps (30s)','4 sets — count and record'],['Interval sprints with puck','8 rounds'],['Burpees','4×10']]},
+      {n:'Wednesday',t:'Active Recovery',items:[['Light jog','20 min'],['Mobility routine','12 min'],['Foam rolling','10 min']]},
+      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','4×8'],['Renegade Row','4×8 each'],['Shoulder Press','4×10'],['Plank','4×50s'],['Russian Twists','4×22'],['Dead Bug','4×12 each'],['Ab Wheel','3×10']]},
+      {n:'Friday',t:'Full Skills + Shooting',items:[['Cone Weave with Puck','5 runs — timed'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Snap Shot','4×15 shots'],['Backhand Shots','3×15 shots'],['Speed Taps (30s)','4 sets — count and record'],['Lateral Bound Intervals — Tabata','8 rounds'],['Jump Rope','4×90s']]},
+      {n:'Saturday',t:'Power Circuit + Shooting',items:[['Bulgarian Split Squat','4×10 each'],['Box Jump','4×6'],['Dumbbell Bench Press','4×8'],['Bent-Over Row','4×8'],['Wrist Shot — 70-shot session','Log total'],['Speed Taps (30s)','4 sets — count and record'],['Side Plank','3×35s each']]}
     ]},
     {num:6,focus:'Strength + Shot Power Combined',days:[
-      {n:'Monday',t:'Lower Body + Speed',items:[['Bulgarian Split Squat','4×8 each'],['Romanian Deadlift','4×10'],['Lateral Lunge','4×10 each'],['Ladder Drills','4×full'],['5-10-5 Shuttle','5 runs — timed'],['Stickhandling — Cone Weave','5 runs — timed'],['Stickhandling — Hand Switches','3×30 sec']]},
-      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','3×10 shots — log score'],['Backhand Shots — roof drill','3×12 shots'],['Slap Shot — Power Position','3×12 shots'],['Stickhandling — Cone Weave — backhand only','4 runs — timed'],['Speed Taps (30s)','4 sets — count and record'],['Suicides','6 rounds']]},
-      {n:'Wednesday',t:'Active Recovery',items:[['Full rest or light movement',''],['Stickhandling — Around the World + Figure 8','8 min']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Incline Dumbbell Press','4×10'],['Bent-Over Row','4×12'],['Lateral Raise','3×15'],['Ab Wheel','3×10'],['Dead Bug','3×10 each'],['Russian Twists','3×22'],['Stickhandling — Top Hand Only','4×30s'],['Stickhandling — Hand Switches','3×30 sec']]},
-      {n:'Friday',t:'Full Skills + Shooting',items:[['Stickhandling — Cone Weave — both directions','5 runs each — timed'],['Stickhandling — Speed Taps (30s)','4 sets — count and record'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Backhand Shots','3×12 shots'],['Interval sprints with puck','8 rounds']]},
-      {n:'Saturday',t:'Power + Shooting Volume',items:[['Box Jump','4×6'],['Goblet Squat','4×12'],['Dumbbell Bench Press','4×10'],['Bent-Over Row','4×12'],['Wrist Shot — 60-shot session','Log total'],['Stickhandling — Speed Taps (30s)','4 sets — count and record']]}
+      {n:'Monday',t:'Lower Body + Speed',items:[['Bulgarian Split Squat','4×8 each'],['Romanian Deadlift','4×10'],['Lateral Lunge','4×10 each'],['Ladder Drills','4×full'],['5-10-5 Shuttle','5 runs — timed'],['Box Jump','4×6']]},
+      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','3×10 shots — log score'],['Snap Shot','4×15 shots'],['Backhand Shots — roof drill','3×12 shots'],['Slap Shot — Power Position','3×12 shots'],['Speed Taps (30s)','4 sets — count and record'],['Suicides','6 rounds'],['Burpees','4×10']]},
+      {n:'Wednesday',t:'Active Recovery',items:[['Full rest or light movement',''],['Mobility routine','15 min']]},
+      {n:'Thursday',t:'Upper Body + Core',items:[['Incline Dumbbell Press','4×8'],['Bent-Over Row','4×10'],['Lateral Raise','4×15'],['Ab Wheel','4×10'],['Dead Bug','4×12 each'],['Russian Twists','4×24'],['Mountain Climbers','4×20']]},
+      {n:'Friday',t:'Full Skills + Shooting',items:[['Cone Weave with Puck','5 runs — timed'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Snap Shot','4×15 shots'],['Backhand Shots','3×15 shots'],['Speed Taps (30s)','4 sets — count and record'],['Interval sprints with puck','8 rounds'],['Jump Rope','4×90s']]},
+      {n:'Saturday',t:'Power + Shooting Volume',items:[['Box Jump','4×6'],['Goblet Squat','4×10'],['Dumbbell Bench Press','4×8'],['Bent-Over Row','4×10'],['Wrist Shot — 80-shot session','Log total'],['Speed Taps (30s)','4 sets — count and record'],['Plank','4×55s']]}
     ]},
     {num:7,focus:'Peak Strength + Skill Integration',days:[
-      {n:'Monday',t:'Lower Body + Speed',items:[['Step-Up with Knee Drive','4×10 each'],['Romanian Deadlift','4×10'],['Lateral Lunge','4×10 each'],['Box Drill + 5-10-5 superset','4 rounds'],['Reactive Drop Step','4×10 each'],['Stickhandling — Cone Weave','5 runs — timed'],['Stickhandling — Triangle Drill','4×45s']]},
-      {n:'Tuesday',t:'Shooting Volume Day',items:[['Wrist Shot — 5-spot accuracy','3×10 shots — log score'],['Backhand Shots — roof drill','3×15 shots'],['Slap Shot','3×12 shots'],['One-timer drill','3×15 each side'],['Stickhandling — Hand Switches','4×30 sec'],['Speed Taps (30s)','4 sets — count and record']]},
-      {n:'Wednesday',t:'Active Recovery',items:[['Active recovery or full rest',''],['Stickhandling — Around the World','5 min'],['Stickhandling — Wide Dribble','3×45s']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','5×8'],['Renegade Row','4×8 each'],['Shoulder Press','4×10'],['Plank + Shoulder Tap','3×20'],['Ab Wheel','3×10'],['Russian Twists','3×24'],['Stickhandling — Top Hand Only','4×30s'],['Stickhandling — Cone Weave — backhand','3 runs — timed']]},
-      {n:'Friday',t:'Full Skills + Shooting',items:[['Stickhandling — Cone Weave — narrow spacing','5 runs — timed'],['Stickhandling — Hand Switches','4×30 sec'],['Stickhandling — Speed Taps (30s)','4 sets — count and record'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Backhand Shots','3×15 shots'],['Lateral Bound Intervals','8 rounds']]},
-      {n:'Saturday',t:'Power + Skill Circuit',items:[['Box Jump','4×8'],['Bulgarian Split Squat','4×8 each'],['Dumbbell Bench Press','4×10'],['Bent-Over Row','4×10'],['Wrist Shot — 60-shot session','Log total'],['Stickhandling — Speed Taps (30s)','4 sets — count and record']]}
+      {n:'Monday',t:'Lower Body + Speed',items:[['Step-Up with Knee Drive','4×10 each'],['Romanian Deadlift','4×10'],['Lateral Lunge','4×10 each'],['Box Drill + 5-10-5 superset','4 rounds'],['Reactive Drop Step','4×10 each'],['Jump Squat','4×6']]},
+      {n:'Tuesday',t:'Shooting Volume Day',items:[['Wrist Shot — 5-spot accuracy','3×10 shots — log score'],['Snap Shot','4×15 shots'],['Backhand Shots — roof drill','3×15 shots'],['Slap Shot','3×12 shots'],['One-timer drill','3×15 each side'],['Speed Taps (30s)','4 sets — count and record'],['Burpees','4×12']]},
+      {n:'Wednesday',t:'Active Recovery',items:[['Active recovery or full rest',''],['Mobility routine','15 min'],['Light stretching','10 min']]},
+      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','4×8'],['Renegade Row','4×8 each'],['Shoulder Press','4×10'],['Plank + Shoulder Tap','4×20'],['Ab Wheel','4×10'],['Russian Twists','4×24'],['Mountain Climbers','4×24']]},
+      {n:'Friday',t:'Full Skills + Shooting',items:[['Cone Weave with Puck','5 runs — timed'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Snap Shot','4×15 shots'],['Backhand Shots','3×15 shots'],['Speed Taps (30s)','4 sets — count and record'],['Lateral Bound Intervals','8 rounds'],['Shuttle Runs','5 rounds']]},
+      {n:'Saturday',t:'Power + Skill Circuit',items:[['Box Jump','4×8'],['Bulgarian Split Squat','4×8 each'],['Dumbbell Bench Press','4×8'],['Bent-Over Row','4×10'],['Wrist Shot — 80-shot session','Log total'],['Speed Taps (30s)','4 sets — count and record'],['Plank','4×60s']]}
     ]},
     {num:8,focus:'Maximum Strength Week',days:[
       {n:'Monday',t:'Lower Body + Power',items:[['Bulgarian Split Squat','5×8 each'],['Romanian Deadlift','5×8'],['Broad Jump','4×3'],['5-10-5 Shuttle — max effort','5 runs — timed'],['Stickhandling — Cone Weave — narrow','5 runs — timed'],['Stickhandling — Hand Switches','4×30 sec']]},
@@ -2845,6 +2857,29 @@ function filterItems(items, settings, dayType){
   });
 }
 
+
+function adjustVolumeForSeason(volumeStr) {
+  // Get current season setting
+  const c = JSON.parse(localStorage.getItem('tigersCustomization')||'{}');
+  const season = c.season || 'offseason';
+  
+  if (season !== 'inseason') return volumeStr; // No adjustment needed
+  
+  // In-season: reduce sets by 1 (4×8 becomes 3×8, 3×10 becomes 2×10)
+  const match = volumeStr.match(/^(\d+)([×x])(\d+)/);
+  if (match) {
+    let sets = parseInt(match[1]);
+    const separator = match[2];
+    const reps = match[3];
+    
+    // Reduce by 1 set, minimum 2 sets
+    sets = Math.max(2, sets - 1);
+    return sets + separator + reps + (volumeStr.includes('each') ? ' each' : '');
+  }
+  
+  return volumeStr; // Return unchanged if format doesn't match
+}
+
 function renderWeeks(){
   _schedulePhase=parseInt(document.getElementById('phaseSelect').value);
   const p=phases[_schedulePhase];
@@ -4060,6 +4095,32 @@ function showCopied(el) {
     el.nextElementSibling.style.color = 'rgba(255,255,255,0.35)';
   }, 2000);
 }
+
+
+function updateSeasonDescription() {
+  const season = document.getElementById('cust-season').value;
+  const desc = document.getElementById('season-description');
+  
+  if (season === 'offseason') {
+    desc.innerHTML = '<strong>Full volume, maximum gains.</strong> Follow the program as written. This is when you build the foundation for next season.';
+  } else if (season === 'preseason') {
+    desc.innerHTML = '<strong>Ramp up intensity.</strong> 4-5 training days, full volumes. Use Weeks 9-12 (Performance phase) to peak before season starts.';
+  } else if (season === 'inseason') {
+    desc.innerHTML = '<strong>Maintain strength, don\'t add fatigue.</strong> Automatically reduces to 2-3 days/week (Mon/Thu/Sat). All sets reduced by 1 (4 sets → 3 sets). Use Weeks 1-4 exercises only.';
+    
+    // Auto-select in-season training days
+    document.querySelectorAll('.day-toggle input').forEach(cb => {
+      cb.checked = ['Monday', 'Thursday', 'Saturday'].includes(cb.value);
+    });
+  }
+}
+
+// Call on page load to show initial description
+setTimeout(() => {
+  if (document.getElementById('season-description')) {
+    updateSeasonDescription();
+  }
+}, 100);
 
 </script>
 </body>
