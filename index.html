@@ -4329,10 +4329,10 @@ function updateLeaderboardDates() {
   if (start) url += `&start=${start}`;
   if (end) url += `&end=${end}`;
   
-  // Update the iframe in the leaderboard tab
+  // Update the iframe in the leaderboard tab (force reload with timestamp)
   const frame = document.getElementById('leaderboardFrame');
   if (frame) {
-    frame.src = url;
+    frame.src = url + '&t=' + Date.now();
   }
   
   // Update the embed code and preview
@@ -4341,8 +4341,11 @@ function updateLeaderboardDates() {
   // Update display text
   const display = document.getElementById('leaderboardRangeDisplay');
   if (start && end) {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
+    // Parse dates without timezone conversion
+    const [sy, sm, sd] = start.split('-').map(Number);
+    const [ey, em, ed] = end.split('-').map(Number);
+    const startDate = new Date(sy, sm - 1, sd);
+    const endDate = new Date(ey, em - 1, ed);
     display.textContent = `${startDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} - ${endDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}`;
   } else if (start) {
     display.textContent = `From ${new Date(start).toLocaleDateString('en-US')}`;
