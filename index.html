@@ -1457,9 +1457,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       if (userSub.expires_at) {
         const expiresAt = new Date(userSub.expires_at);
         if (expiresAt < new Date()) {
-          alert('Your subscription has expired. Please renew.');
+          alert('⚠️ Your subscription has expired.\n\nYou\'ll be redirected to renew your subscription. Your training data and progress are safe and will be restored once you renew.');
           await supabase.auth.signOut();
-          window.location.href = 'subscribe.html';
+          window.location.href = `subscribe.html?email=${encodeURIComponent(user.email)}`;
           return;
         }
       }
