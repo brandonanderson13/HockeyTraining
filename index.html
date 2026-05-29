@@ -1669,7 +1669,7 @@ function saveBaselineResults(){
   msg.style.display='inline';
   setTimeout(()=>msg.style.display='none',2500);
   
-  // Clear inputs and update progress displays
+  // Clear inputs and show saved baseline permanently
   ids.forEach(i => {
     const input = document.getElementById('bt_' + i);
     const progressDiv = document.getElementById('bt_' + i + '_progress');
@@ -1686,14 +1686,11 @@ function saveBaselineResults(){
     }
     
     if (progressDiv && resultsObj['bt_' + i]) {
-      // Show saved baseline in progress display
+      // Show saved baseline PERMANENTLY (don't hide)
       progressDiv.style.display = 'block';
-      progressDiv.style.background = 'rgba(74,222,128,0.08)';
-      progressDiv.style.color = '#4ade80';
-      progressDiv.innerHTML = `<strong>Baseline saved:</strong> ${resultsObj['bt_' + i]} ✓`;
-      
-      // Hide after a moment
-      setTimeout(() => progressDiv.style.display = 'none', 2000);
+      progressDiv.style.background = 'rgba(255,255,255,0.03)';
+      progressDiv.style.color = 'rgba(255,255,255,0.5)';
+      progressDiv.innerHTML = `<strong>Baseline:</strong> ${resultsObj['bt_' + i]}`;
     }
   });
 }
@@ -4495,6 +4492,24 @@ function startNewCycle() {
   // Show confirmation
   alert(`✓ New cycle started!\n\n${cleared} exercises unmarked. Your ${checkboxCount} completed workouts are still saved in your history.`);
 }
+
+
+function loadSavedBaselines() {
+  const baseline = JSON.parse(localStorage.getItem('tigersBaseline') || '{}');
+  
+  Object.keys(baseline).forEach(testId => {
+    const progressDiv = document.getElementById(testId + '_progress');
+    if (progressDiv && baseline[testId]) {
+      progressDiv.style.display = 'block';
+      progressDiv.style.background = 'rgba(255,255,255,0.03)';
+      progressDiv.style.color = 'rgba(255,255,255,0.5)';
+      progressDiv.innerHTML = `<strong>Baseline:</strong> ${baseline[testId]}`;
+    }
+  });
+}
+
+// Call on page load
+setTimeout(loadSavedBaselines, 500);
 
 </script>
 </body>
