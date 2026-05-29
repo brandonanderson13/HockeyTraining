@@ -3054,6 +3054,11 @@ function renderWeeks(){
       const playerAge = settings.age || 'bantam';
       filteredItems = filteredItems.map(([n,v]) => applyAgeToItem(n, v, playerAge));
 
+      // Skip this day entirely if no exercises remain after filtering
+      if(filteredItems.length === 0){
+        return; // Don't render empty days
+      }
+
       if(filteredItems.length){
         const exdiv=document.createElement('div');exdiv.className='dex';
         const today=getTodayStr();
