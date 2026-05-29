@@ -2990,22 +2990,27 @@ function adjustVolumeForSeason(volumeStr) {
 
 
 function updateProgramStatus() {
-  const settings = getCustSettings();
-  const season = (document.getElementById('cust-season')||{}).value || 'offseason';
   const statusDiv = document.getElementById('programStatus');
-  
   if (!statusDiv) return;
   
-  const seasonNames = {
-    'offseason': 'Off-Season — Maximum Development',
-    'preseason': 'Pre-Season — Intensity Ramp',
-    'inseason': 'In-Season — Maintenance Mode'
-  };
-  
-  const dayCount = settings.activeDays.length;
-  const volumeNote = season === 'inseason' ? ' (volumes reduced)' : '';
-  
-  statusDiv.innerHTML = `${seasonNames[season] || 'Off-Season'} · ${dayCount} days/week${volumeNote}`;
+  try {
+    const settings = getCustSettings();
+    const seasonEl = document.getElementById('cust-season');
+    const season = seasonEl ? seasonEl.value : 'offseason';
+    
+    const seasonNames = {
+      'offseason': 'Off-Season — Maximum Development',
+      'preseason': 'Pre-Season — Intensity Ramp',
+      'inseason': 'In-Season — Maintenance Mode'
+    };
+    
+    const dayCount = settings.activeDays.length || 6;
+    const volumeNote = season === 'inseason' ? ' (volumes reduced)' : '';
+    
+    statusDiv.innerHTML = `${seasonNames[season] || 'Off-Season'} · ${dayCount} days/week${volumeNote}`;
+  } catch (e) {
+    statusDiv.innerHTML = 'Off-Season — Maximum Development · 6 days/week';
+  }
 }
 
 function renderWeeks(){
@@ -4282,12 +4287,13 @@ function updateSeasonDescription() {
   }
 }
 
-// Call on page load to show initial description
+// Call on page load to show initial descriptions
 setTimeout(() => {
   if (document.getElementById('season-description')) {
     updateSeasonDescription();
   }
-}, 100);
+  updateProgramStatus();
+}, 200);
 
 
 function setCurrentMonth() {
