@@ -46,7 +46,7 @@
     <p>Top performers — updated live</p>
   </div>
   
-  <div class="reset-info" id="resetInfo">Current period: May 2026</div>
+  <div class="reset-info" id="resetInfo">Loading period...</div>
   
   <div class="tabs">
     <button class="tab-btn active" onclick="switchBoard('shots')" id="tabShots">Most Shots</button>
@@ -66,14 +66,30 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Get organization from URL parameter
+// Get parameters from URL
 const urlParams = new URLSearchParams(window.location.search);
-const orgId = urlParams.get('org') || 'delano'; // Default to delano for this deployment
+const orgId = urlParams.get('org') || 'delano';
+const startDate = urlParams.get('start'); // Optional: YYYY-MM-DD format
+const endDate = urlParams.get('end'); // Optional: YYYY-MM-DD format
 
 let currentBoard = 'shots';
 
 async function loadLeaderboard() {
   const content = document.getElementById('leaderboardContent');
+  
+  // Update period display
+  const resetInfo = document.getElementById('resetInfo');
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    resetInfo.textContent = `Period: ${start.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} - ${end.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}`;
+  } else if (startDate) {
+    resetInfo.textContent = `Period: From ${new Date(startDate).toLocaleDateString('en-US')}`;
+  } else if (endDate) {
+    resetInfo.textContent = `Period: Until ${new Date(endDate).toLocaleDateString('en-US')}`;
+  } else {
+    resetInfo.textContent = 'All-time stats';
+  }
   
   // Update header based on org
   if (orgId === 'delano') {
@@ -88,7 +104,10 @@ async function loadLeaderboard() {
     let players = [];
     
     if (currentBoard === 'shots') {
-      const { data: sessions } = await sb.from('shooting_sessions').select('user_id, total_shots').eq('organization_id', orgId);
+      let query = sb.from('shooting_sessions').select('user_id, total_shots').eq('organization_id', orgId);
+      if (startDate) query = query.gte('session_date', startDate);
+      if (endDate) query = query.lte('session_date', endDate);
+      const { data: sessions } = await query;
       const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('organization_id', orgId);
       
       const shotsByUser = {};
@@ -108,7 +127,10 @@ async function loadLeaderboard() {
           .sort((a, b) => b.value - a.value);
       }
     } else if (currentBoard === 'stickhandling') {
-      const { data: sessions } = await sb.from('stickhandling_sessions').select('user_id, minutes').eq('organization_id', orgId);
+      let query = sb.from('stickhandling_sessions').select('user_id, minutes').eq('organization_id', orgId);
+      if (startDate) query = query.gte('session_date', startDate);
+      if (endDate) query = query.lte('session_date', endDate);
+      const { data: sessions } = await query;
       const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('organization_id', orgId);
       
       const minsByUser = {};

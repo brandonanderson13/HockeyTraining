@@ -3503,6 +3503,35 @@ async function loadAdminPanel(user) {
       </div>
     </div>
     
+        <div class="card" style="margin-top:1rem;">
+      <div class="ch"><span class="cht">Leaderboard Date Range</span></div>
+      <div class="cb">
+        <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">
+          Control which time period the leaderboard displays. Default is current month. Set custom dates for seasonal competitions or specific training blocks.
+        </p>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div>
+            <label style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block;">Start Date</label>
+            <input type="date" id="leaderboardStart" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:8px 10px;border-radius:4px;font-family:monospace;">
+          </div>
+          <div>
+            <label style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block;">End Date</label>
+            <input type="date" id="leaderboardEnd" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:8px 10px;border-radius:4px;font-family:monospace;">
+          </div>
+        </div>
+        
+        <div style="display:flex;gap:8px;">
+          <button onclick="setCurrentMonth()" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.7);font-size:11px;font-weight:700;padding:8px 12px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Current Month</button>
+          <button onclick="setAllTime()" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.7);font-size:11px;font-weight:700;padding:8px 12px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">All Time</button>
+          <button onclick="updateLeaderboardDates()" class="btn-o" style="margin:0;flex:1;">Update Leaderboard</button>
+        </div>
+        
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:12px;line-height:1.5;">
+          Current leaderboard shows: <strong id="leaderboardRangeDisplay">All time</strong>
+        </div>
+      </div>
+    </div>
     <div class="card">
       <div class="ch">
         <span class="cht">All Players</span>
@@ -4173,6 +4202,87 @@ setTimeout(() => {
     updateSeasonDescription();
   }
 }, 100);
+
+
+function setCurrentMonth() {
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  
+  document.getElementById('leaderboardStart').value = firstDay.toISOString().split('T')[0];
+  document.getElementById('leaderboardEnd').value = lastDay.toISOString().split('T')[0];
+  
+  const monthName = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  document.getElementById('leaderboardRangeDisplay').textContent = monthName;
+}
+
+function setAllTime() {
+  document.getElementById('leaderboardStart').value = '';
+  document.getElementById('leaderboardEnd').value = '';
+  document.getElementById('leaderboardRangeDisplay').textContent = 'All time';
+}
+
+function updateLeaderboardDates() {
+  const start = document.getElementById('leaderboardStart').value;
+  const end = document.getElementById('leaderboardEnd').value;
+  const orgParam = window._userOrgId || 'delano';
+  
+  // Build leaderboard URL with date parameters
+  let url = `leaderboard.html?org=${orgParam}`;
+  if (start) url += `&start=${start}`;
+  if (end) url += `&end=${end}`;
+  
+  // Update the iframe in the leaderboard tab
+  const frame = document.getElementById('leaderboardFrame');
+  if (frame) {
+    frame.src = url;
+  }
+  
+  // Update the embed code and preview
+  updateEmbedCode(url);
+  
+  // Update display text
+  const display = document.getElementById('leaderboardRangeDisplay');
+  if (start && end) {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    display.textContent = `${startDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} - ${endDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})}`;
+  } else if (start) {
+    display.textContent = `From ${new Date(start).toLocaleDateString('en-US')}`;
+  } else if (end) {
+    display.textContent = `Until ${new Date(end).toLocaleDateString('en-US')}`;
+  } else {
+    display.textContent = 'All time';
+  }
+}
+
+function updateEmbedCode(url) {
+  // Update the embed iframe preview
+  const embedFrame = document.querySelector('.cb iframe[height="400"]');
+  if (embedFrame) {
+    const fullUrl = `https://hockey-training.vercel.app/${url}`;
+    embedFrame.src = fullUrl;
+    
+    // Update the embed code textarea
+    const embedTextarea = document.querySelector('textarea[readonly]');
+    if (embedTextarea) {
+      embedTextarea.value = `<iframe src="${fullUrl}" width="100%" height="600" frameborder="0" style="border:none;border-radius:8px;"></iframe>`;
+    }
+    
+    // Update the direct link input
+    const linkInput = document.querySelector('input[readonly][value*="leaderboard.html"]');
+    if (linkInput) {
+      linkInput.value = fullUrl;
+    }
+  }
+}
+
+// Set current month by default when admin panel loads
+setTimeout(() => {
+  if (document.getElementById('leaderboardStart')) {
+    setCurrentMonth();
+  }
+}, 500);
 
 </script>
 </body>
