@@ -1778,33 +1778,58 @@ async function syncStickhandlingSession(sessionData) {
 
 async function syncCompletedWorkout(dex) {
   try {
+    console.log('syncCompletedWorkout called', dex);
+    
     // Extract week and day from the dex element
     const weekEl = dex.closest('.wdiv');
-    if (!weekEl) return;
+    console.log('weekEl:', weekEl);
+    
+    if (!weekEl) {
+      console.error('Could not find .wdiv parent');
+      return;
+    }
     
     const weekMatch = weekEl.querySelector('.wh')?.textContent.match(/Week (\d+)/);
     const dayMatch = dex.previousElementSibling?.textContent.match(/^(\w+)/);
     
-    if (!weekMatch || !dayMatch) return;
+    console.log('weekMatch:', weekMatch, 'dayMatch:', dayMatch);
+    
+    if (!weekMatch || !dayMatch) {
+      console.error('Could not extract week or day from DOM');
+      return;
+    }
     
     const weekNum = parseInt(weekMatch[1]);
     const dayName = dayMatch[1];
     const today = new Date().toISOString().split('T')[0];
     
+    console.log('Syncing completed workout:', {weekNum, dayName, today});
+    
     const sb = await getSupabaseClient();
     const { data: { user } } = await sb.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      console.error('No user logged in');
+      return;
+    }
     
     // Record this as one completed workout
-    await sb.from('exercise_completions').upsert({
+    const result = await sb.from('exercise_completions').upsert({
       user_id: user.id,
       organization_id: window._userOrgId || 'delano',
       completion_date: today,
       week_number: weekNum,
       day_name: dayName,
-      exercise_name: 'FULL_DAY_COMPLETED', // Special marker for full day
+      exercise_name: 'FULL_DAY_COMPLETED',
       completed: true
     }, { onConflict: 'user_id,completion_date,week_number,day_name,exercise_name' });
+    
+    console.log('Supabase upsert result:', result);
+    
+    if (result.error) {
+      console.error('Supabase error:', result.error);
+    } else {
+      console.log('✓ Workout synced successfully');
+    }
     
   } catch (error) {
     console.error('Failed to sync completed workout:', error);
