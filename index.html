@@ -400,10 +400,10 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- BASELINE TEST -->
 <div id="baseline" class="sec">
-  <div class="ibox"><strong>Baseline Testing:</strong> Do these tests before you start training. Hit <strong>Save Baseline</strong> when done. Retest every 4-6 weeks and save as your retest — the Progress tab will show your improvements over time.</div>
+  <div class="ibox"><strong>Testing & Progress:</strong> Do these tests before you start training and click <strong>Save as Baseline</strong>. When you retest later, enter your new results and click <strong>Save as Latest Test</strong> — improvements will show instantly as you type.</div>
 
   <div style="background:#141414;border:1px solid rgba(var(--primary-rgb),0.3);border-radius:10px;padding:12px 14px;margin-bottom:1rem;font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;">
-    <span style="color:var(--primary-color);font-weight:600;">How to use:</span> Complete each test below, type your result in the box, then click <strong style="color:#fff;">Save Results</strong> at the bottom. Your numbers will appear in the Progress Tracker tab automatically.
+    <span style="color:var(--primary-color);font-weight:600;">How to use:</span> First time: enter all results and click <strong style="color:#fff;">Save as Baseline</strong>. When you retest later, enter new results — you'll see improvements instantly in green below each test. Click <strong style="color:#fff;">Save as Latest Test</strong> to record your retest.
   </div>
 
   <!-- SPEED & CONDITIONING -->
@@ -507,8 +507,11 @@ select:focus{border-color:var(--or);outline:none;}
   </div>
 
   <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-    <button class="btn-o" onclick="saveBaselineResults()">Save as Baseline</button>
-    <div id="baseline-saved-msg" style="font-size:12px;color:#4ade80;display:none;">&#10003; Results saved! Check the Progress Tracker tab.</div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button class="btn-o" onclick="saveBaselineResults()">Save as Baseline</button>
+      <button class="btn-o" onclick="saveRetestResults()" style="background:#60a5fa;">Save as Latest Test</button>
+      <div id="baseline-saved-msg" style="font-size:12px;color:#4ade80;display:none;">&#10003; Results saved!</div>
+    </div>
   </div>
   
 
@@ -3692,6 +3695,34 @@ function updateTestImprovement(testId, direction) {
     progressDiv.style.color = '#f87171';
     progressDiv.innerHTML = `${diffText} <span style="font-size:10px;color:rgba(248,113,113,0.6);margin-left:4px;">(Baseline: ${baselineValue})</span>`;
   }
+}
+
+
+async function saveRetestResults() {
+  const results = {};
+  for (let i = 0; i < 10; i++) {
+    const val = parseFloat(document.getElementById('bt_' + i).value);
+    if (val) results['bt_' + i] = val;
+  }
+  
+  if (Object.keys(results).length < 10) {
+    alert('Please complete all 10 tests before saving.');
+    return;
+  }
+  
+  // Save to localStorage
+  try {
+    localStorage.setItem('tigersLatestTest', JSON.stringify(results));
+  } catch (e) {}
+  
+  // Sync to Supabase
+  await syncBaselineResults('retest');
+  
+  // Show confirmation
+  const msg = document.getElementById('baseline-saved-msg');
+  msg.textContent = '✓ Latest test saved! Improvements shown above.';
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 3000);
 }
 
 </script>
