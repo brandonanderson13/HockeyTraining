@@ -3877,8 +3877,8 @@ async function loadPlayerList(isSuperAdmin = false) {
     const playersUsedDetailEl = document.getElementById('seatsUsedDetail');
     const playersRemainingEl = document.getElementById('seatsRemaining');
     
-    if (seatsUsedEl) playersUsedEl.textContent = playerCount;
-    if (seatsUsedDetailEl) playersUsedDetailEl.textContent = playerCount;
+    if (playersUsedEl) playersUsedEl.textContent = playerCount;
+    if (playersUsedDetailEl) playersUsedDetailEl.textContent = playerCount;
     
     // Calculate and show remaining players
     if (window._adminSubscription && window._adminSubscription.seat_limit) {
