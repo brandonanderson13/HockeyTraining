@@ -3556,7 +3556,7 @@ async function loadAdminPanel(user) {
       <div class="cb">
         ${hasPlayers ? `<div style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:12px;margin-bottom:12px;text-align:center;">
           <div style="font-size:13px;color:var(--primary-color);font-weight:700;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Association: ${adminSub.organization_name || 'Your Organization'}</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;"><span id="seatsUsed">-</span> of ${adminSub.seat_limit === 999999 ? 'unlimited' : adminSub.seat_limit} players used</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;"><span id="seatsUsed">-</span> of <span id="orgSeatLimit">-</span> players used</div>
         </div>` : ''}
       <div id="quickStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;">
         <div style="text-align:center;padding:12px;background:#0d0d0d;border-radius:8px;">
@@ -3924,12 +3924,21 @@ async function loadPlayerList(isSuperAdmin = false) {
     const statTotalWorkouts = document.getElementById('statTotalWorkouts');
     
     const playerCount = subs.filter(s => s.role === 'player').length; // Don't count admins
+    
+    // Calculate org-wide seat limit (use max among all admins in org)
+    const orgAdmins = subs.filter(s => s.role === 'admin' && s.seat_limit);
+    const maxSeats = orgAdmins.length > 0 
+      ? Math.max(...orgAdmins.map(a => a.seat_limit))
+      : (window._adminSubscription?.seat_limit || 0);
+    
     const playersUsedEl = document.getElementById('seatsUsed');
     const playersUsedDetailEl = document.getElementById('seatsUsedDetail');
     const playersRemainingEl = document.getElementById('seatsRemaining');
+    const orgSeatLimitEl = document.getElementById('orgSeatLimit');
     
     if (playersUsedEl) playersUsedEl.textContent = playerCount;
     if (playersUsedDetailEl) playersUsedDetailEl.textContent = playerCount;
+    if (orgSeatLimitEl) orgSeatLimitEl.textContent = maxSeats === 999999 ? 'unlimited' : maxSeats;
     
     // Calculate and show remaining players
     if (window._adminSubscription && window._adminSubscription.seat_limit) {
