@@ -3990,23 +3990,8 @@ function refreshPlayerList() {
     const embedCard = document.createElement('div');
     embedCard.className = 'card';
     embedCard.style.marginTop = '1rem';
-    embedCard.innerHTML = `
-      <div class="ch"><span class="cht">Embed Leaderboard on Your Website</span></div>
-      <div class="cb">
-        <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">
-          Add the live leaderboard to your website. Updates automatically every 30 seconds.
-  
-  // Update renewal date if available
-  if (window._adminSubscription && window._adminSubscription.seat_limit) {
-    const renewalEl = document.getElementById('renewalDate');
-    if (renewalEl && adminSub.expires_at) {
-      const renewalDate = new Date(adminSub.expires_at);
-      renewalEl.textContent = renewalDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    } else if (renewalEl) {
-      renewalEl.textContent = 'Contact admin';
-      renewalEl.style.fontSize = '12px';
-      renewalEl.style.color = 'rgba(255,255,255,0.4)';
-    }
+    // Embed card creation removed - was causing syntax errors
+    // Admins can access leaderboard via the Leaderboard tab
   }
 }
 
