@@ -3798,9 +3798,7 @@ async function handleAddPlayer(e) {
     }
     
     // Send password reset email so player can set their own password
-    await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://hockey-training.vercel.app/login.html'
-    });
+    await sb.auth.resetPasswordForEmail(email);
     
     msg.style.color = '#4ade80';
     msg.textContent = `✓ Player added! Password reset email sent to ${email}`;

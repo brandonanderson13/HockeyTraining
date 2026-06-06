@@ -29,6 +29,7 @@
   .link:hover { text-decoration: underline; }
   .footer { text-align: center; font-size: 11px; color: rgba(255,255,255,0.25); margin-top: 32px; }
   .error { color: #f87171; font-size: 13px; margin-top: 12px; display: none; }
+  .success { color: #4ade80; font-size: 13px; margin-top: 12px; display: none; }
 </style>
 </head>
 <body>
@@ -38,7 +39,8 @@
     <div style="font-size:13px;color:rgba(255,255,255,0.4);font-weight:500;">Delano Youth Hockey</div>
   </div>
   
-  <div class="card">
+  <!-- Regular Sign In Form -->
+  <div class="card" id="loginCard">
     <h2>Sign In</h2>
     <p>Enter your credentials to access your training program</p>
     
@@ -57,13 +59,57 @@
       <button type="submit" id="submitBtn">Sign In</button>
       
       <div style="text-align:center;margin-top:16px;">
-        <a href="#" class="link" onclick="resetPassword();return false;">Forgot password?</a>
+        <a href="#" class="link" onclick="showForgotPassword();return false;">Forgot password?</a>
       </div>
       
       <div style="text-align:center;margin-top:20px;padding-top:20px;border-top:1px solid #222;">
         <div style="font-size:13px;color:rgba(255,255,255,0.5);">Don't have an account?</div>
         <a href="subscribe.html" style="color:var(--primary-color);text-decoration:none;font-weight:600;font-size:14px;margin-top:6px;display:inline-block;">Subscribe →</a>
       </div>
+    </form>
+  </div>
+  
+  <!-- Forgot Password Form -->
+  <div class="card" id="forgotCard" style="display:none;">
+    <h2>Reset Password</h2>
+    <p>Enter your email and we'll send you a password reset link</p>
+    
+    <form id="forgotForm">
+      <div>
+        <label>Email</label>
+        <input type="email" id="forgotEmail" required>
+      </div>
+      
+      <div id="forgotMsg" class="success"></div>
+      <div id="forgotError" class="error"></div>
+      
+      <button type="submit" id="forgotBtn">Send Reset Link</button>
+      
+      <div style="text-align:center;margin-top:16px;">
+        <a href="#" class="link" onclick="showLogin();return false;">← Back to Sign In</a>
+      </div>
+    </form>
+  </div>
+  
+  <!-- Set New Password Form (shown when coming from email link) -->
+  <div class="card" id="resetCard" style="display:none;">
+    <h2>Set New Password</h2>
+    <p>Choose a strong password for your account</p>
+    
+    <form id="resetForm">
+      <div>
+        <label>New Password</label>
+        <input type="password" id="newPassword" required minlength="6" placeholder="Minimum 6 characters">
+      </div>
+      <div>
+        <label>Confirm Password</label>
+        <input type="password" id="confirmPassword" required minlength="6">
+      </div>
+      
+      <div id="resetMsg" class="success"></div>
+      <div id="resetError" class="error"></div>
+      
+      <button type="submit" id="resetBtn">Update Password</button>
     </form>
   </div>
   
@@ -76,6 +122,20 @@ const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY';
 const sbLogin = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Check if coming from password reset email
+window.addEventListener('load', async () => {
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  const accessToken = hashParams.get('access_token');
+  const type = hashParams.get('type');
+  
+  if (type === 'recovery' && accessToken) {
+    // User clicked password reset link - show reset password form
+    document.getElementById('loginCard').style.display = 'none';
+    document.getElementById('resetCard').style.display = 'block';
+  }
+});
+
+// Regular login
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const submitBtn = document.getElementById('submitBtn');
@@ -100,17 +160,88 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   }
 });
 
-async function resetPassword() {
-  const email = prompt('Enter your email address:');
-  if (!email) return;
+// Forgot password
+document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('forgotBtn');
+  const msg = document.getElementById('forgotMsg');
+  const errorMsg = document.getElementById('forgotError');
   
-  const { error } = await sbLogin.auth.resetPasswordForEmail(email);
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  msg.style.display = 'none';
+  errorMsg.style.display = 'none';
+  
+  const email = document.getElementById('forgotEmail').value;
+  
+  const { error } = await sbLogin.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://hockey-training.vercel.app/login.html'
+  });
   
   if (error) {
-    alert('Error: ' + error.message);
+    errorMsg.textContent = error.message;
+    errorMsg.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Send Reset Link';
   } else {
-    alert('Password reset email sent! Check your inbox.');
+    msg.textContent = '✓ Password reset link sent! Check your email.';
+    msg.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Send Reset Link';
   }
+});
+
+// Reset password (from email link)
+document.getElementById('resetForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('resetBtn');
+  const msg = document.getElementById('resetMsg');
+  const errorMsg = document.getElementById('resetError');
+  
+  const newPassword = document.getElementById('newPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  
+  if (newPassword !== confirmPassword) {
+    errorMsg.textContent = 'Passwords don\'t match';
+    errorMsg.style.display = 'block';
+    return;
+  }
+  
+  if (newPassword.length < 6) {
+    errorMsg.textContent = 'Password must be at least 6 characters';
+    errorMsg.style.display = 'block';
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.textContent = 'Updating...';
+  msg.style.display = 'none';
+  errorMsg.style.display = 'none';
+  
+  const { error } = await sbLogin.auth.updateUser({ password: newPassword });
+  
+  if (error) {
+    errorMsg.textContent = error.message;
+    errorMsg.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Update Password';
+  } else {
+    msg.textContent = '✓ Password updated! Redirecting to sign in...';
+    msg.style.display = 'block';
+    setTimeout(() => {
+      window.location.href = 'login.html';
+    }, 2000);
+  }
+});
+
+function showForgotPassword() {
+  document.getElementById('loginCard').style.display = 'none';
+  document.getElementById('forgotCard').style.display = 'block';
+}
+
+function showLogin() {
+  document.getElementById('loginCard').style.display = 'block';
+  document.getElementById('forgotCard').style.display = 'none';
 }
 </script>
 </body>
