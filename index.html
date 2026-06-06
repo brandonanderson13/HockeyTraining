@@ -3887,7 +3887,7 @@ async function loadPlayerList(isSuperAdmin = false) {
         const remaining = limit - playerCount;
         
         // Update Add Player header
-        if (seatsRemainingEl) {
+        if (playersRemainingEl) {
           playersRemainingEl.textContent = remaining > 0 
             ? `${remaining} seat${remaining === 1 ? '' : 's'} remaining`
             : 'At player limit — upgrade to add more';
