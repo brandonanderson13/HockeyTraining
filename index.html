@@ -4620,6 +4620,30 @@ async function changePassword() {
   }
 }
 
+
+async function editExpiration(subId, email, currentExpires) {
+  const currentDate = currentExpires ? new Date(currentExpires).toISOString().split('T')[0] : '';
+  const newDate = prompt(`Set expiration date for ${email}\n\nCurrent: ${currentDate || 'No expiration'}\n\nEnter new date (YYYY-MM-DD) or leave blank for no expiration:`, currentDate);
+  
+  if (newDate === null) return; // Cancelled
+  
+  const expiresAt = newDate.trim() === '' ? null : newDate + 'T23:59:59Z';
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('subscriptions')
+      .update({ expires_at: expiresAt })
+      .eq('id', subId);
+    
+    if (error) throw error;
+    
+    alert(`✓ Expiration updated for ${email}`);
+    loadPlayerList(window._isSuperAdmin);
+  } catch (error) {
+    alert('Error updating expiration: ' + error.message);
+  }
+}
+
 </script>
 </body>
 </html>
