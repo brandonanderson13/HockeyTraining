@@ -74,7 +74,7 @@
 <script>
 const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sbLogin = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -88,7 +88,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
   
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await sbLogin.auth.signInWithPassword({ email, password });
   
   if (error) {
     errorMsg.textContent = error.message;
@@ -104,7 +104,7 @@ async function resetPassword() {
   const email = prompt('Enter your email address:');
   if (!email) return;
   
-  const { error } = await supabase.auth.resetPasswordForEmail(email);
+  const { error } = await sbLogin.auth.resetPasswordForEmail(email);
   
   if (error) {
     alert('Error: ' + error.message);
