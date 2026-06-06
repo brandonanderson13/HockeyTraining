@@ -1366,6 +1366,17 @@ select:focus{border-color:var(--or);outline:none;}
         <a href="https://billing.stripe.com/p/login/14AcN4fnrf2y4DBdiadjO00" target="_blank" class="btn-o" style="display:inline-block;text-decoration:none;text-align:center;margin:0;">Open Customer Portal</a>
       </div>
     </div>
+    
+    <div class="card">
+      <div class="ch"><span class="cht">Change Password</span></div>
+      <div class="cb">
+        <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">
+          Update your password for added security.
+        </p>
+        <button onclick="changePassword()" class="btn-o" style="margin:0;background:#60a5fa;">Change Password</button>
+        <div id="password-change-msg" style="font-size:12px;margin-top:10px;display:none;"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -3786,8 +3797,13 @@ async function handleAddPlayer(e) {
       throw new Error('Failed to create subscription: ' + subError.message);
     }
     
+    // Send password reset email so player can set their own password
+    await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://hockey-training.vercel.app/login.html'
+    });
+    
     msg.style.color = '#4ade80';
-    msg.textContent = '✓ Player added! Temp password: ' + password;
+    msg.textContent = `✓ Player added! Password reset email sent to ${email}`;
     msg.style.display = 'block';
     document.getElementById('adminFirstName').value = '';
     document.getElementById('adminLastName').value = '';
@@ -4116,10 +4132,24 @@ async function loadAccountDetails() {
     </div>`;
     
     // Plan type
-    if (isAssoc) {
+    if (sub.role === 'admin' && sub.seat_limit) {
+      // Admin with seat allocation
       html += `<div>
         <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Plan</div>
-        <div style="font-size:14px;color:var(--primary-color);font-weight:600;">Association — ${sub.seat_limit === 999999 ? 'Unlimited' : sub.seat_limit + ' Players'}</div>
+        <div style="font-size:14px;color:var(--primary-color);font-weight:600;">Association Admin — ${sub.seat_limit === 999999 ? 'Unlimited' : sub.seat_limit + ' Players'}</div>
+      </div>`;
+      
+      if (sub.organization_name) {
+        html += `<div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Organization</div>
+          <div style="font-size:14px;color:rgba(255,255,255,0.85);">${sub.organization_name}</div>
+        </div>`;
+      }
+    } else if (sub.subscription_type === 'association' || sub.organization_id === 'delano') {
+      // Player in an association (no seat_limit)
+      html += `<div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Plan</div>
+        <div style="font-size:14px;color:var(--primary-color);font-weight:600;">Association Member</div>
       </div>`;
       
       if (sub.organization_name) {
@@ -4129,6 +4159,7 @@ async function loadAccountDetails() {
         </div>`;
       }
     } else {
+      // Individual player
       html += `<div>
         <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Plan</div>
         <div style="font-size:14px;color:var(--primary-color);font-weight:600;">Individual Player</div>
@@ -4553,6 +4584,43 @@ function loadSavedBaselines() {
 
 // Call on page load
 setTimeout(loadSavedBaselines, 500);
+
+
+async function changePassword() {
+  const newPassword = prompt('Enter new password (minimum 6 characters):');
+  
+  if (!newPassword) return;
+  
+  if (newPassword.length < 6) {
+    alert('Password must be at least 6 characters');
+    return;
+  }
+  
+  const confirm = prompt('Confirm new password:');
+  if (confirm !== newPassword) {
+    alert('Passwords don\'t match');
+    return;
+  }
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.auth.updateUser({ password: newPassword });
+    
+    if (error) throw error;
+    
+    const msg = document.getElementById('password-change-msg');
+    msg.textContent = '✓ Password updated successfully!';
+    msg.style.color = '#4ade80';
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+    
+  } catch (error) {
+    const msg = document.getElementById('password-change-msg');
+    msg.textContent = 'Error: ' + error.message;
+    msg.style.color = '#f87171';
+    msg.style.display = 'block';
+  }
+}
 
 </script>
 </body>
