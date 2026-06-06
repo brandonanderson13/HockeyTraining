@@ -3700,10 +3700,7 @@ async function loadAdminPanel(user) {
           <select id="statusFilter" onchange="filterPlayers()" style="background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:6px 10px;border-radius:4px;">
             <option value="">All Status</option>
             <option value="active">Active</option>
-            <option value="pending">Pending</option>
-            <option value="cancelled">Cancelled</option>
-        <option value="expired">Expired</option>
-        <option value="inactive">Inactive</option>
+            <option value="inactive">Inactive</option>
           </select>
         </div>
         <div id="playerListContainer">Loading...</div>
@@ -4731,6 +4728,36 @@ async function reactivatePlayer(subId, email) {
     if (error) throw error;
     
     alert(`✓ ${email} reactivated`);
+    loadPlayerList(window._isSuperAdmin);
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+
+async function editOrgLimit() {
+  const currentLimit = window._orgSeatLimit || window._adminSubscription?.seat_limit || 1000;
+  const newLimit = prompt(`Set organization-wide player limit\n\nCurrent org limit: ${currentLimit === 999999 ? 'Unlimited' : currentLimit}\n\nEnter new limit (or 999999 for unlimited):`, currentLimit);
+  
+  if (!newLimit) return;
+  
+  const limit = parseInt(newLimit);
+  if (isNaN(limit) || limit < 0) {
+    alert('Please enter a valid number');
+    return;
+  }
+  
+  try {
+    const sb = await getSupabaseClient();
+    // Update super admin's seat_limit as the org global limit
+    const { error } = await sb.from('subscriptions')
+      .update({ seat_limit: limit })
+      .eq('email', 'brandonanderson1393@gmail.com');
+    
+    if (error) throw error;
+    
+    window._orgSeatLimit = limit;
+    alert(`✓ Organization player limit set to ${limit === 999999 ? 'Unlimited' : limit}`);
     loadPlayerList(window._isSuperAdmin);
   } catch (error) {
     alert('Error: ' + error.message);
