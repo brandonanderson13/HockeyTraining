@@ -4017,7 +4017,7 @@ async function loadPlayerList(isSuperAdmin = false) {
           ${sub.stripe_subscription_id ? '<button onclick="adminCancelStripe(\''+sub.id+'\',\''+sub.email+'\',\''+sub.stripe_subscription_id+'\')" style="background:#fb923c;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Cancel</button>' : ''}
           ${isSuperAdmin ? '<button onclick="editExpiration(\''+sub.id+'\',\''+sub.email+'\',\''+(sub.expires_at||'')+'\')" style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;color:#3b82f6;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Set Expires</button>' : ''}
           ${isSuperAdmin && sub.role === 'admin' && sub.seat_limit ? '<button onclick="editPlayers(\''+sub.id+'\',\''+sub.email+'\','+sub.seat_limit+')" style="background:#60a5fa;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Edit Players</button>' : ''}
-          ${isSuperAdmin ? (sub.status === 'active' ? 
+          ${isSuperAdmin && sub.email !== 'brandonanderson1393@gmail.com' ? (sub.status === 'active' ? 
               '<button onclick="deactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#fb923c;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
               '<button onclick="reactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
         </td>
@@ -4694,6 +4694,12 @@ async function editExpiration(subId, email, currentExpires) {
 
 
 async function deactivatePlayer(subId, email) {
+  // Prevent deactivating super admin
+  if (email === 'brandonanderson1393@gmail.com') {
+    alert('Cannot deactivate super admin account');
+    return;
+  }
+  
   if (!confirm(`Deactivate ${email}?\n\nThis will set their status to inactive and free up a player slot. Their data will be preserved and they can be reactivated later.`)) return;
   
   try {
