@@ -3896,7 +3896,7 @@ async function loadPlayerList(isSuperAdmin = false) {
         
         // Update My Subscription card
         const playersRemainingTextEl = document.getElementById('seatsRemainingText');
-        if (seatsRemainingTextEl) {
+        if (playersRemainingTextEl) {
           playersRemainingTextEl.textContent = remaining > 0
             ? `${remaining} remaining`
             : 'At limit';
