@@ -4027,7 +4027,7 @@ function refreshPlayerList() {
   }
   
   // Update renewal date if available
-  if (hasPlayers) {
+  if (window._adminSubscription && window._adminSubscription.seat_limit) {
     const renewalEl = document.getElementById('renewalDate');
     if (renewalEl && adminSub.expires_at) {
       const renewalDate = new Date(adminSub.expires_at);
