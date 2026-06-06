@@ -3554,10 +3554,7 @@ async function loadAdminPanel(user) {
     <div class="card" style="margin-bottom:1rem;">
       <div class="ch"><span class="cht">Quick Stats</span></div>
       <div class="cb">
-        ${hasPlayers ? `<div style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:12px;margin-bottom:12px;text-align:center;">
-          <div style="font-size:13px;color:var(--primary-color);font-weight:700;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Association: ${adminSub.organization_name || 'Your Organization'}</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;"><span id="seatsUsed">-</span> of <span id="orgSeatLimit">-</span> players used</div>
-        </div>` : ''}
+        
       <div id="quickStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;">
         <div style="text-align:center;padding:12px;background:#0d0d0d;border-radius:8px;">
           <div style="font-size:24px;font-weight:800;color:#4ade80;font-family:'Barlow Condensed',sans-serif;" id="statTotal">-</div>
@@ -3588,7 +3585,7 @@ async function loadAdminPanel(user) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
           <div>
             <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Plan</div>
-            <div style="font-size:14px;color:var(--primary-color);font-weight:700;">${adminSub.seat_limit === 999999 ? 'Unlimited' : adminSub.seat_limit + ' Players'}</div>
+            <div style="font-size:14px;color:var(--primary-color);font-weight:700;"><span id="mySubPlanLimit">-</span></div>
           </div>
           <div>
             <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Players</div>
@@ -3936,6 +3933,10 @@ async function loadPlayerList(isSuperAdmin = false) {
     if (playersUsedEl) playersUsedEl.textContent = playerCount;
     if (playersUsedDetailEl) playersUsedDetailEl.textContent = playerCount;
     if (orgSeatLimitEl) orgSeatLimitEl.textContent = maxSeats === 999999 ? 'unlimited' : maxSeats;
+    
+    // Update My Subscription card plan limit
+    const mySubPlanLimit = document.getElementById('mySubPlanLimit');
+    if (mySubPlanLimit) mySubPlanLimit.textContent = maxSeats === 999999 ? 'Unlimited Players' : maxSeats + ' Players';
     
     // Calculate and show remaining players
     if (window._adminSubscription && window._adminSubscription.seat_limit) {
