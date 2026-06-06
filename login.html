@@ -246,5 +246,25 @@ function showLogin() {
   document.getElementById('forgotCard').style.display = 'none';
 }
 </script>
+<div id="installBanner" style="display:none;position:fixed;bottom:20px;left:20px;right:20px;background:linear-gradient(135deg, #3B82F6, #2563EB);padding:16px;border-radius:12px;box-shadow:0 4px 12px rgba(59,130,246,0.3);z-index:1000;">
+  <div style="display:flex;justify-content:space-between;align-items:start;">
+    <div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;margin-bottom:4px;">Install TRAINR</div>
+      <div style="font-size:12px;opacity:0.9;">Tap <span style="border:1px solid rgba(255,255,255,0.3);padding:2px 6px;border-radius:4px;display:inline-block;margin:0 2px;">Share</span> → Add to Home Screen</div>
+    </div>
+    <button onclick="document.getElementById('installBanner').style.display='none';localStorage.setItem('installDismissed','1');" style="background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:20px;width:28px;height:28px;border-radius:50%;cursor:pointer;line-height:1;">×</button>
+  </div>
+</div>
+
+<script>
+// Show install banner on mobile (iOS) if not already installed
+if (window.matchMedia('(max-width: 768px)').matches && 
+    !window.matchMedia('(display-mode: standalone)').matches &&
+    !localStorage.getItem('installDismissed')) {
+  setTimeout(() => {
+    document.getElementById('installBanner').style.display = 'block';
+  }, 2000);
+}
+</script>
 </body>
 </html>
