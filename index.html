@@ -3776,10 +3776,15 @@ async function handleAddPlayer(e) {
       last_name: lastName,
       organization_id: window._userOrgId || 'individual',
       status: 'active',
-      role: role
+      role: role,
+      subscription_type: 'association',
+      expires_at: window._adminSubscription?.expires_at || null
     });
     
-    if (subError) throw subError;
+    if (subError) {
+      console.error('Subscription insert error:', subError);
+      throw new Error('Failed to create subscription: ' + subError.message);
+    }
     
     msg.style.color = '#4ade80';
     msg.textContent = '✓ Player added! Temp password: ' + password;
