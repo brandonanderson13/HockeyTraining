@@ -3130,14 +3130,29 @@ function renderWeeks(){
           const exKey = 'cw_' + wk.num + '_' + day.n + '_' + i;
           const isDone = localStorage.getItem(exKey) === '1';
           
+          // Get full exercise data
+          const exDataKey = wk.num + '_' + day.n;
+          console.log('Looking up:', exDataKey, 'Found:', window._customExerciseData[exDataKey]);
+          const fullExData = window._customExerciseData[exDataKey] || [];
+          const exObj = fullExData[i] || {};
+          
+          const desc = exObj.notes || 'Perform this exercise with good form and control.';
+          const yt = exObj.youtube || '';
+          const cat = exObj.category || 'general';
+          const catLabel = cat.charAt(0).toUpperCase() + cat.slice(1);
+          
           exdiv.innerHTML += `<div class="xl ${isDone?'completed':''}" data-ex-key="${exKey}">
             <div class="xl-header">
               <div class="xl-check ${isDone?'checked':''}" onclick="event.stopPropagation();toggleExComplete(this)"></div>
-              <span class="xln" onclick="toggleEx(this.parentElement)">${name}<span class="xl-expand">&#9654;</span></span>
+              <span class="xln" onclick="toggleEx(this.parentElement)" style="text-align:left;">${name}<span class="xl-expand">&#9654;</span></span>
               <span class="xlv">${vol}</span>
             </div>
             <div class="xl-detail">
-              <div class="xl-desc">Perform with good form</div>
+              <div class="xl-desc">${desc}</div>
+              <div class="xl-links">
+                <span class="xl-link tip">💡 ${catLabel}</span>
+                ${yt ? '<a class="xl-link yt" href="'+yt+'" target="_blank">▶ Watch on YouTube</a>' : ''}
+              </div>
             </div>
           </div>`;
         });
@@ -5118,7 +5133,18 @@ async function displayCustomWorkout() {
     });
     
     // Set as custom program data and render using standard function
+    // Store full exercise data for rendering
+    window._customExerciseData = {};
+    Object.values(weeks).forEach(wk => {
+      wk.days.forEach(day => {
+        const key = wk.num + '_' + day.n;
+        window._customExerciseData[key] = day.exercises || [];
+      });
+    });
+    
     window._customProgramData = Object.values(weeks).sort((a,b) => a.num - b.num);
+    console.log('Custom exercise data keys:', Object.keys(window._customExerciseData));
+    console.log('Sample data:', Object.values(window._customExerciseData)[0]);
     console.log('Custom program data:', window._customProgramData);
     console.log('About to call renderWeeks with custom data');
     window._isCustomProgram = true;
