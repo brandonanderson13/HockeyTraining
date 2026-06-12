@@ -3158,7 +3158,7 @@ function renderWeeks(){
   const p=phases[_schedulePhase];
   const settings=getCustSettings();
   document.getElementById('phaseInfo').innerHTML=`<div class="ibox" style="border-left-color:${p.color};"><strong>${p.label}:</strong> ${p.desc}</div>`;
-  const c=document.getElementById('weeksContainer');c.innerHTML='';
+  c.innerHTML='';
 
   p.weeks.forEach(wk=>{
     const wdiv=document.createElement('div');wdiv.className='swk';
