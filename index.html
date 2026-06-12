@@ -3144,7 +3144,7 @@ function renderWeeks(){
           exdiv.innerHTML += `<div class="xl ${isDone?'completed':''}" data-ex-key="${exKey}">
             <div class="xl-header">
               <div class="xl-check ${isDone?'checked':''}" onclick="event.stopPropagation();toggleExComplete(this)"></div>
-              <span class="xln" onclick="toggleEx(this.parentElement)">${name}<span class="xl-expand">&#9654;</span></span>
+              <span class="xln" onclick="toggleEx(this.parentElement)" style="flex:1;cursor:pointer;text-align:left;">${name}<span class="xl-expand">&#9654;</span></span>
               <span class="xlv">${vol}</span>
             </div>
             <div class="xl-detail">
