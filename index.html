@@ -5010,6 +5010,7 @@ async function loadCustomWorkoutOptions() {
 }
 
 async function displayCustomWorkout() {
+  console.log('displayCustomWorkout called');
   const select = document.getElementById('customWorkoutSelect');
   const container = document.getElementById('customWorkoutDisplay');
   
@@ -5024,6 +5025,8 @@ async function displayCustomWorkout() {
     if (!data) return;
     
     const workoutData = data.exercises || [];
+  console.log('Workout data:', workoutData);
+  console.log('Data structure:', JSON.stringify(workoutData).substring(0, 200));
     const workoutKey = 'cw_' + data.id.substring(0,6);
     
     // Group by week
