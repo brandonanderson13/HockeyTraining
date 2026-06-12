@@ -5071,7 +5071,7 @@ async function displayCustomWorkout() {
         dh.className = 'dhd';
         
         let dayCompleted = 0;
-        day.items.forEach((_,i) => {
+        day.exercises.forEach((_,i) => {
           if (localStorage.getItem(dayKey + '_ex' + i) === '1') dayCompleted++;
         });
         
@@ -5088,7 +5088,7 @@ async function displayCustomWorkout() {
           const vol = ex.sets + '×' + ex.reps;
           const isCompleted = localStorage.getItem(exKey) === '1';
           
-          // day.items is array of [name, vol], but we need original exercise data
+          // day.exercises is array of [name, vol], but we need original exercise data
           // Need to get from day data which has full exercise objects
           
           const desc = ex?.notes || 'Perform this exercise with good form and control.';
