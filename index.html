@@ -5014,73 +5014,61 @@ async function displayCustomWorkout() {
   const container = document.getElementById('customWorkoutDisplay');
   
   if (!select || !container || !select.value) {
-    if (container) container.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Select a workout to view exercises</div>';
+    if (container) container.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Select a workout</div>';
     return;
   }
   
-  try {
-    const sb = await getSupabaseClient();
-    const { data, error } = await sb.from('custom_workouts')
-      .select('*')
-      .eq('id', select.value)
-      .single();
+  const sb = await getSupabaseClient();
+  const { data } = await sb.from('custom_workouts').select('*').eq('id', select.value).single();
+  if (!data) return;
+  
+  const workoutData = data.exercises || [];
+  const workoutKey = 'cw_' + data.id.substring(0,6);
+  
+  let html = '';
+  const weeks = {};
+  workoutData.forEach(item => {
+    const w = item.week || 1;
+    if (!weeks[w]) weeks[w] = [];
+    weeks[w].push(item);
+  });
+  
+  Object.keys(weeks).sort((a,b)=>a-b).forEach(wNum => {
+    html += `<div class="wk"><div class="wh"><div class="wnum">WEEK ${wNum}</div><div class="wfcs">${data.workout_name}</div></div><div class="wdiv">`;
     
-    if (error) throw error;
-    
-    const exercises = data.exercises || [];
-    const workoutId = 'custom_' + data.id;
-    
-    // Build HTML exactly like standard program
-    let html = `
-      <div class="wk">
-        <div class="wh">
-          <div class="wnum">${data.workout_name}</div>
-          <div class="wfcs">${exercises.length} exercises</div>
-        </div>
-        <div class="wdiv">
-    `;
-    
-    // Track completed count
-    let completedCount = 0;
-    
-    exercises.forEach((ex, i) => {
-      const exId = workoutId + '_ex_' + i;
-      const isCompleted = localStorage.getItem(exId) === '1';
-      if (isCompleted) completedCount++;
+    weeks[wNum].forEach(dayData => {
+      const exs = dayData.exercises || [];
+      const dayKey = workoutKey + '_w' + wNum + '_' + dayData.day;
+      let done = 0;
+      exs.forEach((_,i) => { if(localStorage.getItem(dayKey+'_'+i)==='1') done++; });
       
-      const repsDisplay = ex.reps ? ex.sets + '×' + ex.reps : ex.sets + ' sets';
+      html += `<div class="dwrap"><div class="dh"><span class="swk-day">${dayData.day.toUpperCase()} — ${dayData.dayDescription}</span><span class="wdone-inline">${done}/${exs.length} DONE</span></div><div class="wlist">`;
       
-      html += `
-        <div class="xl ${isCompleted ? 'completed' : ''}" data-ex-key="${exId}">
+      exs.forEach((ex,i) => {
+        const exId = dayKey+'_'+i;
+        const isDone = localStorage.getItem(exId)==='1';
+        html += `<div class="xl ${isDone?'completed':''}" data-ex-key="${exId}">
           <div class="xl-header">
-            <div class="xl-check ${isCompleted ? 'checked' : ''}" onclick="event.stopPropagation();toggleCustomComplete(this, '${exId}', '${workoutId}', ${exercises.length})"></div>
+            <div class="xl-check ${isDone?'checked':''}" onclick="event.stopPropagation();toggleCustomComplete(this,'${exId}','${dayKey}',${exs.length})"></div>
             <span class="xln" onclick="toggleEx(this.parentElement)" style="flex:1;cursor:pointer;">${ex.name}<span class="xl-expand">&#9654;</span></span>
-            <span class="xlv" onclick="toggleEx(this.parentElement)" style="cursor:pointer;">${repsDisplay}</span>
+            <span class="xlv">${ex.sets}×${ex.reps}</span>
           </div>
           <div class="xl-detail">
-            <div class="xl-desc">${ex.notes || 'Perform this exercise with good form and control.'}</div>
-            <div class="xl-links">
-              ${ex.youtube ? '<a class="xl-link yt" href="'+ex.youtube+'" target="_blank">&#9654; Watch on YouTube</a>' : ''}
-            </div>
+            <div class="xl-desc">${ex.notes||'Perform with good form.'}</div>
+            ${ex.youtube ? '<div class="xl-links"><a class="xl-link yt" href="'+ex.youtube+'" target="_blank">&#9654; Watch on YouTube</a></div>' : ''}
           </div>
-        </div>
-      `;
+        </div>`;
+      });
+      
+      html += '</div></div>';
     });
     
-    html += `
-        </div>
-        <div class="wfoot">
-          <span class="wdone">${completedCount}/${exercises.length} DONE</span>
-        </div>
-      </div>
-    `;
-    
-    container.innerHTML = html;
-    
-  } catch (error) {
-    container.innerHTML = `<div style="color:#f87171;padding:20px;">Error: ${error.message}</div>`;
-  }
+    html += '</div></div>';
+  });
+  
+  container.innerHTML = html;
 }
+
 
 // Toggle custom exercise and sync when all complete
 async function toggleCustomEx(exId, workoutId, totalExercises) {
