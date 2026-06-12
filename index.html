@@ -254,6 +254,7 @@ select:focus{border-color:var(--or);outline:none;}
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="TRAINR">
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -3760,6 +3761,28 @@ async function loadAdminPanel(user) {
       renewalEl.style.color = 'rgba(255,255,255,0.4)';
     }
   }
+
+  // Add Custom Workouts section
+  const customCard = document.createElement('div');
+  customCard.className = 'card';
+  customCard.style.marginTop = '1rem';
+  customCard.innerHTML = `
+    <div class="ch"><span class="cht">Custom Workouts</span></div>
+    <div class="cb">
+      <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Upload CSV to create custom programs. Format: Exercise Name, Sets, Reps, Category, YouTube Link, Notes</p>
+      <input type="text" id="customWorkoutName" placeholder="Workout name" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;margin-bottom:10px;">
+      <input type="file" id="csvUpload" accept=".csv" style="display:block;margin-bottom:10px;">
+      <button onclick="uploadCustomWorkout()" class="btn-o" style="margin:0 0 10px;">Upload Workout</button>
+      <div id="uploadMsg" style="font-size:12px;display:none;"></div>
+      <div style="border-top:1px solid #222;padding-top:12px;margin-top:12px;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:8px;">YOUR WORKOUTS</div>
+        <div id="customWorkoutsList">Loading...</div>
+      </div>
+    </div>
+  `;
+  adminContentDiv.appendChild(customCard);
+  loadCustomWorkouts();
+
 }
 
 async function handleAddPlayer(e) {
@@ -4764,6 +4787,137 @@ async function editOrgLimit() {
     window._orgSeatLimit = limit;
     alert(`✓ Organization player limit set to ${limit === 999999 ? 'Unlimited' : limit}`);
     loadPlayerList(window._isSuperAdmin);
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+
+async function uploadCustomWorkout() {
+  const nameInput = document.getElementById('customWorkoutName');
+  const fileInput = document.getElementById('csvUpload');
+  const msg = document.getElementById('uploadMsg');
+  
+  const name = nameInput.value.trim();
+  const file = fileInput.files[0];
+  
+  if (!name) {
+    alert('Please enter a workout name');
+    return;
+  }
+  
+  if (!file) {
+    alert('Please select a CSV file');
+    return;
+  }
+  
+  msg.textContent = 'Processing CSV...';
+  msg.style.color = '#60a5fa';
+  msg.style.display = 'block';
+  
+  // Parse CSV
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    complete: async (results) => {
+      try {
+        const exercises = results.data.map(row => ({
+          name: row['Exercise Name'] || row['name'] || '',
+          sets: row['Sets'] || row['sets'] || '3',
+          reps: row['Reps'] || row['reps'] || '10',
+          category: (row['Category'] || row['category'] || 'other').toLowerCase(),
+          youtube: row['YouTube Link'] || row['youtube'] || row['link'] || '',
+          notes: row['Notes'] || row['notes'] || ''
+        })).filter(ex => ex.name);
+        
+        if (exercises.length === 0) {
+          throw new Error('No valid exercises found in CSV');
+        }
+        
+        // Save to Supabase
+        const sb = await getSupabaseClient();
+        const { error } = await sb.from('custom_workouts').insert({
+          admin_id: (await sb.auth.getUser()).data.user.id,
+          organization_id: window._userOrgId || 'individual',
+          workout_name: name,
+          exercises: exercises
+        });
+        
+        if (error) throw error;
+        
+        msg.textContent = `✓ Workout created! ${exercises.length} exercises added.`;
+        msg.style.color = '#4ade80';
+        
+        // Clear form
+        nameInput.value = '';
+        fileInput.value = '';
+        
+        // Reload list
+        setTimeout(() => {
+          loadCustomWorkouts();
+          msg.style.display = 'none';
+        }, 2000);
+        
+      } catch (error) {
+        msg.textContent = 'Error: ' + error.message;
+        msg.style.color = '#f87171';
+      }
+    }
+  });
+}
+
+async function loadCustomWorkouts() {
+  const container = document.getElementById('customWorkoutsList');
+  if (!container) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { data, error } = await sb.from('custom_workouts')
+      .select('*')
+      .eq('organization_id', window._userOrgId || 'individual')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.4);text-align:center;padding:20px;">No custom workouts yet</div>';
+      return;
+    }
+    
+    let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+    data.forEach(workout => {
+      const exCount = Array.isArray(workout.exercises) ? workout.exercises.length : 0;
+      html += `
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:12px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:600;font-size:13px;color:#fff;">${workout.workout_name}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">${exCount} exercises</div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button onclick="deleteCustomWorkout('${workout.id}','${workout.workout_name}')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Delete</button>
+          </div>
+        </div>
+      `;
+    });
+    html += '</div>';
+    
+    container.innerHTML = html;
+    
+  } catch (error) {
+    container.innerHTML = `<div style="color:#f87171;font-size:12px;">Error: ${error.message}</div>`;
+  }
+}
+
+async function deleteCustomWorkout(id, name) {
+  if (!confirm(`Delete custom workout "${name}"?\n\nThis cannot be undone.`)) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('custom_workouts').delete().eq('id', id);
+    
+    if (error) throw error;
+    
+    loadCustomWorkouts();
   } catch (error) {
     alert('Error: ' + error.message);
   }
