@@ -272,9 +272,9 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <div class="nav">
-  <button class="nb active" onclick="showSec('overview')">Create Plan</button>
+  
   <button class="nb" onclick="showSec('baseline')">Testing & Progress</button>
-  <button class="nb" onclick="showSec('schedule')">Training Plan</button>
+  <button class="nb active" onclick="showSec('schedule')">Program</button>
   <button class="nb" onclick="showSec('nutrition')">Nutrition</button>
   <button class="nb" onclick="showSec('mobility')">Mobility</button>
   <button class="nb" onclick="showSec('sticklog')">Stickhandling Log</button>
@@ -286,7 +286,7 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <!-- OVERVIEW -->
-<div id="overview" class="sec active">
+<div id="overview" class="sec" style="display:none;">
   <div style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:16px;margin-bottom:1rem;">
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);margin-bottom:8px;">⚡ Quick Start</div>
     <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:10px;">
@@ -561,7 +561,10 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <!-- SCHEDULE -->
-<div id="schedule" class="sec">
+<div id="schedule" class="sec active">
+  <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:12px;margin-bottom:16px;">
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);">💡 Customize your program settings (age, season, days) by clicking <strong>Apply Settings</strong> below, then your program will update!</div>
+  </div>
   
   <div id="currentProgramBanner" style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:14px 16px;margin-bottom:1rem;">
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);">Current Program</div>
@@ -571,7 +574,7 @@ select:focus{border-color:var(--or);outline:none;}
   <div style="margin-bottom:1rem;">
     <label style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block;">Select Program</label>
     <select id="workoutTypeSelect" onchange="switchWorkoutType()" style="width:100%;max-width:400px;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 12px;border-radius:6px;margin-bottom:12px;">
-      <option value="standard">Standard 12-Week Program</option>
+      <option value="standard">Year-Round Program</option>
       <option value="custom">Custom Workout</option>
     </select>
     
