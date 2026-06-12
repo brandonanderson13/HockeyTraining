@@ -5075,7 +5075,7 @@ async function displayCustomWorkout() {
           if (localStorage.getItem(dayKey + '_ex' + i) === '1') dayCompleted++;
         });
         
-        dh.innerHTML = `<div class="dn">${day.n.toUpperCase()}</div><div class="dt" style="flex:1;">${day.t}</div><span class="wdone-inline">${dayCompleted}/${day.items.length} DONE</span>`;
+        dh.innerHTML = `<div class="dn">${day.n.toUpperCase()} </div><div class="dt" style="flex:1;">${day.t}</div><span class="wdone-inline">${dayCompleted}/${day.items.length} DONE</span>`;
         dayWrap.appendChild(dh);
         
         const exdiv = document.createElement('div');
