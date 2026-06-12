@@ -4924,6 +4924,31 @@ async function uploadCustomWorkout() {
         return;
       }
       try {
+        // STRICT VALIDATION - Check required columns exist
+        if (!results.data || results.data.length === 0) {
+          throw new Error('CSV file is empty');
+        }
+        
+        const headers = results.meta.fields || Object.keys(results.data[0]);
+        const requiredCols = ['Week', 'Day', 'Day Description', 'Exercise Name', 'Sets', 'Reps'];
+        
+        const missing = requiredCols.filter(col => 
+          !headers.some(h => h.toLowerCase() === col.toLowerCase())
+        );
+        
+        if (missing.length > 0) {
+          throw new Error(`Missing columns: ${missing.join(', ')}. Please download and use the template.`);
+        }
+        
+        // Validate at least one row has Exercise Name
+        const hasExercises = results.data.some(row => 
+          row['Exercise Name'] || row['exercise name']
+        );
+        
+        if (!hasExercises) {
+          throw new Error('No exercises found in CSV. Check your Exercise Name column.');
+        }
+        
         // Group exercises by week and day
         const grouped = {};
         results.data.forEach(row => {
