@@ -3103,6 +3103,58 @@ function updateProgramStatus() {
 }
 
 function renderWeeks(){
+  const c=document.getElementById('weeksContainer');
+  if(!c)return;
+  c.innerHTML='';
+  
+  // Check if rendering custom workout data
+  if (window._isCustomProgram && window._customProgramData) {
+    console.log('Rendering custom workout data');
+    
+    // Render custom data with same structure as standard
+    window._customProgramData.forEach(wk => {
+      const wdiv=document.createElement('div');
+      wdiv.className='swk';
+      wdiv.innerHTML=`<div class="whd"><div class="wnum">WEEK ${wk.num}</div><div class="wfoc">${wk.focus || ''}</div></div>`;
+      
+      const wbody=document.createElement('div');
+      wbody.className='swb';
+      
+      wk.days.forEach(day => {
+        const ddiv=document.createElement('div');
+        const exdiv=document.createElement('div');exdiv.className='dex';
+        
+        ddiv.innerHTML=`<div class="dhd"><div class="dn">${day.n.toUpperCase()}</div><div class="dt" style="flex:1;">${day.t}</div></div>`;
+        
+        // Render exercises - use standard format exactly
+        day.items.forEach(([name, vol], i) => {
+          const exKey = 'cw_' + wk.num + '_' + day.n + '_' + i;
+          const isDone = localStorage.getItem(exKey) === '1';
+          
+          exdiv.innerHTML += `<div class="xl ${isDone?'completed':''}" data-ex-key="${exKey}">
+            <div class="xl-header">
+              <div class="xl-check ${isDone?'checked':''}" onclick="event.stopPropagation();toggleExComplete(this)"></div>
+              <span class="xln" onclick="toggleEx(this.parentElement)">${name}<span class="xl-expand">&#9654;</span></span>
+              <span class="xlv">${vol}</span>
+            </div>
+            <div class="xl-detail">
+              <div class="xl-desc">Perform with good form</div>
+            </div>
+          </div>`;
+        });
+        
+        ddiv.appendChild(exdiv);
+        wbody.appendChild(ddiv);
+      });
+      
+      wdiv.appendChild(wbody);
+      c.appendChild(wdiv);
+    });
+    
+    return; // Exit early for custom
+  }
+  
+  // Standard program rendering continues below
   _schedulePhase=parseInt(document.getElementById('phaseSelect').value);
   const p=phases[_schedulePhase];
   const settings=getCustSettings();
