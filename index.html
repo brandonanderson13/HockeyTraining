@@ -4833,6 +4833,15 @@ async function uploadCustomWorkout() {
     header: true,
     skipEmptyLines: true,
     complete: async (results) => {
+      const msg = document.getElementById('uploadMsg');
+      
+      // Check for parsing errors
+      if (results.errors && results.errors.length > 0) {
+        msg.textContent = 'CSV Error: ' + results.errors[0].message;
+        msg.style.color = '#f87171';
+        msg.style.display = 'block';
+        return;
+      }
       try {
         // Group exercises by week and day
         const grouped = {};
@@ -4894,6 +4903,7 @@ async function uploadCustomWorkout() {
         }, 2000);
         
       } catch (error) {
+        console.error('Upload error:', error);
         msg.textContent = 'Error: ' + error.message;
         msg.style.color = '#f87171';
       }
