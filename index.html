@@ -3760,23 +3760,9 @@ async function loadAdminPanel(user) {
       </div>
     `;
     adminContentDiv.appendChild(embedCard);
-  }
-  
-  // Update renewal date if available
-  if (hasPlayers) {
-    const renewalEl = document.getElementById('renewalDate');
-    if (renewalEl && adminSub.expires_at) {
-      const renewalDate = new Date(adminSub.expires_at);
-      renewalEl.textContent = renewalDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    } else if (renewalEl) {
-      renewalEl.textContent = 'Contact admin';
-      renewalEl.style.fontSize = '12px';
-      renewalEl.style.color = 'rgba(255,255,255,0.4)';
-    }
-  }
-
-  // Add Custom Workouts section
-  const customCard = document.createElement('div');
+    
+    // Add Custom Workouts section
+    const customCard = document.createElement('div');
   customCard.className = 'card';
   customCard.style.marginTop = '1rem';
   customCard.innerHTML = `
@@ -3797,9 +3783,9 @@ async function loadAdminPanel(user) {
       </div>
     </div>
   `;
-  adminContentDiv.appendChild(customCard);
-  loadCustomWorkouts();
-
+    adminContentDiv.appendChild(customCard);
+    loadCustomWorkouts();
+  }
 }
 
 async function handleAddPlayer(e) {
