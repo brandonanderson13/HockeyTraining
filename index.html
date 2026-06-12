@@ -568,6 +568,19 @@ select:focus{border-color:var(--or);outline:none;}
     <div id="programStatus" style="font-size:14px;color:#fff;font-weight:600;margin-top:4px;">Loading...</div>
   </div>
   
+  <div style="margin-bottom:1rem;">
+    <label style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block;">Select Program</label>
+    <select id="workoutTypeSelect" onchange="switchWorkoutType()" style="width:100%;max-width:400px;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 12px;border-radius:6px;margin-bottom:12px;">
+      <option value="standard">Standard 12-Week Program</option>
+      <option value="custom">Custom Workout</option>
+    </select>
+    
+    <select id="customWorkoutSelect" style="display:none;width:100%;max-width:400px;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 12px;border-radius:6px;margin-bottom:12px;">
+      <option value="">Select a custom workout...</option>
+    </select>
+  </div>
+  
+  <div id="standardProgramArea">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:10px;">
     <select id="phaseSelect" onchange="renderWeeks()" style="flex:1;min-width:250px;">
     <option value="1">Phase 1 &#8212; Foundation (Weeks 1&#8211;4)</option>
@@ -3770,6 +3783,10 @@ async function loadAdminPanel(user) {
     <div class="ch"><span class="cht">Custom Workouts</span></div>
     <div class="cb">
       <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Upload CSV to create custom programs. Format: Exercise Name, Sets, Reps, Category, YouTube Link, Notes</p>
+      <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:6px;padding:10px;margin-bottom:12px;text-align:center;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:6px;">Need the correct format?</div>
+        <button onclick="downloadCSVTemplate()" style="background:#60a5fa;color:#fff;border:none;font-size:11px;font-weight:700;padding:6px 12px;border-radius:4px;cursor:pointer;">Download Template</button>
+      </div>
       <input type="text" id="customWorkoutName" placeholder="Workout name" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;margin-bottom:10px;">
       <input type="file" id="csvUpload" accept=".csv" style="display:block;margin-bottom:10px;">
       <button onclick="uploadCustomWorkout()" class="btn-o" style="margin:0 0 10px;">Upload Workout</button>
@@ -4921,6 +4938,122 @@ async function deleteCustomWorkout(id, name) {
   } catch (error) {
     alert('Error: ' + error.message);
   }
+}
+
+
+async function switchWorkoutType() {
+  const typeSelect = document.getElementById('workoutTypeSelect');
+  const customSelect = document.getElementById('customWorkoutSelect');
+  const standardArea = document.getElementById('standardProgramArea');
+  const customArea = document.getElementById('customWorkoutArea');
+  
+  if (typeSelect.value === 'custom') {
+    // Load custom workouts into dropdown
+    await loadCustomWorkoutOptions();
+    
+    if (customSelect) customSelect.style.display = 'block';
+    if (standardArea) standardArea.style.display = 'none';
+    if (customArea) customArea.style.display = 'block';
+  } else {
+    if (customSelect) customSelect.style.display = 'none';
+    if (standardArea) standardArea.style.display = 'block';
+    if (customArea) customArea.style.display = 'none';
+  }
+}
+
+async function loadCustomWorkoutOptions() {
+  const select = document.getElementById('customWorkoutSelect');
+  if (!select) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { data, error } = await sb.from('custom_workouts')
+      .select('id, workout_name')
+      .eq('organization_id', window._userOrgId || 'individual')
+      .order('workout_name');
+    
+    if (error) throw error;
+    
+    let options = '<option value="">Select a custom workout...</option>';
+    if (data && data.length > 0) {
+      data.forEach(w => {
+        options += `<option value="${w.id}">${w.workout_name}</option>`;
+      });
+    } else {
+      options += '<option value="" disabled>No custom workouts available</option>';
+    }
+    
+    select.innerHTML = options;
+    select.onchange = displayCustomWorkout;
+    
+  } catch (error) {
+    console.error('Error loading custom workouts:', error);
+  }
+}
+
+async function displayCustomWorkout() {
+  const select = document.getElementById('customWorkoutSelect');
+  const container = document.getElementById('customWorkoutDisplay');
+  
+  if (!select || !container || !select.value) {
+    if (container) container.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Select a workout to view exercises</div>';
+    return;
+  }
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { data, error } = await sb.from('custom_workouts')
+      .select('*')
+      .eq('id', select.value)
+      .single();
+    
+    if (error) throw error;
+    
+    const exercises = data.exercises || [];
+    
+    let html = `<div style="margin-bottom:20px;">
+      <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--primary-color);margin-bottom:8px;">${data.workout_name}</h3>
+      <div style="font-size:12px;color:rgba(255,255,255,0.5);">${exercises.length} exercises</div>
+    </div>`;
+    
+    html += '<div class="wlist">';
+    exercises.forEach((ex, i) => {
+      const exId = 'custom_ex_' + i;
+      const isCompleted = localStorage.getItem(exId) === '1';
+      
+      html += `
+        <div class="xl ${isCompleted ? 'completed' : ''}" onclick="toggleEx('${exId}')">
+          <div class="xn">${ex.name}${ex.youtube ? ' <a href="'+ex.youtube+'" target="_blank" style="color:#60a5fa;font-size:10px;margin-left:8px;">▶ Video</a>' : ''}</div>
+          <div class="xd">${ex.sets}×${ex.reps}${ex.notes ? ' · ' + ex.notes : ''}</div>
+        </div>
+      `;
+    });
+    html += '</div>';
+    
+    container.innerHTML = html;
+    
+  } catch (error) {
+    container.innerHTML = `<div style="color:#f87171;padding:20px;">Error: ${error.message}</div>`;
+  }
+}
+
+
+function downloadCSVTemplate() {
+  const csvContent = `Exercise Name,Sets,Reps,Category,YouTube Link,Notes
+Goblet Squat,3,12,strength,https://youtube.com/watch?v=example,Keep chest up
+Box Jumps,4,8,agility,,Land softly
+Wrist Shots,3,20,skills,https://youtube.com/watch?v=example,Focus on accuracy
+Burpees,3,15,conditioning,,Full range of motion`;
+
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'workout_template.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 </script>
