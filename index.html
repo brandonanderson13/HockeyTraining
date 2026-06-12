@@ -5078,8 +5078,8 @@ async function displayCustomWorkout() {
         dh.innerHTML = `<span class="swk-day">${day.n.toUpperCase()}  ${day.t}</span><span class="wdone-inline">${dayCompleted}/${day.items.length} DONE</span>`;
         dayWrap.appendChild(dh);
         
-        const wlist = document.createElement('div');
-        wlist.className = 'wlist';
+        const exdiv = document.createElement('div');
+        wlist.className = "dex";;
         
         // Render exercises - EXACT COPY of standard rendering
         day.items.forEach(([name, vol], idx) => {
@@ -5105,10 +5105,10 @@ async function displayCustomWorkout() {
             </div>
           </div>`;
           itemHtml += '</div>';
-          wlist.innerHTML += itemHtml;
+          exdiv.innerHTML += itemHtml;
         });
         
-        dayWrap.appendChild(wlist);
+        dayWrap.appendChild(exdiv);
         wkBody.appendChild(dayWrap);
       });
       
