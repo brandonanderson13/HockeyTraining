@@ -4980,10 +4980,15 @@ async function switchWorkoutType() {
     await loadCustomWorkoutOptions();
     
     if (customSelect) customSelect.style.display = 'block';
-    if (standardArea) standardArea.style.display = 'none';
-    if (customArea) customArea.style.display = 'block';
+    const phaseSelect = document.getElementById('phaseSelect');
+    if (phaseSelect) phaseSelect.style.display = 'none';
+    // Keep standardArea visible - renderWeeks uses it!
+    if (standardArea) standardArea.style.display = 'block';
+    if (customArea) customArea.style.display = 'none';
   } else {
     if (customSelect) customSelect.style.display = 'none';
+    const phaseSelect = document.getElementById('phaseSelect');
+    if (phaseSelect) phaseSelect.style.display = 'block';
     if (standardArea) standardArea.style.display = 'block';
     if (customArea) customArea.style.display = 'none';
   }
