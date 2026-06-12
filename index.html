@@ -5006,30 +5006,73 @@ async function displayCustomWorkout() {
     if (error) throw error;
     
     const exercises = data.exercises || [];
+    const workoutId = 'custom_' + data.id;
     
-    let html = `<div style="margin-bottom:20px;">
-      <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--primary-color);margin-bottom:8px;">${data.workout_name}</h3>
-      <div style="font-size:12px;color:rgba(255,255,255,0.5);">${exercises.length} exercises</div>
-    </div>`;
+    // Build HTML exactly like standard program
+    let html = `
+      <div class="wk">
+        <div class="wh">
+          <div class="wnum">${data.workout_name}</div>
+          <div class="wfcs">${exercises.length} exercises</div>
+        </div>
+        <div class="wdiv">
+    `;
     
-    html += '<div class="wlist">';
+    // Track completed count
+    let completedCount = 0;
+    
     exercises.forEach((ex, i) => {
-      const exId = 'custom_ex_' + i;
+      const exId = workoutId + '_ex_' + i;
       const isCompleted = localStorage.getItem(exId) === '1';
+      if (isCompleted) completedCount++;
       
       html += `
-        <div class="xl ${isCompleted ? 'completed' : ''}" onclick="toggleEx('${exId}')">
-          <div class="xn">${ex.name}${ex.youtube ? ' <a href="'+ex.youtube+'" target="_blank" style="color:#60a5fa;font-size:10px;margin-left:8px;">▶ Video</a>' : ''}</div>
-          <div class="xd">${ex.sets}×${ex.reps}${ex.notes ? ' · ' + ex.notes : ''}</div>
+        <div class="swk ${isCompleted ? 'completed' : ''}" onclick="toggleCustomEx('${exId}', '${workoutId}', ${exercises.length})">
+          <span class="xn">${ex.name}</span>
+          <span class="xd">${ex.sets} × ${ex.reps}${ex.notes ? ' · ' + ex.notes : ''}</span>
+          ${ex.youtube ? '<a href="'+ex.youtube+'" target="_blank" onclick="event.stopPropagation()" class="yvid" title="Watch video">▶</a>' : ''}
         </div>
       `;
     });
-    html += '</div>';
+    
+    html += `
+        </div>
+        <div class="wfoot">
+          <span class="wdone">${completedCount}/${exercises.length} DONE</span>
+        </div>
+      </div>
+    `;
     
     container.innerHTML = html;
     
   } catch (error) {
     container.innerHTML = `<div style="color:#f87171;padding:20px;">Error: ${error.message}</div>`;
+  }
+}
+
+// Toggle custom exercise and sync when all complete
+async function toggleCustomEx(exId, workoutId, totalExercises) {
+  const current = localStorage.getItem(exId);
+  if (current === '1') {
+    localStorage.removeItem(exId);
+  } else {
+    localStorage.setItem(exId, '1');
+  }
+  
+  // Refresh display
+  displayCustomWorkout();
+  
+  // Check if all exercises are completed
+  let completed = 0;
+  for (let i = 0; i < totalExercises; i++) {
+    if (localStorage.getItem(workoutId + '_ex_' + i) === '1') {
+      completed++;
+    }
+  }
+  
+  // If all done, sync to Supabase
+  if (completed === totalExercises) {
+    syncCompletedWorkout(workoutId);
   }
 }
 
