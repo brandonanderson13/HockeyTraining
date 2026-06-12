@@ -5026,11 +5026,21 @@ async function displayCustomWorkout() {
       const isCompleted = localStorage.getItem(exId) === '1';
       if (isCompleted) completedCount++;
       
+      const repsDisplay = ex.reps ? ex.sets + '×' + ex.reps : ex.sets + ' sets';
+      
       html += `
-        <div class="swk ${isCompleted ? 'completed' : ''}" onclick="toggleCustomEx('${exId}', '${workoutId}', ${exercises.length})">
-          <span class="xn">${ex.name}</span>
-          <span class="xd">${ex.sets} × ${ex.reps}${ex.notes ? ' · ' + ex.notes : ''}</span>
-          ${ex.youtube ? '<a href="'+ex.youtube+'" target="_blank" onclick="event.stopPropagation()" class="yvid" title="Watch video">▶</a>' : ''}
+        <div class="xl ${isCompleted ? 'completed' : ''}" data-ex-key="${exId}">
+          <div class="xl-header">
+            <div class="xl-check ${isCompleted ? 'checked' : ''}" onclick="event.stopPropagation();toggleCustomComplete(this, '${exId}', '${workoutId}', ${exercises.length})"></div>
+            <span class="xln" onclick="toggleEx(this.parentElement)" style="flex:1;cursor:pointer;">${ex.name}<span class="xl-expand">&#9654;</span></span>
+            <span class="xlv" onclick="toggleEx(this.parentElement)" style="cursor:pointer;">${repsDisplay}</span>
+          </div>
+          <div class="xl-detail">
+            <div class="xl-desc">${ex.notes || 'Perform this exercise with good form and control.'}</div>
+            <div class="xl-links">
+              ${ex.youtube ? '<a class="xl-link yt" href="'+ex.youtube+'" target="_blank">&#9654; Watch on YouTube</a>' : ''}
+            </div>
+          </div>
         </div>
       `;
     });
