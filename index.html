@@ -5037,7 +5037,7 @@ async function displayCustomWorkout() {
       weeks[w].days.push({
         n: item.day,
         t: item.dayDescription,
-        items: item.exercises.map(ex => [ex.name, ex.sets + '×' + ex.reps])
+        exercises: item.exercises
       });
     });
     
@@ -5075,32 +5075,37 @@ async function displayCustomWorkout() {
           if (localStorage.getItem(dayKey + '_ex' + i) === '1') dayCompleted++;
         });
         
-        dh.innerHTML = `<div class="dn">${day.n.toUpperCase()} </div><div class="dt" style="flex:1;">${day.t}</div><span class="wdone-inline">${dayCompleted}/${day.items.length} DONE</span>`;
+        dh.innerHTML = `<div class="dn">${day.n.toUpperCase()} </div><div class="dt" style="flex:1;">${day.t}</div><span class="wdone-inline">${dayCompleted}/${day.exercises.length} DONE</span>`;
         dayWrap.appendChild(dh);
         
         const exdiv = document.createElement('div');
         exdiv.className = "dex";;
         
         // Render exercises - EXACT COPY of standard rendering
-        day.items.forEach(([name, vol], idx) => {
+        day.exercises.forEach((ex, idx) => {
           const exKey = dayKey + '_ex' + idx;
+          const name = ex.name;
+          const vol = ex.sets + '×' + ex.reps;
           const isCompleted = localStorage.getItem(exKey) === '1';
           
-          // Get description (default if not in standard library)
-          const desc = 'Perform this exercise with good form. Focus on quality of movement.';
-          const cue = 'Form first — always';
-          const yt = '';  // YouTube links from CSV handled separately
+          // day.items is array of [name, vol], but we need original exercise data
+          // Need to get from day data which has full exercise objects
+          
+          const desc = ex?.notes || 'Perform this exercise with good form and control.';
+          const yt = ex?.youtube || '';
+          const category = ex?.category || 'general';
+          const categoryLabel = category.charAt(0).toUpperCase() + category.slice(1);
           
           let itemHtml = `<div class="xl ${isCompleted ? 'completed' : ''}" data-ex-key="${exKey}">`;
           itemHtml += `<div class="xl-header">
-            <div class="xl-check ${isCompleted ? 'checked' : ''}" onclick="event.stopPropagation();toggleCustomEx(this, '${exKey}', '${dayKey}', ${day.items.length})"></div>
+            <div class="xl-check ${isCompleted ? 'checked' : ''}" onclick="event.stopPropagation();toggleCustomEx(this, '${exKey}', '${dayKey}', ${day.exercises.length})"></div>
             <span class="xln" onclick="toggleEx(this.parentElement)" style="flex:1;cursor:pointer;">${name}<span class="xl-expand">&#9654;</span></span>
             <span class="xlv" onclick="toggleEx(this.parentElement)" style="cursor:pointer;">${vol}</span>
           </div>
           <div class="xl-detail">
             <div class="xl-desc">${desc}</div>
             <div class="xl-links">
-              <span class="xl-link tip">&#128161; ${cue}</span>
+              <span class="xl-link tip">&#128161; ${categoryLabel}</span>
               ${yt ? `<a class="xl-link yt" href="${yt}" target="_blank">&#9654; Watch on YouTube</a>` : ''}
             </div>
           </div>`;
