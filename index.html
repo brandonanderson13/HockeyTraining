@@ -3096,7 +3096,11 @@ function updateProgramStatus() {
     const dayCount = settings.activeDays.length || 6;
     const volumeNote = season === 'inseason' ? ' (volumes reduced)' : '';
     
-    statusDiv.innerHTML = `${seasonNames[season] || 'Off-Season'} · ${dayCount} days/week${volumeNote}`;
+    if (window._isCustomProgram && window._selectedCustomWorkoutName) {
+      statusDiv.innerHTML = `Custom Workout: ${window._selectedCustomWorkoutName}`;
+    } else {
+      statusDiv.innerHTML = `${seasonNames[season] || 'Off-Season'} · ${dayCount} days/week${volumeNote}`;
+    }
   } catch (e) {
     statusDiv.innerHTML = 'Off-Season — Maximum Development · 6 days/week';
   }
@@ -3109,6 +3113,10 @@ function renderWeeks(){
   if (window._isCustomProgram && window._customProgramData) {
     console.log('Rendering custom workout data');
     c.innerHTML = '';
+    
+    // Hide phase info for custom workouts
+    const phaseInfoDiv = document.getElementById('phaseInfo');
+    if (phaseInfoDiv) phaseInfoDiv.style.display = 'none';
     
     // Render custom data with same structure as standard
     window._customProgramData.forEach(wk => {
@@ -3172,7 +3180,9 @@ function renderWeeks(){
   _schedulePhase=parseInt(document.getElementById('phaseSelect').value);
   const p=phases[_schedulePhase];
   const settings=getCustSettings();
-  document.getElementById('phaseInfo').innerHTML=`<div class="ibox" style="border-left-color:${p.color};"><strong>${p.label}:</strong> ${p.desc}</div>`;
+  const phaseInfoDiv = document.getElementById('phaseInfo');
+  if (phaseInfoDiv) phaseInfoDiv.style.display = 'block';
+  phaseInfoDiv.innerHTML=`<div class="ibox" style="border-left-color:${p.color};"><strong>${p.label}:</strong> ${p.desc}</div>`;
   c.innerHTML='';
 
   p.weeks.forEach(wk=>{
@@ -5149,6 +5159,7 @@ async function displayCustomWorkout() {
     console.log('Custom program data:', window._customProgramData);
     console.log('About to call renderWeeks with custom data');
     window._isCustomProgram = true;
+    window._selectedCustomWorkoutName = data.workout_name;
     
     // Use the EXACT same renderWeeks function
     renderWeeks();
