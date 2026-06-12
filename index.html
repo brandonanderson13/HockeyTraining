@@ -5025,8 +5025,13 @@ async function displayCustomWorkout() {
   
   try {
     const sb = await getSupabaseClient();
-    const { data } = await sb.from('custom_workouts').select('*').eq('id', select.value).single();
-    if (!data) return;
+    console.log('Fetching workout with id:', select.value);
+    const { data, error } = await sb.from('custom_workouts').select('*').eq('id', select.value).single();
+    console.log('Fetch result:', data, 'Error:', error);
+    if (!data) {
+      console.log('No data returned');
+      return;
+    }
     
     // Convert custom workout data to standard program format
     const workoutData = data.exercises || [];
@@ -5059,10 +5064,12 @@ async function displayCustomWorkout() {
     // Set as custom program data and render using standard function
     window._customProgramData = Object.values(weeks).sort((a,b) => a.num - b.num);
     console.log('Custom program data:', window._customProgramData);
+    console.log('About to call renderWeeks with custom data');
     window._isCustomProgram = true;
     
     // Use the EXACT same renderWeeks function
     renderWeeks();
+    console.log('renderWeeks completed');
     
   } catch (error) {
     console.error('Custom workout error:', error);
