@@ -4834,14 +4834,36 @@ async function uploadCustomWorkout() {
     skipEmptyLines: true,
     complete: async (results) => {
       try {
-        const exercises = results.data.map(row => ({
-          name: row['Exercise Name'] || row['name'] || '',
-          sets: row['Sets'] || row['sets'] || '3',
-          reps: row['Reps'] || row['reps'] || '10',
-          category: (row['Category'] || row['category'] || 'other').toLowerCase(),
-          youtube: row['YouTube Link'] || row['youtube'] || row['link'] || '',
-          notes: row['Notes'] || row['notes'] || ''
-        })).filter(ex => ex.name);
+        // Group exercises by week and day
+        const grouped = {};
+        results.data.forEach(row => {
+          const week = row['Week'] || row['week'] || '1';
+          const day = row['Day'] || row['day'] || 'Day 1';
+          const dayDesc = row['Day Description'] || row['description'] || '';
+          
+          const key = week + '_' + day;
+          if (!grouped[key]) {
+            grouped[key] = {
+              week: parseInt(week),
+              day: day,
+              dayDescription: dayDesc,
+              exercises: []
+            };
+          }
+          
+          if (row['Exercise Name']) {
+            grouped[key].exercises.push({
+              name: row['Exercise Name'],
+              sets: row['Sets'] || '3',
+              reps: row['Reps'] || '10',
+              category: (row['Category'] || 'other').toLowerCase(),
+              youtube: row['YouTube Link'] || '',
+              notes: row['Notes'] || ''
+            });
+          }
+        });
+        
+        const exercises = Object.values(grouped);
         
         if (exercises.length === 0) {
           throw new Error('No valid exercises found in CSV');
@@ -5088,22 +5110,24 @@ async function toggleCustomEx(exId, workoutId, totalExercises) {
 
 
 function downloadCSVTemplate() {
-  const csvContent = `Exercise Name,Sets,Reps,Category,YouTube Link,Notes
-Goblet Squat,3,12,strength,https://youtube.com/watch?v=example,Keep chest up
-Box Jumps,4,8,agility,,Land softly
-Wrist Shots,3,20,skills,https://youtube.com/watch?v=example,Focus on accuracy
-Burpees,3,15,conditioning,,Full range of motion`;
+  const csvContent = `Week,Day,Day Description,Exercise Name,Sets,Reps,Category,YouTube Link,Notes
+1,Monday,Lower Body + Agility,Warm-Up,1,5-6 min,other,,Light cardio
+1,Monday,Lower Body + Agility,Goblet Squat,3,12,strength,https://youtube.com/example,Keep chest up
+1,Monday,Lower Body + Agility,Box Jumps,4,8,agility,,Land softly
+1,Tuesday,Shooting + Skills,Wrist Shots,3,20,skills,https://youtube.com/example,Focus accuracy
+2,Monday,Power Development,Deadlifts,4,10,strength,https://youtube.com/example,Hinge at hips`;
 
   const blob = new Blob([csvContent], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'workout_template.csv';
+  a.download = 'custom_workout_template.csv';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
 
 </script>
 </body>
