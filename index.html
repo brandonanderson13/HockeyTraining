@@ -5128,7 +5128,8 @@ async function displayCustomWorkout() {
       weeks[w].days.push({
         n: item.day,
         t: item.dayDescription,
-        items: items
+        items: items,
+        exercises: item.exercises  // KEEP full exercise objects!
       });
     });
     
