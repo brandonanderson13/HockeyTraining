@@ -578,7 +578,7 @@ select:focus{border-color:var(--or);outline:none;}
       <option value="custom">Custom Workout</option>
     </select>
     
-    <select id="customWorkoutSelect" style="display:none;width:100%;max-width:400px;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 12px;border-radius:6px;margin-bottom:12px;">
+    <select id="customWorkoutSelect" onchange="displayCustomWorkout()" style="display:none;width:100%;max-width:400px;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 12px;border-radius:6px;margin-bottom:12px;">
       <option value="">Select a custom workout...</option>
     </select>
   </div>
