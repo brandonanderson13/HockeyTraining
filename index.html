@@ -5010,123 +5010,55 @@ async function loadCustomWorkoutOptions() {
 }
 
 async function displayCustomWorkout() {
-  console.log('displayCustomWorkout called');
   const select = document.getElementById('customWorkoutSelect');
-  const container = document.getElementById('customWorkoutDisplay');
-  
-  if (!select || !container || !select.value) {
-    if (container) container.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Select a workout</div>';
-    return;
-  }
+  if (!select || !select.value) return;
   
   try {
     const sb = await getSupabaseClient();
     const { data } = await sb.from('custom_workouts').select('*').eq('id', select.value).single();
     if (!data) return;
     
+    // Convert custom workout data to standard program format
     const workoutData = data.exercises || [];
-  console.log('Workout data:', workoutData);
-  console.log('Data structure:', JSON.stringify(workoutData).substring(0, 200));
-    const workoutKey = 'cw_' + data.id.substring(0,6);
     
     // Group by week
     const weeks = {};
     workoutData.forEach(item => {
       const w = item.week || 1;
-      if (!weeks[w]) weeks[w] = { num: w, days: [] };
+      if (!weeks[w]) {
+        weeks[w] = {
+          num: w,
+          focus: data.workout_name,
+          days: []
+        };
+      }
+      
+      // Convert exercises to standard format [name, sets×reps]
+      const items = item.exercises.map(ex => {
+        const vol = ex.sets + '×' + ex.reps;
+        return [ex.name, vol];
+      });
+      
       weeks[w].days.push({
         n: item.day,
         t: item.dayDescription,
-        exercises: item.exercises
+        items: items
       });
     });
     
-    const weeksArray = Object.values(weeks).sort((a,b) => a.num - b.num);
+    // Set as custom program data and render using standard function
+    window._customProgramData = Object.values(weeks).sort((a,b) => a.num - b.num);
+    window._isCustomProgram = true;
     
-    // Render exactly like standard program
-    container.innerHTML = '';
-    const wkCont = document.createElement('div');
-    
-    weeksArray.forEach(wk => {
-      const wkDiv = document.createElement('div');
-      wkDiv.className = 'wk';
-      
-      const wkHeader = document.createElement('div');
-      wkHeader.className = 'wh';
-      wkHeader.innerHTML = `<div class="wnum">WEEK ${wk.num}</div>`;
-      wkDiv.appendChild(wkHeader);
-      
-      const wkBody = document.createElement('div');
-      wkBody.className = 'wdiv';
-      
-      wk.days.forEach((day, dayIdx) => {
-        const dayWrap = document.createElement('div');
-        dayWrap.className = 'dwrap';
-        
-        const dayKey = workoutKey + '_w' + wk.num + '_' + day.n;
-        const today = new Date().toISOString().split('T')[0];
-        
-        // Day header
-        const dh = document.createElement('div');
-        dh.className = 'dhd';
-        
-        let dayCompleted = 0;
-        day.exercises.forEach((_,i) => {
-          if (localStorage.getItem(dayKey + '_ex' + i) === '1') dayCompleted++;
-        });
-        
-        dh.innerHTML = `<div class="dn">${day.n.toUpperCase()} </div><div class="dt" style="flex:1;">${day.t}</div><span class="wdone-inline">${dayCompleted}/${day.exercises.length} DONE</span>`;
-        dayWrap.appendChild(dh);
-        
-        const exdiv = document.createElement('div');
-        exdiv.className = "dex";;
-        
-        // Render exercises - EXACT COPY of standard rendering
-        day.exercises.forEach((ex, idx) => {
-          const exKey = dayKey + '_ex' + idx;
-          const name = ex.name;
-          const vol = ex.sets + '×' + ex.reps;
-          const isCompleted = localStorage.getItem(exKey) === '1';
-          
-          // day.exercises is array of [name, vol], but we need original exercise data
-          // Need to get from day data which has full exercise objects
-          
-          const desc = ex?.notes || 'Perform this exercise with good form and control.';
-          const yt = ex?.youtube || '';
-          const category = ex?.category || 'general';
-          const categoryLabel = category.charAt(0).toUpperCase() + category.slice(1);
-          
-          let itemHtml = `<div class="xl ${isCompleted ? 'completed' : ''}" data-ex-key="${exKey}">`;
-          itemHtml += `<div class="xl-header">
-            <div class="xl-check ${isCompleted ? 'checked' : ''}" onclick="event.stopPropagation();toggleCustomEx(this, '${exKey}', '${dayKey}', ${day.exercises.length})"></div>
-            <span class="xln" onclick="toggleEx(this.parentElement)" style="flex:1;cursor:pointer;">${name}<span class="xl-expand">&#9654;</span></span>
-            <span class="xlv" onclick="toggleEx(this.parentElement)" style="cursor:pointer;">${vol}</span>
-          </div>
-          <div class="xl-detail">
-            <div class="xl-desc">${desc}</div>
-            <div class="xl-links">
-              <span class="xl-link tip">&#128161; ${categoryLabel}</span>
-              ${yt ? `<a class="xl-link yt" href="${yt}" target="_blank">&#9654; Watch on YouTube</a>` : ''}
-            </div>
-          </div>`;
-          itemHtml += '</div>';
-          exdiv.innerHTML += itemHtml;
-        });
-        
-        dayWrap.appendChild(exdiv);
-        wkBody.appendChild(dayWrap);
-      });
-      
-      wkDiv.appendChild(wkBody);
-      wkCont.appendChild(wkDiv);
-    });
-    
-    container.appendChild(wkCont);
+    // Use the EXACT same renderWeeks function
+    renderWeeks();
     
   } catch (error) {
-    container.innerHTML = '<div style="color:#f87171;padding:20px;">' + error.message + '</div>';
+    console.error('Custom workout error:', error);
   }
 }
+
+
 
 function toggleCustomEx(checkbox, exKey, dayKey, total) {
   const xlDiv = checkbox.closest('.xl');
