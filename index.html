@@ -5081,31 +5081,31 @@ async function displayCustomWorkout() {
         const wlist = document.createElement('div');
         wlist.className = 'wlist';
         
-        // Render exercises
+        // Render exercises - EXACT COPY of standard rendering
         day.items.forEach(([name, vol], idx) => {
           const exKey = dayKey + '_ex' + idx;
           const isCompleted = localStorage.getItem(exKey) === '1';
           
-          const exDiv = document.createElement('div');
-          exDiv.className = 'xl' + (isCompleted ? ' completed' : '');
-          exDiv.setAttribute('data-ex-key', exKey);
+          // Get description (default if not in standard library)
+          const desc = 'Perform this exercise with good form. Focus on quality of movement.';
+          const cue = 'Form first — always';
+          const yt = '';  // YouTube links from CSV handled separately
           
-          // Get exercise info from standard exercises if it exists
-          let desc = 'Perform with good form and control.';
-          let yt = '';
-          
-          exDiv.innerHTML = `
-            <div class="xl-header">
-              <div class="xl-check ${isCompleted ? 'checked' : ''}" onclick="event.stopPropagation();toggleCustomEx(this, '${exKey}', '${dayKey}', ${day.items.length})"></div>
-              <span class="xln" onclick="toggleEx(this.parentElement)" style="flex:1;cursor:pointer;">${name}<span class="xl-expand">&#9654;</span></span>
-              <span class="xlv" onclick="toggleEx(this.parentElement)" style="cursor:pointer;">${vol}</span>
+          let itemHtml = `<div class="xl ${isCompleted ? 'completed' : ''}" data-ex-key="${exKey}">`;
+          itemHtml += `<div class="xl-header">
+            <div class="xl-check ${isCompleted ? 'checked' : ''}" onclick="event.stopPropagation();toggleCustomEx(this, '${exKey}', '${dayKey}', ${day.items.length})"></div>
+            <span class="xln" onclick="toggleEx(this.parentElement)" style="flex:1;cursor:pointer;">${name}<span class="xl-expand">&#9654;</span></span>
+            <span class="xlv" onclick="toggleEx(this.parentElement)" style="cursor:pointer;">${vol}</span>
+          </div>
+          <div class="xl-detail">
+            <div class="xl-desc">${desc}</div>
+            <div class="xl-links">
+              <span class="xl-link tip">&#128161; ${cue}</span>
+              ${yt ? `<a class="xl-link yt" href="${yt}" target="_blank">&#9654; Watch on YouTube</a>` : ''}
             </div>
-            <div class="xl-detail">
-              <div class="xl-desc">${desc}</div>
-            </div>
-          `;
-          
-          wlist.appendChild(exDiv);
+          </div>`;
+          itemHtml += '</div>';
+          wlist.innerHTML += itemHtml;
         });
         
         dayWrap.appendChild(wlist);
