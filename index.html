@@ -3105,11 +3105,10 @@ function updateProgramStatus() {
 function renderWeeks(){
   const c=document.getElementById('weeksContainer');
   if(!c)return;
-  c.innerHTML='';
-  
   // Check if rendering custom workout data
   if (window._isCustomProgram && window._customProgramData) {
     console.log('Rendering custom workout data');
+    c.innerHTML = '';
     
     // Render custom data with same structure as standard
     window._customProgramData.forEach(wk => {
