@@ -5042,7 +5042,7 @@ async function displayCustomWorkout() {
       let done = 0;
       exs.forEach((_,i) => { if(localStorage.getItem(dayKey+'_'+i)==='1') done++; });
       
-      html += `<div class="dwrap"><div class="dh"><span class="swk-day">${dayData.day.toUpperCase()} — ${dayData.dayDescription}</span><span class="wdone-inline">${done}/${exs.length} DONE</span></div><div class="wlist">`;
+      html += `<div class="dwrap"><div class="dh"><span class="swk-day">${dayData.day.toUpperCase()}  ${dayData.dayDescription}</span><span class="wdone-inline">${done}/${exs.length} DONE</span></div><div class="wlist">`;
       
       exs.forEach((ex,i) => {
         const exId = dayKey+'_'+i;
