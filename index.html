@@ -598,7 +598,7 @@ select:focus{border-color:var(--or);outline:none;}
   </div>
   
   <div id="customWorkoutArea" style="display:none;">
-    <div id="customWorkoutDisplay" style="padding:20px;text-align:center;color:rgba(255,255,255,0.4);">
+    <div id="customWorkoutDisplay">
       Select a custom workout above
     </div>
   </div>
@@ -5143,7 +5143,10 @@ function toggleCustomEx(checkbox, exKey, dayKey, total) {
   }
   
   const doneSpan = xlDiv.closest('.dwrap').querySelector('.wdone-inline');
-  if (doneSpan) doneSpan.textContent = done + '/' + total + ' DONE';
+  if (doneSpan) {
+    doneSpan.textContent = done + '/' + total + ' DONE';
+    doneSpan.style.color = done === total ? '#4ade80' : 'rgba(255,255,255,0.5)';
+  }
   
   if (done === total) syncCompletedWorkout(dayKey);
 }
