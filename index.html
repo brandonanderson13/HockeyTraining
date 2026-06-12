@@ -5117,6 +5117,36 @@ function downloadCSVTemplate() {
 }
 
 
+
+function toggleCustomComplete(checkbox, exId, dayKey, totalExercises) {
+  const current = localStorage.getItem(exId);
+  const xlDiv = checkbox.closest('.xl');
+  
+  if (current === '1') {
+    localStorage.removeItem(exId);
+    checkbox.classList.remove('checked');
+    xlDiv.classList.remove('completed');
+  } else {
+    localStorage.setItem(exId, '1');
+    checkbox.classList.add('checked');
+    xlDiv.classList.add('completed');
+  }
+  
+  // Update day counter
+  let dayCompleted = 0;
+  for (let i = 0; i < totalExercises; i++) {
+    if (localStorage.getItem(dayKey + '_' + i) === '1') dayCompleted++;
+  }
+  
+  const doneSpan = xlDiv.closest('.dwrap').querySelector('.wdone-inline');
+  if (doneSpan) doneSpan.textContent = dayCompleted + '/' + totalExercises + ' DONE';
+  
+  // Sync when day is complete
+  if (dayCompleted === totalExercises) {
+    syncCompletedWorkout(dayKey);
+  }
+}
+
 </script>
 </body>
 </html>
