@@ -5152,7 +5152,7 @@ function toggleCustomEx(checkbox, exKey, dayKey, total) {
 
 
 // Toggle custom exercise and sync when all complete
-async function toggleCustomEx(exId, workoutId, totalExercises) {
+function toggleCustomEx_OLD(exId, workoutId, totalExercises) {
   const current = localStorage.getItem(exId);
   if (current === '1') {
     localStorage.removeItem(exId);
