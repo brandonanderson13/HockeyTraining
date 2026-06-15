@@ -4558,6 +4558,7 @@ function renderWeeks(){
     const isCurrentWeek = (wk.num === (window._currentWeekNum || 1));
     if (!isCurrentWeek) wdiv.classList.add('collapsed');
     wdiv.innerHTML=`<div class="whd" onclick="toggleWeek(this.parentElement)"><div class="wnum">WEEK ${wk.num}</div><div class="wfoc">${wk.focus}</div><div class="wchev">▼</div></div>`;
+    const wbody=document.createElement('div');wbody.className='swb';wdiv.appendChild(wbody);
 
     // BUILD A REMAPPED SCHEDULE BASED ON USER'S ACTIVE DAYS
     // The phase template has 6 workout days (Mon-Sat) — we extract the workouts that have items,
@@ -4607,7 +4608,7 @@ function renderWeeks(){
       if(!isTraining){
         // Rest day — user didn't select this day
         ddiv.innerHTML=`<div class="dhd"><div class="dn">${dayName}</div><div class="dt" style="color:rgba(255,255,255,0.25);">Rest (day off)</div></div>`;
-        wdiv.appendChild(ddiv);
+        wbody.appendChild(ddiv);
         return;
       }
 
@@ -4864,7 +4865,7 @@ function renderWeeks(){
 
         ddiv.appendChild(exdiv);
       }
-      wdiv.appendChild(ddiv);
+      wbody.appendChild(ddiv);
     });
     c.appendChild(wdiv);
   });
