@@ -3894,30 +3894,6 @@ async function loadAdminPanel(user) {
   
     
   // Teams Management Card
-  const teamsCard = document.createElement('div');
-  teamsCard.className = 'card';
-  teamsCard.style.marginTop = '1rem';
-  teamsCard.innerHTML = `
-    <div class="ch"><span class="cht">Teams</span></div>
-    <div class="cb">
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <input type="text" id="teamNameInput" placeholder="Team name (e.g. Mites, Squirts)" style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
-        <button onclick="createTeam()" class="btn-o">Create Team</button>
-      </div>
-      <div id="teamsList">Loading...</div>
-    </div>
-  `;
-  adminContentDiv.appendChild(teamsCard);
-  loadTeams();
-  populateTeamDropdown();
-
-  // Coaches Management Card
-  const coachesCard = document.createElement('div');
-  coachesCard.className = 'card';
-  coachesCard.style.marginTop = '1rem';
-  coachesCard.innerHTML = `
-    <div class="ch"><span class="cht">Coaches</span></div>
-    <div class="cb">
       <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:14px;">
         <input type="email" id="coachEmail" placeholder="Coach email" style="background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
         <input type="text" id="coachName" placeholder="Coach name" style="background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
