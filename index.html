@@ -5840,13 +5840,15 @@ async function assignCoach(teamId, coachId) {
 
 async function addCoach() {
   const emailInput = document.getElementById('coachEmail');
-  const nameInput = document.getElementById('coachName');
+  const firstInput = document.getElementById('coachFirstName');
+  const lastInput = document.getElementById('coachLastName');
   
   const email = emailInput.value.trim().toLowerCase();
-  const name = nameInput.value.trim();
+  const firstName = firstInput.value.trim();
+  const lastName = lastInput.value.trim();
   
-  if (!email || !name) {
-    alert('Please enter both email and name');
+  if (!email || !firstName || !lastName) {
+    alert('Please enter email, first name, and last name');
     return;
   }
   
@@ -5878,7 +5880,8 @@ async function addCoach() {
     const { error: subError } = await sb.from('subscriptions').insert({
       user_id: authData.user.id,
       email: email,
-      name: name,
+      first_name: firstName,
+      last_name: lastName,
       role: 'coach',
       status: 'active',
       organization_id: window._userOrgId || 'individual'
@@ -5937,13 +5940,14 @@ async function loadCoaches() {
     let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
     
     coaches.forEach(coach => {
+      const coachName = (coach.first_name || '') + ' ' + (coach.last_name || coach.email);
       const team = (teams || []).find(t => t.coach_id === coach.user_id);
       const teamName = team ? team.team_name : 'Not assigned';
       
       html += `
         <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:12px;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-weight:700;font-size:13px;color:#fff;">${coach.name}</div>
+            <div style="font-weight:700;font-size:13px;color:#fff;">${coachName}</div>
             <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;">${coach.email}</div>
             <div style="font-size:11px;color:rgba(59,130,246,0.8);margin-top:2px;">Team: ${teamName}</div>
           </div>
