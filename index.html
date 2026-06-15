@@ -257,6 +257,14 @@ select:focus{border-color:var(--or);outline:none;}
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
+
+<div id="debugPanel" style="position:fixed;top:10px;right:10px;background:#1a1a1a;border:2px solid #60a5fa;padding:16px;border-radius:8px;z-index:9999;max-width:400px;font-size:11px;color:#fff;display:none;">
+  <div style="font-weight:700;margin-bottom:8px;color:#60a5fa;">🔍 DEBUG INFO</div>
+  <div id="debugContent">Checking...</div>
+  <button onclick="this.parentElement.style.display='none'" style="margin-top:8px;background:#f87171;color:#fff;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:10px;">Close</button>
+</div>
+
+
 <div class="wrap">
 
 <div class="hdr">
@@ -5982,5 +5990,51 @@ async function populateTeamDropdown() {
 }
 
 </script>
+
+window.addEventListener('load', async () => {
+  setTimeout(async () => {
+    const panel = document.getElementById('debugPanel');
+    const content = document.getElementById('debugContent');
+    if (!panel || !content) return;
+    
+    panel.style.display = 'block';
+    
+    try {
+      const sb = await getSupabaseClient();
+      const { data: { user }, error: userError } = await sb.auth.getUser();
+      
+      let html = '';
+      if (userError) {
+        html = '<span style="color:#f87171;">Auth error: ' + userError.message + '</span>';
+      } else if (!user) {
+        html = '<span style="color:#fbbf24;">Not logged in</span>';
+      } else {
+        html = '<strong>User:</strong><br>Email: ' + user.email + '<br>ID: ' + user.id.substring(0,20) + '...<br><br>';
+        
+        // Try to get subscription
+        const { data: subs, error: subError } = await sb.from('subscriptions').select('*').eq('email', user.email);
+        
+        html += '<strong>Subscription:</strong><br>';
+        if (subError) {
+          html += '<span style="color:#f87171;">Error: ' + subError.message + '</span>';
+        } else if (!subs || subs.length === 0) {
+          html += '<span style="color:#fbbf24;">NOT FOUND</span><br>';
+          html += '<br>Tried query: email = ' + user.email;
+        } else {
+          html += '<span style="color:#4ade80;">FOUND</span><br>';
+          html += 'Role: ' + subs[0].role + '<br>';
+          html += 'Org: ' + subs[0].organization_id + '<br>';
+          html += 'Status: ' + subs[0].status;
+        }
+      }
+      
+      content.innerHTML = html;
+    } catch (e) {
+      content.innerHTML = '<span style="color:#f87171;">' + e.message + '</span>';
+    }
+  }, 2000);
+});
+
+
 </body>
 </html>
