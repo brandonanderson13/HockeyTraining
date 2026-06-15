@@ -3784,7 +3784,7 @@ async function loadAdminPanel(user) {
             </div>
           </div>
           <div id="teamSelectWrapper">
-            <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Team (for players)</label>
+            <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Team</label>
             <select id="adminTeam" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;margin-bottom:10px;">
               <option value="">No team (individual)</option>
             </select>
@@ -5770,12 +5770,16 @@ async function loadTeams() {
       const coach = coachMap[team.coach_id];
       const coachName = coach ? coach.name : 'No coach assigned';
       
+      // Get player count for this team
+      const playerCount = (await sb.from('subscriptions').select('user_id', { count: 'exact' }).eq('team_id', team.id).eq('role', 'player')).count || 0;
+      
       html += `
         <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:12px;">
           <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px;">
             <div>
               <div style="font-weight:700;font-size:14px;color:#fff;margin-bottom:4px;">${team.team_name}</div>
               <div style="font-size:11px;color:rgba(255,255,255,0.5);">Coach: ${coachName}</div>
+              <div style="font-size:11px;color:rgba(59,130,246,0.8);margin-top:2px;">${playerCount} players</div>
             </div>
             <button onclick="deleteTeam('${team.id}','${team.team_name}')" class="btn-danger" style="font-size:10px;padding:4px 8px;">Delete</button>
           </div>
@@ -6044,7 +6048,7 @@ function handleRoleChange() {
   
   if (roleSelect && teamWrapper) {
     const role = roleSelect.value;
-    teamWrapper.style.display = role === 'player' ? 'block' : 'none';
+    teamWrapper.style.display = (role === 'player' || role === 'coach') ? 'block' : 'none';
   }
 }
 
