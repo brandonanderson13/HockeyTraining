@@ -3829,6 +3829,7 @@ async function loadAdminPanel(user) {
             <option value="">All Roles</option>
             <option value="admin">Admins Only</option>
             <option value="player">Players Only</option>
+            <option value="coach">Coaches Only</option>
           </select>
           <select id="statusFilter" onchange="filterPlayers()" style="background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:6px 10px;border-radius:4px;">
             <option value="">All Status</option>
@@ -5916,7 +5917,7 @@ async function loadCoaches() {
     
     const { data: coaches, error } = await sb
       .from('subscriptions')
-      .select('user_id, name, email, team_id, status')
+      .select('user_id, first_name, last_name, email, team_id, status')
       .eq('organization_id', window._userOrgId)
       .eq('role', 'coach')
       .order('name');
