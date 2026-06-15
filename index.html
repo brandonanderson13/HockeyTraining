@@ -5763,21 +5763,19 @@ async function loadTeams() {
     
     const coachMap = {};
     (coaches || []).forEach(c => coachMap[c.user_id] = c);
-    
-    let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
-    
+
     // Pre-fetch player counts to avoid await inside forEach
     const { data: allPlayers } = await sb.from('subscriptions').select('user_id, team_id').eq('role', 'player').eq('organization_id', window._userOrgId || 'individual');
     const playerCountByTeam = {};
     (allPlayers || []).forEach(p => { if (p.team_id) playerCountByTeam[p.team_id] = (playerCountByTeam[p.team_id] || 0) + 1; });
 
+    let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+
     for (const team of teams) {
       const coach = coachMap[team.coach_id];
       const coachName = coach ? ([coach.first_name, coach.last_name].filter(Boolean).join(' ') || coach.email) : 'No coach assigned';
-      
-      // Get player count for this team (pre-fetched)
       const playerCount = playerCountByTeam[team.id] || 0;
-      
+
       html += `
         <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:12px;">
           <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px;">
@@ -5790,12 +5788,12 @@ async function loadTeams() {
           </div>
           <select onchange="assignCoach('${team.id}', this.value)" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:11px;padding:6px;border-radius:4px;">
             <option value="">Assign coach...</option>
-            ${(coaches || []).map(c => `<option value="${c.user_id}" ${c.user_id === team.coach_id ? 'selected' : ''}>${c.name} (${c.email})</option>`).join('')}
+            ${(coaches || []).map(c => `<option value="${c.user_id}" ${c.user_id === team.coach_id ? 'selected' : ''}>${[c.first_name, c.last_name].filter(Boolean).join(' ') || c.email} (${c.email})</option>`).join('')}
           </select>
         </div>
       `;
     }
-    
+
     html += '</div>';
     container.innerHTML = html;
     
