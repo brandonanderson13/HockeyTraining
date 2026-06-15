@@ -3778,11 +3778,18 @@ async function loadAdminPanel(user) {
               <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Role</label>
               <select id="adminRole" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
                 <option value="player">Player</option>
+                <option value="coach">Coach</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
           </div>
-          <button class="btn-o" type="submit" style="margin:0;" id="addPlayerBtn">Add Player</button>
+          <div id="teamSelectWrapper">
+            <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Team (for players)</label>
+            <select id="adminTeam" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;margin-bottom:10px;">
+              <option value="">No team (individual)</option>
+            </select>
+          </div>
+          <button class="btn-o" type="submit" style="margin:0;" id="addPlayerBtn">Add User</button>
         </form>
         <div id="adminAddMessage" style="margin-top:10px;font-size:12px;display:none;"></div>
       </div>
@@ -3899,6 +3906,7 @@ async function loadAdminPanel(user) {
   adminContentDiv.appendChild(teamsCard);
   loadTeams();
   populateTeamDropdown();
+  populateAdminTeamDropdown();
   
   // Add Coaches section
   const coachesCard = document.createElement('div');
@@ -5468,6 +5476,7 @@ async function createTeam() {
     input.value = '';
     loadTeams();
   populateTeamDropdown();
+  populateAdminTeamDropdown();
     
   } catch (error) {
     msg.textContent = 'Error: ' + error.message;
@@ -5493,6 +5502,7 @@ async function deleteTeam(id, name) {
     
     loadTeams();
   populateTeamDropdown();
+  populateAdminTeamDropdown();
   } catch (error) {
     alert('Error: ' + error.message);
   }
@@ -5553,6 +5563,7 @@ async function saveCoachAssignment(teamId) {
     document.querySelector('div[style*=fixed]').remove();
     loadTeams();
   populateTeamDropdown();
+  populateAdminTeamDropdown();
   } catch (error) {
     alert('Error: ' + error.message);
   }
@@ -5694,7 +5705,8 @@ async function removeCoach(userId, name) {
     
     loadCoaches();
     loadTeams();
-  populateTeamDropdown(); // Refresh teams list
+  populateTeamDropdown();
+  populateAdminTeamDropdown(); // Refresh teams list
   } catch (error) {
     alert('Error: ' + error.message);
   }
@@ -5726,6 +5738,7 @@ async function createTeam() {
     nameInput.value = '';
     loadTeams();
   populateTeamDropdown();
+  populateAdminTeamDropdown();
     alert('Team created!');
   } catch (error) {
     alert('Error: ' + error.message);
@@ -5811,6 +5824,7 @@ async function deleteTeam(teamId, teamName) {
     
     loadTeams();
   populateTeamDropdown();
+  populateAdminTeamDropdown();
     loadPlayers(); // Refresh player list
   } catch (error) {
     alert('Error: ' + error.message);
@@ -5830,6 +5844,7 @@ async function assignCoach(teamId, coachId) {
     
     loadTeams();
   populateTeamDropdown();
+  populateAdminTeamDropdown();
   } catch (error) {
     alert('Error: ' + error.message);
   }
@@ -5900,7 +5915,8 @@ async function addCoach() {
     
     loadCoaches();
     loadTeams();
-  populateTeamDropdown(); // Refresh for coach assignment
+  populateTeamDropdown();
+  populateAdminTeamDropdown(); // Refresh for coach assignment
     alert(`Coach added! Password reset email sent to ${email}`);
     
   } catch (error) {
@@ -5982,6 +5998,7 @@ async function removeCoach(userId, name) {
     loadCoaches();
     loadTeams();
   populateTeamDropdown();
+  populateAdminTeamDropdown();
   } catch (error) {
     alert('Error: ' + error.message);
   }
@@ -6012,6 +6029,51 @@ async function populateTeamDropdown() {
     console.error('Error loading teams:', error);
   }
 }
+
+
+// Populate team dropdown in Add User form
+async function populateAdminTeamDropdown() {
+  const select = document.getElementById('adminTeam');
+  if (!select) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { data: teams } = await sb.from('teams')
+      .select('id, team_name')
+      .eq('organization_id', window._userOrgId)
+      .eq('is_active', true)
+      .order('team_name');
+    
+    let options = '<option value="">No team (individual)</option>';
+    (teams || []).forEach(t => {
+      options += `<option value="${t.id}">${t.team_name}</option>`;
+    });
+    
+    select.innerHTML = options;
+  } catch (error) {
+    console.error('Error loading teams:', error);
+  }
+}
+
+// Show/hide team dropdown based on role
+function handleRoleChange() {
+  const roleSelect = document.getElementById('adminRole');
+  const teamWrapper = document.getElementById('teamSelectWrapper');
+  
+  if (roleSelect && teamWrapper) {
+    const role = roleSelect.value;
+    teamWrapper.style.display = role === 'player' ? 'block' : 'none';
+  }
+}
+
+// Add event listener to role dropdown
+document.addEventListener('DOMContentLoaded', () => {
+  const roleSelect = document.getElementById('adminRole');
+  if (roleSelect) {
+    roleSelect.addEventListener('change', handleRoleChange);
+    handleRoleChange(); // Set initial state
+  }
+});
 
 </script>
 
