@@ -4418,7 +4418,7 @@ function filterPlayers() {
   
   const filtered = allPlayers.filter(p => {
     const matchesSearch = !search || 
-      (p.name && p.name.toLowerCase().includes(search)) ||
+      ((p.first_name + " " + p.last_name).toLowerCase().includes(search)) ||
       (p.email && p.email.toLowerCase().includes(search));
     const matchesRole = !roleFilter || p.role === roleFilter;
     const matchesStatus = !statusFilter || p.status === statusFilter;
@@ -5388,7 +5388,7 @@ async function loadTeams() {
     const { data, error } = await sb.from('teams')
       .select(`
         *,
-        coach:subscriptions!coach_id(email, full_name)
+        coach:subscriptions!coach_id(email, first_name, last_name)
       `)
       .eq('organization_id', window._userOrgId)
       .order('team_name');
@@ -5408,7 +5408,7 @@ async function loadTeams() {
         .eq('team_id', team.id)
         .eq('role', 'player');
       
-      const coachName = team.coach?.full_name || team.coach?.email || 'No coach';
+      const coachName = ([team.coach?.first_name, team.coach?.last_name].filter(Boolean).join(' ') || team.coach?.email || 'No coach');
       
       html += `
         <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:12px;display:flex;justify-content:space-between;align-items:center;">
@@ -5494,7 +5494,7 @@ async function assignCoachToTeam(teamId, teamName) {
   // Load coaches for selection
   const sb = await getSupabaseClient();
   const { data } = await sb.from('subscriptions')
-    .select('user_id, email, full_name')
+    .select('user_id, first_name, last_name, email')
     .eq('organization_id', window._userOrgId)
     .eq('role', 'coach');
   
@@ -5505,7 +5505,7 @@ async function assignCoachToTeam(teamId, teamName) {
   
   let options = '<option value="">Remove coach</option>';
   data.forEach(c => {
-    options += `<option value="${c.user_id}">${c.full_name || c.email}</option>`;
+    options += `<option value="${c.user_id}">${[c.first_name, c.last_name].filter(Boolean).join(" ") || c.email}</option>`;
   });
   
   const select = document.createElement('select');
@@ -5569,7 +5569,7 @@ async function loadCoaches() {
       `)
       .eq('organization_id', window._userOrgId)
       .eq('role', 'coach')
-      .order('full_name');
+      .order('first_name');
     
     if (error) throw error;
     
@@ -5584,10 +5584,10 @@ async function loadCoaches() {
       html += `
         <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:12px;display:flex;justify-content:space-between;align-items:center;">
           <div>
-            <div style="font-weight:600;font-size:14px;color:#fff;">${coach.full_name || coach.email}</div>
+            <div style="font-weight:600;font-size:14px;color:#fff;">${[coach.first_name, coach.last_name].filter(Boolean).join(" ") || coach.email}</div>
             <div style="font-size:11px;color:rgba(255,255,255,0.4);">${coach.email} · Team: ${teamName}</div>
           </div>
-          <button onclick="removeCoach('${coach.user_id}','${coach.full_name || coach.email}')" class="btn-sm" style="background:#f87171;">Remove</button>
+          <button onclick="removeCoach('${coach.user_id}','${[coach.first_name, coach.last_name].filter(Boolean).join(" ") || coach.email}')" class="btn-sm" style="background:#f87171;">Remove</button>
         </div>
       `;
     });
@@ -5638,7 +5638,7 @@ async function addCoach() {
     const { error: subError } = await sb.from('subscriptions').insert({
       user_id: authData.user.id,
       email: email,
-      full_name: name || null,
+      first_name: name || null,
       organization_id: window._userOrgId,
       role: 'coach',
       status: 'active'
