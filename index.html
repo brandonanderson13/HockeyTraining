@@ -2070,14 +2070,12 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
             <div style="font-weight:700;font-size:14px;color:#fff;margin-bottom:2px;">${name}</div>
             <div style="font-size:11px;color:rgba(255,255,255,0.3);">Last active: ${last}</div>
           </div>
-          ${openCt>0?`<span style="background:rgba(var(--primary-rgb),0.15);color:var(--primary-color);font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;">${openCt} open</span>`:''}
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #1a1a1a;">
           <div style="padding:8px;text-align:center;border-right:1px solid #1a1a1a;"><div style="font-size:15px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;">${s.shots}</div><div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Shots</div></div>
           <div style="padding:8px;text-align:center;border-right:1px solid #1a1a1a;"><div style="font-size:15px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;">${s.mins}</div><div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Stick Min</div></div>
           <div style="padding:8px;text-align:center;"><div style="font-size:15px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;">${s.workouts}</div><div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Workouts</div></div>
         </div>
-        ${pGoals.length?`<div style="padding:8px 14px;border-top:1px solid #1a1a1a;">${goalBars}</div>`:''}
         <div style="padding:10px 14px;border-top:1px solid #1a1a1a;display:flex;gap:6px;">
           <button onclick="openAssignModal('${p.user_id}','${name.replace(/'/g,"\\'")}')" style="flex:1;background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.25);color:var(--primary-color);font-size:11px;font-weight:700;padding:6px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Task</button>
           <button onclick="openGoalModal('${p.user_id}','${name.replace(/'/g,"\\'")}')" style="flex:1;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:6px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
