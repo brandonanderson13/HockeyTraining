@@ -5426,7 +5426,7 @@ async function loadTeams() {
     // Fetch all coaches in org
     const { data: coaches } = await sb
       .from('subscriptions')
-      .select('user_id, first_name, last_name, name, email')
+      .select('user_id, first_name, last_name, email')
       .eq('organization_id', orgId)
       .eq('role', 'coach');
     const coachMap = {};
@@ -5435,7 +5435,7 @@ async function loadTeams() {
     // Fetch all active members (players + coaches) with team assignment
     const { data: members } = await sb
       .from('subscriptions')
-      .select('user_id, first_name, last_name, name, email, role, team_id')
+      .select('user_id, first_name, last_name, email, role, team_id')
       .eq('organization_id', orgId)
       .in('role', ['player', 'coach'])
       .eq('status', 'active');
@@ -5654,7 +5654,7 @@ async function loadCoaches() {
       .select('user_id, first_name, last_name, email, team_id, status')
       .eq('organization_id', window._userOrgId)
       .eq('role', 'coach')
-      .order('name');
+      .order('first_name');
     
     if (error) throw error;
     
@@ -5686,7 +5686,7 @@ async function loadCoaches() {
             <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;">${coach.email}</div>
             <div style="font-size:11px;color:rgba(59,130,246,0.8);margin-top:2px;">Team: ${teamName}</div>
           </div>
-          <button onclick="removeCoach('${coach.user_id}','${coach.name}')" class="btn-danger" style="font-size:10px;padding:4px 8px;">Remove</button>
+          <button onclick="removeCoach('${coach.user_id}','${coachName}')" class="btn-danger" style="font-size:10px;padding:4px 8px;">Remove</button>
         </div>
       `;
     });
