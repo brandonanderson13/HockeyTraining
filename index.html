@@ -2033,38 +2033,122 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
     </div>`;
   }).join('') : '<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:12px;">No assignments yet</div>';
 
-  const goalsHtml = goals.length ? goals.map(g => {
-    const pct = g.target_value ? Math.min(100,Math.round((g.current_value||0)/g.target_value*100)) : 0;
+  // Goal rendering helper
+  function goalCard(g) {
+    const isCheckbox = !g.target_value;
+    const isDone = isCheckbox ? g.completed : (g.target_value ? (g.current_value||0) >= g.target_value : false);
+    const pct = !isCheckbox && g.target_value ? Math.min(100,Math.round((g.current_value||0)/g.target_value*100)) : (isDone?100:0);
     const bc = pct>=100?'#4ade80':pct>=50?'var(--primary-color)':'#60a5fa';
-    const isDone = pct >= 100;
-    return `<div style="background:#0d0d0d;border:1px solid ${isDone?'rgba(74,222,128,0.25)':'#222'};border-radius:8px;padding:12px 14px;margin-bottom:8px;cursor:pointer;" onclick="openItemDetail('goal','${g.id}')">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <span style="font-size:13px;font-weight:700;color:#fff;">${g.metric}${isDone?' ✓':''}</span>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:12px;color:rgba(255,255,255,0.4);">${g.current_value||0} / ${g.target_value}</span>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="opacity:0.25;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    const due = g.due_date ? new Date(g.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    const checkBg = isDone ? '#4ade80' : 'transparent';
+    const checkBorder = isDone ? '#4ade80' : '#444';
+    return `<div style="display:flex;align-items:start;gap:10px;padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="openItemDetail('goal','${g.id}')">
+      ${isCheckbox ? `<div onclick="event.stopPropagation();toggleGoalComplete('${g.id}',${isDone})"
+        style="width:20px;height:20px;border-radius:5px;border:2px solid ${checkBorder};background:${checkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;cursor:pointer;transition:all .15s;">
+        ${isDone?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+      </div>` : ''}
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${isCheckbox?'0':'6px'};">
+          <span style="font-size:13px;font-weight:700;color:${isDone?'rgba(255,255,255,0.35)':'#fff'};${isDone?'text-decoration:line-through;':''}">${g.metric}${isDone&&!isCheckbox?' 🎯':''}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            ${!isCheckbox?`<span style="font-size:11px;color:rgba(255,255,255,0.35);">${g.current_value||0}/${g.target_value}</span>`:''}
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="opacity:0.2;flex-shrink:0;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
         </div>
-      </div>
-      <div style="background:#1a1a1a;border-radius:4px;height:7px;">
-        <div style="height:7px;width:${pct}%;background:${bc};border-radius:4px;transition:width .3s;"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:10px;margin-top:5px;">
-        <span style="color:rgba(255,255,255,0.3);">${pct}%${isDone?' · 🎯 Goal Achieved!':''}</span>
-        ${g.due_date?`<span style="color:rgba(255,255,255,0.3);">Due ${new Date(g.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`:''}
+        ${!isCheckbox?`<div style="background:#1a1a1a;border-radius:3px;height:5px;margin-bottom:4px;"><div style="height:5px;width:${pct}%;background:${bc};border-radius:3px;transition:width .3s;"></div></div>`:''}
+        ${due?`<div style="font-size:10px;color:rgba(255,255,255,0.3);">Due ${due}</div>`:''}
       </div>
     </div>`;
-  }).join('') : '<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:12px;">No goals set yet</div>';
+  }
+
+  const openGoals = goals.filter(g => {
+    const isCheckbox = !g.target_value;
+    return isCheckbox ? !g.completed : (g.current_value||0) < g.target_value;
+  });
+  const doneGoals = goals.filter(g => {
+    const isCheckbox = !g.target_value;
+    return isCheckbox ? g.completed : (g.current_value||0) >= g.target_value;
+  });
+
+  const goalsOpenHtml = openGoals.length
+    ? openGoals.map(goalCard).join('')
+    : '<div style="text-align:center;padding:16px;color:rgba(255,255,255,0.25);font-size:12px;">No open goals</div>';
+
+  const goalsDoneHtml = doneGoals.length
+    ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #1a1a1a;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Completed</div>
+        ${doneGoals.map(goalCard).join('')}
+      </div>` : '';
+
+  // Split assignments
+  const openAssign = assignments.filter(a => {
+    const isTracked = !!a.tracked_metric;
+    const pct = isTracked && a.target_value ? Math.min(100,Math.round((a._progress||0)/a.target_value*100)) : 0;
+    return a.status !== 'completed' && !(isTracked && pct >= 100);
+  });
+  const doneAssign = assignments.filter(a => {
+    const isTracked = !!a.tracked_metric;
+    const pct = isTracked && a.target_value ? Math.min(100,Math.round((a._progress||0)/a.target_value*100)) : 0;
+    return a.status === 'completed' || (isTracked && pct >= 100);
+  });
+
+  function assignRow(a) {
+    const isDone = a.status === 'completed';
+    const isTracked = !!a.tracked_metric;
+    const due = a.due_date ? new Date(a.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    const progress = a._progress || 0;
+    const pct = isTracked && a.target_value ? Math.min(100, Math.round(progress/a.target_value*100)) : 0;
+    const metricLabels = {shots:'pucks',stickhandling:'mins',workouts:'days'};
+    const mLabel = metricLabels[a.tracked_metric] || '';
+    const tabMap = {shots:'shotlog',stickhandling:'sticklog',workouts:'schedule'};
+    const tabTarget = tabMap[a.tracked_metric] || 'shotlog';
+    const autoComplete = isTracked && pct >= 100;
+    const effectiveDone = isDone || autoComplete;
+    const checkBg = effectiveDone ? '#4ade80' : 'transparent';
+    const checkBorder = effectiveDone ? '#4ade80' : '#444';
+    return `<div style="padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="openItemDetail('assignment','${a.id}')">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div onclick="event.stopPropagation();${isTracked?'':("toggleAssignment('"+a.id+"',"+isDone+")")}"
+          style="width:20px;height:20px;border-radius:5px;border:2px solid ${checkBorder};background:${checkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;${isTracked?'opacity:0.5;':'cursor:pointer;'}transition:all .15s;">
+          ${effectiveDone?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:13px;font-weight:600;color:${effectiveDone?'rgba(255,255,255,0.35)':'rgba(255,255,255,0.85)'};${effectiveDone?'text-decoration:line-through;':''}">${a.title}</span>
+            ${isTracked?'<span style="font-size:9px;font-weight:700;color:#60a5fa;background:rgba(96,165,250,0.12);padding:1px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">Auto</span>':''}
+          </div>
+          <div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap;">
+            ${isTracked?`<span style="font-size:10px;color:rgba(255,255,255,0.35);">${progress}/${a.target_value} ${mLabel}</span>`:''}
+            ${due?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">· Due ${due}</span>`:''}
+            ${isTracked&&!effectiveDone?`<span style="font-size:10px;color:#60a5fa;cursor:pointer;" onclick="event.stopPropagation();showSec('${tabTarget}')">→ Log now</span>`:''}
+          </div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.2;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      ${isTracked&&!effectiveDone?`<div style="margin-top:5px;margin-left:30px;"><div style="background:#1a1a1a;border-radius:3px;height:4px;"><div style="height:4px;width:${pct}%;background:#60a5fa;border-radius:3px;"></div></div><div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:2px;">${pct}% complete</div></div>`:''}
+    </div>`;
+  }
+
+  const assignOpenHtml = openAssign.length
+    ? openAssign.map(assignRow).join('')
+    : '<div style="text-align:center;padding:16px;color:rgba(255,255,255,0.25);font-size:12px;">All caught up! ✓</div>';
+
+  const assignDoneHtml = doneAssign.length
+    ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #1a1a1a;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Completed</div>
+        ${doneAssign.map(assignRow).join('')}
+      </div>` : '';
 
   el.innerHTML = `
     ${statsHtml}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
       <div class="card" style="margin-bottom:0;">
         <div class="ch"><span class="cht">My Assignments</span></div>
-        <div class="cb">${assignHtml}</div>
+        <div class="cb">${assignOpenHtml}${assignDoneHtml}</div>
       </div>
       <div class="card" style="margin-bottom:0;">
         <div class="ch"><span class="cht">My Goals</span><button onclick="openPlayerGoalModal()" style="margin-left:auto;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button></div>
-        <div class="cb">${goalsHtml}</div>
+        <div class="cb">${goalsOpenHtml}${goalsDoneHtml}</div>
       </div>
     </div>`;
 }
@@ -2562,28 +2646,26 @@ function openPlayerGoalModal() {
       </div>
       <div style="display:grid;gap:12px;">
         <div>
-          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Metric *</label>
-          <select id="pgMetric" onchange="document.getElementById('pgCustomWrap').style.display=this.value==='Custom'?'block':'none'" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
-            <option value="Total Shots">Total Shots</option>
-            <option value="Stick Minutes">Stick Minutes</option>
-            <option value="Workouts Completed">Workouts Completed</option>
-            <option value="30m Sprint (sec)">30m Sprint (sec)</option>
-            <option value="Push-Up Max">Push-Up Max</option>
-            <option value="Custom">Custom...</option>
-          </select>
-        </div>
-        <div id="pgCustomWrap" style="display:none;">
-          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Custom Metric</label>
-          <input id="pgCustom" type="text" placeholder="e.g. Backhand Accuracy" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <div>
-            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Target *</label>
-            <input id="pgTarget" type="number" placeholder="e.g. 500" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Goal Type</label>
+          <div style="display:flex;gap:0;background:#0d0d0d;border:1px solid #222;border-radius:6px;overflow:hidden;margin-bottom:0;">
+            <button type="button" id="pgTypeCheck" onclick="pgSetType('checkbox')" style="flex:1;padding:7px;background:var(--primary-color);border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">✓ Check Off</button>
+            <button type="button" id="pgTypeNum" onclick="pgSetType('number')" style="flex:1;padding:7px;background:transparent;border:none;color:rgba(255,255,255,0.4);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">123 Numeric</button>
           </div>
-          <div>
-            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Current</label>
-            <input id="pgCurrent" type="number" placeholder="e.g. 0" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+        </div>
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Goal Name *</label>
+          <input id="pgMetric" type="text" placeholder="e.g. Attend 3 practices, Land backhand" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+        </div>
+        <div id="pgNumericFields" style="display:none;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+              <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Target *</label>
+              <input id="pgTarget" type="number" placeholder="e.g. 500" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+            </div>
+            <div>
+              <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Current</label>
+              <input id="pgCurrent" type="number" placeholder="e.g. 0" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+            </div>
           </div>
         </div>
         <div>
@@ -2602,17 +2684,39 @@ function openPlayerGoalModal() {
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
 }
 
+function pgSetType(t) {
+  const checkBtn = document.getElementById('pgTypeCheck');
+  const numBtn = document.getElementById('pgTypeNum');
+  const numFields = document.getElementById('pgNumericFields');
+  const metricInput = document.getElementById('pgMetric');
+  if (t === 'checkbox') {
+    checkBtn.style.background = 'var(--primary-color)'; checkBtn.style.color = '#fff';
+    numBtn.style.background = 'transparent'; numBtn.style.color = 'rgba(255,255,255,0.4)';
+    if (numFields) numFields.style.display = 'none';
+    if (metricInput) metricInput.placeholder = 'e.g. Attend 3 practices, Land backhand';
+  } else {
+    numBtn.style.background = 'var(--primary-color)'; numBtn.style.color = '#fff';
+    checkBtn.style.background = 'transparent'; checkBtn.style.color = 'rgba(255,255,255,0.4)';
+    if (numFields) numFields.style.display = 'block';
+    if (metricInput) metricInput.placeholder = 'e.g. Total Shots, Push-Up Max';
+  }
+}
+
 async function savePlayerGoal() {
-  const metricSel = document.getElementById('pgMetric')?.value;
-  const metric = metricSel === 'Custom' ? (document.getElementById('pgCustom')?.value.trim() || 'Custom') : metricSel;
-  const target = parseFloat(document.getElementById('pgTarget')?.value) || null;
-  const current = parseFloat(document.getElementById('pgCurrent')?.value) || 0;
+  const isCheckbox = document.getElementById('pgTypeCheck')?.style.background !== 'transparent';
+  const metric = document.getElementById('pgMetric')?.value.trim();
+  const target = isCheckbox ? null : (parseFloat(document.getElementById('pgTarget')?.value) || null);
+  const current = isCheckbox ? null : (parseFloat(document.getElementById('pgCurrent')?.value) || 0);
   const due = document.getElementById('pgDue')?.value;
   const notes = document.getElementById('pgNotes')?.value.trim();
   const msg = document.getElementById('pgMsg');
 
-  if (!metric || !target) {
-    if (msg) { msg.style.background='rgba(248,113,113,0.1)'; msg.style.color='#f87171'; msg.textContent='Please enter a metric and target.'; msg.style.display='block'; }
+  if (!metric) {
+    if (msg) { msg.style.background='rgba(248,113,113,0.1)'; msg.style.color='#f87171'; msg.textContent='Please enter a goal name.'; msg.style.display='block'; }
+    return;
+  }
+  if (!isCheckbox && !target) {
+    if (msg) { msg.style.background='rgba(248,113,113,0.1)'; msg.style.color='#f87171'; msg.textContent='Please enter a target number.'; msg.style.display='block'; }
     return;
   }
   if (msg) { msg.style.background='rgba(59,130,246,0.1)'; msg.style.color='#60a5fa'; msg.textContent='Saving...'; msg.style.display='block'; }
@@ -2697,6 +2801,17 @@ async function saveGoalComment(goalId) {
     input.disabled = false;
     input.focus();
   }
+}
+
+async function deleteGoal(id) {
+  if (!confirm('Delete this goal? This cannot be undone.')) return;
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('goals').delete().eq('id', id);
+    if (error) throw error;
+    window._dashGoals = (window._dashGoals||[]).filter(g => g.id !== id);
+    loadDashboard();
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 async function deleteGoalComment(commentId, goalId) {
@@ -2797,14 +2912,25 @@ function openItemDetail(type, id) {
         ${isCoach?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Player</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${pName}</div></div>`:''}
       </div>
       ${item.notes?`<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px 14px;margin-bottom:16px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Coach Notes</div><div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;font-style:italic;">${item.notes}</div></div>`:''}
-      ${!isDone?`
-      <div style="margin-bottom:6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;">Update Progress</div>
-      <div style="display:flex;gap:8px;margin-bottom:16px;">
-        <input type="number" id="detailGoalVal" placeholder="New value" value="${item.current_value||''}"
-          style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:9px 12px;border-radius:6px;">
-        <button onclick="updateGoalFromDetail('${item.id}')"
-          style="background:${bc};border:none;color:#fff;font-size:12px;font-weight:700;padding:9px 16px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Save</button>
-      </div>`:'<div style="text-align:center;padding:10px 0 16px;font-size:14px;color:#4ade80;font-weight:700;">🎯 Goal Complete!</div>'}
+      ${item.target_value ? (
+        !isDone ? `
+        <div style="margin-bottom:6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;">Update Progress</div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <input type="number" id="detailGoalVal" placeholder="New value" value="${item.current_value||''}"
+            style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:9px 12px;border-radius:6px;">
+          <button onclick="updateGoalFromDetail('${item.id}')"
+            style="background:${bc};border:none;color:#fff;font-size:12px;font-weight:700;padding:9px 16px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Save</button>
+        </div>` : '<div style="text-align:center;padding:10px 0 16px;font-size:14px;color:#4ade80;font-weight:700;">🎯 Goal Complete!</div>'
+      ) : `
+        <button onclick="toggleGoalComplete('${item.id}',${item.completed});document.getElementById('itemDetailModal').remove();"
+          style="width:100%;padding:11px;border-radius:6px;border:1px solid ${isDone?'#4ade80':'#333'};background:${isDone?'rgba(74,222,128,0.1)':'#0d0d0d'};color:${isDone?'#4ade80':'rgba(255,255,255,0.6)'};font-size:13px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px;">
+          ${isDone ? '✓ Mark as Incomplete' : '○ Mark as Complete'}
+        </button>`
+      }
+      <button onclick="deleteGoal('${item.id}');document.getElementById('itemDetailModal').remove();"
+        style="width:100%;margin-bottom:16px;padding:8px;border-radius:6px;border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.08);color:#f87171;font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">
+        Delete Goal
+      </button>
       <div style="margin-bottom:6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;">Comments</div>
       <div id="goalComments_${item.id}" style="margin-bottom:10px;"><div style="font-size:12px;color:rgba(255,255,255,0.25);">Loading comments...</div></div>
       <div style="display:flex;gap:8px;">
@@ -2831,6 +2957,17 @@ function openItemDetail(type, id) {
   if (!isAssign) {
     loadGoalComments(id);
   }
+}
+
+async function toggleGoalComplete(id, currentlyDone) {
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('goals').update({ completed: !currentlyDone }).eq('id', id);
+    if (error) throw error;
+    const g = (window._dashGoals||[]).find(x=>x.id===id);
+    if (g) g.completed = !currentlyDone;
+    loadDashboard();
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 async function toggleAssignment(id, currentlyDone) {
