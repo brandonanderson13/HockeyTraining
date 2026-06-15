@@ -3852,6 +3852,84 @@ async function loadAdminPanel(user) {
     `;
     adminContentDiv.appendChild(embedCard);
     
+  // Add Teams section
+  const teamsCard = document.createElement('div');
+  teamsCard.className = 'card';
+  teamsCard.style.marginTop = '1rem';
+  teamsCard.innerHTML = `
+    <div class="ch"><span class="cht">Teams</span></div>
+    <div class="cb">
+      <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Create teams and assign coaches to organize your players</p>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <input type="text" id="newTeamName" placeholder="Team name (e.g., Mites, Squirts)" style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
+        <button onclick="createTeam()" class="btn-o" style="margin:0;">Create Team</button>
+      </div>
+      <div id="teamMsg" style="font-size:12px;display:none;margin-bottom:8px;"></div>
+      <div id="teamsList">Loading...</div>
+    </div>
+  `;
+  adminContentDiv.appendChild(teamsCard);
+  loadTeams();
+  populateTeamDropdown();
+  
+  // Add Coaches section
+  const coachesCard = document.createElement('div');
+  coachesCard.className = 'card';
+  coachesCard.style.marginTop = '1rem';
+  coachesCard.innerHTML = `
+    <div class="ch"><span class="cht">Coaches</span></div>
+    <div class="cb">
+      <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Add coaches who can view their team's player stats</p>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input type="email" id="newCoachEmail" placeholder="Coach email" style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
+        <input type="text" id="newCoachName" placeholder="Full name (optional)" style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
+      </div>
+      <button onclick="addCoach()" class="btn-o" style="margin:0 0 12px;">Add Coach</button>
+      <div id="coachMsg" style="font-size:12px;display:none;margin-bottom:8px;"></div>
+      <div id="coachesList">Loading...</div>
+    </div>
+  `;
+  adminContentDiv.appendChild(coachesCard);
+  loadCoaches();
+  
+    
+  // Teams Management Card
+  const teamsCard = document.createElement('div');
+  teamsCard.className = 'card';
+  teamsCard.style.marginTop = '1rem';
+  teamsCard.innerHTML = `
+    <div class="ch"><span class="cht">Teams</span></div>
+    <div class="cb">
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <input type="text" id="teamNameInput" placeholder="Team name (e.g. Mites, Squirts)" style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
+        <button onclick="createTeam()" class="btn-o">Create Team</button>
+      </div>
+      <div id="teamsList">Loading...</div>
+    </div>
+  `;
+  adminContentDiv.appendChild(teamsCard);
+  loadTeams();
+  populateTeamDropdown();
+
+  // Coaches Management Card
+  const coachesCard = document.createElement('div');
+  coachesCard.className = 'card';
+  coachesCard.style.marginTop = '1rem';
+  coachesCard.innerHTML = `
+    <div class="ch"><span class="cht">Coaches</span></div>
+    <div class="cb">
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:14px;">
+        <input type="email" id="coachEmail" placeholder="Coach email" style="background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
+        <input type="text" id="coachName" placeholder="Coach name" style="background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
+        <button onclick="addCoach()" class="btn-o">Add Coach</button>
+      </div>
+      <div id="coachesList">Loading...</div>
+    </div>
+  `;
+  adminContentDiv.appendChild(coachesCard);
+  loadCoaches();
+
+
     // Add Custom Workouts section
     const customCard = document.createElement('div');
   customCard.className = 'card';
@@ -5310,6 +5388,631 @@ function toggleCustomComplete(checkbox, exId, dayKey, totalExercises) {
   // Sync when day is complete
   if (dayCompleted === totalExercises) {
     syncCompletedWorkout(dayKey);
+  }
+}
+
+
+// ============================================
+// TEAMS MANAGEMENT
+// ============================================
+
+async function loadTeams() {
+  const container = document.getElementById('teamsList');
+  if (!container) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { data, error } = await sb.from('teams')
+      .select(`
+        *,
+        coach:subscriptions!coach_id(email, full_name)
+      `)
+      .eq('organization_id', window._userOrgId)
+      .order('team_name');
+    
+    if (error) throw error;
+    
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.4);font-size:12px;">No teams yet</div>';
+      return;
+    }
+    
+    let html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+    for (const team of data) {
+      // Count players
+      const {count} = await sb.from('subscriptions')
+        .select('*', {count: 'exact', head: true})
+        .eq('team_id', team.id)
+        .eq('role', 'player');
+      
+      const coachName = team.coach?.full_name || team.coach?.email || 'No coach';
+      
+      html += `
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:12px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="flex:1;">
+            <div style="font-weight:600;font-size:14px;color:#fff;margin-bottom:4px;">${team.team_name}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);">Coach: ${coachName} · ${count || 0} players</div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button onclick="assignCoachToTeam('${team.id}','${team.team_name}')" class="btn-sm" style="background:#60a5fa;">Assign Coach</button>
+            <button onclick="deleteTeam('${team.id}','${team.team_name}')" class="btn-sm" style="background:#f87171;">Delete</button>
+          </div>
+        </div>
+      `;
+    }
+    html += '</div>';
+    container.innerHTML = html;
+    
+  } catch (error) {
+    container.innerHTML = `<div style="color:#f87171;font-size:12px;">Error: ${error.message}</div>`;
+  }
+}
+
+async function createTeam() {
+  const input = document.getElementById('newTeamName');
+  const msg = document.getElementById('teamMsg');
+  
+  const name = input.value.trim();
+  if (!name) {
+    alert('Enter team name');
+    return;
+  }
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('teams').insert({
+      organization_id: window._userOrgId,
+      team_name: name
+    });
+    
+    if (error) throw error;
+    
+    msg.textContent = '✓ Team created!';
+    msg.style.color = '#4ade80';
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 2000);
+    
+    input.value = '';
+    loadTeams();
+  populateTeamDropdown();
+    
+  } catch (error) {
+    msg.textContent = 'Error: ' + error.message;
+    msg.style.color = '#f87171';
+    msg.style.display = 'block';
+  }
+}
+
+async function deleteTeam(id, name) {
+  if (!confirm(`Delete team "${name}"?\n\nPlayers on this team will be unassigned.`)) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    
+    // Unassign players first
+    await sb.from('subscriptions')
+      .update({ team_id: null })
+      .eq('team_id', id);
+    
+    // Delete team
+    const { error } = await sb.from('teams').delete().eq('id', id);
+    if (error) throw error;
+    
+    loadTeams();
+  populateTeamDropdown();
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+async function assignCoachToTeam(teamId, teamName) {
+  // Load coaches for selection
+  const sb = await getSupabaseClient();
+  const { data } = await sb.from('subscriptions')
+    .select('user_id, email, full_name')
+    .eq('organization_id', window._userOrgId)
+    .eq('role', 'coach');
+  
+  if (!data || data.length === 0) {
+    alert('No coaches available. Add coaches first.');
+    return;
+  }
+  
+  let options = '<option value="">Remove coach</option>';
+  data.forEach(c => {
+    options += `<option value="${c.user_id}">${c.full_name || c.email}</option>`;
+  });
+  
+  const select = document.createElement('select');
+  select.innerHTML = options;
+  select.style.cssText = 'width:100%;padding:8px;margin:10px 0;background:#1a1a1a;border:1px solid #333;color:#fff;border-radius:4px;';
+  
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+  modal.innerHTML = `
+    <div style="background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:24px;max-width:400px;width:90%;">
+      <div style="font-size:16px;font-weight:600;margin-bottom:12px;">Assign Coach to ${teamName}</div>
+      <div id="modalSelect"></div>
+      <div style="display:flex;gap:8px;margin-top:16px;">
+        <button onclick="this.closest('div[style*=fixed]').remove()" style="flex:1;padding:8px;background:#333;color:#fff;border:none;border-radius:4px;cursor:pointer;">Cancel</button>
+        <button onclick="saveCoachAssignment('${teamId}')" style="flex:1;padding:8px;background:#60a5fa;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;">Save</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  document.getElementById('modalSelect').appendChild(select);
+  window._tempCoachSelect = select;
+}
+
+async function saveCoachAssignment(teamId) {
+  const select = window._tempCoachSelect;
+  const coachId = select.value || null;
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('teams')
+      .update({ coach_id: coachId })
+      .eq('id', teamId);
+    
+    if (error) throw error;
+    
+    document.querySelector('div[style*=fixed]').remove();
+    loadTeams();
+  populateTeamDropdown();
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+
+// ============================================
+// COACHES MANAGEMENT
+// ============================================
+
+async function loadCoaches() {
+  const container = document.getElementById('coachesList');
+  if (!container) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { data, error } = await sb.from('subscriptions')
+      .select(`
+        *,
+        team:teams!team_id(team_name)
+      `)
+      .eq('organization_id', window._userOrgId)
+      .eq('role', 'coach')
+      .order('full_name');
+    
+    if (error) throw error;
+    
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.4);font-size:12px;">No coaches yet</div>';
+      return;
+    }
+    
+    let html = '<div style="display:flex;flex-direction:column;gap:8px;">';
+    data.forEach(coach => {
+      const teamName = coach.team?.team_name || 'No team assigned';
+      html += `
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:12px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:600;font-size:14px;color:#fff;">${coach.full_name || coach.email}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);">${coach.email} · Team: ${teamName}</div>
+          </div>
+          <button onclick="removeCoach('${coach.user_id}','${coach.full_name || coach.email}')" class="btn-sm" style="background:#f87171;">Remove</button>
+        </div>
+      `;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+    
+  } catch (error) {
+    container.innerHTML = `<div style="color:#f87171;font-size:12px;">Error: ${error.message}</div>`;
+  }
+}
+
+async function addCoach() {
+  const emailInput = document.getElementById('newCoachEmail');
+  const nameInput = document.getElementById('newCoachName');
+  const msg = document.getElementById('coachMsg');
+  
+  const email = emailInput.value.trim().toLowerCase();
+  const name = nameInput.value.trim();
+  
+  if (!email) {
+    alert('Enter coach email');
+    return;
+  }
+  
+  try {
+    const sb = await getSupabaseClient();
+    
+    // Check if coach already exists
+    const { data: existing } = await sb.from('subscriptions')
+      .select('*')
+      .eq('email', email)
+      .eq('organization_id', window._userOrgId)
+      .single();
+    
+    if (existing) {
+      throw new Error('This email is already registered in your organization');
+    }
+    
+    // Create coach account (they'll get password reset email)
+    const { data: authData, error: authError } = await sb.auth.admin.createUser({
+      email: email,
+      email_confirm: true
+    });
+    
+    if (authError) throw authError;
+    
+    // Add to subscriptions with role='coach'
+    const { error: subError } = await sb.from('subscriptions').insert({
+      user_id: authData.user.id,
+      email: email,
+      full_name: name || null,
+      organization_id: window._userOrgId,
+      role: 'coach',
+      status: 'active'
+    });
+    
+    if (subError) throw subError;
+    
+    // Send password reset email
+    await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://hockey-training.vercel.app/login.html'
+    });
+    
+    msg.textContent = '✓ Coach added! Password reset email sent.';
+    msg.style.color = '#4ade80';
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+    
+    emailInput.value = '';
+    nameInput.value = '';
+    loadCoaches();
+    
+  } catch (error) {
+    msg.textContent = 'Error: ' + error.message;
+    msg.style.color = '#f87171';
+    msg.style.display = 'block';
+  }
+}
+
+async function removeCoach(userId, name) {
+  if (!confirm(`Remove coach "${name}"?\n\nThey will lose access but team assignments will remain.`)) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    
+    // Remove from subscriptions (soft delete by setting status)
+    const { error } = await sb.from('subscriptions')
+      .update({ status: 'inactive' })
+      .eq('user_id', userId);
+    
+    if (error) throw error;
+    
+    // Also remove as coach from any teams
+    await sb.from('teams')
+      .update({ coach_id: null })
+      .eq('coach_id', userId);
+    
+    loadCoaches();
+    loadTeams();
+  populateTeamDropdown(); // Refresh teams list
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+
+// ============================================
+// TEAMS MANAGEMENT
+// ============================================
+
+async function createTeam() {
+  const nameInput = document.getElementById('teamNameInput');
+  const teamName = nameInput.value.trim();
+  
+  if (!teamName) {
+    alert('Please enter a team name');
+    return;
+  }
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('teams').insert({
+      organization_id: window._userOrgId || 'individual',
+      team_name: teamName
+    });
+    
+    if (error) throw error;
+    
+    nameInput.value = '';
+    loadTeams();
+  populateTeamDropdown();
+    alert('Team created!');
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+async function loadTeams() {
+  const container = document.getElementById('teamsList');
+  if (!container) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    
+    // Get teams with coach info
+    const { data: teams, error } = await sb
+      .from('teams')
+      .select(`
+        id,
+        team_name,
+        coach_id,
+        created_at
+      `)
+      .eq('organization_id', window._userOrgId || 'individual')
+      .eq('is_active', true)
+      .order('team_name');
+    
+    if (error) throw error;
+    
+    if (!teams || teams.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.4);font-size:12px;">No teams yet</div>';
+      return;
+    }
+    
+    // Get coaches for assignment
+    const { data: coaches } = await sb
+      .from('subscriptions')
+      .select('user_id, name, email')
+      .eq('organization_id', window._userOrgId)
+      .eq('role', 'coach');
+    
+    const coachMap = {};
+    (coaches || []).forEach(c => coachMap[c.user_id] = c);
+    
+    let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+    
+    teams.forEach(team => {
+      const coach = coachMap[team.coach_id];
+      const coachName = coach ? coach.name : 'No coach assigned';
+      
+      html += `
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px;">
+            <div>
+              <div style="font-weight:700;font-size:14px;color:#fff;margin-bottom:4px;">${team.team_name}</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.5);">Coach: ${coachName}</div>
+            </div>
+            <button onclick="deleteTeam('${team.id}','${team.team_name}')" class="btn-danger" style="font-size:10px;padding:4px 8px;">Delete</button>
+          </div>
+          <select onchange="assignCoach('${team.id}', this.value)" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:11px;padding:6px;border-radius:4px;">
+            <option value="">Assign coach...</option>
+            ${(coaches || []).map(c => `<option value="${c.user_id}" ${c.user_id === team.coach_id ? 'selected' : ''}>${c.name} (${c.email})</option>`).join('')}
+          </select>
+        </div>
+      `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+    
+  } catch (error) {
+    container.innerHTML = '<div style="color:#f87171;font-size:12px;">Error: ' + error.message + '</div>';
+  }
+}
+
+async function deleteTeam(teamId, teamName) {
+  if (!confirm(`Delete team "${teamName}"?\n\nPlayers on this team will be unassigned.`)) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('teams').delete().eq('id', teamId);
+    
+    if (error) throw error;
+    
+    loadTeams();
+  populateTeamDropdown();
+    loadPlayers(); // Refresh player list
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+async function assignCoach(teamId, coachId) {
+  if (!coachId) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('teams')
+      .update({ coach_id: coachId })
+      .eq('id', teamId);
+    
+    if (error) throw error;
+    
+    loadTeams();
+  populateTeamDropdown();
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+// ============================================
+// COACHES MANAGEMENT
+// ============================================
+
+async function addCoach() {
+  const emailInput = document.getElementById('coachEmail');
+  const nameInput = document.getElementById('coachName');
+  
+  const email = emailInput.value.trim().toLowerCase();
+  const name = nameInput.value.trim();
+  
+  if (!email || !name) {
+    alert('Please enter both email and name');
+    return;
+  }
+  
+  try {
+    const sb = await getSupabaseClient();
+    
+    // Check if user already exists
+    const { data: existing } = await sb
+      .from('subscriptions')
+      .select('user_id')
+      .eq('email', email)
+      .eq('organization_id', window._userOrgId)
+      .single();
+    
+    if (existing) {
+      alert('This email is already registered in your organization');
+      return;
+    }
+    
+    // Create coach account (they'll set password via email)
+    const { data: authData, error: authError } = await sb.auth.admin.createUser({
+      email: email,
+      email_confirm: true
+    });
+    
+    if (authError) throw authError;
+    
+    // Add to subscriptions as coach
+    const { error: subError } = await sb.from('subscriptions').insert({
+      user_id: authData.user.id,
+      email: email,
+      name: name,
+      role: 'coach',
+      status: 'active',
+      organization_id: window._userOrgId || 'individual'
+    });
+    
+    if (subError) throw subError;
+    
+    // Send password reset email
+    await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://hockey-training.vercel.app/login.html'
+    });
+    
+    emailInput.value = '';
+    nameInput.value = '';
+    
+    loadCoaches();
+    loadTeams();
+  populateTeamDropdown(); // Refresh for coach assignment
+    alert(`Coach added! Password reset email sent to ${email}`);
+    
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+async function loadCoaches() {
+  const container = document.getElementById('coachesList');
+  if (!container) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    
+    const { data: coaches, error } = await sb
+      .from('subscriptions')
+      .select('user_id, name, email, team_id, status')
+      .eq('organization_id', window._userOrgId)
+      .eq('role', 'coach')
+      .order('name');
+    
+    if (error) throw error;
+    
+    if (!coaches || coaches.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.4);font-size:12px;">No coaches yet</div>';
+      return;
+    }
+    
+    // Get teams for display
+    const { data: teams } = await sb
+      .from('teams')
+      .select('id, team_name, coach_id')
+      .eq('organization_id', window._userOrgId);
+    
+    const teamMap = {};
+    (teams || []).forEach(t => teamMap[t.id] = t.team_name);
+    
+    let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+    
+    coaches.forEach(coach => {
+      const team = (teams || []).find(t => t.coach_id === coach.user_id);
+      const teamName = team ? team.team_name : 'Not assigned';
+      
+      html += `
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:12px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-weight:700;font-size:13px;color:#fff;">${coach.name}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;">${coach.email}</div>
+            <div style="font-size:11px;color:rgba(59,130,246,0.8);margin-top:2px;">Team: ${teamName}</div>
+          </div>
+          <button onclick="removeCoach('${coach.user_id}','${coach.name}')" class="btn-danger" style="font-size:10px;padding:4px 8px;">Remove</button>
+        </div>
+      `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+    
+  } catch (error) {
+    container.innerHTML = '<div style="color:#f87171;font-size:12px;">Error: ' + error.message + '</div>';
+  }
+}
+
+async function removeCoach(userId, name) {
+  if (!confirm(`Remove coach "${name}"?\n\nThey will lose access to the platform.`)) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    
+    // Remove coach assignment from teams first
+    await sb.from('teams').update({ coach_id: null }).eq('coach_id', userId);
+    
+    // Delete subscription
+    const { error } = await sb.from('subscriptions').delete().eq('user_id', userId);
+    
+    if (error) throw error;
+    
+    loadCoaches();
+    loadTeams();
+  populateTeamDropdown();
+  } catch (error) {
+    alert('Error: ' + error.message);
+  }
+}
+
+
+
+async function populateTeamDropdown() {
+  const select = document.getElementById('playerTeam');
+  if (!select) return;
+  
+  try {
+    const sb = await getSupabaseClient();
+    const { data: teams } = await sb
+      .from('teams')
+      .select('id, team_name')
+      .eq('organization_id', window._userOrgId)
+      .eq('is_active', true)
+      .order('team_name');
+    
+    let options = '<option value="">No team (individual)</option>';
+    (teams || []).forEach(t => {
+      options += `<option value="${t.id}">${t.team_name}</option>`;
+    });
+    
+    select.innerHTML = options;
+  } catch (error) {
+    console.error('Error loading teams:', error);
   }
 }
 
