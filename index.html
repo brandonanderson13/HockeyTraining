@@ -280,7 +280,7 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <div class="nav">
-  
+  <button class="nb" id="dashTab" onclick="showSec('dashboard')" style="display:none;">Dashboard</button>
   <button class="nb active" onclick="showSec('overview')">Create Plan</button>
   <button class="nb" onclick="showSec('schedule')">Program</button>
   <button class="nb" onclick="showSec('baseline')">Testing & Progress</button>
@@ -292,6 +292,13 @@ select:focus{border-color:var(--or);outline:none;}
   <button class="nb" onclick="showSec('account')">Account</button>
   <button class="nb" onclick="showSec('leaderboard')">Leaderboard</button>
   <button class="nb" id="adminTab" onclick="showSec('admin')" style="display:none;margin-left:8px;background:rgba(var(--primary-rgb),0.1);border-color:var(--primary-color);">Admin</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="sec">
+  <div id="dashboardContent">
+    <div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);font-size:13px;">Loading dashboard...</div>
+  </div>
 </div>
 
 <!-- OVERVIEW -->
@@ -1510,8 +1517,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       
       console.log('Role check result:', {userSub, roleError, userId: user.id});
       
-      const isAdmin = userSub && userSub.role === 'admin';
-      console.log('Is admin?', isAdmin, 'Role:', userSub?.role);
+      const isAdmin = userSub && (userSub.role === 'admin' || userSub.role === 'super_admin');
+      const isCoach = userSub && userSub.role === 'coach';
+      window._userRole = userSub?.role || 'player';
+      window._userId = user.id;
+      console.log('Is admin?', isAdmin, 'Is coach?', isCoach, 'Role:', userSub?.role);
       
       // Store user's organization_id globally for filtering
       window._userOrgId = userSub?.organization_id || 'individual';
@@ -1569,16 +1579,26 @@ Check Supabase Table Editor:
         }
       }
       
-      // Show admin tab if user is admin
+      // Show dashboard tab for coaches and admins
+      if (isAdmin || isCoach) {
+        const dashTab = document.getElementById('dashTab');
+        if (dashTab) dashTab.style.display = 'inline-block';
+      }
+      // Show admin tab for admins only
       if (isAdmin) {
         const adminTab = document.getElementById('adminTab');
-        if (adminTab) {
-          adminTab.style.display = 'block';
-          console.log('Admin access granted');
-        }
+        if (adminTab) adminTab.style.display = 'block';
         loadAdminPanel(user);
-      } else {
-        console.log('Admin access granted for:', user.email);
+      }
+      // Load dashboard for coaches and admins, auto-navigate
+      if (isCoach || isAdmin) {
+        loadDashboard();
+        showSec('dashboard');
+      }
+      // Hide coach/admin-only tabs from players
+      if (!isAdmin && !isCoach) {
+        const dashTab = document.getElementById('dashTab');
+        if (dashTab) dashTab.style.display = 'none';
       }
 
       
@@ -1831,6 +1851,604 @@ function calcDiffs(){
     const msg=imp>=tot*.75?'Outstanding — Tigers strong! 🏒':imp>=tot*.5?'Solid improvement across the board 💪':'Keep building — great foundation 📈';
     document.getElementById('summaryContent').innerHTML=`<div style="font-size:13px;color:rgba(255,255,255,0.68);line-height:2;">Tests completed: <strong style="color:#fff;">${tot}</strong><br>Improved: <strong style="color:#4ade80;">${imp} of ${tot}</strong><br><span style="color:var(--primary-color);font-size:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${msg}</span></div>`;
   }
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DASHBOARD — Coach & Admin view
+// ═══════════════════════════════════════════════════════════════════════════
+
+let _dashPlayers = [];
+let _dashSelectedPlayer = null;
+let _dashTeamId = null;
+
+async function loadDashboard() {
+  const content = document.getElementById('dashboardContent');
+  if (!content) return;
+
+  try {
+    const sb = await getSupabaseClient();
+    const orgId = window._userOrgId || 'individual';
+    const role = window._userRole;
+    const userId = window._userId;
+
+    // Get teams and players based on role
+    let players = [];
+    let teamName = '';
+
+    if (role === 'coach') {
+      // Coach sees only their team
+      const { data: teamData } = await sb.from('teams')
+        .select('id, team_name')
+        .eq('coach_id', userId)
+        .eq('organization_id', orgId)
+        .single();
+
+      if (teamData) {
+        _dashTeamId = teamData.id;
+        teamName = teamData.team_name;
+        const { data: teamPlayers } = await sb.from('subscriptions')
+          .select('user_id, first_name, last_name, email, team_id')
+          .eq('team_id', teamData.id)
+          .eq('role', 'player')
+          .eq('status', 'active');
+        players = teamPlayers || [];
+      }
+    } else {
+      // Admin sees all players in org
+      const { data: allP } = await sb.from('subscriptions')
+        .select('user_id, first_name, last_name, email, team_id')
+        .eq('organization_id', orgId)
+        .eq('role', 'player')
+        .eq('status', 'active')
+        .order('first_name');
+      players = allP || [];
+
+      // Get all teams for admin filter
+      const { data: allTeams } = await sb.from('teams')
+        .select('id, team_name')
+        .eq('organization_id', orgId)
+        .order('team_name');
+      window._dashAllTeams = allTeams || [];
+    }
+
+    _dashPlayers = players;
+
+    // Get workout stats for all players
+    const playerIds = players.map(p => p.user_id);
+    let statsMap = {};
+
+    if (playerIds.length > 0) {
+      const { data: shots } = await sb.from('shooting_sessions')
+        .select('user_id, total_shots').in('user_id', playerIds);
+      const { data: sticks } = await sb.from('stickhandling_sessions')
+        .select('user_id, minutes').in('user_id', playerIds);
+      const { data: completions } = await sb.from('exercise_completions')
+        .select('user_id, created_at').eq('exercise_name', 'FULL_DAY_COMPLETED').in('user_id', playerIds);
+
+      (shots || []).forEach(s => {
+        if (!statsMap[s.user_id]) statsMap[s.user_id] = {shots:0,mins:0,workouts:0,lastActive:null};
+        statsMap[s.user_id].shots += s.total_shots || 0;
+      });
+      (sticks || []).forEach(s => {
+        if (!statsMap[s.user_id]) statsMap[s.user_id] = {shots:0,mins:0,workouts:0,lastActive:null};
+        statsMap[s.user_id].mins += s.minutes || 0;
+      });
+      (completions || []).forEach(c => {
+        if (!statsMap[c.user_id]) statsMap[c.user_id] = {shots:0,mins:0,workouts:0,lastActive:null};
+        statsMap[c.user_id].workouts += 1;
+        const d = new Date(c.created_at);
+        if (!statsMap[c.user_id].lastActive || d > statsMap[c.user_id].lastActive) {
+          statsMap[c.user_id].lastActive = d;
+        }
+      });
+    }
+
+    // Get assignments
+    const { data: assignments } = await sb.from('assignments')
+      .select('*')
+      .eq('organization_id', orgId)
+      .order('created_at', {ascending: false});
+
+    // Get goals
+    const { data: goals } = await sb.from('goals')
+      .select('*')
+      .eq('organization_id', orgId)
+      .order('created_at', {ascending: false});
+
+    window._dashAssignments = assignments || [];
+    window._dashGoals = goals || [];
+    window._dashStatsMap = statsMap;
+
+    renderDashboard(players, statsMap, teamName, assignments || [], goals || []);
+
+  } catch (e) {
+    document.getElementById('dashboardContent').innerHTML =
+      '<div style="color:#f87171;padding:20px;">Error loading dashboard: ' + e.message + '</div>';
+  }
+}
+
+function renderDashboard(players, statsMap, teamName, assignments, goals) {
+  const content = document.getElementById('dashboardContent');
+  const role = window._userRole;
+  const isAdmin = role === 'admin' || role === 'super_admin';
+
+  // Team/filter header
+  let filterHtml = '';
+  if (isAdmin && window._dashAllTeams && window._dashAllTeams.length > 0) {
+    const opts = window._dashAllTeams.map(t =>
+      `<option value="${t.id}">${t.team_name}</option>`
+    ).join('');
+    filterHtml = `
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:1.2rem;">
+        <select onchange="filterDashByTeam(this.value)" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:12px;padding:7px 12px;border-radius:6px;min-width:160px;">
+          <option value="">All Teams</option>
+          ${opts}
+        </select>
+        <span style="font-size:12px;color:rgba(255,255,255,0.35);">${players.length} player${players.length!==1?'s':''}</span>
+      </div>`;
+  } else if (teamName) {
+    filterHtml = `<div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin-bottom:1.2rem;">${teamName} <span style="font-size:13px;color:rgba(255,255,255,0.35);font-family:'Barlow',sans-serif;font-weight:400;text-transform:none;letter-spacing:0;">${players.length} players</span></div>`;
+  }
+
+  // Summary stats bar
+  let totalShots = 0, totalMins = 0, totalWorkouts = 0;
+  players.forEach(p => {
+    const s = statsMap[p.user_id] || {};
+    totalShots += s.shots || 0;
+    totalMins += s.mins || 0;
+    totalWorkouts += s.workouts || 0;
+  });
+
+  const summaryHtml = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.2rem;">
+      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:22px;font-weight:800;color:#4ade80;font-family:'Barlow Condensed',sans-serif;">${players.length}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Players</div>
+      </div>
+      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:22px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;">${totalShots.toLocaleString()}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Total Shots</div>
+      </div>
+      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:22px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;">${totalMins.toLocaleString()}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Stick Mins</div>
+      </div>
+      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:22px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;">${totalWorkouts}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Workouts</div>
+      </div>
+      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:22px;font-weight:800;color:#60a5fa;font-family:'Barlow Condensed',sans-serif;">${assignments.filter(a=>a.status==='assigned').length}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Open Tasks</div>
+      </div>
+    </div>`;
+
+  // Player roster cards
+  let rosterHtml = '';
+  if (players.length === 0) {
+    rosterHtml = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.3);font-size:13px;">No players on this team yet.</div>';
+  } else {
+    rosterHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;">';
+    players.forEach(p => {
+      const s = statsMap[p.user_id] || {shots:0,mins:0,workouts:0,lastActive:null};
+      const name = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
+      const lastActive = s.lastActive ? s.lastActive.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'Never';
+      const playerAssignments = assignments.filter(a => a.player_id === p.user_id);
+      const openCount = playerAssignments.filter(a => a.status === 'assigned').length;
+      const playerGoals = goals.filter(g => g.player_id === p.user_id);
+
+      rosterHtml += `
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
+          <div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:start;">
+            <div>
+              <div style="font-weight:700;font-size:14px;color:#fff;margin-bottom:2px;">${name}</div>
+              <div style="font-size:11px;color:rgba(255,255,255,0.35);">Last active: ${lastActive}</div>
+            </div>
+            ${openCount > 0 ? `<span style="background:rgba(var(--primary-rgb),0.15);color:var(--primary-color);font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;white-space:nowrap;">${openCount} open</span>` : ''}
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid #1a1a1a;">
+            <div style="padding:8px;text-align:center;border-right:1px solid #1a1a1a;">
+              <div style="font-size:15px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;">${s.shots}</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Shots</div>
+            </div>
+            <div style="padding:8px;text-align:center;border-right:1px solid #1a1a1a;">
+              <div style="font-size:15px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;">${s.mins}</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Stick Min</div>
+            </div>
+            <div style="padding:8px;text-align:center;">
+              <div style="font-size:15px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;">${s.workouts}</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Workouts</div>
+            </div>
+          </div>
+          ${playerGoals.length > 0 ? `
+          <div style="padding:8px 14px;border-top:1px solid #1a1a1a;">
+            ${playerGoals.slice(0,2).map(g => {
+              const pct = g.target_value ? Math.min(100,Math.round((g.current_value||0)/g.target_value*100)) : 0;
+              return `<div style="margin-bottom:5px;">
+                <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px;">
+                  <span style="color:rgba(255,255,255,0.5);">${g.metric}</span>
+                  <span style="color:rgba(255,255,255,0.4);">${g.current_value||0}/${g.target_value}</span>
+                </div>
+                <div style="background:#1a1a1a;border-radius:3px;height:4px;"><div style="height:4px;width:${pct}%;background:var(--primary-color);border-radius:3px;"></div></div>
+              </div>`;
+            }).join('')}
+          </div>` : ''}
+          <div style="padding:10px 14px;border-top:1px solid #1a1a1a;display:flex;gap:6px;">
+            <button onclick="openAssignModal('${p.user_id}','${name.replace(/'/g,"\'")}','assignment')"
+              style="flex:1;background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.25);color:var(--primary-color);font-size:11px;font-weight:700;padding:6px 8px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">
+              + Assignment
+            </button>
+            <button onclick="openAssignModal('${p.user_id}','${name.replace(/'/g,"\'")}','goal')"
+              style="flex:1;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:6px 8px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">
+              + Goal
+            </button>
+            <button onclick="viewPlayerDetail('${p.user_id}','${name.replace(/'/g,"\'")}' )"
+              style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;padding:6px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">
+              View
+            </button>
+          </div>
+        </div>`;
+    });
+    rosterHtml += '</div>';
+  }
+
+  // Recent assignments list
+  const recentAssign = assignments.slice(0, 8);
+  let assignHtml = '';
+  if (recentAssign.length > 0) {
+    const playerMap = {};
+    _dashPlayers.forEach(p => { playerMap[p.user_id] = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email; });
+    assignHtml = recentAssign.map(a => {
+      const pName = playerMap[a.player_id] || 'Unknown';
+      const statusColor = a.status === 'completed' ? '#4ade80' : a.status === 'in_progress' ? '#fbbf24' : 'rgba(255,255,255,0.4)';
+      const due = a.due_date ? new Date(a.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1a1a1a;">
+        <div>
+          <span style="font-size:12px;color:rgba(255,255,255,0.8);font-weight:600;">${a.title}</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.35);margin-left:8px;">→ ${pName}</span>
+          ${a.type ? `<span style="font-size:10px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);padding:1px 6px;border-radius:3px;margin-left:6px;">${a.type}</span>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${due ? `<span style="font-size:10px;color:rgba(255,255,255,0.3);">${due}</span>` : ''}
+          <span style="font-size:10px;font-weight:700;color:${statusColor};text-transform:uppercase;">${a.status}</span>
+          <button onclick="deleteAssignment('${a.id}')" style="background:none;border:none;color:rgba(255,255,255,0.2);cursor:pointer;font-size:12px;padding:0 2px;">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    assignHtml = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">No assignments yet — create one from a player card above.</div>';
+  }
+
+  content.innerHTML = `
+    ${filterHtml}
+    ${summaryHtml}
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="ch"><span class="cht">Roster</span></div>
+      <div class="cb">${rosterHtml}</div>
+    </div>
+    <div class="card">
+      <div class="ch">
+        <span class="cht">Assignments & Tasks</span>
+        <button onclick="openAssignModal(null,null,'assignment')" style="margin-left:auto;background:var(--primary-color);border:none;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ New</button>
+      </div>
+      <div class="cb">${assignHtml}</div>
+    </div>`;
+}
+
+function filterDashByTeam(teamId) {
+  const players = teamId
+    ? _dashPlayers.filter(p => p.team_id === teamId)
+    : _dashPlayers;
+  renderDashboard(players, window._dashStatsMap, '', window._dashAssignments, window._dashGoals);
+}
+
+// ── Assignment / Goal Modal ────────────────────────────────────────────────
+function openAssignModal(playerId, playerName, type) {
+  const existing = document.getElementById('assignModal');
+  if (existing) existing.remove();
+
+  const playerOpts = _dashPlayers.map(p => {
+    const n = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
+    const sel = p.user_id === playerId ? 'selected' : '';
+    return `<option value="${p.user_id}" ${sel}>${n}</option>`;
+  }).join('');
+
+  const isGoal = type === 'goal';
+  const today = new Date().toISOString().split('T')[0];
+
+  const modal = document.createElement('div');
+  modal.id = 'assignModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:#141414;border:1px solid #333;border-radius:12px;padding:24px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;">${isGoal ? '+ New Goal' : '+ New Assignment'}</div>
+        <button onclick="document.getElementById('assignModal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer;line-height:1;">✕</button>
+      </div>
+
+      <div style="display:flex;gap:0;margin-bottom:16px;background:#0d0d0d;border-radius:6px;overflow:hidden;border:1px solid #222;">
+        <button onclick="switchModalType('assignment',this)" style="flex:1;padding:8px;background:${!isGoal?'var(--primary-color)':'transparent'};border:none;color:${!isGoal?'#fff':'rgba(255,255,255,0.4)'};font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">Assignment</button>
+        <button onclick="switchModalType('goal',this)" style="flex:1;padding:8px;background:${isGoal?'#60a5fa':'transparent'};border:none;color:${isGoal?'#fff':'rgba(255,255,255,0.4)'};font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">Goal</button>
+      </div>
+
+      <div id="modalTypeContent">
+        ${isGoal ? renderGoalForm(playerOpts, today) : renderAssignForm(playerOpts, today)}
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+function switchModalType(type, btn) {
+  const today = new Date().toISOString().split('T')[0];
+  const playerOpts = _dashPlayers.map(p => {
+    const n = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
+    return `<option value="${p.user_id}">${n}</option>`;
+  }).join('');
+  document.getElementById('modalTypeContent').innerHTML =
+    type === 'goal' ? renderGoalForm(playerOpts, today) : renderAssignForm(playerOpts, today);
+  const btns = btn.parentElement.querySelectorAll('button');
+  btns.forEach(b => {
+    b.style.background = 'transparent';
+    b.style.color = 'rgba(255,255,255,0.4)';
+  });
+  btn.style.background = type === 'goal' ? '#60a5fa' : 'var(--primary-color)';
+  btn.style.color = '#fff';
+}
+
+function renderAssignForm(playerOpts, today) {
+  return `
+    <div style="display:grid;gap:12px;">
+      <div>
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Player</label>
+        <select id="modalPlayer" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;"><option value="">Select player...</option>${playerOpts}</select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Title</label>
+        <input id="modalTitle" type="text" placeholder="e.g. 100 wrist shots daily" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+      </div>
+      <div>
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Type</label>
+        <select id="modalType" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+          <option value="workout">Workout</option>
+          <option value="shooting">Shooting</option>
+          <option value="stickhandling">Stickhandling</option>
+          <option value="conditioning">Conditioning</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Description (optional)</label>
+        <textarea id="modalDesc" placeholder="Details, reps, notes..." style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;resize:vertical;height:70px;font-family:'Barlow',sans-serif;"></textarea>
+      </div>
+      <div>
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Due Date (optional)</label>
+        <input id="modalDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+      </div>
+      <div id="modalMsg" style="font-size:12px;display:none;"></div>
+      <button onclick="saveAssignment()" style="background:var(--primary-color);border:none;color:#fff;font-size:13px;font-weight:700;padding:10px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Create Assignment</button>
+    </div>`;
+}
+
+function renderGoalForm(playerOpts, today) {
+  return `
+    <div style="display:grid;gap:12px;">
+      <div>
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Player</label>
+        <select id="modalPlayer" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;"><option value="">Select player...</option>${playerOpts}</select>
+      </div>
+      <div>
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Metric</label>
+        <select id="modalMetric" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+          <option value="Total Shots">Total Shots</option>
+          <option value="Stick Minutes">Stick Minutes</option>
+          <option value="Workouts Completed">Workouts Completed</option>
+          <option value="30m Sprint (sec)">30m Sprint (sec)</option>
+          <option value="Push-Up Max">Push-Up Max</option>
+          <option value="Custom">Custom</option>
+        </select>
+      </div>
+      <div id="customMetricWrap" style="display:none;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Custom Metric Name</label>
+        <input id="modalCustomMetric" type="text" placeholder="e.g. Backhand Accuracy" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Target</label>
+          <input id="modalTarget" type="number" placeholder="e.g. 500" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+        </div>
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Current</label>
+          <input id="modalCurrent" type="number" placeholder="e.g. 120" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+        </div>
+      </div>
+      <div>
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Due Date (optional)</label>
+        <input id="modalDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+      </div>
+      <div>
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Notes (optional)</label>
+        <textarea id="modalDesc" placeholder="Coaching notes..." style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;resize:vertical;height:60px;font-family:'Barlow',sans-serif;"></textarea>
+      </div>
+      <div id="modalMsg" style="font-size:12px;display:none;"></div>
+      <button onclick="saveGoal()" style="background:#60a5fa;border:none;color:#fff;font-size:13px;font-weight:700;padding:10px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Create Goal</button>
+    </div>`;
+}
+
+// Show custom metric input when Custom is selected
+document.addEventListener('change', e => {
+  if (e.target.id === 'modalMetric') {
+    const wrap = document.getElementById('customMetricWrap');
+    if (wrap) wrap.style.display = e.target.value === 'Custom' ? 'block' : 'none';
+  }
+});
+
+async function saveAssignment() {
+  const playerId = document.getElementById('modalPlayer')?.value;
+  const title = document.getElementById('modalTitle')?.value.trim();
+  const type = document.getElementById('modalType')?.value;
+  const desc = document.getElementById('modalDesc')?.value.trim();
+  const due = document.getElementById('modalDue')?.value;
+  const msg = document.getElementById('modalMsg');
+
+  if (!playerId || !title) {
+    if (msg) { msg.style.color='#f87171'; msg.textContent='Please select a player and enter a title.'; msg.style.display='block'; }
+    return;
+  }
+
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('assignments').insert({
+      organization_id: window._userOrgId || 'individual',
+      coach_id: window._userId,
+      player_id: playerId,
+      title,
+      type: type || 'workout',
+      description: desc || null,
+      due_date: due || null,
+      status: 'assigned'
+    });
+    if (error) throw error;
+    document.getElementById('assignModal')?.remove();
+    loadDashboard();
+  } catch (e) {
+    if (msg) { msg.style.color='#f87171'; msg.textContent='Error: '+e.message; msg.style.display='block'; }
+  }
+}
+
+async function saveGoal() {
+  const playerId = document.getElementById('modalPlayer')?.value;
+  const metricSel = document.getElementById('modalMetric')?.value;
+  const metric = metricSel === 'Custom' ? (document.getElementById('modalCustomMetric')?.value.trim() || 'Custom') : metricSel;
+  const target = parseFloat(document.getElementById('modalTarget')?.value) || null;
+  const current = parseFloat(document.getElementById('modalCurrent')?.value) || null;
+  const due = document.getElementById('modalDue')?.value;
+  const notes = document.getElementById('modalDesc')?.value.trim();
+  const msg = document.getElementById('modalMsg');
+
+  if (!playerId || !metric) {
+    if (msg) { msg.style.color='#f87171'; msg.textContent='Please select a player and metric.'; msg.style.display='block'; }
+    return;
+  }
+
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('goals').insert({
+      organization_id: window._userOrgId || 'individual',
+      coach_id: window._userId,
+      player_id: playerId,
+      metric,
+      target_value: target,
+      current_value: current,
+      due_date: due || null,
+      notes: notes || null
+    });
+    if (error) throw error;
+    document.getElementById('assignModal')?.remove();
+    loadDashboard();
+  } catch (e) {
+    if (msg) { msg.style.color='#f87171'; msg.textContent='Error: '+e.message; msg.style.display='block'; }
+  }
+}
+
+async function deleteAssignment(id) {
+  if (!confirm('Delete this assignment?')) return;
+  try {
+    const sb = await getSupabaseClient();
+    await sb.from('assignments').delete().eq('id', id);
+    loadDashboard();
+  } catch (e) { alert('Error: ' + e.message); }
+}
+
+function viewPlayerDetail(playerId, playerName) {
+  const player = _dashPlayers.find(p => p.user_id === playerId);
+  const stats = window._dashStatsMap?.[playerId] || {shots:0,mins:0,workouts:0};
+  const assignments = (window._dashAssignments || []).filter(a => a.player_id === playerId);
+  const goals = (window._dashGoals || []).filter(g => g.player_id === playerId);
+
+  const existing = document.getElementById('playerDetailModal');
+  if (existing) existing.remove();
+
+  const assignHtml = assignments.length ? assignments.map(a => {
+    const statusColor = a.status === 'completed' ? '#4ade80' : a.status === 'in_progress' ? '#fbbf24' : 'rgba(255,255,255,0.4)';
+    const due = a.due_date ? new Date(a.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1a1a1a;">
+      <div>
+        <span style="font-size:12px;color:rgba(255,255,255,0.8);">${a.title}</span>
+        ${a.type ? `<span style="font-size:10px;color:rgba(255,255,255,0.35);margin-left:6px;">${a.type}</span>` : ''}
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        ${due ? `<span style="font-size:10px;color:rgba(255,255,255,0.3);">${due}</span>` : ''}
+        <select onchange="updateAssignmentStatus('${a.id}',this.value)" style="background:#1a1a1a;border:1px solid #333;color:${statusColor};font-size:10px;padding:3px 6px;border-radius:4px;">
+          <option value="assigned" ${a.status==='assigned'?'selected':''}>Assigned</option>
+          <option value="in_progress" ${a.status==='in_progress'?'selected':''}>In Progress</option>
+          <option value="completed" ${a.status==='completed'?'selected':''}>Completed</option>
+        </select>
+      </div>
+    </div>`;
+  }).join('') : '<div style="font-size:12px;color:rgba(255,255,255,0.3);padding:8px 0;">No assignments</div>';
+
+  const goalsHtml = goals.length ? goals.map(g => {
+    const pct = g.target_value ? Math.min(100,Math.round((g.current_value||0)/g.target_value*100)) : 0;
+    return `<div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+        <span style="color:rgba(255,255,255,0.75);font-weight:600;">${g.metric}</span>
+        <span style="color:rgba(255,255,255,0.4);">${g.current_value||0} / ${g.target_value} · ${pct}%</span>
+      </div>
+      <div style="background:#1a1a1a;border-radius:4px;height:6px;"><div style="height:6px;width:${pct}%;background:var(--primary-color);border-radius:4px;transition:width .3s;"></div></div>
+      ${g.notes ? `<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px;">${g.notes}</div>` : ''}
+    </div>`;
+  }).join('') : '<div style="font-size:12px;color:rgba(255,255,255,0.3);padding:8px 0;">No goals set</div>';
+
+  const modal = document.createElement('div');
+  modal.id = 'playerDetailModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:#141414;border:1px solid #333;border-radius:12px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;">${playerName}</div>
+        <button onclick="document.getElementById('playerDetailModal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer;">✕</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px;">
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;">${stats.shots}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Shots</div>
+        </div>
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;">${stats.mins}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Stick Min</div>
+        </div>
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;">${stats.workouts}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Workouts</div>
+        </div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:8px;">Goals</div>
+        ${goalsHtml}
+      </div>
+      <div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:8px;">Assignments</div>
+        ${assignHtml}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px;">
+        <button onclick="document.getElementById('playerDetailModal').remove();openAssignModal('${playerId}','${playerName}','assignment')" style="flex:1;background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.25);color:var(--primary-color);font-size:12px;font-weight:700;padding:8px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Assignment</button>
+        <button onclick="document.getElementById('playerDetailModal').remove();openAssignModal('${playerId}','${playerName}','goal')" style="flex:1;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:12px;font-weight:700;padding:8px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+async function updateAssignmentStatus(id, status) {
+  try {
+    const sb = await getSupabaseClient();
+    await sb.from('assignments').update({status}).eq('id', id);
+    // Update local cache
+    const a = (window._dashAssignments||[]).find(x=>x.id===id);
+    if (a) a.status = status;
+  } catch (e) { alert('Error: ' + e.message); }
 }
 
 function showSec(id){
@@ -4437,7 +5055,7 @@ function renderPlayerTable(players) {
     return;
   }
   
-  let html = '<div class="player-table-wrapper"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1400px;"><thead><tr style="border-bottom:1px solid #222;"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'name\')">Name ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'team\')">Team ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'email\')">Email ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'role\')">Role ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'status\')">Status ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'shots\')">Shots ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'mins\')">Stick Min ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'workouts\')">Workouts ↕</th><th style="text-align:center;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Expires</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Actions</th></tr></thead><tbody>';
+  let html = '<div class="player-table-wrapper"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1400px;"><thead><tr style="border-bottom:1px solid #222;"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'name\')">Name ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'email\')">Email ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'role\')">Role ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'status\')">Status ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'shots\')">Shots ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'mins\')">Stick Min ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'workouts\')">Workouts ↕</th><th style="text-align:center;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Expires</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Actions</th></tr></thead><tbody>';
   
   players.forEach(p => {
     html += p.html;
@@ -5764,9 +6382,9 @@ async function loadTeams() {
     const coachMap = {};
     (coaches || []).forEach(c => coachMap[c.user_id] = c);
 
-    const { data: allPlayers } = await sb.from('subscriptions').select('user_id, team_id, first_name, last_name, email').eq('role', 'player').eq('organization_id', window._userOrgId || 'individual');
+    const { data: allPlayersT } = await sb.from('subscriptions').select('user_id, team_id, first_name, last_name, email').eq('role', 'player').eq('organization_id', window._userOrgId || 'individual');
     const playersByTeam = {};
-    (allPlayers || []).forEach(p => { if (p.team_id) { if (!playersByTeam[p.team_id]) playersByTeam[p.team_id] = []; playersByTeam[p.team_id].push(p); } });
+    (allPlayersT || []).forEach(p => { if (p.team_id) { if (!playersByTeam[p.team_id]) playersByTeam[p.team_id] = []; playersByTeam[p.team_id].push(p); } });
 
     let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
 
@@ -5774,24 +6392,16 @@ async function loadTeams() {
       const coach = coachMap[team.coach_id];
       const coachName = coach ? ([coach.first_name, coach.last_name].filter(Boolean).join(' ') || coach.email) : 'No coach assigned';
       const players = playersByTeam[team.id] || [];
-
       let rosterHtml = players.length ? players.map(p => {
         const n = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
         return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1a1a1a;font-size:12px;"><span style="color:rgba(255,255,255,0.75);">${n}</span><span style="color:#60a5fa;font-size:10px;font-weight:700;text-transform:uppercase;">Player</span></div>`;
       }).join('') : '<div style="font-size:11px;color:rgba(255,255,255,0.3);padding:4px 0;">No players assigned</div>';
-
       const detailId = 'roster-' + team.id;
       html += `
         <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;overflow:hidden;">
           <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;cursor:pointer;" onclick="const d=document.getElementById('${detailId}');const open=d.style.display==='block';d.style.display=open?'none':'block';this.querySelector('.arr').textContent=open?'▶':'▼';">
-            <div>
-              <span style="font-weight:700;font-size:14px;color:#fff;">${team.team_name}</span>
-              <span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:8px;">${players.length} player${players.length!==1?'s':''} · Coach: ${coachName}</span>
-            </div>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <span class="arr" style="font-size:10px;color:rgba(255,255,255,0.3);">▶</span>
-              <button onclick="event.stopPropagation();deleteTeam('${team.id}','${team.team_name}')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;cursor:pointer;">Delete</button>
-            </div>
+            <div><span style="font-weight:700;font-size:14px;color:#fff;">${team.team_name}</span><span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:8px;">${players.length} player${players.length!==1?'s':''} · Coach: ${coachName}</span></div>
+            <div style="display:flex;gap:8px;align-items:center;"><span class="arr" style="font-size:10px;color:rgba(255,255,255,0.3);">▶</span><button onclick="event.stopPropagation();deleteTeam('${team.id}','${team.team_name}')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;cursor:pointer;">Delete</button></div>
           </div>
           <div id="${detailId}" style="display:none;border-top:1px solid #1a1a1a;padding:10px 12px;">
             <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Coach</div>
@@ -5802,7 +6412,6 @@ async function loadTeams() {
         </div>
       `;
     }
-
     html += '</div>';
     container.innerHTML = html;
     
