@@ -296,9 +296,7 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="sec">
-  <div id="dashboardContent">
-    <div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);font-size:13px;">Loading dashboard...</div>
-  </div>
+  <div id="dashboardContent"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Loading...</div></div>
 </div>
 
 <!-- OVERVIEW -->
@@ -1521,7 +1519,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       const isCoach = userSub && userSub.role === 'coach';
       window._userRole = userSub?.role || 'player';
       window._userId = user.id;
-      console.log('Is admin?', isAdmin, 'Is coach?', isCoach, 'Role:', userSub?.role);
+      window._userSub = userSub;
+      console.log('Role:', userSub?.role);
       
       // Store user's organization_id globally for filtering
       window._userOrgId = userSub?.organization_id || 'individual';
@@ -1579,7 +1578,7 @@ Check Supabase Table Editor:
         }
       }
       
-      // Show dashboard tab for everyone
+      // Show dashboard for everyone
       const dashTab = document.getElementById('dashTab');
       if (dashTab) dashTab.style.display = 'inline-block';
 
@@ -1590,7 +1589,7 @@ Check Supabase Table Editor:
         loadAdminPanel(user);
       }
 
-      // Load dashboard and navigate everyone there on login
+      // Load dashboard and navigate there
       loadDashboard();
       showSec('dashboard');
 
@@ -1848,16 +1847,16 @@ function calcDiffs(){
 
 
 // ═══════════════════════════════════════════════════════════════════════════
-// DASHBOARD — Coach & Admin view
+// DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════════
 
 let _dashPlayers = [];
-let _dashSelectedPlayer = null;
 let _dashTeamId = null;
 
 async function loadDashboard() {
-  const content = document.getElementById('dashboardContent');
-  if (!content) return;
+  const el = document.getElementById('dashboardContent');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Loading...</div>';
 
   try {
     const sb = await getSupabaseClient();
@@ -1866,160 +1865,141 @@ async function loadDashboard() {
     const userId = window._userId;
     const isPlayer = role === 'player';
     const isCoach = role === 'coach';
-    const isAdmin = role === 'admin' || role === 'super_admin';
 
-    // ── PLAYER VIEW ───────────────────────────────────────────────────────
     if (isPlayer) {
-      // Get their own stats
-      const { data: shots } = await sb.from('shooting_sessions').select('total_shots').eq('user_id', userId);
-      const { data: sticks } = await sb.from('stickhandling_sessions').select('minutes').eq('user_id', userId);
-      const { data: completions } = await sb.from('exercise_completions').select('created_at').eq('user_id', userId).eq('exercise_name', 'FULL_DAY_COMPLETED');
-      const totalShots = (shots||[]).reduce((a,s)=>a+(s.total_shots||0),0);
-      const totalMins = (sticks||[]).reduce((a,s)=>a+(s.minutes||0),0);
-      const totalWorkouts = (completions||[]).length;
-
-      // Get their assignments
-      const { data: myAssignments } = await sb.from('assignments').select('*').eq('player_id', userId).order('created_at',{ascending:false});
-      const { data: myGoals } = await sb.from('goals').select('*').eq('player_id', userId).order('created_at',{ascending:false});
-
-      window._dashAssignments = myAssignments || [];
-      window._dashGoals = myGoals || [];
-
-      renderPlayerDashboard(totalShots, totalMins, totalWorkouts, myAssignments||[], myGoals||[]);
+      // ── PLAYER VIEW ────────────────────────────────────────────────────
+      const [shotRes, stickRes, workRes, assignRes, goalRes] = await Promise.all([
+        sb.from('shooting_sessions').select('total_shots').eq('user_id', userId),
+        sb.from('stickhandling_sessions').select('minutes').eq('user_id', userId),
+        sb.from('exercise_completions').select('created_at').eq('user_id', userId).eq('exercise_name', 'FULL_DAY_COMPLETED'),
+        sb.from('assignments').select('*').eq('player_id', userId).order('created_at', {ascending: false}),
+        sb.from('goals').select('*').eq('player_id', userId).order('created_at', {ascending: false})
+      ]);
+      const totalShots = (shotRes.data||[]).reduce((a,s)=>a+(s.total_shots||0),0);
+      const totalMins = (stickRes.data||[]).reduce((a,s)=>a+(s.minutes||0),0);
+      const totalWorkouts = (workRes.data||[]).length;
+      window._dashAssignments = assignRes.data || [];
+      window._dashGoals = goalRes.data || [];
+      renderPlayerDashboard(totalShots, totalMins, totalWorkouts, window._dashAssignments, window._dashGoals);
       return;
     }
 
-    // ── COACH / ADMIN VIEW ────────────────────────────────────────────────
+    // ── COACH / ADMIN VIEW ──────────────────────────────────────────────
     let players = [];
     let teamName = '';
 
     if (isCoach) {
-      const { data: teamData } = await sb.from('teams')
-        .select('id, team_name')
-        .eq('coach_id', userId)
-        .eq('organization_id', orgId)
-        .single();
+      const { data: teamData } = await sb.from('teams').select('id, team_name').eq('coach_id', userId).eq('organization_id', orgId).single();
       if (teamData) {
         _dashTeamId = teamData.id;
         teamName = teamData.team_name;
-        const { data: teamPlayers } = await sb.from('subscriptions')
-          .select('user_id, first_name, last_name, email, team_id')
-          .eq('team_id', teamData.id).eq('role', 'player').eq('status', 'active');
-        players = teamPlayers || [];
+        const { data: tp } = await sb.from('subscriptions').select('user_id, first_name, last_name, email, team_id').eq('team_id', teamData.id).eq('role', 'player').eq('status', 'active');
+        players = tp || [];
       }
     } else {
-      const { data: allP } = await sb.from('subscriptions')
-        .select('user_id, first_name, last_name, email, team_id')
-        .eq('organization_id', orgId).eq('role', 'player').eq('status', 'active').order('first_name');
+      const { data: allP } = await sb.from('subscriptions').select('user_id, first_name, last_name, email, team_id').eq('organization_id', orgId).eq('role', 'player').eq('status', 'active').order('first_name');
       players = allP || [];
-      const { data: allTeams } = await sb.from('teams')
-        .select('id, team_name').eq('organization_id', orgId).order('team_name');
-      window._dashAllTeams = allTeams || [];
+      const { data: allT } = await sb.from('teams').select('id, team_name').eq('organization_id', orgId).order('team_name');
+      window._dashAllTeams = allT || [];
     }
 
     _dashPlayers = players;
-
-    const playerIds = players.map(p => p.user_id);
+    const pIds = players.map(p => p.user_id);
     let statsMap = {};
-    if (playerIds.length > 0) {
-      const { data: shots } = await sb.from('shooting_sessions').select('user_id, total_shots').in('user_id', playerIds);
-      const { data: sticks } = await sb.from('stickhandling_sessions').select('user_id, minutes').in('user_id', playerIds);
-      const { data: completions } = await sb.from('exercise_completions').select('user_id, created_at').eq('exercise_name', 'FULL_DAY_COMPLETED').in('user_id', playerIds);
-      (shots||[]).forEach(s => { if (!statsMap[s.user_id]) statsMap[s.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[s.user_id].shots+=s.total_shots||0; });
-      (sticks||[]).forEach(s => { if (!statsMap[s.user_id]) statsMap[s.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[s.user_id].mins+=s.minutes||0; });
-      (completions||[]).forEach(c => {
+
+    if (pIds.length > 0) {
+      const [shots, sticks, comps] = await Promise.all([
+        sb.from('shooting_sessions').select('user_id, total_shots').in('user_id', pIds),
+        sb.from('stickhandling_sessions').select('user_id, minutes').in('user_id', pIds),
+        sb.from('exercise_completions').select('user_id, created_at').eq('exercise_name', 'FULL_DAY_COMPLETED').in('user_id', pIds)
+      ]);
+      (shots.data||[]).forEach(s => { if (!statsMap[s.user_id]) statsMap[s.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[s.user_id].shots+=s.total_shots||0; });
+      (sticks.data||[]).forEach(s => { if (!statsMap[s.user_id]) statsMap[s.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[s.user_id].mins+=s.minutes||0; });
+      (comps.data||[]).forEach(c => {
         if (!statsMap[c.user_id]) statsMap[c.user_id]={shots:0,mins:0,workouts:0,lastActive:null};
-        statsMap[c.user_id].workouts+=1;
-        const d=new Date(c.created_at);
-        if (!statsMap[c.user_id].lastActive||d>statsMap[c.user_id].lastActive) statsMap[c.user_id].lastActive=d;
+        statsMap[c.user_id].workouts++;
+        const d = new Date(c.created_at);
+        if (!statsMap[c.user_id].lastActive || d > statsMap[c.user_id].lastActive) statsMap[c.user_id].lastActive = d;
       });
     }
 
-    const { data: assignments } = await sb.from('assignments').select('*').eq('organization_id', orgId).order('created_at',{ascending:false});
-    const { data: goals } = await sb.from('goals').select('*').eq('organization_id', orgId).order('created_at',{ascending:false});
-
-    window._dashAssignments = assignments || [];
-    window._dashGoals = goals || [];
+    const [assignRes, goalRes] = await Promise.all([
+      sb.from('assignments').select('*').eq('organization_id', orgId).order('created_at', {ascending: false}),
+      sb.from('goals').select('*').eq('organization_id', orgId).order('created_at', {ascending: false})
+    ]);
+    window._dashAssignments = assignRes.data || [];
+    window._dashGoals = goalRes.data || [];
     window._dashStatsMap = statsMap;
+    renderCoachDashboard(players, statsMap, teamName, window._dashAssignments, window._dashGoals);
 
-    renderDashboard(players, statsMap, teamName, assignments||[], goals||[]);
-
-  } catch (e) {
-    document.getElementById('dashboardContent').innerHTML =
-      '<div style="color:#f87171;padding:20px;">Error loading dashboard: ' + e.message + '</div>';
+  } catch(e) {
+    document.getElementById('dashboardContent').innerHTML = '<div style="color:#f87171;padding:20px;">Error: ' + e.message + '</div>';
+    console.error('Dashboard error:', e);
   }
 }
 
+// ── PLAYER DASHBOARD ──────────────────────────────────────────────────────
 function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments, goals) {
-  const content = document.getElementById('dashboardContent');
+  const el = document.getElementById('dashboardContent');
+  const open = assignments.filter(a => a.status !== 'completed');
+  const done = assignments.filter(a => a.status === 'completed');
 
-  const openAssign = assignments.filter(a => a.status !== 'completed');
-  const doneAssign = assignments.filter(a => a.status === 'completed');
+  const statsHtml = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.2rem;">
+      ${[['Total Shots','#fb923c',totalShots.toLocaleString()],['Stick Mins','#a78bfa',totalMins.toLocaleString()],['Workouts','#fbbf24',totalWorkouts],['Done','#4ade80',done.length],['Open','var(--primary-color)',open.length]].map(([label,color,val])=>`
+      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
+        <div style="font-size:22px;font-weight:800;color:${color};font-family:'Barlow Condensed',sans-serif;">${val}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">${label}</div>
+      </div>`).join('')}
+    </div>`;
 
   const assignHtml = assignments.length ? assignments.map(a => {
-    const statusColor = a.status==='completed'?'#4ade80':a.status==='in_progress'?'#fbbf24':'rgba(255,255,255,0.4)';
-    const due = a.due_date ? new Date(a.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-    return `<div style="display:flex;justify-content:space-between;align-items:start;padding:10px 0;border-bottom:1px solid #1a1a1a;">
+    const sc = a.status==='completed'?'#4ade80':a.status==='in_progress'?'#fbbf24':'rgba(255,255,255,0.4)';
+    const due = a.due_date ? new Date(a.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    const isDone = a.status === 'completed';
+    return `<div style="padding:10px 0;border-bottom:1px solid #1a1a1a;display:flex;justify-content:space-between;align-items:start;gap:10px;">
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);margin-bottom:2px;">${a.title}</div>
-        ${a.description ? `<div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.4;margin-top:2px;">${a.description}</div>` : ''}
-        <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
-          ${a.type ? `<span style="font-size:10px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);padding:2px 7px;border-radius:3px;">${a.type}</span>` : ''}
-          ${due ? `<span style="font-size:10px;color:rgba(255,255,255,0.3);">Due ${due}</span>` : ''}
+        <div style="font-size:13px;font-weight:600;color:${isDone?'rgba(255,255,255,0.4)':'rgba(255,255,255,0.85)'};${isDone?'text-decoration:line-through;':''}">${a.title}</div>
+        ${a.description?`<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px;line-height:1.4;">${a.description}</div>`:''}
+        <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;">
+          ${a.type?`<span style="font-size:10px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);padding:2px 6px;border-radius:3px;">${a.type}</span>`:''}
+          ${due?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">Due ${due}</span>`:''}
         </div>
       </div>
-      <div style="margin-left:12px;flex-shrink:0;">
-        <select onchange="updateAssignmentStatus('${a.id}',this.value)" style="background:#1a1a1a;border:1px solid #333;color:${statusColor};font-size:11px;padding:4px 8px;border-radius:4px;">
-          <option value="assigned" ${a.status==='assigned'?'selected':''}>Assigned</option>
-          <option value="in_progress" ${a.status==='in_progress'?'selected':''}>In Progress</option>
-          <option value="completed" ${a.status==='completed'?'selected':''}>Completed</option>
-        </select>
-      </div>
+      <select onchange="updateAssignmentStatus('${a.id}',this.value)" style="background:#1a1a1a;border:1px solid #333;color:${sc};font-size:11px;padding:4px 8px;border-radius:4px;flex-shrink:0;">
+        <option value="assigned" ${a.status==='assigned'?'selected':''}>Assigned</option>
+        <option value="in_progress" ${a.status==='in_progress'?'selected':''}>In Progress</option>
+        <option value="completed" ${a.status==='completed'?'selected':''}>Completed ✓</option>
+      </select>
     </div>`;
-  }).join('') : '<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:13px;">No assignments yet</div>';
+  }).join('') : '<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:12px;">No assignments yet</div>';
 
   const goalsHtml = goals.length ? goals.map(g => {
     const pct = g.target_value ? Math.min(100,Math.round((g.current_value||0)/g.target_value*100)) : 0;
-    const barColor = pct>=100?'#4ade80':pct>=50?'var(--primary-color)':'#60a5fa';
-    return `<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px 14px;margin-bottom:8px;">
+    const bc = pct>=100?'#4ade80':pct>=50?'var(--primary-color)':'#60a5fa';
+    const isDone = pct >= 100;
+    return `<div style="background:#0d0d0d;border:1px solid ${isDone?'rgba(74,222,128,0.3)':'#222'};border-radius:8px;padding:12px 14px;margin-bottom:8px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <span style="font-size:13px;font-weight:700;color:#fff;">${g.metric}</span>
+        <span style="font-size:13px;font-weight:700;color:#fff;">${g.metric} ${isDone?'✓':''}</span>
         <span style="font-size:12px;color:rgba(255,255,255,0.4);">${g.current_value||0} / ${g.target_value}</span>
       </div>
       <div style="background:#1a1a1a;border-radius:4px;height:8px;margin-bottom:6px;">
-        <div style="height:8px;width:${pct}%;background:${barColor};border-radius:4px;transition:width .3s;"></div>
+        <div style="height:8px;width:${pct}%;background:${bc};border-radius:4px;transition:width .3s;"></div>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:11px;">
-        <span style="color:rgba(255,255,255,0.3);">${pct}% complete</span>
-        ${g.due_date ? `<span style="color:rgba(255,255,255,0.3);">Due ${new Date(g.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>` : ''}
+        <span style="color:rgba(255,255,255,0.35);">${pct}% complete</span>
+        ${g.due_date?`<span style="color:rgba(255,255,255,0.3);">Due ${new Date(g.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`:''}
       </div>
-      ${g.notes ? `<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:6px;font-style:italic;">${g.notes}</div>` : ''}
+      ${!isDone?`<div style="display:flex;gap:8px;margin-top:8px;">
+        <input type="number" placeholder="Update progress" id="goalUpdate_${g.id}" style="flex:1;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:12px;padding:5px 8px;border-radius:4px;">
+        <button onclick="updateGoalProgress('${g.id}')" style="background:var(--primary-color);border:none;color:#fff;font-size:11px;font-weight:700;padding:5px 10px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;">Update</button>
+      </div>`:`<div style="font-size:11px;color:#4ade80;margin-top:6px;font-weight:700;">🎯 Goal Achieved!</div>`}
+      ${g.notes?`<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:6px;font-style:italic;">${g.notes}</div>`:''}
     </div>`;
-  }).join('') : '<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:13px;">No goals set yet</div>';
+  }).join('') : '<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:12px;">No goals set yet</div>';
 
-  content.innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.2rem;">
-      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;">${totalShots.toLocaleString()}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Total Shots</div>
-      </div>
-      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;">${totalMins.toLocaleString()}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Stick Mins</div>
-      </div>
-      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;">${totalWorkouts}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Workouts</div>
-      </div>
-      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:#4ade80;font-family:'Barlow Condensed',sans-serif;">${doneAssign.length}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Completed</div>
-      </div>
-      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:var(--primary-color);font-family:'Barlow Condensed',sans-serif;">${openAssign.length}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Open Tasks</div>
-      </div>
-    </div>
+  el.innerHTML = `
+    ${statsHtml}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
       <div class="card" style="margin-bottom:0;">
         <div class="ch"><span class="cht">My Assignments</span></div>
@@ -2032,159 +2012,100 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
     </div>`;
 }
 
-function renderDashboard(players, statsMap, teamName, assignments, goals) {
-  const content = document.getElementById('dashboardContent');
+// ── COACH / ADMIN DASHBOARD ───────────────────────────────────────────────
+function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
+  const el = document.getElementById('dashboardContent');
   const role = window._userRole;
   const isAdmin = role === 'admin' || role === 'super_admin';
+  const playerMap = {};
+  players.forEach(p => { playerMap[p.user_id] = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email; });
 
-  // Team/filter header
   let filterHtml = '';
-  if (isAdmin && window._dashAllTeams && window._dashAllTeams.length > 0) {
-    const opts = window._dashAllTeams.map(t =>
-      `<option value="${t.id}">${t.team_name}</option>`
-    ).join('');
-    filterHtml = `
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:1.2rem;">
-        <select onchange="filterDashByTeam(this.value)" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:12px;padding:7px 12px;border-radius:6px;min-width:160px;">
-          <option value="">All Teams</option>
-          ${opts}
-        </select>
-        <span style="font-size:12px;color:rgba(255,255,255,0.35);">${players.length} player${players.length!==1?'s':''}</span>
-      </div>`;
+  if (isAdmin && window._dashAllTeams && window._dashAllTeams.length) {
+    filterHtml = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:1.2rem;">
+      <select onchange="filterDashByTeam(this.value)" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:12px;padding:7px 12px;border-radius:6px;min-width:160px;">
+        <option value="">All Teams</option>
+        ${window._dashAllTeams.map(t=>`<option value="${t.id}">${t.team_name}</option>`).join('')}
+      </select>
+      <span style="font-size:12px;color:rgba(255,255,255,0.35);">${players.length} player${players.length!==1?'s':''}</span>
+    </div>`;
   } else if (teamName) {
-    filterHtml = `<div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin-bottom:1.2rem;">${teamName} <span style="font-size:13px;color:rgba(255,255,255,0.35);font-family:'Barlow',sans-serif;font-weight:400;text-transform:none;letter-spacing:0;">${players.length} players</span></div>`;
+    filterHtml = `<div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin-bottom:1.2rem;">${teamName} <span style="font-size:13px;color:rgba(255,255,255,0.35);font-family:'Barlow',sans-serif;font-weight:400;text-transform:none;">${players.length} players</span></div>`;
   }
 
-  // Summary stats bar
-  let totalShots = 0, totalMins = 0, totalWorkouts = 0;
-  players.forEach(p => {
-    const s = statsMap[p.user_id] || {};
-    totalShots += s.shots || 0;
-    totalMins += s.mins || 0;
-    totalWorkouts += s.workouts || 0;
-  });
+  let totShots=0,totMins=0,totWork=0;
+  players.forEach(p => { const s=statsMap[p.user_id]||{}; totShots+=s.shots||0; totMins+=s.mins||0; totWork+=s.workouts||0; });
 
-  const summaryHtml = `
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.2rem;">
-      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:#4ade80;font-family:'Barlow Condensed',sans-serif;">${players.length}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Players</div>
-      </div>
-      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;">${totalShots.toLocaleString()}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Total Shots</div>
-      </div>
-      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;">${totalMins.toLocaleString()}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Stick Mins</div>
-      </div>
-      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;">${totalWorkouts}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Workouts</div>
-      </div>
-      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-size:22px;font-weight:800;color:#60a5fa;font-family:'Barlow Condensed',sans-serif;">${assignments.filter(a=>a.status==='assigned').length}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">Open Tasks</div>
-      </div>
-    </div>`;
+  const summaryHtml = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.2rem;">
+    ${[['Players','#4ade80',players.length],['Total Shots','#fb923c',totShots.toLocaleString()],['Stick Mins','#a78bfa',totMins.toLocaleString()],['Workouts','#fbbf24',totWork],['Open Tasks','var(--primary-color)',assignments.filter(a=>a.status!=='completed').length]].map(([l,c,v])=>`
+    <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
+      <div style="font-size:22px;font-weight:800;color:${c};font-family:'Barlow Condensed',sans-serif;">${v}</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">${l}</div>
+    </div>`).join('')}
+  </div>`;
 
-  // Player roster cards
-  let rosterHtml = '';
-  if (players.length === 0) {
+  // Roster cards
+  let rosterHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;">';
+  if (!players.length) {
     rosterHtml = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.3);font-size:13px;">No players on this team yet.</div>';
   } else {
-    rosterHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;">';
     players.forEach(p => {
       const s = statsMap[p.user_id] || {shots:0,mins:0,workouts:0,lastActive:null};
       const name = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
-      const lastActive = s.lastActive ? s.lastActive.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'Never';
-      const playerAssignments = assignments.filter(a => a.player_id === p.user_id);
-      const openCount = playerAssignments.filter(a => a.status === 'assigned').length;
-      const playerGoals = goals.filter(g => g.player_id === p.user_id);
+      const last = s.lastActive ? s.lastActive.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'Never';
+      const pAssign = assignments.filter(a=>a.player_id===p.user_id);
+      const openCt = pAssign.filter(a=>a.status!=='completed').length;
+      const pGoals = goals.filter(g=>g.player_id===p.user_id);
 
-      rosterHtml += `
-        <div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
-          <div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:start;">
-            <div>
-              <div style="font-weight:700;font-size:14px;color:#fff;margin-bottom:2px;">${name}</div>
-              <div style="font-size:11px;color:rgba(255,255,255,0.35);">Last active: ${lastActive}</div>
-            </div>
-            ${openCount > 0 ? `<span style="background:rgba(var(--primary-rgb),0.15);color:var(--primary-color);font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;white-space:nowrap;">${openCount} open</span>` : ''}
+      const goalBars = pGoals.slice(0,2).map(g => {
+        const pct = g.target_value ? Math.min(100,Math.round((g.current_value||0)/g.target_value*100)) : 0;
+        return `<div style="margin-bottom:5px;"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px;"><span style="color:rgba(255,255,255,0.45);">${g.metric}</span><span style="color:rgba(255,255,255,0.3);">${pct}%</span></div><div style="background:#1a1a1a;border-radius:3px;height:4px;"><div style="height:4px;width:${pct}%;background:var(--primary-color);border-radius:3px;"></div></div></div>`;
+      }).join('');
+
+      rosterHtml += `<div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
+        <div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:start;">
+          <div>
+            <div style="font-weight:700;font-size:14px;color:#fff;margin-bottom:2px;">${name}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.3);">Last active: ${last}</div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid #1a1a1a;">
-            <div style="padding:8px;text-align:center;border-right:1px solid #1a1a1a;">
-              <div style="font-size:15px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;">${s.shots}</div>
-              <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Shots</div>
-            </div>
-            <div style="padding:8px;text-align:center;border-right:1px solid #1a1a1a;">
-              <div style="font-size:15px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;">${s.mins}</div>
-              <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Stick Min</div>
-            </div>
-            <div style="padding:8px;text-align:center;">
-              <div style="font-size:15px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;">${s.workouts}</div>
-              <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Workouts</div>
-            </div>
-          </div>
-          ${playerGoals.length > 0 ? `
-          <div style="padding:8px 14px;border-top:1px solid #1a1a1a;">
-            ${playerGoals.slice(0,2).map(g => {
-              const pct = g.target_value ? Math.min(100,Math.round((g.current_value||0)/g.target_value*100)) : 0;
-              return `<div style="margin-bottom:5px;">
-                <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px;">
-                  <span style="color:rgba(255,255,255,0.5);">${g.metric}</span>
-                  <span style="color:rgba(255,255,255,0.4);">${g.current_value||0}/${g.target_value}</span>
-                </div>
-                <div style="background:#1a1a1a;border-radius:3px;height:4px;"><div style="height:4px;width:${pct}%;background:var(--primary-color);border-radius:3px;"></div></div>
-              </div>`;
-            }).join('')}
-          </div>` : ''}
-          <div style="padding:10px 14px;border-top:1px solid #1a1a1a;display:flex;gap:6px;">
-            <button onclick="openAssignModal('${p.user_id}','${name.replace(/'/g,"\'")}','assignment')"
-              style="flex:1;background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.25);color:var(--primary-color);font-size:11px;font-weight:700;padding:6px 8px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">
-              + Assignment
-            </button>
-            <button onclick="openAssignModal('${p.user_id}','${name.replace(/'/g,"\'")}','goal')"
-              style="flex:1;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:6px 8px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">
-              + Goal
-            </button>
-            <button onclick="viewPlayerDetail('${p.user_id}','${name.replace(/'/g,"\'")}' )"
-              style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;padding:6px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">
-              View
-            </button>
-          </div>
-        </div>`;
+          ${openCt>0?`<span style="background:rgba(var(--primary-rgb),0.15);color:var(--primary-color);font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;">${openCt} open</span>`:''}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #1a1a1a;">
+          <div style="padding:8px;text-align:center;border-right:1px solid #1a1a1a;"><div style="font-size:15px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;">${s.shots}</div><div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Shots</div></div>
+          <div style="padding:8px;text-align:center;border-right:1px solid #1a1a1a;"><div style="font-size:15px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;">${s.mins}</div><div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Stick Min</div></div>
+          <div style="padding:8px;text-align:center;"><div style="font-size:15px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;">${s.workouts}</div><div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Workouts</div></div>
+        </div>
+        ${pGoals.length?`<div style="padding:8px 14px;border-top:1px solid #1a1a1a;">${goalBars}</div>`:''}
+        <div style="padding:10px 14px;border-top:1px solid #1a1a1a;display:flex;gap:6px;">
+          <button onclick="openAssignModal('${p.user_id}','${name.replace(/'/g,"\\'")}')" style="flex:1;background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.25);color:var(--primary-color);font-size:11px;font-weight:700;padding:6px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Task</button>
+          <button onclick="openGoalModal('${p.user_id}','${name.replace(/'/g,"\\'")}')" style="flex:1;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:6px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
+          <button onclick="viewPlayer('${p.user_id}','${name.replace(/'/g,"\\'")}')" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;padding:6px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">View</button>
+        </div>
+      </div>`;
     });
     rosterHtml += '</div>';
   }
 
-  // Recent assignments list
-  const recentAssign = assignments.slice(0, 8);
-  let assignHtml = '';
-  if (recentAssign.length > 0) {
-    const playerMap = {};
-    _dashPlayers.forEach(p => { playerMap[p.user_id] = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email; });
-    assignHtml = recentAssign.map(a => {
-      const pName = playerMap[a.player_id] || 'Unknown';
-      const statusColor = a.status === 'completed' ? '#4ade80' : a.status === 'in_progress' ? '#fbbf24' : 'rgba(255,255,255,0.4)';
-      const due = a.due_date ? new Date(a.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1a1a1a;">
-        <div>
-          <span style="font-size:12px;color:rgba(255,255,255,0.8);font-weight:600;">${a.title}</span>
-          <span style="font-size:11px;color:rgba(255,255,255,0.35);margin-left:8px;">→ ${pName}</span>
-          ${a.type ? `<span style="font-size:10px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);padding:1px 6px;border-radius:3px;margin-left:6px;">${a.type}</span>` : ''}
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          ${due ? `<span style="font-size:10px;color:rgba(255,255,255,0.3);">${due}</span>` : ''}
-          <span style="font-size:10px;font-weight:700;color:${statusColor};text-transform:uppercase;">${a.status}</span>
-          <button onclick="deleteAssignment('${a.id}')" style="background:none;border:none;color:rgba(255,255,255,0.2);cursor:pointer;font-size:12px;padding:0 2px;">✕</button>
-        </div>
-      </div>`;
-    }).join('');
-  } else {
-    assignHtml = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">No assignments yet — create one from a player card above.</div>';
-  }
+  // Activity log - all assignments across team
+  const logHtml = assignments.slice(0,15).map(a => {
+    const pName = playerMap[a.player_id] || 'Unknown';
+    const sc = a.status==='completed'?'#4ade80':a.status==='in_progress'?'#fbbf24':'rgba(255,255,255,0.4)';
+    const due = a.due_date ? new Date(a.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1a1a1a;gap:10px;">
+      <div style="flex:1;min-width:0;">
+        <span style="font-size:12px;color:rgba(255,255,255,0.8);font-weight:600;">${a.title}</span>
+        <span style="font-size:11px;color:rgba(255,255,255,0.35);margin-left:8px;">→ ${pName}</span>
+        ${a.type?`<span style="font-size:10px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.35);padding:1px 5px;border-radius:3px;margin-left:4px;">${a.type}</span>`:''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        ${due?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">${due}</span>`:''}
+        <span style="font-size:10px;font-weight:700;color:${sc};text-transform:uppercase;letter-spacing:.04em;">${a.status.replace('_',' ')}</span>
+        <button onclick="deleteAssignment('${a.id}')" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:12px;padding:0 2px;line-height:1;">✕</button>
+      </div>
+    </div>`;
+  }).join('') || '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">No assignments yet</div>';
 
-  content.innerHTML = `
+  el.innerHTML = `
     ${filterHtml}
     ${summaryHtml}
     <div class="card" style="margin-bottom:1rem;">
@@ -2193,220 +2114,130 @@ function renderDashboard(players, statsMap, teamName, assignments, goals) {
     </div>
     <div class="card">
       <div class="ch">
-        <span class="cht">Assignments & Tasks</span>
+        <span class="cht">Assignments & Activity</span>
         <div style="margin-left:auto;display:flex;gap:6px;">
-          <button onclick="openAssignModal(null,null,'assignment',true)" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">All Players</button>
-          <button onclick="openAssignModal(null,null,'assignment')" style="background:var(--primary-color);border:none;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ New</button>
+          <button onclick="openAssignModal(null,null,true)" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">All Players</button>
+          <button onclick="openAssignModal(null,null,false)" style="background:var(--primary-color);border:none;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ New Task</button>
         </div>
       </div>
-      <div class="cb">${assignHtml}</div>
+      <div class="cb">${logHtml}</div>
     </div>`;
 }
 
 function filterDashByTeam(teamId) {
-  const players = teamId
-    ? _dashPlayers.filter(p => p.team_id === teamId)
-    : _dashPlayers;
-  renderDashboard(players, window._dashStatsMap, '', window._dashAssignments, window._dashGoals);
+  const players = teamId ? _dashPlayers.filter(p => p.team_id === teamId) : _dashPlayers;
+  renderCoachDashboard(players, window._dashStatsMap||{}, '', window._dashAssignments||[], window._dashGoals||[]);
 }
 
-// ── Assignment / Goal Modal ────────────────────────────────────────────────
-function openAssignModal(playerId, playerName, type, bulk) {
-  const existing = document.getElementById('assignModal');
+// ── ASSIGNMENT MODAL ──────────────────────────────────────────────────────
+function openAssignModal(playerId, playerName, isAll) {
+  const existing = document.getElementById('dashModal');
   if (existing) existing.remove();
 
-  const isBulk = bulk === true;
+  const allMode = isAll === true;
+  const today = new Date().toISOString().split('T')[0];
   const playerOpts = _dashPlayers.map(p => {
     const n = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
     const sel = p.user_id === playerId ? 'selected' : '';
     return `<option value="${p.user_id}" ${sel}>${n}</option>`;
   }).join('');
 
-  const isGoal = type === 'goal';
-  const today = new Date().toISOString().split('T')[0];
-
   const modal = document.createElement('div');
-  modal.id = 'assignModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.id = 'dashModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
   modal.innerHTML = `
     <div style="background:#141414;border:1px solid #333;border-radius:12px;padding:24px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;">${isGoal ? '+ New Goal' : '+ New Assignment'}</div>
-        <button onclick="document.getElementById('assignModal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer;line-height:1;">✕</button>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;">New Assignment</div>
+        <button onclick="document.getElementById('dashModal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;line-height:1;">✕</button>
       </div>
-
-      <div style="display:flex;gap:0;margin-bottom:16px;background:#0d0d0d;border-radius:6px;overflow:hidden;border:1px solid #222;">
-        <button onclick="switchModalType('assignment',this)" style="flex:1;padding:8px;background:${!isGoal?'var(--primary-color)':'transparent'};border:none;color:${!isGoal?'#fff':'rgba(255,255,255,0.4)'};font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">Assignment</button>
-        <button onclick="switchModalType('goal',this)" style="flex:1;padding:8px;background:${isGoal?'#60a5fa':'transparent'};border:none;color:${isGoal?'#fff':'rgba(255,255,255,0.4)'};font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">Goal</button>
-      </div>
-
-      <div id="modalTypeContent">
-        ${isGoal ? renderGoalForm(playerOpts, today) : renderAssignForm(playerOpts, today)}
+      <div style="display:grid;gap:12px;">
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Assign To</label>
+          <div style="display:flex;gap:0;background:#0d0d0d;border:1px solid #222;border-radius:6px;overflow:hidden;margin-bottom:8px;">
+            <button type="button" id="modeAll" onclick="dashSetMode('all')" style="flex:1;padding:7px;background:${allMode?'var(--primary-color)':'transparent'};border:none;color:${allMode?'#fff':'rgba(255,255,255,0.4)'};font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">All Players</button>
+            <button type="button" id="modeSel" onclick="dashSetMode('select')" style="flex:1;padding:7px;background:${!allMode?'var(--primary-color)':'transparent'};border:none;color:${!allMode?'#fff':'rgba(255,255,255,0.4)'};font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">Select Players</button>
+          </div>
+          <div id="modeSelDiv" style="display:${allMode?'none':'block'};">
+            <select id="mAssignTo" multiple style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;min-height:90px;">${playerOpts}</select>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;">Hold Ctrl/Cmd to select multiple</div>
+          </div>
+          <div id="modeAllDiv" style="display:${allMode?'block':'none'};font-size:12px;color:rgba(255,255,255,0.5);padding:8px 10px;background:#0d0d0d;border:1px solid #222;border-radius:6px;">Will assign to all ${_dashPlayers.length} players</div>
+        </div>
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Title *</label>
+          <input id="mTitle" type="text" placeholder="e.g. 100 wrist shots daily" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+        </div>
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Type</label>
+          <select id="mType" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+            <option value="workout">Workout</option>
+            <option value="shooting">Shooting</option>
+            <option value="stickhandling">Stickhandling</option>
+            <option value="conditioning">Conditioning</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Description</label>
+          <textarea id="mDesc" placeholder="Details, reps, sets, notes..." style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;resize:vertical;height:70px;font-family:'Barlow',sans-serif;"></textarea>
+        </div>
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Due Date</label>
+          <input id="mDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+        </div>
+        <div id="mMsg" style="font-size:12px;display:none;padding:8px 10px;border-radius:4px;"></div>
+        <button onclick="saveAssignment()" style="background:var(--primary-color);border:none;color:#fff;font-size:14px;font-weight:700;padding:11px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Create Assignment</button>
       </div>
     </div>`;
   document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
 }
 
-function switchModalType(type, btn) {
-  const today = new Date().toISOString().split('T')[0];
-  const playerOpts = _dashPlayers.map(p => {
-    const n = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
-    return `<option value="${p.user_id}">${n}</option>`;
-  }).join('');
-  document.getElementById('modalTypeContent').innerHTML =
-    type === 'goal' ? renderGoalForm(playerOpts, today) : renderAssignForm(playerOpts, today);
-  const btns = btn.parentElement.querySelectorAll('button');
-  btns.forEach(b => {
-    b.style.background = 'transparent';
-    b.style.color = 'rgba(255,255,255,0.4)';
-  });
-  btn.style.background = type === 'goal' ? '#60a5fa' : 'var(--primary-color)';
-  btn.style.color = '#fff';
-}
-
-function renderAssignForm(playerOpts, today) {
-  return `
-    <div style="display:grid;gap:12px;">
-      <div>
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Assign To</label>
-        <div style="display:flex;gap:0;background:#0d0d0d;border:1px solid #222;border-radius:6px;overflow:hidden;margin-bottom:8px;">
-          <button type="button" id="assignModeAll" onclick="setAssignMode('all')" style="flex:1;padding:7px;background:transparent;border:none;color:rgba(255,255,255,0.4);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">All Players</button>
-          <button type="button" id="assignModeSelect" onclick="setAssignMode('select')" style="flex:1;padding:7px;background:var(--primary-color);border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">Select Players</button>
-        </div>
-        <div id="assignPlayerSelect">
-          <select id="modalPlayer" multiple style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;min-height:100px;"><option value="">Select player...</option>${playerOpts}</select>
-          <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;">Hold Ctrl/Cmd to select multiple</div>
-        </div>
-        <div id="assignAllNote" style="display:none;font-size:12px;color:rgba(255,255,255,0.5);padding:10px;background:#0d0d0d;border:1px solid #222;border-radius:6px;">Assignment will be sent to all ${_dashPlayers.length} players on this team.</div>
-      </div>
-      <div>
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Title</label>
-        <input id="modalTitle" type="text" placeholder="e.g. 100 wrist shots daily" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
-      </div>
-      <div>
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Type</label>
-        <select id="modalType" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
-          <option value="workout">Workout</option>
-          <option value="shooting">Shooting</option>
-          <option value="stickhandling">Stickhandling</option>
-          <option value="conditioning">Conditioning</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-      <div>
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Description (optional)</label>
-        <textarea id="modalDesc" placeholder="Details, reps, notes..." style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;resize:vertical;height:70px;font-family:'Barlow',sans-serif;"></textarea>
-      </div>
-      <div>
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Due Date (optional)</label>
-        <input id="modalDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
-      </div>
-      <div id="modalMsg" style="font-size:12px;display:none;"></div>
-      <button onclick="saveAssignment()" style="background:var(--primary-color);border:none;color:#fff;font-size:13px;font-weight:700;padding:10px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Create Assignment</button>
-    </div>`;
-}
-
-function renderGoalForm(playerOpts, today) {
-  return `
-    <div style="display:grid;gap:12px;">
-      <div>
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Player</label>
-        <select id="modalPlayer" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;"><option value="">Select player...</option>${playerOpts}</select>
-      </div>
-      <div>
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Metric</label>
-        <select id="modalMetric" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
-          <option value="Total Shots">Total Shots</option>
-          <option value="Stick Minutes">Stick Minutes</option>
-          <option value="Workouts Completed">Workouts Completed</option>
-          <option value="30m Sprint (sec)">30m Sprint (sec)</option>
-          <option value="Push-Up Max">Push-Up Max</option>
-          <option value="Custom">Custom</option>
-        </select>
-      </div>
-      <div id="customMetricWrap" style="display:none;">
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Custom Metric Name</label>
-        <input id="modalCustomMetric" type="text" placeholder="e.g. Backhand Accuracy" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div>
-          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Target</label>
-          <input id="modalTarget" type="number" placeholder="e.g. 500" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
-        </div>
-        <div>
-          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Current</label>
-          <input id="modalCurrent" type="number" placeholder="e.g. 120" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
-        </div>
-      </div>
-      <div>
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Due Date (optional)</label>
-        <input id="modalDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
-      </div>
-      <div>
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Notes (optional)</label>
-        <textarea id="modalDesc" placeholder="Coaching notes..." style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;resize:vertical;height:60px;font-family:'Barlow',sans-serif;"></textarea>
-      </div>
-      <div id="modalMsg" style="font-size:12px;display:none;"></div>
-      <button onclick="saveGoal()" style="background:#60a5fa;border:none;color:#fff;font-size:13px;font-weight:700;padding:10px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Create Goal</button>
-    </div>`;
-}
-
-// Show custom metric input when Custom is selected
-document.addEventListener('change', e => {
-  if (e.target.id === 'modalMetric') {
-    const wrap = document.getElementById('customMetricWrap');
-    if (wrap) wrap.style.display = e.target.value === 'Custom' ? 'block' : 'none';
-  }
-});
-
-function setAssignMode(mode) {
-  const allBtn = document.getElementById('assignModeAll');
-  const selBtn = document.getElementById('assignModeSelect');
-  const selDiv = document.getElementById('assignPlayerSelect');
-  const allNote = document.getElementById('assignAllNote');
+function dashSetMode(mode) {
+  const allBtn = document.getElementById('modeAll');
+  const selBtn = document.getElementById('modeSel');
+  const selDiv = document.getElementById('modeSelDiv');
+  const allDiv = document.getElementById('modeAllDiv');
   if (mode === 'all') {
-    if (allBtn) { allBtn.style.background='var(--primary-color)'; allBtn.style.color='#fff'; }
-    if (selBtn) { selBtn.style.background='transparent'; selBtn.style.color='rgba(255,255,255,0.4)'; }
-    if (selDiv) selDiv.style.display='none';
-    if (allNote) allNote.style.display='block';
+    allBtn.style.background='var(--primary-color)'; allBtn.style.color='#fff';
+    selBtn.style.background='transparent'; selBtn.style.color='rgba(255,255,255,0.4)';
+    selDiv.style.display='none'; allDiv.style.display='block';
   } else {
-    if (selBtn) { selBtn.style.background='var(--primary-color)'; selBtn.style.color='#fff'; }
-    if (allBtn) { allBtn.style.background='transparent'; allBtn.style.color='rgba(255,255,255,0.4)'; }
-    if (selDiv) selDiv.style.display='block';
-    if (allNote) allNote.style.display='none';
+    selBtn.style.background='var(--primary-color)'; selBtn.style.color='#fff';
+    allBtn.style.background='transparent'; allBtn.style.color='rgba(255,255,255,0.4)';
+    selDiv.style.display='block'; allDiv.style.display='none';
   }
 }
 
 async function saveAssignment() {
-  const title = document.getElementById('modalTitle')?.value.trim();
-  const type = document.getElementById('modalType')?.value;
-  const desc = document.getElementById('modalDesc')?.value.trim();
-  const due = document.getElementById('modalDue')?.value;
-  const msg = document.getElementById('modalMsg');
-  const allBtn = document.getElementById('assignModeAll');
-  const isAll = allBtn && allBtn.style.background.includes('primary') || allBtn?.style.background === 'var(--primary-color)';
+  const title = document.getElementById('mTitle')?.value.trim();
+  const type = document.getElementById('mType')?.value;
+  const desc = document.getElementById('mDesc')?.value.trim();
+  const due = document.getElementById('mDue')?.value;
+  const msg = document.getElementById('mMsg');
+  const allDiv = document.getElementById('modeAllDiv');
+  const isAll = allDiv && allDiv.style.display !== 'none';
 
   if (!title) {
-    if (msg) { msg.style.color='#f87171'; msg.textContent='Please enter a title.'; msg.style.display='block'; }
+    if(msg){msg.style.background='rgba(248,113,113,0.1)';msg.style.color='#f87171';msg.textContent='Please enter a title.';msg.style.display='block';}
     return;
   }
 
-  // Get player IDs to assign to
   let playerIds = [];
-  const assignAllNote = document.getElementById('assignAllNote');
-  if (assignAllNote && assignAllNote.style.display !== 'none') {
-    // All players mode
+  if (isAll) {
     playerIds = _dashPlayers.map(p => p.user_id);
   } else {
-    const sel = document.getElementById('modalPlayer');
-    playerIds = sel ? Array.from(sel.selectedOptions).map(o => o.value).filter(Boolean) : [];
+    const sel = document.getElementById('mAssignTo');
+    playerIds = sel ? Array.from(sel.selectedOptions).map(o=>o.value).filter(Boolean) : [];
   }
 
-  if (playerIds.length === 0) {
-    if (msg) { msg.style.color='#f87171'; msg.textContent='Please select at least one player.'; msg.style.display='block'; }
+  if (!playerIds.length) {
+    if(msg){msg.style.background='rgba(248,113,113,0.1)';msg.style.color='#f87171';msg.textContent='Please select at least one player.';msg.style.display='block';}
     return;
   }
+
+  if(msg){msg.style.background='rgba(59,130,246,0.1)';msg.style.color='#60a5fa';msg.textContent=`Saving${playerIds.length>1?' ('+playerIds.length+' players)':''}...`;msg.style.display='block';}
 
   try {
     const sb = await getSupabaseClient();
@@ -2415,34 +2246,103 @@ async function saveAssignment() {
       coach_id: window._userId,
       player_id: pid,
       title,
-      type: type || 'workout',
-      description: desc || null,
-      due_date: due || null,
+      type: type||'workout',
+      description: desc||null,
+      due_date: due||null,
       status: 'assigned'
     }));
     const { error } = await sb.from('assignments').insert(rows);
     if (error) throw error;
-    document.getElementById('assignModal')?.remove();
-    loadDashboard();
-  } catch (e) {
-    if (msg) { msg.style.color='#f87171'; msg.textContent='Error: '+e.message; msg.style.display='block'; }
+
+    if(msg){msg.style.background='rgba(74,222,128,0.1)';msg.style.color='#4ade80';msg.textContent=`✓ Created for ${playerIds.length} player${playerIds.length!==1?'s':''}!`;msg.style.display='block';}
+    setTimeout(() => { document.getElementById('dashModal')?.remove(); loadDashboard(); }, 800);
+  } catch(e) {
+    if(msg){msg.style.background='rgba(248,113,113,0.1)';msg.style.color='#f87171';msg.textContent='Error: '+e.message;msg.style.display='block';}
+    console.error('Save assignment error:', e);
   }
 }
 
-async function saveGoal() {
-  const playerId = document.getElementById('modalPlayer')?.value;
-  const metricSel = document.getElementById('modalMetric')?.value;
-  const metric = metricSel === 'Custom' ? (document.getElementById('modalCustomMetric')?.value.trim() || 'Custom') : metricSel;
-  const target = parseFloat(document.getElementById('modalTarget')?.value) || null;
-  const current = parseFloat(document.getElementById('modalCurrent')?.value) || null;
-  const due = document.getElementById('modalDue')?.value;
-  const notes = document.getElementById('modalDesc')?.value.trim();
-  const msg = document.getElementById('modalMsg');
+// ── GOAL MODAL ────────────────────────────────────────────────────────────
+function openGoalModal(playerId, playerName) {
+  const existing = document.getElementById('dashModal');
+  if (existing) existing.remove();
+  const today = new Date().toISOString().split('T')[0];
+  const playerOpts = _dashPlayers.map(p => {
+    const n = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
+    return `<option value="${p.user_id}" ${p.user_id===playerId?'selected':''}>${n}</option>`;
+  }).join('');
 
-  if (!playerId || !metric) {
-    if (msg) { msg.style.color='#f87171'; msg.textContent='Please select a player and metric.'; msg.style.display='block'; }
+  const modal = document.createElement('div');
+  modal.id = 'dashModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:#141414;border:1px solid #333;border-radius:12px;padding:24px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#60a5fa;">New Goal</div>
+        <button onclick="document.getElementById('dashModal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;line-height:1;">✕</button>
+      </div>
+      <div style="display:grid;gap:12px;">
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Player *</label>
+          <select id="gPlayer" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;"><option value="">Select player...</option>${playerOpts}</select>
+        </div>
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Metric *</label>
+          <select id="gMetric" onchange="document.getElementById('gCustomWrap').style.display=this.value==='Custom'?'block':'none'" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+            <option value="Total Shots">Total Shots</option>
+            <option value="Stick Minutes">Stick Minutes</option>
+            <option value="Workouts Completed">Workouts Completed</option>
+            <option value="30m Sprint (sec)">30m Sprint (sec)</option>
+            <option value="Push-Up Max">Push-Up Max</option>
+            <option value="Custom">Custom...</option>
+          </select>
+        </div>
+        <div id="gCustomWrap" style="display:none;">
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Custom Metric Name</label>
+          <input id="gCustom" type="text" placeholder="e.g. Backhand Accuracy" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Target *</label>
+            <input id="gTarget" type="number" placeholder="e.g. 500" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+          </div>
+          <div>
+            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Current</label>
+            <input id="gCurrent" type="number" placeholder="e.g. 0" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+          </div>
+        </div>
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Due Date</label>
+          <input id="gDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+        </div>
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Notes</label>
+          <textarea id="gNotes" placeholder="Coaching notes..." style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;resize:vertical;height:60px;font-family:'Barlow',sans-serif;"></textarea>
+        </div>
+        <div id="gMsg" style="font-size:12px;display:none;padding:8px 10px;border-radius:4px;"></div>
+        <button onclick="saveGoalDash()" style="background:#60a5fa;border:none;color:#fff;font-size:14px;font-weight:700;padding:11px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Create Goal</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+async function saveGoalDash() {
+  const playerId = document.getElementById('gPlayer')?.value;
+  const metricSel = document.getElementById('gMetric')?.value;
+  const metric = metricSel === 'Custom' ? (document.getElementById('gCustom')?.value.trim()||'Custom') : metricSel;
+  const target = parseFloat(document.getElementById('gTarget')?.value)||null;
+  const current = parseFloat(document.getElementById('gCurrent')?.value)||null;
+  const due = document.getElementById('gDue')?.value;
+  const notes = document.getElementById('gNotes')?.value.trim();
+  const msg = document.getElementById('gMsg');
+
+  if (!playerId || !metric || !target) {
+    if(msg){msg.style.background='rgba(248,113,113,0.1)';msg.style.color='#f87171';msg.textContent='Please select a player, metric, and target.';msg.style.display='block';}
     return;
   }
+
+  if(msg){msg.style.background='rgba(59,130,246,0.1)';msg.style.color='#60a5fa';msg.textContent='Saving...';msg.style.display='block';}
 
   try {
     const sb = await getSupabaseClient();
@@ -2452,16 +2352,45 @@ async function saveGoal() {
       player_id: playerId,
       metric,
       target_value: target,
-      current_value: current,
-      due_date: due || null,
-      notes: notes || null
+      current_value: current || 0,
+      due_date: due||null,
+      notes: notes||null
     });
     if (error) throw error;
-    document.getElementById('assignModal')?.remove();
-    loadDashboard();
-  } catch (e) {
-    if (msg) { msg.style.color='#f87171'; msg.textContent='Error: '+e.message; msg.style.display='block'; }
+    if(msg){msg.style.background='rgba(74,222,128,0.1)';msg.style.color='#4ade80';msg.textContent='✓ Goal created!';msg.style.display='block';}
+    setTimeout(() => { document.getElementById('dashModal')?.remove(); loadDashboard(); }, 800);
+  } catch(e) {
+    if(msg){msg.style.background='rgba(248,113,113,0.1)';msg.style.color='#f87171';msg.textContent='Error: '+e.message;msg.style.display='block';}
+    console.error('Save goal error:', e);
   }
+}
+
+async function updateAssignmentStatus(id, status) {
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('assignments').update({status}).eq('id', id);
+    if (error) throw error;
+    // Update local cache silently
+    const a = (window._dashAssignments||[]).find(x=>x.id===id);
+    if (a) { a.status = status; }
+    // Refresh player dashboard display if player
+    if (window._userRole === 'player') {
+      loadDashboard();
+    }
+  } catch(e) { alert('Error updating status: ' + e.message); }
+}
+
+async function updateGoalProgress(id) {
+  const input = document.getElementById('goalUpdate_' + id);
+  if (!input) return;
+  const val = parseFloat(input.value);
+  if (isNaN(val)) { alert('Please enter a number'); return; }
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('goals').update({current_value: val}).eq('id', id);
+    if (error) throw error;
+    loadDashboard();
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 async function deleteAssignment(id) {
@@ -2470,97 +2399,77 @@ async function deleteAssignment(id) {
     const sb = await getSupabaseClient();
     await sb.from('assignments').delete().eq('id', id);
     loadDashboard();
-  } catch (e) { alert('Error: ' + e.message); }
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
-function viewPlayerDetail(playerId, playerName) {
-  const player = _dashPlayers.find(p => p.user_id === playerId);
-  const stats = window._dashStatsMap?.[playerId] || {shots:0,mins:0,workouts:0};
-  const assignments = (window._dashAssignments || []).filter(a => a.player_id === playerId);
-  const goals = (window._dashGoals || []).filter(g => g.player_id === playerId);
+function viewPlayer(playerId, playerName) {
+  const player = _dashPlayers.find(p=>p.user_id===playerId);
+  const stats = (window._dashStatsMap||{})[playerId] || {shots:0,mins:0,workouts:0};
+  const assignments = (window._dashAssignments||[]).filter(a=>a.player_id===playerId);
+  const goals = (window._dashGoals||[]).filter(g=>g.player_id===playerId);
 
-  const existing = document.getElementById('playerDetailModal');
+  const existing = document.getElementById('dashPlayerModal');
   if (existing) existing.remove();
 
-  const assignHtml = assignments.length ? assignments.map(a => {
-    const statusColor = a.status === 'completed' ? '#4ade80' : a.status === 'in_progress' ? '#fbbf24' : 'rgba(255,255,255,0.4)';
-    const due = a.due_date ? new Date(a.due_date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1a1a1a;">
-      <div>
+  const assignRows = assignments.map(a => {
+    const sc = a.status==='completed'?'#4ade80':a.status==='in_progress'?'#fbbf24':'rgba(255,255,255,0.4)';
+    const due = a.due_date ? new Date(a.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1a1a1a;gap:10px;">
+      <div style="flex:1;min-width:0;">
         <span style="font-size:12px;color:rgba(255,255,255,0.8);">${a.title}</span>
-        ${a.type ? `<span style="font-size:10px;color:rgba(255,255,255,0.35);margin-left:6px;">${a.type}</span>` : ''}
+        ${a.type?`<span style="font-size:10px;color:rgba(255,255,255,0.3);margin-left:6px;">${a.type}</span>`:''}
+        ${due?`<span style="font-size:10px;color:rgba(255,255,255,0.3);margin-left:6px;">· ${due}</span>`:''}
       </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        ${due ? `<span style="font-size:10px;color:rgba(255,255,255,0.3);">${due}</span>` : ''}
-        <select onchange="updateAssignmentStatus('${a.id}',this.value)" style="background:#1a1a1a;border:1px solid #333;color:${statusColor};font-size:10px;padding:3px 6px;border-radius:4px;">
-          <option value="assigned" ${a.status==='assigned'?'selected':''}>Assigned</option>
-          <option value="in_progress" ${a.status==='in_progress'?'selected':''}>In Progress</option>
-          <option value="completed" ${a.status==='completed'?'selected':''}>Completed</option>
-        </select>
-      </div>
+      <select onchange="updateAssignmentStatus('${a.id}',this.value)" style="background:#1a1a1a;border:1px solid #333;color:${sc};font-size:11px;padding:4px 6px;border-radius:4px;flex-shrink:0;">
+        <option value="assigned" ${a.status==='assigned'?'selected':''}>Assigned</option>
+        <option value="in_progress" ${a.status==='in_progress'?'selected':''}>In Progress</option>
+        <option value="completed" ${a.status==='completed'?'selected':''}>Completed ✓</option>
+      </select>
     </div>`;
-  }).join('') : '<div style="font-size:12px;color:rgba(255,255,255,0.3);padding:8px 0;">No assignments</div>';
+  }).join('') || '<div style="font-size:12px;color:rgba(255,255,255,0.3);padding:8px 0;">No assignments</div>';
 
-  const goalsHtml = goals.length ? goals.map(g => {
+  const goalRows = goals.map(g => {
     const pct = g.target_value ? Math.min(100,Math.round((g.current_value||0)/g.target_value*100)) : 0;
+    const bc = pct>=100?'#4ade80':pct>=50?'var(--primary-color)':'#60a5fa';
     return `<div style="margin-bottom:10px;">
       <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
-        <span style="color:rgba(255,255,255,0.75);font-weight:600;">${g.metric}</span>
+        <span style="color:rgba(255,255,255,0.8);font-weight:600;">${g.metric}</span>
         <span style="color:rgba(255,255,255,0.4);">${g.current_value||0} / ${g.target_value} · ${pct}%</span>
       </div>
-      <div style="background:#1a1a1a;border-radius:4px;height:6px;"><div style="height:6px;width:${pct}%;background:var(--primary-color);border-radius:4px;transition:width .3s;"></div></div>
-      ${g.notes ? `<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px;">${g.notes}</div>` : ''}
+      <div style="background:#1a1a1a;border-radius:4px;height:6px;"><div style="height:6px;width:${pct}%;background:${bc};border-radius:4px;"></div></div>
+      ${g.notes?`<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px;">${g.notes}</div>`:''}
     </div>`;
-  }).join('') : '<div style="font-size:12px;color:rgba(255,255,255,0.3);padding:8px 0;">No goals set</div>';
+  }).join('') || '<div style="font-size:12px;color:rgba(255,255,255,0.3);padding:8px 0;">No goals</div>';
 
   const modal = document.createElement('div');
-  modal.id = 'playerDetailModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.id = 'dashPlayerModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
   modal.innerHTML = `
     <div style="background:#141414;border:1px solid #333;border-radius:12px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;">${playerName}</div>
-        <button onclick="document.getElementById('playerDetailModal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer;">✕</button>
+        <button onclick="document.getElementById('dashPlayerModal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;">✕</button>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px;">
-        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;">
-          <div style="font-size:20px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;">${stats.shots}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Shots</div>
-        </div>
-        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;">
-          <div style="font-size:20px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;">${stats.mins}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Stick Min</div>
-        </div>
-        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;">
-          <div style="font-size:20px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;">${stats.workouts}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Workouts</div>
-        </div>
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;">${stats.shots}</div><div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Shots</div></div>
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;">${stats.mins}</div><div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Stick Min</div></div>
+        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;">${stats.workouts}</div><div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Workouts</div></div>
       </div>
       <div style="margin-bottom:16px;">
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:8px;">Goals</div>
-        ${goalsHtml}
+        ${goalRows}
       </div>
       <div>
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:8px;">Assignments</div>
-        ${assignHtml}
+        ${assignRows}
       </div>
       <div style="display:flex;gap:8px;margin-top:16px;">
-        <button onclick="document.getElementById('playerDetailModal').remove();openAssignModal('${playerId}','${playerName}','assignment')" style="flex:1;background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.25);color:var(--primary-color);font-size:12px;font-weight:700;padding:8px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Assignment</button>
-        <button onclick="document.getElementById('playerDetailModal').remove();openAssignModal('${playerId}','${playerName}','goal')" style="flex:1;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:12px;font-weight:700;padding:8px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
+        <button onclick="document.getElementById('dashPlayerModal').remove();openAssignModal('${playerId}','${playerName}')" style="flex:1;background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.25);color:var(--primary-color);font-size:12px;font-weight:700;padding:8px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Assignment</button>
+        <button onclick="document.getElementById('dashPlayerModal').remove();openGoalModal('${playerId}','${playerName}')" style="flex:1;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:12px;font-weight:700;padding:8px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
       </div>
     </div>`;
   document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-}
-
-async function updateAssignmentStatus(id, status) {
-  try {
-    const sb = await getSupabaseClient();
-    await sb.from('assignments').update({status}).eq('id', id);
-    // Update local cache
-    const a = (window._dashAssignments||[]).find(x=>x.id===id);
-    if (a) a.status = status;
-  } catch (e) { alert('Error: ' + e.message); }
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
 }
 
 function showSec(id){
@@ -6493,36 +6402,17 @@ async function loadTeams() {
     
     const coachMap = {};
     (coaches || []).forEach(c => coachMap[c.user_id] = c);
-
     const { data: allPlayersT } = await sb.from('subscriptions').select('user_id, team_id, first_name, last_name, email').eq('role', 'player').eq('organization_id', window._userOrgId || 'individual');
     const playersByTeam = {};
     (allPlayersT || []).forEach(p => { if (p.team_id) { if (!playersByTeam[p.team_id]) playersByTeam[p.team_id] = []; playersByTeam[p.team_id].push(p); } });
-
     let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
-
     for (const team of teams) {
       const coach = coachMap[team.coach_id];
       const coachName = coach ? ([coach.first_name, coach.last_name].filter(Boolean).join(' ') || coach.email) : 'No coach assigned';
       const players = playersByTeam[team.id] || [];
-      let rosterHtml = players.length ? players.map(p => {
-        const n = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
-        return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1a1a1a;font-size:12px;"><span style="color:rgba(255,255,255,0.75);">${n}</span><span style="color:#60a5fa;font-size:10px;font-weight:700;text-transform:uppercase;">Player</span></div>`;
-      }).join('') : '<div style="font-size:11px;color:rgba(255,255,255,0.3);padding:4px 0;">No players assigned</div>';
+      let rosterHtml = players.length ? players.map(p => { const n = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email; return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1a1a1a;font-size:12px;"><span style="color:rgba(255,255,255,0.75);">${n}</span><span style="color:#60a5fa;font-size:10px;font-weight:700;text-transform:uppercase;">Player</span></div>`; }).join('') : '<div style="font-size:11px;color:rgba(255,255,255,0.3);padding:4px 0;">No players assigned</div>';
       const detailId = 'roster-' + team.id;
-      html += `
-        <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;overflow:hidden;">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;cursor:pointer;" onclick="const d=document.getElementById('${detailId}');const open=d.style.display==='block';d.style.display=open?'none':'block';this.querySelector('.arr').textContent=open?'▶':'▼';">
-            <div><span style="font-weight:700;font-size:14px;color:#fff;">${team.team_name}</span><span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:8px;">${players.length} player${players.length!==1?'s':''} · Coach: ${coachName}</span></div>
-            <div style="display:flex;gap:8px;align-items:center;"><span class="arr" style="font-size:10px;color:rgba(255,255,255,0.3);">▶</span><button onclick="event.stopPropagation();deleteTeam('${team.id}','${team.team_name}')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;cursor:pointer;">Delete</button></div>
-          </div>
-          <div id="${detailId}" style="display:none;border-top:1px solid #1a1a1a;padding:10px 12px;">
-            <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Coach</div>
-            <div style="font-size:12px;color:rgba(255,255,255,0.75);margin-bottom:10px;">${coachName}</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Players</div>
-            ${rosterHtml}
-          </div>
-        </div>
-      `;
+      html += `<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;overflow:hidden;"><div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;cursor:pointer;" onclick="const d=document.getElementById('${detailId}');const open=d.style.display==='block';d.style.display=open?'none':'block';this.querySelector('.arr').textContent=open?'▶':'▼';"><div><span style="font-weight:700;font-size:14px;color:#fff;">${team.team_name}</span><span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:8px;">${players.length} player${players.length!==1?'s':''} · Coach: ${coachName}</span></div><div style="display:flex;gap:8px;align-items:center;"><span class="arr" style="font-size:10px;color:rgba(255,255,255,0.3);">▶</span><button onclick="event.stopPropagation();deleteTeam('${team.id}','${team.team_name}')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;cursor:pointer;">Delete</button></div></div><div id="${detailId}" style="display:none;border-top:1px solid #1a1a1a;padding:10px 12px;"><div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Coach</div><div style="font-size:12px;color:rgba(255,255,255,0.75);margin-bottom:10px;">${coachName}</div><div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Players</div>${rosterHtml}</div></div>`;
     }
     html += '</div>';
     container.innerHTML = html;
