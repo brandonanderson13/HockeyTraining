@@ -3869,6 +3869,9 @@ async function loadAdminPanel(user) {
   }
   
   loadPlayerList(window._isSuperAdmin);
+  loadTeams();
+  populateTeamDropdown();
+  populateAdminTeamDropdown();
   
   // Add embed card at the bottom
   const adminContentDiv = document.getElementById('adminContent');
@@ -3900,12 +3903,7 @@ async function loadAdminPanel(user) {
     `;
     adminContentDiv.appendChild(embedCard);
     
-  // Teams card is now in the static template above - just load data
-  loadTeams();
-  populateTeamDropdown();
-  populateAdminTeamDropdown();
-  
-  // (Coaches section placeholder)
+  // (Teams already loaded above)
 
     // Add Custom Workouts section
     const customCard = document.createElement('div');
