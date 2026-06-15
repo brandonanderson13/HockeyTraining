@@ -1908,19 +1908,16 @@ async function loadDashboard() {
     let statsMap = {};
 
     if (pIds.length > 0) {
-      const [shots, sticks, comps] = await Promise.all([
-        sb.from('shooting_sessions').select('user_id, total_shots, created_at').in('user_id', pIds),
-        sb.from('stickhandling_sessions').select('user_id, minutes, created_at').in('user_id', pIds),
-        sb.from('exercise_completions').select('user_id, created_at').eq('exercise_name', 'FULL_DAY_COMPLETED').in('user_id', pIds)
+      const [shots, sticks, comps, logins] = await Promise.all([
+        sb.from('shooting_sessions').select('user_id, total_shots').in('user_id', pIds),
+        sb.from('stickhandling_sessions').select('user_id, minutes').in('user_id', pIds),
+        sb.from('exercise_completions').select('user_id, created_at').eq('exercise_name', 'FULL_DAY_COMPLETED').in('user_id', pIds),
+        sb.from('user_last_login').select('user_id, last_sign_in_at').in('user_id', pIds)
       ]);
-      const updateLast = (uid, dateStr) => { if (!dateStr) return; const d=new Date(dateStr); if (!statsMap[uid]) statsMap[uid]={shots:0,mins:0,workouts:0,lastActive:null}; if (!statsMap[uid].lastActive||d>statsMap[uid].lastActive) statsMap[uid].lastActive=d; };
-      (shots.data||[]).forEach(s => { if (!statsMap[s.user_id]) statsMap[s.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[s.user_id].shots+=s.total_shots||0; updateLast(s.user_id,s.created_at); });
-      (sticks.data||[]).forEach(s => { if (!statsMap[s.user_id]) statsMap[s.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[s.user_id].mins+=s.minutes||0; updateLast(s.user_id,s.created_at); });
-      (comps.data||[]).forEach(c => {
-        if (!statsMap[c.user_id]) statsMap[c.user_id]={shots:0,mins:0,workouts:0,lastActive:null};
-        statsMap[c.user_id].workouts++;
-        updateLast(c.user_id, c.created_at);
-      });
+      (shots.data||[]).forEach(s => { if (!statsMap[s.user_id]) statsMap[s.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[s.user_id].shots+=s.total_shots||0; });
+      (sticks.data||[]).forEach(s => { if (!statsMap[s.user_id]) statsMap[s.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[s.user_id].mins+=s.minutes||0; });
+      (comps.data||[]).forEach(c => { if (!statsMap[c.user_id]) statsMap[c.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[c.user_id].workouts++; });
+      (logins.data||[]).forEach(l => { if (!statsMap[l.user_id]) statsMap[l.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[l.user_id].lastActive = l.last_sign_in_at ? new Date(l.last_sign_in_at) : null; });
     }
 
     const [assignRes, goalRes] = await Promise.all([
