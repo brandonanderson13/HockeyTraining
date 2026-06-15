@@ -1953,48 +1953,49 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
       </div>`).join('')}
     </div>`;
 
+  // Assignments — checkbox + clickable row to open detail
   const assignHtml = assignments.length ? assignments.map(a => {
-    const sc = a.status==='completed'?'#4ade80':a.status==='in_progress'?'#fbbf24':'rgba(255,255,255,0.4)';
-    const due = a.due_date ? new Date(a.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
     const isDone = a.status === 'completed';
-    return `<div style="padding:10px 0;border-bottom:1px solid #1a1a1a;display:flex;justify-content:space-between;align-items:start;gap:10px;">
+    const due = a.due_date ? new Date(a.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    const checkBg = isDone ? '#4ade80' : 'transparent';
+    const checkBorder = isDone ? '#4ade80' : '#444';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="openItemDetail('assignment','${a.id}')">
+      <div onclick="event.stopPropagation();toggleAssignment('${a.id}',${isDone})"
+        style="width:20px;height:20px;border-radius:5px;border:2px solid ${checkBorder};background:${checkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s;">
+        ${isDone ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+      </div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:600;color:${isDone?'rgba(255,255,255,0.4)':'rgba(255,255,255,0.85)'};${isDone?'text-decoration:line-through;':''}">${a.title}</div>
-        ${a.description?`<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px;line-height:1.4;">${a.description}</div>`:''}
-        <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;">
-          ${a.type?`<span style="font-size:10px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);padding:2px 6px;border-radius:3px;">${a.type}</span>`:''}
-          ${due?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">Due ${due}</span>`:''}
+        <div style="font-size:13px;font-weight:600;color:${isDone?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.85)'};${isDone?'text-decoration:line-through;':''}">${a.title}</div>
+        <div style="display:flex;gap:6px;margin-top:3px;flex-wrap:wrap;">
+          ${a.type?`<span style="font-size:10px;color:rgba(255,255,255,0.35);">${a.type}</span>`:''}
+          ${due?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">· Due ${due}</span>`:''}
+          ${a.status==='in_progress'?`<span style="font-size:10px;color:#fbbf24;">· In Progress</span>`:''}
         </div>
       </div>
-      <select onchange="updateAssignmentStatus('${a.id}',this.value)" style="background:#1a1a1a;border:1px solid #333;color:${sc};font-size:11px;padding:4px 8px;border-radius:4px;flex-shrink:0;">
-        <option value="assigned" ${a.status==='assigned'?'selected':''}>Assigned</option>
-        <option value="in_progress" ${a.status==='in_progress'?'selected':''}>In Progress</option>
-        <option value="completed" ${a.status==='completed'?'selected':''}>Completed ✓</option>
-      </select>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.25;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>`;
   }).join('') : '<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:12px;">No assignments yet</div>';
 
+  // Goals — clickable card to open detail + progress bar
   const goalsHtml = goals.length ? goals.map(g => {
     const pct = g.target_value ? Math.min(100,Math.round((g.current_value||0)/g.target_value*100)) : 0;
     const bc = pct>=100?'#4ade80':pct>=50?'var(--primary-color)':'#60a5fa';
     const isDone = pct >= 100;
-    return `<div style="background:#0d0d0d;border:1px solid ${isDone?'rgba(74,222,128,0.3)':'#222'};border-radius:8px;padding:12px 14px;margin-bottom:8px;">
+    return `<div style="background:#0d0d0d;border:1px solid ${isDone?'rgba(74,222,128,0.25)':'#222'};border-radius:8px;padding:12px 14px;margin-bottom:8px;cursor:pointer;" onclick="openItemDetail('goal','${g.id}')">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <span style="font-size:13px;font-weight:700;color:#fff;">${g.metric} ${isDone?'✓':''}</span>
-        <span style="font-size:12px;color:rgba(255,255,255,0.4);">${g.current_value||0} / ${g.target_value}</span>
+        <span style="font-size:13px;font-weight:700;color:#fff;">${g.metric}${isDone?' ✓':''}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:12px;color:rgba(255,255,255,0.4);">${g.current_value||0} / ${g.target_value}</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="opacity:0.25;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
       </div>
-      <div style="background:#1a1a1a;border-radius:4px;height:8px;margin-bottom:6px;">
-        <div style="height:8px;width:${pct}%;background:${bc};border-radius:4px;transition:width .3s;"></div>
+      <div style="background:#1a1a1a;border-radius:4px;height:7px;">
+        <div style="height:7px;width:${pct}%;background:${bc};border-radius:4px;transition:width .3s;"></div>
       </div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;">
-        <span style="color:rgba(255,255,255,0.35);">${pct}% complete</span>
+      <div style="display:flex;justify-content:space-between;font-size:10px;margin-top:5px;">
+        <span style="color:rgba(255,255,255,0.3);">${pct}%${isDone?' · 🎯 Goal Achieved!':''}</span>
         ${g.due_date?`<span style="color:rgba(255,255,255,0.3);">Due ${new Date(g.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`:''}
       </div>
-      ${!isDone?`<div style="display:flex;gap:8px;margin-top:8px;">
-        <input type="number" placeholder="Update progress" id="goalUpdate_${g.id}" style="flex:1;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:12px;padding:5px 8px;border-radius:4px;">
-        <button onclick="updateGoalProgress('${g.id}')" style="background:var(--primary-color);border:none;color:#fff;font-size:11px;font-weight:700;padding:5px 10px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;">Update</button>
-      </div>`:`<div style="font-size:11px;color:#4ade80;margin-top:6px;font-weight:700;">🎯 Goal Achieved!</div>`}
-      ${g.notes?`<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:6px;font-style:italic;">${g.notes}</div>`:''}
     </div>`;
   }).join('') : '<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:12px;">No goals set yet</div>';
 
@@ -2012,6 +2013,7 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
     </div>`;
 }
 
+// ── COACH / ADMIN DASHBOARD ───────────────────────────────────────────────
 // ── COACH / ADMIN DASHBOARD ───────────────────────────────────────────────
 function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
   const el = document.getElementById('dashboardContent');
@@ -2089,18 +2091,27 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
   // Activity log - all assignments across team
   const logHtml = assignments.slice(0,15).map(a => {
     const pName = playerMap[a.player_id] || 'Unknown';
-    const sc = a.status==='completed'?'#4ade80':a.status==='in_progress'?'#fbbf24':'rgba(255,255,255,0.4)';
+    const isDone = a.status === 'completed';
     const due = a.due_date ? new Date(a.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1a1a1a;gap:10px;">
+    const checkBg = isDone ? '#4ade80' : 'transparent';
+    const checkBorder = isDone ? '#4ade80' : '#444';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="openItemDetail('assignment','${a.id}')">
+      <div onclick="event.stopPropagation();toggleAssignment('${a.id}',${isDone})"
+        style="width:20px;height:20px;border-radius:5px;border:2px solid ${checkBorder};background:${checkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s;">
+        ${isDone ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+      </div>
       <div style="flex:1;min-width:0;">
-        <span style="font-size:12px;color:rgba(255,255,255,0.8);font-weight:600;">${a.title}</span>
+        <span style="font-size:12px;font-weight:600;color:${isDone?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.85)'};${isDone?'text-decoration:line-through;':''}">${a.title}</span>
         <span style="font-size:11px;color:rgba(255,255,255,0.35);margin-left:8px;">→ ${pName}</span>
-        ${a.type?`<span style="font-size:10px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.35);padding:1px 5px;border-radius:3px;margin-left:4px;">${a.type}</span>`:''}
+        <div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap;">
+          ${a.type?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">${a.type}</span>`:''}
+          ${due?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">· Due ${due}</span>`:''}
+          ${a.status==='in_progress'?`<span style="font-size:10px;color:#fbbf24;">· In Progress</span>`:''}
+        </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-        ${due?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">${due}</span>`:''}
-        <span style="font-size:10px;font-weight:700;color:${sc};text-transform:uppercase;letter-spacing:.04em;">${a.status.replace('_',' ')}</span>
-        <button onclick="deleteAssignment('${a.id}')" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:12px;padding:0 2px;line-height:1;">✕</button>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="opacity:0.25;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <button onclick="event.stopPropagation();deleteAssignment('${a.id}')" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:12px;padding:0 2px;line-height:1;">✕</button>
       </div>
     </div>`;
   }).join('') || '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">No assignments yet</div>';
@@ -2389,6 +2400,147 @@ async function updateGoalProgress(id) {
     const sb = await getSupabaseClient();
     const { error } = await sb.from('goals').update({current_value: val}).eq('id', id);
     if (error) throw error;
+    loadDashboard();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+
+// ── ITEM DETAIL MODAL (assignment or goal) ────────────────────────────────
+function openItemDetail(type, id) {
+  const existing = document.getElementById('itemDetailModal');
+  if (existing) existing.remove();
+
+  const isAssign = type === 'assignment';
+  const item = isAssign
+    ? (window._dashAssignments||[]).find(a => a.id === id)
+    : (window._dashGoals||[]).find(g => g.id === id);
+
+  if (!item) return;
+
+  const role = window._userRole;
+  const isCoach = role === 'coach' || role === 'admin' || role === 'super_admin';
+
+  // Find player name
+  const playerMap = {};
+  (_dashPlayers||[]).forEach(p => { playerMap[p.user_id] = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email; });
+
+  let bodyHtml = '';
+
+  if (isAssign) {
+    const isDone = item.status === 'completed';
+    const due = item.due_date ? new Date(item.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'No due date';
+    const pName = playerMap[item.player_id] || 'Unknown';
+    const sc = isDone?'#4ade80':item.status==='in_progress'?'#fbbf24':'rgba(255,255,255,0.5)';
+    const checkBg = isDone ? '#4ade80' : 'transparent';
+    const checkBorder = isDone ? '#4ade80' : '#555';
+
+    bodyHtml = `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div onclick="toggleAssignment('${item.id}',${isDone});document.getElementById('itemDetailModal').remove();"
+          style="width:26px;height:26px;border-radius:6px;border:2px solid ${checkBorder};background:${checkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s;">
+          ${isDone?'<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polyline points="2,7 6,11 12,3" stroke="#0d0d0d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+        </div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:#fff;line-height:1.2;">${item.title}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div style="background:#0d0d0d;border-radius:6px;padding:10px;">
+          <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Status</div>
+          <div style="font-size:13px;font-weight:700;color:${sc};">${item.status.replace('_',' ').replace(/\w/g,c=>c.toUpperCase())}</div>
+        </div>
+        <div style="background:#0d0d0d;border-radius:6px;padding:10px;">
+          <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Due</div>
+          <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${due}</div>
+        </div>
+        ${item.type?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Type</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${item.type.replace(/\w/g,c=>c.toUpperCase())}</div></div>`:''}
+        ${isCoach?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Player</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${pName}</div></div>`:''}
+      </div>
+      ${item.description?`<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px 14px;margin-bottom:16px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Description</div><div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;">${item.description}</div></div>`:''}
+      <div style="margin-bottom:6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;">Update Status</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        ${['assigned','in_progress','completed'].map(s => {
+          const active = item.status === s;
+          const colors = {assigned:'rgba(255,255,255,0.4)',in_progress:'#fbbf24',completed:'#4ade80'};
+          const labels = {assigned:'Assigned',in_progress:'In Progress',completed:'Completed ✓'};
+          return `<button onclick="updateAssignmentStatus('${item.id}','${s}');document.getElementById('itemDetailModal').remove();loadDashboard();"
+            style="flex:1;padding:8px;border-radius:6px;border:1px solid ${active?colors[s]:'#333'};background:${active?'rgba(255,255,255,0.06)':'transparent'};color:${active?colors[s]:'rgba(255,255,255,0.4)'};font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">${labels[s]}</button>`;
+        }).join('')}
+      </div>
+      ${isCoach?`<button onclick="deleteAssignment('${item.id}');document.getElementById('itemDetailModal').remove();" style="width:100%;margin-top:10px;padding:8px;border-radius:6px;border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.08);color:#f87171;font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Delete Assignment</button>`:''}`;
+
+  } else {
+    // Goal detail
+    const pct = item.target_value ? Math.min(100,Math.round((item.current_value||0)/item.target_value*100)) : 0;
+    const bc = pct>=100?'#4ade80':pct>=50?'var(--primary-color)':'#60a5fa';
+    const isDone = pct >= 100;
+    const due = item.due_date ? new Date(item.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'No due date';
+    const pName = playerMap[item.player_id] || 'Unknown';
+
+    bodyHtml = `
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:16px;">${item.metric}${isDone?' ✓':''}</div>
+      <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:14px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span style="font-size:13px;color:rgba(255,255,255,0.6);">Progress</span>
+          <span style="font-size:18px;font-weight:800;color:${bc};font-family:'Barlow Condensed',sans-serif;">${item.current_value||0} <span style="font-size:13px;color:rgba(255,255,255,0.35);font-weight:400;">/ ${item.target_value}</span></span>
+        </div>
+        <div style="background:#1a1a1a;border-radius:6px;height:10px;margin-bottom:8px;">
+          <div style="height:10px;width:${pct}%;background:${bc};border-radius:6px;transition:width .3s;"></div>
+        </div>
+        <div style="text-align:center;font-size:12px;color:rgba(255,255,255,0.35);">${pct}% complete${isDone?' · 🎯 Goal Achieved!':''}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Due</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${due}</div></div>
+        ${isCoach?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Player</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${pName}</div></div>`:''}
+      </div>
+      ${item.notes?`<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px 14px;margin-bottom:16px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Coach Notes</div><div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;font-style:italic;">${item.notes}</div></div>`:''}
+      ${!isDone?`
+      <div style="margin-bottom:6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;">Update Progress</div>
+      <div style="display:flex;gap:8px;">
+        <input type="number" id="detailGoalVal" placeholder="New value" value="${item.current_value||''}"
+          style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:9px 12px;border-radius:6px;">
+        <button onclick="updateGoalFromDetail('${item.id}')"
+          style="background:${bc};border:none;color:#fff;font-size:12px;font-weight:700;padding:9px 16px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Save</button>
+      </div>`:'<div style="text-align:center;padding:10px;font-size:14px;color:#4ade80;font-weight:700;">🎯 Goal Complete!</div>'}`;
+  }
+
+  const modal = document.createElement('div');
+  modal.id = 'itemDetailModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:#141414;border:1px solid #2a2a2a;border-radius:14px;padding:24px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:${isAssign?'var(--primary-color)':'#60a5fa'};background:${isAssign?'rgba(var(--primary-rgb),0.12)':'rgba(96,165,250,0.12)'};padding:4px 10px;border-radius:4px;">${isAssign?'Assignment':'Goal'}</span>
+        <button onclick="document.getElementById('itemDetailModal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;line-height:1;">✕</button>
+      </div>
+      ${bodyHtml}
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+async function toggleAssignment(id, currentlyDone) {
+  const newStatus = currentlyDone ? 'assigned' : 'completed';
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('assignments').update({status: newStatus}).eq('id', id);
+    if (error) throw error;
+    const a = (window._dashAssignments||[]).find(x=>x.id===id);
+    if (a) a.status = newStatus;
+    loadDashboard();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function updateGoalFromDetail(id) {
+  const input = document.getElementById('detailGoalVal');
+  if (!input) return;
+  const val = parseFloat(input.value);
+  if (isNaN(val)) { alert('Please enter a number'); return; }
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('goals').update({current_value: val}).eq('id', id);
+    if (error) throw error;
+    const g = (window._dashGoals||[]).find(x=>x.id===id);
+    if (g) g.current_value = val;
+    document.getElementById('itemDetailModal')?.remove();
     loadDashboard();
   } catch(e) { alert('Error: ' + e.message); }
 }
