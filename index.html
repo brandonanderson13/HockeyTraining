@@ -3861,7 +3861,7 @@ async function loadAdminPanel(user) {
     <div class="cb">
       <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Create teams and assign coaches to organize your players</p>
       <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <input type="text" id="newTeamName" placeholder="Team name (e.g., Mites, Squirts)" style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
+        <input type="text" id="teamNameInput" placeholder="Team name (e.g., Mites, Squirts)" style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
         <button onclick="createTeam()" class="btn-o" style="margin:0;">Create Team</button>
       </div>
       <div id="teamMsg" style="font-size:12px;display:none;margin-bottom:8px;"></div>
@@ -3881,8 +3881,8 @@ async function loadAdminPanel(user) {
     <div class="cb">
       <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Add coaches who can view their team's player stats</p>
       <div style="display:flex;gap:8px;margin-bottom:8px;">
-        <input type="email" id="newCoachEmail" placeholder="Coach email" style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
-        <input type="text" id="newCoachName" placeholder="Full name (optional)" style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
+        <input type="email" id="coachEmail" placeholder="Coach email" style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
+        <input type="text" id="coachName" placeholder="Full name (optional)" style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
       </div>
       <button onclick="addCoach()" class="btn-o" style="margin:0 0 12px;">Add Coach</button>
       <div id="coachMsg" style="font-size:12px;display:none;margin-bottom:8px;"></div>
@@ -3894,17 +3894,6 @@ async function loadAdminPanel(user) {
   
     
   // Teams Management Card
-      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:14px;">
-        <input type="email" id="coachEmail" placeholder="Coach email" style="background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
-        <input type="text" id="coachName" placeholder="Coach name" style="background:#0d0d0d;border:1px solid #333;color:#fff;padding:8px 12px;border-radius:6px;">
-        <button onclick="addCoach()" class="btn-o">Add Coach</button>
-      </div>
-      <div id="coachesList">Loading...</div>
-    </div>
-  `;
-  adminContentDiv.appendChild(coachesCard);
-  loadCoaches();
-
 
     // Add Custom Workouts section
     const customCard = document.createElement('div');
