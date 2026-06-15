@@ -2076,10 +2076,23 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
   const playerMap = {};
   players.forEach(p => { playerMap[p.user_id] = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email; });
 
-  let filterHtml_unused = ''; // filterHtml defined below
-  let totShots=0,totMins=0,totWork=0;
-  players.forEach(p => { const s=statsMap[p.user_id]||{}; totShots+=s.shots||0; totMins+=s.mins||0; totWork+=s.workouts||0; });
+  // Filter header
+  let filterHtml = '';
+  if (isAdmin && window._dashAllTeams && window._dashAllTeams.length) {
+    filterHtml = `<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:1.2rem;">
+      <select onchange="filterDashByTeam(this.value)" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:12px;padding:7px 12px;border-radius:6px;min-width:160px;">
+        <option value="">All Teams</option>
+        ${window._dashAllTeams.map(t=>`<option value="${t.id}">${t.team_name}</option>`).join('')}
+      </select>
+      <span style="font-size:12px;color:rgba(255,255,255,0.35);">${players.length} player${players.length!==1?'s':''}</span>
+    </div>`;
+  } else if (teamName) {
+    filterHtml = `<div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin-bottom:1.2rem;">${teamName} <span style="font-size:13px;color:rgba(255,255,255,0.35);font-family:'Barlow',sans-serif;font-weight:400;text-transform:none;">${players.length} players</span></div>`;
+  }
 
+  // Summary bar
+  let totShots=0, totMins=0, totWork=0;
+  players.forEach(p => { const s=statsMap[p.user_id]||{}; totShots+=s.shots||0; totMins+=s.mins||0; totWork+=s.workouts||0; });
   const summaryHtml = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.2rem;">
     ${[['Players','#4ade80',players.length],['Total Shots','#fb923c',totShots.toLocaleString()],['Stick Mins','#a78bfa',totMins.toLocaleString()],['Workouts','#fbbf24',totWork],['Open Tasks','var(--primary-color)',assignments.filter(a=>a.status!=='completed').length]].map(([l,c,v])=>`
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
@@ -2088,52 +2101,45 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
     </div>`).join('')}
   </div>`;
 
-  // (assignments map below is for activity log, not player view)
-  const assignHtml_unused = []; // unused here, coach uses logHtml
-  const _skip = assignments.length ? assignments.map(a => {
-        const isDone = a.status === 'completed';
-    const isTracked = !!a.tracked_metric;
-    const due = a.due_date ? new Date(a.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-    const checkBg = isDone ? '#4ade80' : 'transparent';
-    const checkBorder = isDone ? '#4ade80' : '#444';
-    const progress = a._progress || 0;
-    const pct = isTracked && a.target_value ? Math.min(100, Math.round(progress/a.target_value*100)) : 0;
-    const metricLabels = {shots:'pucks',stickhandling:'mins',workouts:'days'};
-    const mLabel = metricLabels[a.tracked_metric] || '';
-    const tabMap = {shots:'shotlog',stickhandling:'sticklog',workouts:'schedule'};
-    const tabTarget = tabMap[a.tracked_metric] || 'shotlog';
-    const autoComplete = isTracked && pct >= 100;
-    const effectiveDone = isDone || autoComplete;
-    return `<div style="padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="openItemDetail('assignment','${a.id}')">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div onclick="event.stopPropagation();${isTracked ? '' : "toggleAssignment('"+a.id+"',"+isDone+")"}"
-          style="width:20px;height:20px;border-radius:5px;border:2px solid ${effectiveDone?'#4ade80':checkBorder};background:${effectiveDone?'#4ade80':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;${isTracked?'opacity:0.5;':'cursor:pointer;'}transition:all .15s;">
-          ${effectiveDone ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
-        </div>
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:13px;font-weight:600;color:${effectiveDone?'rgba(255,255,255,0.4)':'rgba(255,255,255,0.85)'};${effectiveDone?'text-decoration:line-through;':''}">${a.title}</span>
-            ${isTracked ? '<span style="font-size:9px;font-weight:700;color:#60a5fa;background:rgba(96,165,250,0.12);padding:1px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">Auto</span>' : ''}
-          </div>
-          <div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap;">
-            ${isTracked ? `<span style="font-size:10px;color:rgba(255,255,255,0.35);">${progress} / ${a.target_value} ${mLabel}</span>` : ''}
-            ${due ? `<span style="font-size:10px;color:rgba(255,255,255,0.3);">· Due ${due}</span>` : ''}
-            ${isTracked && !effectiveDone ? `<span style="font-size:10px;color:#60a5fa;cursor:pointer;" onclick="event.stopPropagation();showSec('${tabTarget}')">→ Log now</span>` : ''}
+  // Roster cards
+  let rosterHtml = '';
+  if (!players.length) {
+    rosterHtml = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.3);font-size:13px;">No players on this team yet.</div>';
+  } else {
+    rosterHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;">';
+    players.forEach(p => {
+      const s = statsMap[p.user_id] || {shots:0,mins:0,workouts:0,lastActive:null};
+      const name = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
+      const last = s.lastActive ? s.lastActive.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'Never';
+      const pGoals = goals.filter(g=>g.player_id===p.user_id);
+      const goalBars = pGoals.slice(0,2).map(g => {
+        const pct = g.target_value ? Math.min(100,Math.round((g.current_value||0)/g.target_value*100)) : 0;
+        return `<div style="margin-bottom:5px;"><div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:2px;"><span style="color:rgba(255,255,255,0.45);">${g.metric}</span><span style="color:rgba(255,255,255,0.3);">${pct}%</span></div><div style="background:#1a1a1a;border-radius:3px;height:4px;"><div style="height:4px;width:${pct}%;background:var(--primary-color);border-radius:3px;"></div></div></div>`;
+      }).join('');
+      rosterHtml += `<div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;overflow:hidden;">
+        <div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:start;">
+          <div>
+            <div style="font-weight:700;font-size:14px;color:#fff;margin-bottom:2px;">${name}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.3);">Last login: ${last}</div>
           </div>
         </div>
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.25;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      ${isTracked && !effectiveDone ? `
-      <div style="margin-top:6px;margin-left:30px;">
-        <div style="background:#1a1a1a;border-radius:4px;height:5px;">
-          <div style="height:5px;width:${pct}%;background:#60a5fa;border-radius:4px;transition:width .3s;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #1a1a1a;">
+          <div style="padding:8px;text-align:center;border-right:1px solid #1a1a1a;"><div style="font-size:15px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;">${s.shots}</div><div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Shots</div></div>
+          <div style="padding:8px;text-align:center;border-right:1px solid #1a1a1a;"><div style="font-size:15px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;">${s.mins}</div><div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Stick Min</div></div>
+          <div style="padding:8px;text-align:center;"><div style="font-size:15px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;">${s.workouts}</div><div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Workouts</div></div>
         </div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:3px;">${pct}% complete</div>
-      </div>` : ''}
-    </div>`;
-  }) : [];
+        ${pGoals.length?`<div style="padding:8px 14px;border-top:1px solid #1a1a1a;">${goalBars}</div>`:''}
+        <div style="padding:10px 14px;border-top:1px solid #1a1a1a;display:flex;gap:6px;">
+          <button onclick="openAssignModal('${p.user_id}','${name.replace(/'/g,"\'")}',false)" style="flex:1;background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.25);color:var(--primary-color);font-size:11px;font-weight:700;padding:6px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Task</button>
+          <button onclick="openGoalModal('${p.user_id}','${name.replace(/'/g,"\'")}' )" style="flex:1;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:6px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
+          <button onclick="viewPlayer('${p.user_id}','${name.replace(/'/g,"\'")}' )" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;padding:6px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">View</button>
+        </div>
+      </div>`;
+    });
+    rosterHtml += '</div>';
+  }
 
-  // Activity log — group assignments with same title+due into one 'All Players' row
+  // Activity log — group bulk assignments into one row
   const groupedLog = [];
   const seenGroups = {};
   assignments.forEach(a => {
@@ -2142,10 +2148,10 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
       seenGroups[key].ids.push(a.id);
       seenGroups[key].players.push(a.player_id);
       if (a.status !== 'completed') seenGroups[key].allDone = false;
+      if (a._progress !== undefined) seenGroups[key]._progress = (seenGroups[key]._progress||0) + (a._progress||0);
     } else {
-      const g = { key, ids:[a.id], players:[a.player_id], title:a.title, type:a.type, due_date:a.due_date, status:a.status, allDone:a.status==='completed' };
-      seenGroups[key] = g;
-      groupedLog.push(g);
+      seenGroups[key] = { ids:[a.id], players:[a.player_id], title:a.title, type:a.type, due_date:a.due_date, tracked_metric:a.tracked_metric, target_value:a.target_value, allDone:a.status==='completed', _progress:a._progress||0 };
+      groupedLog.push(seenGroups[key]);
     }
   });
 
@@ -2158,23 +2164,33 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
     const checkBg = isDone ? '#4ade80' : 'transparent';
     const checkBorder = isDone ? '#4ade80' : '#444';
     const firstId = g.ids[0];
-    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="openItemDetail('assignment','${firstId}')">
-      <div onclick="event.stopPropagation();toggleBulkAssignment(${JSON.stringify(g.ids)},${isDone})"
-        style="width:20px;height:20px;border-radius:5px;border:2px solid ${checkBorder};background:${checkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s;">
-        ${isDone ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
-      </div>
-      <div style="flex:1;min-width:0;">
-        <span style="font-size:12px;font-weight:600;color:${isDone?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.85)'};${isDone?'text-decoration:line-through;':''}">${g.title}</span>
-        <span style="font-size:11px;color:${isBulk?'rgba(96,165,250,0.7)':'rgba(255,255,255,0.35)'};margin-left:8px;">→ ${pLabel}</span>
-        <div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap;">
-          ${g.type?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">${g.type}</span>`:''}
-          ${due?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">· Due ${due}</span>`:''}
+    const isTracked = !!g.tracked_metric;
+    const avgProgress = isTracked && g.players.length ? Math.round(g._progress / g.players.length) : 0;
+    const pct = isTracked && g.target_value ? Math.min(100, Math.round(avgProgress/g.target_value*100)) : 0;
+    const metricLabels = {shots:'pucks',stickhandling:'mins',workouts:'days'};
+    return `<div style="padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="openItemDetail('assignment','${firstId}')">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div onclick="event.stopPropagation();toggleBulkAssignment(${JSON.stringify(g.ids)},${isDone})"
+          style="width:20px;height:20px;border-radius:5px;border:2px solid ${checkBorder};background:${checkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s;">
+          ${isDone ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:12px;font-weight:600;color:${isDone?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.85)'};${isDone?'text-decoration:line-through;':''}">${g.title}</span>
+            ${isTracked?'<span style="font-size:9px;font-weight:700;color:#60a5fa;background:rgba(96,165,250,0.12);padding:1px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">Auto</span>':''}
+          </div>
+          <div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap;">
+            <span style="font-size:11px;color:${isBulk?'rgba(96,165,250,0.7)':'rgba(255,255,255,0.35)'};">→ ${pLabel}</span>
+            ${isTracked?`<span style="font-size:10px;color:rgba(255,255,255,0.35);">· avg ${avgProgress}/${g.target_value} ${metricLabels[g.tracked_metric]||''}</span>`:''}
+            ${due?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">· Due ${due}</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="opacity:0.25;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <button onclick="event.stopPropagation();deleteBulkAssignment(${JSON.stringify(g.ids)})" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:12px;padding:0 2px;line-height:1;">✕</button>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="opacity:0.25;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <button onclick="event.stopPropagation();deleteBulkAssignment(${JSON.stringify(g.ids)})" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:12px;padding:0 2px;line-height:1;">✕</button>
-      </div>
+      ${isTracked && !isDone ? `<div style="margin-top:5px;margin-left:30px;"><div style="background:#1a1a1a;border-radius:3px;height:4px;"><div style="height:4px;width:${pct}%;background:#60a5fa;border-radius:3px;"></div></div><div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:2px;">avg ${pct}% complete</div></div>` : ''}
     </div>`;
   }).join('') || '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">No assignments yet</div>';
 
@@ -2196,6 +2212,7 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
       <div class="cb">${logHtml}</div>
     </div>`;
 }
+
 
 function filterDashByTeam(teamId) {
   const players = teamId ? _dashPlayers.filter(p => p.team_id === teamId) : _dashPlayers;
