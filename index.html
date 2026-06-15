@@ -1975,6 +1975,7 @@ async function loadDashboard() {
 }
 
 // ── PLAYER DASHBOARD ──────────────────────────────────────────────────────
+// ── PLAYER DASHBOARD ──────────────────────────────────────────────────────
 function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments, goals) {
   const el = document.getElementById('dashboardContent');
   const open = assignments.filter(a => a.status !== 'completed');
@@ -1989,8 +1990,107 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
       </div>`).join('')}
     </div>`;
 
-  // Assignments — checkbox + clickable row to open detail
   const assignHtml = assignments.length ? assignments.map(a => {
+    const isDone = a.status === 'completed';
+    const isTracked = !!a.tracked_metric;
+    const due = a.due_date ? new Date(a.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    const progress = a._progress || 0;
+    const pct = isTracked && a.target_value ? Math.min(100, Math.round(progress/a.target_value*100)) : 0;
+    const metricLabels = {shots:'pucks',stickhandling:'mins',workouts:'days'};
+    const mLabel = metricLabels[a.tracked_metric] || '';
+    const tabMap = {shots:'shotlog',stickhandling:'sticklog',workouts:'schedule'};
+    const tabTarget = tabMap[a.tracked_metric] || 'shotlog';
+    const autoComplete = isTracked && pct >= 100;
+    const effectiveDone = isDone || autoComplete;
+    const checkBg = effectiveDone ? '#4ade80' : 'transparent';
+    const checkBorder = effectiveDone ? '#4ade80' : '#444';
+    return `<div style="padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="openItemDetail('assignment','${a.id}')">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div onclick="event.stopPropagation();${isTracked ? '' : "toggleAssignment('"+a.id+"',"+isDone+")"}"
+          style="width:20px;height:20px;border-radius:5px;border:2px solid ${checkBorder};background:${checkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;${isTracked?'opacity:0.5;':'cursor:pointer;'}transition:all .15s;">
+          ${effectiveDone ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:13px;font-weight:600;color:${effectiveDone?'rgba(255,255,255,0.4)':'rgba(255,255,255,0.85)'};${effectiveDone?'text-decoration:line-through;':''}">${a.title}</span>
+            ${isTracked ? '<span style="font-size:9px;font-weight:700;color:#60a5fa;background:rgba(96,165,250,0.12);padding:1px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">Auto</span>' : ''}
+          </div>
+          <div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap;">
+            ${isTracked ? `<span style="font-size:10px;color:rgba(255,255,255,0.35);">${progress} / ${a.target_value} ${mLabel}</span>` : ''}
+            ${due ? `<span style="font-size:10px;color:rgba(255,255,255,0.3);">· Due ${due}</span>` : ''}
+            ${isTracked && !effectiveDone ? `<span style="font-size:10px;color:#60a5fa;cursor:pointer;" onclick="event.stopPropagation();showSec('${tabTarget}')">→ Log now</span>` : ''}
+          </div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.25;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      ${isTracked && !effectiveDone ? `
+      <div style="margin-top:6px;margin-left:30px;">
+        <div style="background:#1a1a1a;border-radius:4px;height:5px;">
+          <div style="height:5px;width:${pct}%;background:#60a5fa;border-radius:4px;transition:width .3s;"></div>
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:3px;">${pct}% complete</div>
+      </div>` : ''}
+    </div>`;
+  }).join('') : '<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:12px;">No assignments yet</div>';
+
+  const goalsHtml = goals.length ? goals.map(g => {
+    const pct = g.target_value ? Math.min(100,Math.round((g.current_value||0)/g.target_value*100)) : 0;
+    const bc = pct>=100?'#4ade80':pct>=50?'var(--primary-color)':'#60a5fa';
+    const isDone = pct >= 100;
+    return `<div style="background:#0d0d0d;border:1px solid ${isDone?'rgba(74,222,128,0.25)':'#222'};border-radius:8px;padding:12px 14px;margin-bottom:8px;cursor:pointer;" onclick="openItemDetail('goal','${g.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:13px;font-weight:700;color:#fff;">${g.metric}${isDone?' ✓':''}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:12px;color:rgba(255,255,255,0.4);">${g.current_value||0} / ${g.target_value}</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="opacity:0.25;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div style="background:#1a1a1a;border-radius:4px;height:7px;">
+        <div style="height:7px;width:${pct}%;background:${bc};border-radius:4px;transition:width .3s;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;margin-top:5px;">
+        <span style="color:rgba(255,255,255,0.3);">${pct}%${isDone?' · 🎯 Goal Achieved!':''}</span>
+        ${g.due_date?`<span style="color:rgba(255,255,255,0.3);">Due ${new Date(g.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`:''}
+      </div>
+    </div>`;
+  }).join('') : '<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:12px;">No goals set yet</div>';
+
+  el.innerHTML = `
+    ${statsHtml}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+      <div class="card" style="margin-bottom:0;">
+        <div class="ch"><span class="cht">My Assignments</span></div>
+        <div class="cb">${assignHtml}</div>
+      </div>
+      <div class="card" style="margin-bottom:0;">
+        <div class="ch"><span class="cht">My Goals</span></div>
+        <div class="cb">${goalsHtml}</div>
+      </div>
+    </div>`;
+}
+
+function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
+  const el = document.getElementById('dashboardContent');
+  const role = window._userRole;
+  const isAdmin = role === 'admin' || role === 'super_admin';
+  const playerMap = {};
+  players.forEach(p => { playerMap[p.user_id] = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email; });
+
+  let filterHtml_unused = ''; // filterHtml defined below
+  let totShots=0,totMins=0,totWork=0;
+  players.forEach(p => { const s=statsMap[p.user_id]||{}; totShots+=s.shots||0; totMins+=s.mins||0; totWork+=s.workouts||0; });
+
+  const summaryHtml = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.2rem;">
+    ${[['Players','#4ade80',players.length],['Total Shots','#fb923c',totShots.toLocaleString()],['Stick Mins','#a78bfa',totMins.toLocaleString()],['Workouts','#fbbf24',totWork],['Open Tasks','var(--primary-color)',assignments.filter(a=>a.status!=='completed').length]].map(([l,c,v])=>`
+    <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
+      <div style="font-size:22px;font-weight:800;color:${c};font-family:'Barlow Condensed',sans-serif;">${v}</div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">${l}</div>
+    </div>`).join('')}
+  </div>`;
+
+  // (assignments map below is for activity log, not player view)
+  const assignHtml_unused = []; // unused here, coach uses logHtml
+  const _skip = assignments.length ? assignments.map(a => {
         const isDone = a.status === 'completed';
     const isTracked = !!a.tracked_metric;
     const due = a.due_date ? new Date(a.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
@@ -2031,7 +2131,7 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
         <div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:3px;">${pct}% complete</div>
       </div>` : ''}
     </div>`;
-  }).join('') : '<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:12px;">No assignments yet</div>';
+  }) : [];
 
   // Activity log — group assignments with same title+due into one 'All Players' row
   const groupedLog = [];
