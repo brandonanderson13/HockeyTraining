@@ -86,7 +86,11 @@ body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh
 
 /* SCHEDULE */
 .swk{background:var(--bk);border:1px solid var(--g2);border-radius:12px;overflow:hidden;margin-bottom:10px;}
-.whd{background:#141414;padding:10px 14px;border-bottom:1px solid var(--g2);display:flex;align-items:center;gap:10px;}
+.whd{background:#141414;padding:10px 14px;border-bottom:1px solid var(--g2);display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+.whd:hover{background:#1a1a1a;}
+.wchev{margin-left:auto;font-size:11px;color:rgba(255,255,255,0.25);transition:transform .2s;}
+.swk.collapsed .wchev{transform:rotate(-90deg);}
+.swk.collapsed .swb{display:none;}
 .wnum{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;color:var(--or);letter-spacing:.03em;min-width:68px;}
 .wfoc{font-size:12px;color:rgba(255,255,255,0.42);font-style:italic;}
 .dhd{background:#111;padding:7px 14px;border-bottom:1px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center;}
@@ -609,6 +613,10 @@ select:focus{border-color:var(--or);outline:none;}
   </div>
   <div style="font-size:11px;color:rgba(255,255,255,0.38);margin-bottom:8px;">Tap any exercise for description + YouTube. Skills sessions have quick-log buttons to log directly into Stickhandling Log or Shot Log.</div>
   <div id="phaseInfo"></div>
+  <div style="display:flex;gap:8px;margin-bottom:10px;">
+    <button onclick="expandAllWeeks()" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Expand All</button>
+    <button onclick="collapseAllWeeks()" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Collapse All</button>
+  </div>
   <div id="weeksContainer"></div>
   </div>
   
@@ -3135,6 +3143,18 @@ function viewPlayer(playerId, playerName) {
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
 }
 
+function toggleWeek(wdiv) {
+  wdiv.classList.toggle('collapsed');
+}
+
+function expandAllWeeks() {
+  document.querySelectorAll('.swk.collapsed').forEach(w => w.classList.remove('collapsed'));
+}
+
+function collapseAllWeeks() {
+  document.querySelectorAll('.swk:not(.collapsed)').forEach(w => w.classList.add('collapsed'));
+}
+
 function showSec(id){
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   const sec = document.getElementById(id);
@@ -4443,6 +4463,18 @@ function updateProgramStatus() {
 function renderWeeks(){
   const c=document.getElementById('weeksContainer');
   if(!c)return;
+  // Calculate current week from program start date if stored
+  try {
+    const stored = localStorage.getItem('tigersProgramStart');
+    if (stored) {
+      const start = new Date(stored);
+      const now = new Date();
+      const weekNum = Math.min(12, Math.max(1, Math.floor((now - start) / (7*24*60*60*1000)) + 1));
+      window._currentWeekNum = weekNum;
+    } else {
+      window._currentWeekNum = 1;
+    }
+  } catch(e) { window._currentWeekNum = 1; }
   // Check if rendering custom workout data
   if (window._isCustomProgram && window._customProgramData) {
     console.log('Rendering custom workout data');
@@ -4456,7 +4488,9 @@ function renderWeeks(){
     window._customProgramData.forEach(wk => {
       const wdiv=document.createElement('div');
       wdiv.className='swk';
-      wdiv.innerHTML=`<div class="whd"><div class="wnum">WEEK ${wk.num}</div><div class="wfoc">${wk.focus || ''}</div></div>`;
+      const isCurrentWk = (wk.num === (window._currentWeekNum || 1));
+      if (!isCurrentWk) wdiv.classList.add('collapsed');
+      wdiv.innerHTML=`<div class="whd" onclick="toggleWeek(this.parentElement)"><div class="wnum">WEEK ${wk.num}</div><div class="wfoc">${wk.focus || ''}</div><div class="wchev">▼</div></div>`;
       
       const wbody=document.createElement('div');
       wbody.className='swb';
@@ -4521,7 +4555,9 @@ function renderWeeks(){
 
   p.weeks.forEach(wk=>{
     const wdiv=document.createElement('div');wdiv.className='swk';
-    wdiv.innerHTML=`<div class="whd"><div class="wnum">WEEK ${wk.num}</div><div class="wfoc">${wk.focus}</div></div>`;
+    const isCurrentWeek = (wk.num === (window._currentWeekNum || 1));
+    if (!isCurrentWeek) wdiv.classList.add('collapsed');
+    wdiv.innerHTML=`<div class="whd" onclick="toggleWeek(this.parentElement)"><div class="wnum">WEEK ${wk.num}</div><div class="wfoc">${wk.focus}</div><div class="wchev">▼</div></div>`;
 
     // BUILD A REMAPPED SCHEDULE BASED ON USER'S ACTIVE DAYS
     // The phase template has 6 workout days (Mon-Sat) — we extract the workouts that have items,
