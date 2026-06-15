@@ -2063,7 +2063,7 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
         <div class="cb">${assignHtml}</div>
       </div>
       <div class="card" style="margin-bottom:0;">
-        <div class="ch"><span class="cht">My Goals</span></div>
+        <div class="ch"><span class="cht">My Goals</span><button onclick="openPlayerGoalModal()" style="margin-left:auto;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button></div>
         <div class="cb">${goalsHtml}</div>
       </div>
     </div>`;
@@ -2544,6 +2544,172 @@ async function updateGoalProgress(id) {
 }
 
 
+
+// ── PLAYER GOAL MODAL ─────────────────────────────────────────────────────
+function openPlayerGoalModal() {
+  const existing = document.getElementById('dashModal');
+  if (existing) existing.remove();
+  const today = new Date().toISOString().split('T')[0];
+
+  const modal = document.createElement('div');
+  modal.id = 'dashModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:#141414;border:1px solid #333;border-radius:12px;padding:24px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#60a5fa;">Set a Goal</div>
+        <button onclick="document.getElementById('dashModal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;line-height:1;">✕</button>
+      </div>
+      <div style="display:grid;gap:12px;">
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Metric *</label>
+          <select id="pgMetric" onchange="document.getElementById('pgCustomWrap').style.display=this.value==='Custom'?'block':'none'" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+            <option value="Total Shots">Total Shots</option>
+            <option value="Stick Minutes">Stick Minutes</option>
+            <option value="Workouts Completed">Workouts Completed</option>
+            <option value="30m Sprint (sec)">30m Sprint (sec)</option>
+            <option value="Push-Up Max">Push-Up Max</option>
+            <option value="Custom">Custom...</option>
+          </select>
+        </div>
+        <div id="pgCustomWrap" style="display:none;">
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Custom Metric</label>
+          <input id="pgCustom" type="text" placeholder="e.g. Backhand Accuracy" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Target *</label>
+            <input id="pgTarget" type="number" placeholder="e.g. 500" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+          </div>
+          <div>
+            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Current</label>
+            <input id="pgCurrent" type="number" placeholder="e.g. 0" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+          </div>
+        </div>
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Due Date</label>
+          <input id="pgDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+        </div>
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Notes</label>
+          <textarea id="pgNotes" placeholder="Why this goal matters to you..." style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;resize:vertical;height:60px;font-family:'Barlow',sans-serif;"></textarea>
+        </div>
+        <div id="pgMsg" style="font-size:12px;display:none;padding:8px 10px;border-radius:4px;"></div>
+        <button onclick="savePlayerGoal()" style="background:#60a5fa;border:none;color:#fff;font-size:14px;font-weight:700;padding:11px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Set Goal</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+async function savePlayerGoal() {
+  const metricSel = document.getElementById('pgMetric')?.value;
+  const metric = metricSel === 'Custom' ? (document.getElementById('pgCustom')?.value.trim() || 'Custom') : metricSel;
+  const target = parseFloat(document.getElementById('pgTarget')?.value) || null;
+  const current = parseFloat(document.getElementById('pgCurrent')?.value) || 0;
+  const due = document.getElementById('pgDue')?.value;
+  const notes = document.getElementById('pgNotes')?.value.trim();
+  const msg = document.getElementById('pgMsg');
+
+  if (!metric || !target) {
+    if (msg) { msg.style.background='rgba(248,113,113,0.1)'; msg.style.color='#f87171'; msg.textContent='Please enter a metric and target.'; msg.style.display='block'; }
+    return;
+  }
+  if (msg) { msg.style.background='rgba(59,130,246,0.1)'; msg.style.color='#60a5fa'; msg.textContent='Saving...'; msg.style.display='block'; }
+
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('goals').insert({
+      organization_id: window._userOrgId || 'individual',
+      coach_id: window._userId,  // player sets their own goal
+      player_id: window._userId,
+      metric,
+      target_value: target,
+      current_value: current,
+      due_date: due || null,
+      notes: notes || null
+    });
+    if (error) throw error;
+    if (msg) { msg.style.background='rgba(74,222,128,0.1)'; msg.style.color='#4ade80'; msg.textContent='✓ Goal set!'; msg.style.display='block'; }
+    setTimeout(() => { document.getElementById('dashModal')?.remove(); loadDashboard(); }, 700);
+  } catch(e) {
+    if (msg) { msg.style.background='rgba(248,113,113,0.1)'; msg.style.color='#f87171'; msg.textContent='Error: '+e.message; msg.style.display='block'; }
+  }
+}
+
+// ── GOAL COMMENTS ─────────────────────────────────────────────────────────
+async function loadGoalComments(goalId) {
+  const el = document.getElementById('goalComments_' + goalId);
+  if (!el) return;
+
+  try {
+    const sb = await getSupabaseClient();
+    const { data, error } = await sb.from('goal_comments')
+      .select('id, comment, created_at, user_id')
+      .eq('goal_id', goalId)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+
+    if (!data || !data.length) {
+      el.innerHTML = '<div style="font-size:12px;color:rgba(255,255,255,0.25);padding:6px 0;">No comments yet — be the first!</div>';
+      return;
+    }
+
+    el.innerHTML = data.map(c => {
+      const isMe = c.user_id === window._userId;
+      const time = new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      return `<div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+          <span style="font-size:10px;font-weight:700;color:${isMe?'var(--primary-color)':'#60a5fa'};text-transform:uppercase;letter-spacing:.04em;">${isMe?'You':'Coach'}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:10px;color:rgba(255,255,255,0.25);">${time}</span>
+            ${isMe?`<button onclick="deleteGoalComment('${c.id}','${goalId}')" style="background:none;border:none;color:rgba(255,255,255,0.2);cursor:pointer;font-size:11px;padding:0;line-height:1;">✕</button>`:''}
+          </div>
+        </div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.5;background:#0d0d0d;border-radius:6px;padding:8px 10px;">${c.comment}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    if (el) el.innerHTML = '<div style="font-size:11px;color:#f87171;">Could not load comments</div>';
+  }
+}
+
+async function saveGoalComment(goalId) {
+  const input = document.getElementById('goalCommentInput');
+  if (!input) return;
+  const comment = input.value.trim();
+  if (!comment) return;
+
+  input.disabled = true;
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('goal_comments').insert({
+      goal_id: goalId,
+      user_id: window._userId,
+      comment
+    });
+    if (error) throw error;
+    input.value = '';
+    loadGoalComments(goalId);
+  } catch(e) {
+    alert('Error: ' + e.message);
+  } finally {
+    input.disabled = false;
+    input.focus();
+  }
+}
+
+async function deleteGoalComment(commentId, goalId) {
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('goal_comments').delete().eq('id', commentId);
+    if (error) throw error;
+    loadGoalComments(goalId);
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+}
+
 // ── ITEM DETAIL MODAL (assignment or goal) ────────────────────────────────
 function openItemDetail(type, id) {
   const existing = document.getElementById('itemDetailModal');
@@ -2633,12 +2799,18 @@ function openItemDetail(type, id) {
       ${item.notes?`<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px 14px;margin-bottom:16px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Coach Notes</div><div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;font-style:italic;">${item.notes}</div></div>`:''}
       ${!isDone?`
       <div style="margin-bottom:6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;">Update Progress</div>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
         <input type="number" id="detailGoalVal" placeholder="New value" value="${item.current_value||''}"
           style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:9px 12px;border-radius:6px;">
         <button onclick="updateGoalFromDetail('${item.id}')"
           style="background:${bc};border:none;color:#fff;font-size:12px;font-weight:700;padding:9px 16px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Save</button>
-      </div>`:'<div style="text-align:center;padding:10px;font-size:14px;color:#4ade80;font-weight:700;">🎯 Goal Complete!</div>'}`;
+      </div>`:'<div style="text-align:center;padding:10px 0 16px;font-size:14px;color:#4ade80;font-weight:700;">🎯 Goal Complete!</div>'}
+      <div style="margin-bottom:6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;">Comments</div>
+      <div id="goalComments_${item.id}" style="margin-bottom:10px;"><div style="font-size:12px;color:rgba(255,255,255,0.25);">Loading comments...</div></div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="goalCommentInput" placeholder="Add a comment..." style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;" onkeydown="if(event.key==='Enter')saveGoalComment('${item.id}')">
+        <button onclick="saveGoalComment('${item.id}')" style="background:#333;border:none;color:#fff;font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;">Post</button>
+      </div>`;
   }
 
   const modal = document.createElement('div');
@@ -2654,6 +2826,11 @@ function openItemDetail(type, id) {
     </div>`;
   document.body.appendChild(modal);
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+
+  // Load comments if it's a goal
+  if (!isAssign) {
+    loadGoalComments(id);
+  }
 }
 
 async function toggleAssignment(id, currentlyDone) {
