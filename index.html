@@ -6926,18 +6926,19 @@ async function loadAccountDetails() {
       return;
     }
 
-    // Fetch seat_limit from organizations table
+    // Fetch seat_limit and expires_at from organizations table (org-level data)
     const orgId = sub.organization_id || 'individual';
     if (orgId !== 'individual') {
-      const { data: orgData } = await sb.from('organizations').select('seat_limit, expires_at').eq('id', orgId).single();
+      const { data: orgData } = await sb.from('organizations').select('seat_limit, expires_at, name').eq('id', orgId).single();
       if (orgData) {
         if (orgData.seat_limit != null) sub.seat_limit = orgData.seat_limit;
         if (orgData.expires_at) sub.expires_at = orgData.expires_at;
+        if (orgData.name && !sub.organization_name) sub.organization_name = orgData.name;
       }
     }
 
     const isAssoc = sub.subscription_type === 'association';
-    const renewalDate = sub.expires_at ? new Date(sub.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+    // renewalDate calculated after org fetch below
     
     let html = '<div style="display:grid;gap:14px;">';
     
