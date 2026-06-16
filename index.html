@@ -559,10 +559,10 @@ select:focus{border-color:var(--or);outline:none;}
         <div>
           <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Age Group</label>
           <select id="cust-age" onchange="updateAgeDescription()" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;">
-            <option value="squirt">Squirts — 10U</option>
-            <option value="peewee">Peewees — 12U</option>
-            <option value="bantam" selected>Bantams — 15U</option>
-            <option value="midget">Midgets — 18U</option>
+            <option value="squirt">Mites / Squirts (8–10)</option>
+            <option value="peewee">Peewees / Atoms (11–12)</option>
+            <option value="bantam" selected>Bantams / Midget Minor (13–15)</option>
+            <option value="midget">Midget / Junior (16–18)</option>
           </select>
           <div id="age-desc" style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:5px;line-height:1.5;"></div>
         </div>
@@ -570,9 +570,9 @@ select:focus{border-color:var(--or);outline:none;}
         <div>
           <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Season Phase</label>
           <select id="cust-season" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;">
-            <option value="offseason" selected>Off-Season (5 days/wk)</option>
-            <option value="preseason">Pre-Season (5 days/wk)</option>
-            <option value="inseason">In-Season (3 days/wk)</option>
+            <option value="offseason" selected>Off-Season — Build (5 days/wk)</option>
+            <option value="preseason">Pre-Season — Peak (4 days/wk)</option>
+            <option value="inseason">In-Season — Maintain (3 days/wk)</option>
           </select>
         </div>
 
@@ -615,19 +615,19 @@ select:focus{border-color:var(--or);outline:none;}
         <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">About the Phases</div>
         <div class="g3">
           <div class="pc">
-            <div class="pct"><div class="pn">Off-Season</div><div class="pt">Maximum Development</div><div class="pw">6 days/week · Full volume</div></div>
-            <div class="pcb"><span class="ptag ptago">Strength Building</span><span class="ptag">Power Development</span><span class="ptag ptago">High Volume</span></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">This is when you make the biggest gains. Train 6 days/week with full volumes. Progress through all 12 weeks, then restart the cycle.</div>
+            <div class="pct"><div class="pn">Off-Season</div><div class="pt">Build & Develop</div><div class="pw">5 days/week</div></div>
+            <div class="pcb"><span class="ptag ptago">Strength</span><span class="ptag">Skills</span><span class="ptag ptago">Conditioning</span></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Your biggest window to improve. Full program, 5 days per week. Progress through all 12 weeks at your own pace.</div>
           </div>
           <div class="pc">
-            <div class="pct"><div class="pn">Pre-Season</div><div class="pt">Intensity Ramp</div><div class="pw">5 days/week · Peak preparation</div></div>
-            <div class="pcb"><span class="ptag ptago">Game Speed</span><span class="ptag">Conditioning Peak</span><span class="ptag ptago">Power Focus</span></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">4–6 weeks before season. Ramp up intensity, train 5 days/week. Focus on Weeks 9–12 exercises to peak power before games.</div>
+            <div class="pct"><div class="pn">Pre-Season</div><div class="pt">Sharpen & Peak</div><div class="pw">4 days/week</div></div>
+            <div class="pcb"><span class="ptag ptago">Speed</span><span class="ptag">Power</span><span class="ptag ptago">Game Prep</span></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Get game-ready. Slightly reduced volume, sharper focus on speed and skill. 4 sessions per week.</div>
           </div>
           <div class="pc">
-            <div class="pct"><div class="pn">In-Season</div><div class="pt">Maintenance</div><div class="pw">3 days/week · Reduced volume</div></div>
-            <div class="pcb"><span class="ptag ptago">Strength Maintenance</span><span class="ptag">Injury Prevention</span><span class="ptag ptago">Recovery Focus</span></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">During games, train 3 days/week. All volumes reduce by 1 set. Use Weeks 1–4 exercises. Goal: maintain strength without added fatigue.</div>
+            <div class="pct"><div class="pn">In-Season</div><div class="pt">Maintain & Recover</div><div class="pw">3 days/week</div></div>
+            <div class="pcb"><span class="ptag ptago">Maintenance</span><span class="ptag">Recovery</span><span class="ptag ptago">Staying Sharp</span></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Keep your gains during the season. Lower volume, 3 days per week. Stay strong without wearing yourself out for games.</div>
           </div>
         </div>
       </div>
@@ -1883,7 +1883,7 @@ function addLogoutButton(supabase, user, isAdmin) {
 
 
 const phases={
-  1:{label:'Phase 1 — Foundation (Wks 1–4)',desc:'Build the foundation with proper form and consistency. Moderate loads, controlled reps, skill integrated every session. Harder than it looks — focus on clean execution.',color:'#60a5fa',weeks:[
+  1:{label:'Phase 1 — Foundation (Wks 1–4)',desc:'Build the foundation. Focus on form and consistency — every rep counts. Skill work is integrated into every session from day one.',color:'#60a5fa',weeks:[
     {num:1,focus:'Establishing Movement Patterns',days:[
       {n:'Monday',t:'Lower Body + Agility',items:[['Goblet Squat','4×12'],['Romanian Deadlift','4×10'],['Lateral Lunge','3×12 each'],['Calf Raises','4×20'],['Cone Shuffle','4×30s'],['Crossover Run','4×25 yds']]},
       {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — Mechanics Focus','4×20 shots'],['Snap Shot — Short Backswing','4×15 shots'],['Backhand Shots','3×15 shots'],['Speed Taps (30s)','4 sets — count and record'],['Shuttle Runs','5 rounds'],['Burpees','4×12']]},
@@ -1913,7 +1913,7 @@ const phases={
       {n:'Saturday',t:'Full Body + Shooting Volume',items:[['Goblet Squat','4×14'],['Dumbbell Bench Press','4×12'],['Bent-Over Row','4×12'],['Plank','4×55s'],['Wrist Shot — 80-shot session','Log total'],['Speed Taps (30s)','5 sets — count and record']]}
     ]}
   ]},
-  2:{label:'Phase 2 — Development (Wks 5–8)',desc:'Strength and skill development. Heavier loads, advanced moves, higher shooting volume. The bridge from foundation to game-ready.',color:'#4ade80',weeks:[
+  2:{label:'Phase 2 — Development (Wks 5–8)',desc:'Step it up. Harder movements, more volume, advanced skill work. This phase bridges foundation training with game-ready performance.',color:'#4ade80',weeks:[
     {num:5,focus:'Increasing Load & Skill',days:[
       {n:'Monday',t:'Lower Body + Power',items:[['Barbell/DB Squat','4×8'],['Romanian Deadlift','4×10'],['Walking Lunge','3×12 each'],['Calf Raises','4×25'],['Box Jump','4×8'],['5-10-5 Shuttle','6 runs — timed']]},
       {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','5×10 shots — log score'],['Snap Shot','4×20 shots'],['Backhand Toe Drag Shot','3×15 shots'],['Speed Taps (30s)','5 sets — count and record'],['Shuttle Runs','6 rounds'],['Burpees','4×15']]},
@@ -1943,32 +1943,32 @@ const phases={
       {n:'Saturday',t:'Full Body + Shooting Volume',items:[['Barbell/DB Squat','5×10'],['Push-Up with Weight Vest/Plate','4×18'],['Bent-Over Row','5×12'],['Ab Wheel','5×14'],['Wrist Shot — 120-shot session','Log total'],['Speed Taps (30s)','6 sets — count and record']]}
     ]}
   ]},
-  3:{label:'Phase 3 — Performance (Wks 9–12)',desc:'Convert strength into hockey-specific power. Explosive movements, max shooting volume, peak conditioning. This is where it all comes together.',color:'#fb923c',weeks:[
+  3:{label:'Phase 3 — Performance (Wks 9–12)',desc:'Peak performance. Everything you\'ve built comes together — explosive power, high-volume shooting, and conditioning that holds up all game.',color:'#fb923c',weeks:[
     {num:9,focus:'Explosive Power Introduction',days:[
-      {n:'Monday',t:'Lower Body — Explosive',items:[['Barbell/DB Squat','5×5 heavy'],['Power Clean or Jump Squat','4×5'],['Nordic Curl','4×8'],['Depth Jump','4×6'],['5-10-5 Shuttle','8 runs — timed'],['Broad Jump','5×6']]},
+      {n:'Monday',t:'Lower Body — Explosive',items:[['Barbell/DB Squat','4×5 — challenging weight'],['Power Clean or Jump Squat','4×5'],['Nordic Curl','4×8'],['Depth Jump','4×6'],['5-10-5 Shuttle','8 runs — timed'],['Broad Jump','5×6']]},
       {n:'Tuesday',t:'Shooting + Max Conditioning',items:[['Wrist Shot — 5-spot accuracy','6×10 shots — log score'],['Snap Shot — Rapid Fire','5×20 shots'],['Backhand Toe Drag Shot','5×15 shots'],['Slap Shot — Power','5×15 shots'],['Speed Taps (30s)','6 sets — count and record'],['Shuttle Runs','8 rounds'],['Burpees','5×15']]},
-      {n:'Thursday',t:'Upper Body — Power',items:[['Dumbbell Bench Press','5×8 heavy'],['Pull-Up','5×8'],['Explosive Push-Up','4×10'],['Farmer Carry','5×50 yds'],['Ab Wheel','5×15'],['Plank','5×70s'],['Russian Twists','5×28']]},
+      {n:'Thursday',t:'Upper Body — Power',items:[['Dumbbell Bench Press','4×8 — challenging weight'],['Pull-Up','5×8'],['Explosive Push-Up','4×10'],['Farmer Carry','5×50 yds'],['Ab Wheel','5×15'],['Plank','5×70s'],['Russian Twists','5×28']]},
       {n:'Friday',t:'Full Skills + Power Conditioning',items:[['Cone Weave with Puck — Max Speed','8 runs — timed'],['Wrist Shot — 5-spot accuracy','6×10 shots — log score'],['Backhand Shots','5×15 shots'],['Slap Shot — Power','5×15 shots'],['Lateral Bound Intervals','12 rounds'],['Jump Rope','6×2 min']]},
-      {n:'Saturday',t:'Total Body + Shooting Volume',items:[['Barbell/DB Squat','5×8 heavy'],['Explosive Push-Up','4×12'],['Bent-Over Row','5×10'],['Wrist Shot — 120-shot session','Log total'],['Speed Taps (30s)','6 sets — count and record'],['Side Plank','5×45s each']]}
+      {n:'Saturday',t:'Total Body + Shooting Volume',items:[['Barbell/DB Squat','4×8 — challenging weight'],['Explosive Push-Up','4×12'],['Bent-Over Row','5×10'],['Wrist Shot — 120-shot session','Log total'],['Speed Taps (30s)','6 sets — count and record'],['Side Plank','5×45s each']]}
     ]},
     {num:10,focus:'Peak Power & Volume',days:[
-      {n:'Monday',t:'Lower Body — Max Power',items:[['Barbell/DB Squat','5×5 heavy'],['Power Clean or Jump Squat','4×6'],['Nordic Curl','4×8'],['Depth Jump','5×6'],['5-10-5 Shuttle','8 runs — timed'],['Broad Jump','5×8']]},
+      {n:'Monday',t:'Lower Body — Max Power',items:[['Barbell/DB Squat','4×5 — challenging weight'],['Power Clean or Jump Squat','4×6'],['Nordic Curl','4×8'],['Depth Jump','5×6'],['5-10-5 Shuttle','8 runs — timed'],['Broad Jump','5×8']]},
       {n:'Tuesday',t:'Shooting + Max Conditioning',items:[['Wrist Shot — 5-spot accuracy','6×10 shots — log score'],['Snap Shot','5×20 shots'],['Backhand Toe Drag Shot','5×18 shots'],['Slap Shot — Power','5×18 shots'],['Speed Taps (30s)','7 sets — count and record'],['Shuttle Runs','8 rounds'],['Burpees','5×18']]},
-      {n:'Thursday',t:'Upper Body — Max Strength',items:[['Dumbbell Bench Press','5×8 heavy'],['Weighted Pull-Up','4×6'],['Explosive Push-Up','4×12'],['Farmer Carry','5×60 yds'],['Ab Wheel','5×15'],['Plank','5×75s'],['Mountain Climbers','5×30']]},
+      {n:'Thursday',t:'Upper Body — Max Strength',items:[['Dumbbell Bench Press','4×8 — challenging weight'],['Weighted Pull-Up','4×6'],['Explosive Push-Up','4×12'],['Farmer Carry','5×60 yds'],['Ab Wheel','5×15'],['Plank','5×75s'],['Mountain Climbers','5×30']]},
       {n:'Friday',t:'Full Skills + Max Conditioning',items:[['Cone Weave with Puck — Max Speed','8 runs — timed'],['Wrist Shot — 5-spot accuracy','6×10 shots — log score'],['Backhand Shots','5×18 shots'],['Slap Shot','5×18 shots'],['Lateral Bound Intervals','14 rounds'],['Jump Rope','6×2 min']]},
-      {n:'Saturday',t:'Total Body + Shooting Volume',items:[['Barbell/DB Squat','5×10 heavy'],['Explosive Push-Up','5×12'],['Bent-Over Row','5×12'],['Wrist Shot — 150-shot session','Log total'],['Speed Taps (30s)','7 sets — count and record'],['Side Plank','5×50s each']]}
+      {n:'Saturday',t:'Total Body + Shooting Volume',items:[['Barbell/DB Squat','4×10 — challenging weight'],['Explosive Push-Up','5×12'],['Bent-Over Row','5×12'],['Wrist Shot — 150-shot session','Log total'],['Speed Taps (30s)','7 sets — count and record'],['Side Plank','5×50s each']]}
     ]},
     {num:11,focus:'Peak Performance Week',days:[
-      {n:'Monday',t:'Lower Body — Peak',items:[['Barbell/DB Squat','6×5 heavy'],['Power Clean or Jump Squat','5×5'],['Nordic Curl','5×8'],['Depth Jump','5×8'],['5-10-5 Shuttle','10 runs — timed'],['Broad Jump','5×8']]},
+      {n:'Monday',t:'Lower Body — Peak',items:[['Barbell/DB Squat','5×5 — challenging weight'],['Power Clean or Jump Squat','5×5'],['Nordic Curl','5×8'],['Depth Jump','5×8'],['5-10-5 Shuttle','10 runs — timed'],['Broad Jump','5×8']]},
       {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','7×10 shots — log score'],['Snap Shot','6×20 shots'],['Backhand Toe Drag Shot','5×18 shots'],['Slap Shot — Power','5×20 shots'],['Speed Taps (30s)','7 sets — count and record'],['Shuttle Runs','10 rounds'],['Burpees','5×20']]},
-      {n:'Thursday',t:'Upper Body — Peak Strength',items:[['Dumbbell Bench Press','6×6 heavy'],['Weighted Pull-Up','5×6'],['Explosive Push-Up','5×12'],['Farmer Carry','5×60 yds'],['Ab Wheel','6×15'],['Plank','6×75s'],['Russian Twists','5×30']]},
+      {n:'Thursday',t:'Upper Body — Peak Strength',items:[['Dumbbell Bench Press','5×6 — challenging weight'],['Weighted Pull-Up','5×6'],['Explosive Push-Up','5×12'],['Farmer Carry','5×60 yds'],['Ab Wheel','6×15'],['Plank','6×75s'],['Russian Twists','5×30']]},
       {n:'Friday',t:'Full Skills + Peak Conditioning',items:[['Cone Weave with Puck — Max Speed','10 runs — timed'],['Wrist Shot — 5-spot accuracy','7×10 shots — log score'],['Backhand Shots','6×18 shots'],['Slap Shot — Power','6×18 shots'],['Lateral Bound Intervals','16 rounds'],['Jump Rope','6×2 min']]},
-      {n:'Saturday',t:'Total Body + Peak Shooting',items:[['Barbell/DB Squat','5×10 heavy'],['Explosive Push-Up','5×15'],['Weighted Pull-Up','4×6'],['Wrist Shot — 150-shot session','Log total'],['Speed Taps (30s)','7 sets — count and record'],['Ab Wheel','6×15']]}
+      {n:'Saturday',t:'Total Body + Peak Shooting',items:[['Barbell/DB Squat','4×10 — challenging weight'],['Explosive Push-Up','5×15'],['Weighted Pull-Up','4×6'],['Wrist Shot — 150-shot session','Log total'],['Speed Taps (30s)','7 sets — count and record'],['Ab Wheel','6×15']]}
     ]},
     {num:12,focus:'Final Test & Celebrate Progress',days:[
-      {n:'Monday',t:'Lower Body — Final Test',items:[['Barbell/DB Squat','3×5 — test max weight'],['Box Jump','5×8 — test max height'],['5-10-5 Shuttle','5 runs — best time'],['Broad Jump','5 attempts — best distance'],[' ','Rest — well earned']]},
+      {n:'Monday',t:'Lower Body — Final Test',items:[['Barbell/DB Squat','3×5 — test your limit'],['Box Jump','5×8 — test max height'],['5-10-5 Shuttle','5 runs — best time'],['Broad Jump','5 attempts — best distance'],[' ','Rest — well earned']]},
       {n:'Tuesday',t:'Shooting Benchmark',items:[['Wrist Shot — 5-spot accuracy','10×10 shots — log all'],['Snap Shot','5×20 shots'],['Backhand Shots','5×20 shots'],['Slap Shot','5×20 shots'],['Speed Taps (30s)','8 sets — beat your Week 1 score']]},
-      {n:'Thursday',t:'Upper Body — Final Test',items:[['Dumbbell Bench Press','3×5 — test max weight'],['Pull-Up','Max reps — 3 sets'],['Explosive Push-Up','3×max'],['Plank','3×max hold'],['Ab Wheel','3×max']]},
+      {n:'Thursday',t:'Upper Body — Final Test',items:[['Dumbbell Bench Press','3×5 — test your limit'],['Pull-Up','Max reps — 3 sets'],['Explosive Push-Up','3×max'],['Plank','3×max hold'],['Ab Wheel','3×max']]},
       {n:'Friday',t:'Full Skills — Final Benchmark',items:[['Cone Weave with Puck — Max Speed','10 runs — beat best time'],['Wrist Shot — 5-spot accuracy','10×10 shots — log all'],['5-10-5 Shuttle','5 runs — beat Week 1'],['Speed Taps','8 sets — beat Week 1 score']]},
       {n:'Saturday',t:'Celebration + Review',items:[['Enter all results in Progress Tracker',''],['Compare to baseline numbers',''],['Great work! Keep it up!','']]}
     ]}
