@@ -1632,10 +1632,9 @@ Check Supabase Table Editor:
         return;
       }
       
-      if (userSub.status !== 'active') {
-        alert('Your subscription is not active. Please contact support or renew.');
-        await supabase.auth.signOut();
-        window.location.href = 'subscribe.html';
+      if (userSub.status !== 'active' && userSub.status !== 'expired') {
+        // Cancelled or unknown — show renewal wall without signing out
+        showRenewalWall(user.email, userSub.status);
         return;
       }
       
@@ -1643,12 +1642,8 @@ Check Supabase Table Editor:
       if (userSub.expires_at) {
         const expiresAt = new Date(userSub.expires_at);
         if (expiresAt < new Date()) {
-          // Update status to expired
           await supabase.from('subscriptions').update({ status: 'expired' }).eq('id', userSub.id);
-          
-          alert('⚠️ Your subscription has expired.\n\nYou\'ll be redirected to renew your subscription. Your training data and progress are safe and will be restored once you renew.');
-          await supabase.auth.signOut();
-          window.location.href = `subscribe.html?email=${encodeURIComponent(user.email)}`;
+          showRenewalWall(user.email, 'expired');
           return;
         }
       }
@@ -8661,6 +8656,77 @@ function checkShowWizard() {
   if (role === 'player' && !done && !hasSettings) {
     setTimeout(showSetupWizard, 800);
   }
+}
+
+
+// ── RENEWAL WALL ──────────────────────────────────────────────────────────
+function showRenewalWall(email, reason) {
+  const wall = document.getElementById('renewalWall');
+  if (!wall) return;
+
+  const role = window._userRole || 'player';
+  const orgId = window._userOrgId || 'individual';
+  const isIndividualOrAdmin = role === 'admin' || role === 'super_admin' || orgId === 'individual';
+
+  const title = document.getElementById('renewalTitle');
+  const msg = document.getElementById('renewalMsg');
+  const newBtn = document.getElementById('renewalNewBtn');
+  const portalBtn = document.getElementById('renewalPortalBtn');
+  const renewBtn = document.querySelector('[onclick="renewalCheckStatus()"]');
+
+  if (isIndividualOrAdmin) {
+    // Admin or individual — show full renewal options
+    if (reason === 'expired') {
+      if (title) title.textContent = 'Subscription Expired';
+      if (msg) msg.textContent = 'Your subscription has expired. Your data is safe — renew to pick up right where you left off.';
+    } else if (reason === 'cancelled') {
+      if (title) title.textContent = 'Subscription Cancelled';
+      if (msg) msg.textContent = 'Your subscription has been cancelled. Renew anytime to restore full access — your data is preserved.';
+    } else {
+      if (title) title.textContent = 'Subscription Inactive';
+      if (msg) msg.textContent = 'Your subscription is no longer active. Renew to restore access.';
+    }
+    if (newBtn) newBtn.href = `subscribe.html?email=${encodeURIComponent(email||'')}`;
+    if (portalBtn) portalBtn.style.display = 'block';
+    if (newBtn) newBtn.style.display = 'block';
+    if (renewBtn) renewBtn.style.display = 'inline-block';
+  } else {
+    // Player or coach at an association — contact admin wall
+    if (title) title.textContent = 'Access Unavailable';
+    if (msg) msg.innerHTML = 'Your association's subscription is currently inactive.<br><br>Please contact your association admin to restore access.<br><br><span style="font-size:11px;color:rgba(255,255,255,0.35);">Your training data and progress are safe.</span>';
+    if (portalBtn) portalBtn.style.display = 'none';
+    if (newBtn) newBtn.style.display = 'none';
+    if (renewBtn) renewBtn.style.display = 'none';
+  }
+
+  wall.style.setProperty('display', 'flex', 'important');
+}
+
+async function renewalCheckStatus() {
+  const msg = document.getElementById('renewalCheckMsg');
+  if (msg) { msg.textContent = 'Checking...'; msg.style.display = 'block'; msg.style.color = '#60a5fa'; }
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) { if (msg) { msg.textContent = 'Not signed in.'; msg.style.color = '#f87171'; } return; }
+    const { data: sub } = await sb.from('subscriptions').select('status, expires_at').eq('user_id', user.id).single();
+    if (sub && sub.status === 'active' && (!sub.expires_at || new Date(sub.expires_at) > new Date())) {
+      if (msg) { msg.textContent = '✓ Active! Reloading...'; msg.style.color = '#4ade80'; }
+      setTimeout(() => window.location.reload(), 1000);
+    } else {
+      if (msg) { msg.textContent = 'Subscription not yet active. Please complete payment first, then check again.'; msg.style.color = '#f87171'; }
+    }
+  } catch(e) {
+    if (msg) { msg.textContent = 'Error checking: ' + e.message; msg.style.color = '#f87171'; }
+  }
+}
+
+async function renewalSignOut() {
+  try {
+    const sb = await getSupabaseClient();
+    await sb.auth.signOut();
+  } catch(e) {}
+  window.location.href = 'login.html';
 }
 
 
