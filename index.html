@@ -6412,7 +6412,7 @@ async function loadAdminPanel(user) {
     <!-- SUPER ADMIN SUBSCRIPTIONS PANEL -->
     <div class="card" style="margin-bottom:1rem;display:none;" id="superAdminSubsPanel">
       <div class="ch">
-        <span class="cht">All Subscriptions</span>
+        <span class="cht" id="superAdminSubsTitle">All Subscriptions</span>
         <button onclick="loadSuperAdminSubs()" style="margin-left:auto;background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Refresh</button>
       </div>
       <div class="cb">
@@ -7574,9 +7574,12 @@ async function loadSuperAdminSubs() {
   const el = document.getElementById('superAdminSubsContent');
   if (!el) return;
   el.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">Loading...</div>';
+  const titleEl = document.getElementById('superAdminSubsTitle');
+  if (titleEl) titleEl.textContent = viewingIndividuals ? 'Individual Subscriptions' : 'Association Subscriptions';
 
   const viewingOrg = window._userOrgId || 'individual';
   const viewingIndividuals = viewingOrg === 'individual';
+  console.log('loadSuperAdminSubs: viewingOrg=', viewingOrg, 'viewingIndividuals=', viewingIndividuals);
 
   try {
     const sb = await getSupabaseClient();
