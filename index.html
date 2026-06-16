@@ -552,6 +552,71 @@ select:focus{border-color:var(--or);outline:none;}
       <span id="customizeChev" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.3);transition:transform .2s;">▼</span>
     </button>
     <div id="customizePanel" style="display:block;border:1px solid #333;border-top:none;border-radius:0 0 8px 8px;background:#111;padding:16px;">
+
+        <!-- AGE GROUP -->
+        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:8px;">🏒 Age Group <span style="color:rgba(255,255,255,0.4);font-weight:400;">(adjusts exercises &amp; loads)</span></div>
+          <select id="cust-age" onchange="updateAgeDescription()" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;">
+            <option value="squirt">Squirts — 10U — Bodyweight only, focus on movement quality</option>
+            <option value="peewee">Peewees — 12U — Light resistance, technique first</option>
+            <option value="bantam" selected>Bantams — 15U — Moderate loads, full program</option>
+            <option value="midget">Midgets/18U — Heavy loads, advanced training</option>
+            <option value="senior">Senior/Adult — Full program, max intensity</option>
+          </select>
+          <div id="age-desc" style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:8px;line-height:1.5;"></div>
+        </div>
+
+        <!-- SEASON PHASE -->
+        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:8px;">🏟 Season Phase <span style="color:rgba(255,255,255,0.4);font-weight:400;">(adjusts volume &amp; frequency)</span></div>
+          <select id="cust-season" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;">
+            <option value="offseason" selected>Off-Season — Max development, 6 days/week</option>
+            <option value="preseason">Pre-Season — Intensity ramp, 5 days/week</option>
+            <option value="inseason">In-Season — Maintenance, 3 days/week</option>
+          </select>
+        </div>
+
+        <!-- TRAINING DAYS -->
+        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:10px;">📅 Training Days</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <label class="day-toggle"><input type="checkbox" value="Monday" checked><span>Mon</span></label>
+            <label class="day-toggle"><input type="checkbox" value="Tuesday" checked><span>Tue</span></label>
+            <label class="day-toggle"><input type="checkbox" value="Wednesday"><span>Wed</span></label>
+            <label class="day-toggle"><input type="checkbox" value="Thursday" checked><span>Thu</span></label>
+            <label class="day-toggle"><input type="checkbox" value="Friday" checked><span>Fri</span></label>
+            <label class="day-toggle"><input type="checkbox" value="Saturday" checked><span>Sat</span></label>
+            <label class="day-toggle"><input type="checkbox" value="Sunday"><span>Sun</span></label>
+          </div>
+        </div>
+
+        <!-- FOCUS -->
+        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:10px;">🎯 Training Focus</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <label class="cust-radio"><input type="radio" name="focus" value="balanced" checked><span>Balanced</span></label>
+            <label class="cust-radio"><input type="radio" name="focus" value="strength"><span>Strength</span></label>
+            <label class="cust-radio"><input type="radio" name="focus" value="skills"><span>Skills</span></label>
+            <label class="cust-radio"><input type="radio" name="focus" value="conditioning"><span>Conditioning</span></label>
+          </div>
+        </div>
+
+        <!-- TRAINING TYPES -->
+        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:16px;">
+          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:10px;">⚡ Include in Program</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <label class="cust-check"><input type="checkbox" id="cust-strength" checked><span>Strength</span></label>
+            <label class="cust-check"><input type="checkbox" id="cust-agility" checked><span>Agility</span></label>
+            <label class="cust-check"><input type="checkbox" id="cust-skills" checked><span>Skills</span></label>
+            <label class="cust-check"><input type="checkbox" id="cust-conditioning" checked><span>Conditioning</span></label>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;">
+          <button onclick="applyCustomization()" class="btn-o" style="margin-top:0;">Apply Settings</button>
+          <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">✓ Settings applied!</div>
+        </div>
+
   <div style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:16px;margin-bottom:1rem;">
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);margin-bottom:8px;">⚡ Quick Start</div>
     <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:10px;">
