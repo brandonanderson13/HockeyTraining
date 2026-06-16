@@ -2280,7 +2280,7 @@ async function uploadOrgLogo(file) {
     const ext = file.name.split('.').pop().toLowerCase();
     const path = `${orgId}/logo.${ext}`;
     const { error: upErr } = await sb.storage.from('org-logos').upload(path, file, { upsert: true, contentType: file.type });
-    if (upErr) throw upErr;
+    if (upErr) { console.error('Storage upload error:', upErr); throw upErr; }
     const { data } = sb.storage.from('org-logos').getPublicUrl(path);
     const url = data.publicUrl + '?t=' + Date.now(); // bust cache
     await sb.from('organizations').update({ logo_url: url }).eq('id', orgId);
