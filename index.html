@@ -7573,13 +7573,12 @@ async function loadSuperAdminSubs() {
   if (panel) panel.style.removeProperty('display');
   const el = document.getElementById('superAdminSubsContent');
   if (!el) return;
+  const viewingOrg = window._userOrgId || 'individual';
+  const viewingIndividuals = viewingOrg === 'individual';
+
   el.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">Loading...</div>';
   const titleEl = document.getElementById('superAdminSubsTitle');
   if (titleEl) titleEl.textContent = viewingIndividuals ? 'Individual Subscriptions' : 'Association Subscriptions';
-
-  const viewingOrg = window._userOrgId || 'individual';
-  const viewingIndividuals = viewingOrg === 'individual';
-  console.log('loadSuperAdminSubs: viewingOrg=', viewingOrg, 'viewingIndividuals=', viewingIndividuals);
 
   try {
     const sb = await getSupabaseClient();
