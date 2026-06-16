@@ -6644,6 +6644,7 @@ async function loadPlayerList(isSuperAdmin = false) {
     } else {
       query = query.eq('organization_id', orgId);
     }
+    query = query.neq('email', 'brandonanderson1393@gmail.com');
     const { data: subs, error } = await query.order('created_at', {ascending: false});
     if (error) throw error;
     
