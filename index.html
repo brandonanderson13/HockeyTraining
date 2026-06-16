@@ -4083,16 +4083,20 @@ async function toggleGoalComplete(id, currentlyDone) {
 
 
 async function updateItemDueDate(type, id, newDate) {
+  console.log('updateItemDueDate called:', type, id, newDate);
+  if (!id) { alert('Error: no item ID'); return; }
   try {
-    const sb = await getSupabaseClient();
+    const sb = window._supabaseClient || await getSupabaseClient();
     const table = type === 'goal' ? 'goals' : 'assignments';
     const { error } = await sb.from(table).update({ due_date: newDate || null }).eq('id', id);
     if (error) throw error;
-    // Update local cache
     const arr = type === 'goal' ? (window._dashGoals||[]) : (window._dashAssignments||[]);
     const item = arr.find(x => x.id === id);
     if (item) item.due_date = newDate;
-  } catch(e) { alert('Error updating due date: ' + e.message); }
+    // Show confirmation
+    const btn = event?.target;
+    if (btn) { const orig = btn.textContent; btn.textContent = '✓'; btn.style.background='#4ade80'; setTimeout(()=>{ btn.textContent=orig; btn.style.background=''; },1500); }
+  } catch(e) { console.error('Due date error:', e); alert('Error: ' + e.message); }
 }
 
 async function toggleAssignment(id, currentlyDone) {
