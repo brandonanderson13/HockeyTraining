@@ -24,6 +24,7 @@ body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh
 
 /* NAV */
 .nav{display:flex;gap:0;flex-wrap:wrap;margin-bottom:1.5rem;background:var(--bk);border-radius:8px;padding:4px;border:1px solid var(--g2);}
+@media(max-width:600px){.nav{gap:2px;}.nb{flex:1 1 auto;min-width:calc(25% - 2px);font-size:10px;padding:6px 4px;letter-spacing:.02em;}}
 .nb{flex:1;min-width:0;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:7px 13px;border:none;border-radius:5px;background:transparent;color:rgba(255,255,255,0.4);cursor:pointer;transition:all .15s;}
 .nb:hover{background:var(--g2);color:rgba(255,255,255,0.85);}
 .nb.active{background:var(--or);color:var(--secondary-color);}
@@ -5555,9 +5556,9 @@ function renderWeeks(){
   _schedulePhase=parseInt(document.getElementById('phaseSelect').value);
   const p=phases[_schedulePhase];
   const settings=getCustSettings();
+  // phaseInfo hidden — description shown in customize panel
   const phaseInfoDiv = document.getElementById('phaseInfo');
-  if (phaseInfoDiv) phaseInfoDiv.style.display = 'block';
-  phaseInfoDiv.innerHTML=`<div class="ibox" style="border-left-color:${p.color};"><strong>${p.label}:</strong> ${p.desc}</div>`;
+  if (phaseInfoDiv) phaseInfoDiv.style.display = 'none';
   c.innerHTML='';
 
   p.weeks.forEach(wk=>{
@@ -7663,7 +7664,7 @@ async function switchWorkoutType() {
   } else {
     if (customSelect) customSelect.style.display = 'none';
     const phaseSelect = document.getElementById('phaseSelect');
-    if (phaseSelect) phaseSelect.style.display = 'block';
+    if (phaseSelect) phaseSelect.style.display = 'none'; // always hidden
     if (standardArea) standardArea.style.display = 'block';
     if (customArea) customArea.style.display = 'none';
     window._isCustomProgram = false;
