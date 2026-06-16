@@ -3908,32 +3908,7 @@ const BRANDING = {
   }
 };
 
-function applyBranding(orgId) {
-  const brand = BRANDING[orgId] || BRANDING.individual;
-  
-  // Set CSS variables for theming
-  document.documentElement.style.setProperty('--primary-color', brand.color);
-  document.documentElement.style.setProperty('--primary-rgb', brand.colorRgb);
-  
-  // Update header text
-  const orgNameEl = document.querySelector('.hn .org-name');
-  const teamNameEl = document.querySelector('.hn .team-name');
-  if (orgNameEl) orgNameEl.textContent = brand.name.toUpperCase();
-  if (teamNameEl) teamNameEl.textContent = brand.team.toUpperCase();
-  
-  // Update logo if element exists
-  const logoImg = document.querySelector('.hlogo img');
-  if (logoImg) {
-    logoImg.src = brand.logo || '';
-    logoImg.alt = brand.name + ' Logo';
-  }
-  
-  // Update footer
-  const footer = document.querySelector('.ftr');
-  if (footer) {
-    footer.textContent = brand.fullName;
-  }
-}
+// applyBranding legacy removed — see applyBranding(org) above
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SUPABASE SYNC HELPERS - Dual-write to localStorage + Supabase
