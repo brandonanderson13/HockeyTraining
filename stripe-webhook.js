@@ -55,9 +55,40 @@ export default async function handler(req, res) {
           userId = newUser.user.id;
         }
 
-        // Create or update subscription record with names
+        // Fetch subscription to get period end date
+        let expiresAt = null;
+        let orgId = null;
+        if (subscriptionId) {
+          try {
+            const stripeSub = await stripe.subscriptions.retrieve(subscriptionId);
+            expiresAt = new Date(stripeSub.current_period_end * 1000).toISOString();
+          } catch(e) {
+            console.error('Error fetching subscription period:', e.message);
+          }
+        }
+
+        // Create or update subscription record
         const isAssociation = metadata.subscription_type === 'association';
         const role = isAssociation ? 'admin' : 'player';
+
+        // Generate org_id from org name if association
+        if (isAssociation && metadata.organization_id) {
+          orgId = metadata.organization_id;
+        } else if (!isAssociation) {
+          orgId = 'individual';
+        }
+
+        // Check if org exists in organizations table, create if not
+        if (orgId && orgId !== 'individual') {
+          const { data: existingOrg } = await supabase.from('organizations').select('id').eq('id', orgId).single();
+          if (!existingOrg) {
+            await supabase.from('organizations').insert({
+              id: orgId,
+              name: metadata.organization_name || orgId,
+              primary_color: '#E07820'
+            });
+          }
+        }
         
         const { error: upsertError } = await supabase
           .from('subscriptions')
@@ -69,10 +100,12 @@ export default async function handler(req, res) {
             subscription_type: metadata.subscription_type || 'individual',
             seat_limit: metadata.seat_limit ? parseInt(metadata.seat_limit) : null,
             organization_name: metadata.organization_name || null,
+            organization_id: orgId,
             stripe_customer_id: customerId,
             stripe_subscription_id: subscriptionId,
             status: 'active',
-            role: role
+            role: role,
+            expires_at: expiresAt
           }, {
             onConflict: 'user_id'
           });
@@ -80,8 +113,48 @@ export default async function handler(req, res) {
         if (upsertError) {
           console.error('Error upserting subscription:', upsertError);
         } else {
-          console.log('✓ Subscription activated for:', customerEmail, metadata.first_name, metadata.last_name);
+          console.log('✓ Subscription activated for:', customerEmail, 'expires:', expiresAt);
         }
+        break;
+      }
+
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object;
+        const subscriptionId = invoice.subscription;
+        if (!subscriptionId) break;
+
+        // Get updated period end from Stripe
+        try {
+          const stripeSub = await stripe.subscriptions.retrieve(subscriptionId);
+          const expiresAt = new Date(stripeSub.current_period_end * 1000).toISOString();
+
+          const { error } = await supabase
+            .from('subscriptions')
+            .update({ status: 'active', expires_at: expiresAt })
+            .eq('stripe_subscription_id', subscriptionId);
+
+          if (error) {
+            console.error('Error updating renewal:', error);
+          } else {
+            console.log('✓ Subscription renewed, expires:', expiresAt);
+          }
+        } catch(e) {
+          console.error('Error processing renewal:', e.message);
+        }
+        break;
+      }
+
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object;
+        const expiresAt = new Date(subscription.current_period_end * 1000).toISOString();
+        const status = subscription.status === 'active' ? 'active' : subscription.status;
+
+        await supabase
+          .from('subscriptions')
+          .update({ status, expires_at: expiresAt })
+          .eq('stripe_subscription_id', subscription.id);
+
+        console.log('✓ Subscription updated:', subscription.id, 'status:', status);
         break;
       }
 

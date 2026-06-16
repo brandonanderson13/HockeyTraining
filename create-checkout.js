@@ -15,8 +15,8 @@ export default async function handler(req, res) {
         price_data: {
           currency: 'usd',
           product_data: {
-            name: 'Delano Tigers Training Program',
-            description: '12-Week Off-Ice Development Program',
+            name: (metadata?.organization_name ? metadata.organization_name + ' — ' : '') + 'TRAINR Hockey Training',
+            description: 'Annual hockey development program — off-ice training, skills, and conditioning.',
           },
           unit_amount: priceAmount,
           recurring: { interval: interval || 'month' },
