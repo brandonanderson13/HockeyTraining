@@ -6172,24 +6172,16 @@ async function loadPlayerList(isSuperAdmin = false) {
         teamsData.map(t => `<option value="${t.id}">${t.team_name}</option>`).join('');
     }
 
-    // Query subscriptions - super admin sees all, regular admin sees only their org
-    let query = sb.from('subscriptions').select('*');
-    if (!window._isSuperAdmin && window._userOrgId) {
-      query = query.eq('organization_id', window._userOrgId);
-    }
+    // Always filter by the current org (super admin picks org on login)
+    const orgId = window._userOrgId || 'individual';
+    let query = sb.from('subscriptions').select('*').eq('organization_id', orgId);
     const { data: subs, error } = await query.order('created_at', {ascending: false});
     if (error) throw error;
     
-    // Query workout stats - filter by org unless super admin
-    let shootingQuery = sb.from('shooting_sessions').select('user_id, total_shots');
-    let stickQuery = sb.from('stickhandling_sessions').select('user_id, minutes');
-    let completionsQuery = sb.from('exercise_completions').select('user_id, exercise_name');
-    
-    if (!window._isSuperAdmin && window._userOrgId) {
-      shootingQuery = shootingQuery.eq('organization_id', window._userOrgId);
-      stickQuery = stickQuery.eq('organization_id', window._userOrgId);
-      completionsQuery = completionsQuery.eq('organization_id', window._userOrgId);
-    }
+    // Query workout stats filtered by org
+    let shootingQuery = sb.from('shooting_sessions').select('user_id, total_shots').eq('organization_id', orgId);
+    let stickQuery = sb.from('stickhandling_sessions').select('user_id, minutes').eq('organization_id', orgId);
+    let completionsQuery = sb.from('exercise_completions').select('user_id, exercise_name').eq('organization_id', orgId);
     
     const { data: shootingSessions } = await shootingQuery;
     const { data: stickSessions } = await stickQuery;
