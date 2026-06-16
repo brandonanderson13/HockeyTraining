@@ -7581,7 +7581,7 @@ async function loadSuperAdminSubs() {
       .order('created_at', { ascending: false });
     const { data: _rawIndividuals } = await indQuery;
     // Filter out anyone whose org_id matches a known association
-    const individuals = (_rawIndividuals||[]).filter(s => !knownOrgIds.includes(s.organization_id));
+    const individuals = (_rawIndividuals||[]).filter(s => !knownOrgIds.includes(s.organization_id) && s.email !== 'brandonanderson1393@gmail.com');
 
     const now = new Date();
     const fmt = d => d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
