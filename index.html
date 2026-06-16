@@ -1725,13 +1725,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       
       // Store user's organization_id globally for filtering
       window._isSuperAdmin = (user.email === 'brandonanderson1393@gmail.com');
-      if (window._isSuperAdmin) {
-        // Super admin picks which org to view
-        const orgChoice = await superAdminPickOrg();
-        window._userOrgId = orgChoice || userSub?.organization_id || 'delano';
-      } else {
-        window._userOrgId = userSub?.organization_id || 'individual';
-      }
+      // Set a temporary orgId — super admin will pick after all checks pass
+      window._userOrgId = userSub?.organization_id || 'individual';
       console.log('Organization:', window._userOrgId, 'Super admin:', window._isSuperAdmin);
       
       // Apply branding based on organization
@@ -1796,9 +1791,15 @@ Check Supabase Table Editor:
         loadAdminPanel(user);
       }
 
+      // Super admin picks org after all checks pass
+      if (window._isSuperAdmin) {
+        const orgChoice = await superAdminPickOrg();
+        window._userOrgId = orgChoice || userSub?.organization_id || 'delano';
+      }
+
       // Load org branding then navigate
       await loadOrgBranding();
-      const landingTab = (role === 'player') ? 'home' : 'dashboard';
+      const landingTab = (window._userRole === 'player') ? 'home' : 'dashboard';
       showSec(landingTab);
 
       
