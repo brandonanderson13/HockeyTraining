@@ -4039,10 +4039,12 @@ function showSec(id){
     const frame = document.getElementById('leaderboardFrame');
     if (frame) {
       const orgParam = window._userOrgId || 'delano';
+      const orgName = encodeURIComponent(window._orgBranding?.name || '');
+      const orgColor = encodeURIComponent(window._orgBranding?.primary_color || '#E07820');
       const startDate = document.getElementById('leaderboardStart')?.value || '';
       const endDate = document.getElementById('leaderboardEnd')?.value || '';
       
-      let url = `leaderboard.html?org=${orgParam}`;
+      let url = `leaderboard.html?org=${orgParam}&name=${orgName}&color=${orgColor}`;
       if (startDate) url += `&start=${startDate}`;
       if (endDate) url += `&end=${endDate}`;
       
