@@ -1784,13 +1784,25 @@ Check Supabase Table Editor:
         }
       }
       
-      // Show dashboard for everyone
+      // Set up nav tabs by role
+      const role = userSub?.role || 'player';
+      const isPlayer = role === 'player';
       const dashTab = document.getElementById('dashTab');
-      if (dashTab) dashTab.style.display = 'inline-block';
+      const homeTab = document.getElementById('homeTab');
+      const adminTab = document.getElementById('adminTab');
+
+      if (isPlayer) {
+        // Players: show Home, hide Dashboard tab
+        if (homeTab) homeTab.style.display = 'inline-block';
+        if (dashTab) dashTab.style.display = 'none';
+      } else {
+        // Coaches/admins: show Dashboard, hide Home tab
+        if (dashTab) dashTab.style.display = 'inline-block';
+        if (homeTab) homeTab.style.display = 'none';
+      }
 
       // Show admin tab for admins only
       if (isAdmin) {
-        const adminTab = document.getElementById('adminTab');
         if (adminTab) adminTab.style.display = 'block';
         loadAdminPanel(user);
       }
@@ -1803,7 +1815,7 @@ Check Supabase Table Editor:
 
       // Load org branding then navigate
       await loadOrgBranding();
-      const landingTab = (window._userRole === 'player') ? 'home' : 'dashboard';
+      const landingTab = (userSub?.role === 'player') ? 'home' : 'dashboard';
       showSec(landingTab);
 
       
