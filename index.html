@@ -298,6 +298,28 @@ select:focus{border-color:var(--or);outline:none;}
   <button class="nb" id="adminTab" onclick="showSec('admin')" style="display:none;margin-left:8px;background:rgba(var(--primary-rgb),0.1);border-color:var(--primary-color);">Admin</button>
 </div>
 
+<!-- PASSWORD RESET SCREEN -->
+<div id="passwordResetScreen" style="display:none;position:fixed;inset:0;background:#0d0d0d;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#141414;border:1px solid #333;border-radius:14px;padding:32px;width:100%;max-width:400px;">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:6px;">Set Your Password</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.5;">Your account was set up with a temporary password.<br>Please choose a new password to continue.</div>
+    </div>
+    <div style="display:grid;gap:12px;">
+      <div>
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">New Password</label>
+        <input type="password" id="newPasswordInput" placeholder="At least 8 characters" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;" onkeydown="if(event.key==='Enter')document.getElementById('confirmPasswordInput').focus()">
+      </div>
+      <div>
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Confirm Password</label>
+        <input type="password" id="confirmPasswordInput" placeholder="Repeat your password" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;" onkeydown="if(event.key==='Enter')submitPasswordReset()">
+      </div>
+      <div id="passwordResetMsg" style="display:none;font-size:12px;padding:8px 10px;border-radius:6px;"></div>
+      <button onclick="submitPasswordReset()" style="background:var(--primary-color);border:none;color:#fff;font-size:14px;font-weight:700;padding:12px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Set Password & Continue</button>
+    </div>
+  </div>
+</div>
+
 <!-- DASHBOARD -->
 <div id="dashboard" class="sec">
   <div id="dashboardContent"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Loading...</div></div>
@@ -1607,7 +1629,13 @@ Check Supabase Table Editor:
       
       // All checks passed - user can access the program
       console.log('Access granted for:', user.email);
-      
+
+      // Check if forced password reset is required
+      if (userSub?.force_password_reset) {
+        showPasswordResetScreen();
+        return;
+      }
+
       // Add a logout button to the header
       addLogoutButton(supabase, user, isAdmin);
       
@@ -1863,6 +1891,293 @@ function calcDiffs(){
 
 let _dashPlayers = [];
 let _dashTeamId = null;
+
+
+
+// ── FORCED PASSWORD RESET ─────────────────────────────────────────────────
+function showPasswordResetScreen() {
+  // Hide everything else, show reset screen
+  document.querySelectorAll('.sec').forEach(s => s.style.display = 'none');
+  document.querySelector('.nav')?.style && (document.querySelector('.nav').style.display = 'none');
+  const screen = document.getElementById('passwordResetScreen');
+  if (screen) { screen.style.display = 'flex'; }
+}
+
+async function submitPasswordReset() {
+  const newPw = document.getElementById('newPasswordInput')?.value;
+  const confirmPw = document.getElementById('confirmPasswordInput')?.value;
+  const msg = document.getElementById('passwordResetMsg');
+
+  const showMsg = (text, color) => {
+    msg.textContent = text;
+    msg.style.background = color === 'red' ? 'rgba(248,113,113,0.1)' : 'rgba(74,222,128,0.1)';
+    msg.style.color = color === 'red' ? '#f87171' : '#4ade80';
+    msg.style.display = 'block';
+  };
+
+  if (!newPw || newPw.length < 8) { showMsg('Password must be at least 8 characters.', 'red'); return; }
+  if (newPw !== confirmPw) { showMsg('Passwords do not match.', 'red'); return; }
+
+  try {
+    const sb = await getSupabaseClient();
+    const { error: pwError } = await sb.auth.updateUser({ password: newPw });
+    if (pwError) throw pwError;
+
+    // Clear the force_password_reset flag
+    const { data: { user } } = await sb.auth.getUser();
+    if (user) {
+      await sb.from('subscriptions').update({ force_password_reset: false }).eq('user_id', user.id);
+    }
+
+    showMsg('Password updated! Loading your dashboard...', 'green');
+
+    // Hide reset screen, restore nav, reload
+    setTimeout(() => {
+      document.getElementById('passwordResetScreen').style.display = 'none';
+      document.querySelector('.nav').style.display = '';
+      window.location.reload();
+    }, 1000);
+
+  } catch(e) {
+    showMsg('Error: ' + e.message, 'red');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BULK USER UPLOAD
+// ═══════════════════════════════════════════════════════════════════════════
+
+let _bulkUsers = [];
+
+async function populateBulkTeamDropdown() {
+  const sel = document.getElementById('bulkTeamSelect');
+  if (!sel) return;
+  try {
+    const sb = await getSupabaseClient();
+    const { data } = await sb.from('teams').select('id, team_name').eq('organization_id', window._userOrgId || 'individual').order('team_name');
+    if (data && data.length) {
+      sel.innerHTML = '<option value="">No team (unassigned)</option>' +
+        data.map(t => `<option value="${t.id}">${t.team_name}</option>`).join('');
+    } else {
+      sel.innerHTML = '<option value="">No teams yet</option>';
+    }
+  } catch(e) { sel.innerHTML = '<option value="">Error loading teams</option>'; }
+}
+
+function handleBulkDrop(e) {
+  const file = e.dataTransfer.files[0];
+  if (file) handleBulkFile(file);
+}
+
+async function handleBulkFile(file) {
+  if (!file) return;
+  const msg = document.getElementById('bulkMsg');
+  const preview = document.getElementById('bulkPreview');
+  const btn = document.getElementById('bulkUploadBtn');
+  _bulkUsers = [];
+  preview.style.display = 'none';
+  btn.style.display = 'none';
+
+  const showMsg = (text, color) => {
+    msg.textContent = text;
+    msg.style.background = color === 'red' ? 'rgba(248,113,113,0.1)' : color === 'green' ? 'rgba(74,222,128,0.1)' : 'rgba(59,130,246,0.1)';
+    msg.style.color = color === 'red' ? '#f87171' : color === 'green' ? '#4ade80' : '#60a5fa';
+    msg.style.display = 'block';
+  };
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['xlsx','csv'].includes(ext)) {
+    showMsg('Please upload a .xlsx or .csv file.', 'red'); return;
+  }
+
+  showMsg('Reading file...', 'blue');
+
+  try {
+    let rows = [];
+
+    if (ext === 'csv') {
+      const text = await file.text();
+      const lines = text.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[^a-z_]/g,''));
+      for (let i = 1; i < lines.length; i++) {
+        const vals = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g,''));
+        const obj = {};
+        headers.forEach((h,j) => obj[h] = vals[j] || '');
+        rows.push(obj);
+      }
+    } else {
+      // Read xlsx using FileReader + SheetJS CDN
+      const buf = await file.arrayBuffer();
+      if (typeof XLSX === 'undefined') {
+        // Load SheetJS dynamically
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+          s.onload = resolve; s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+      const wb = XLSX.read(buf, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      // Normalize keys
+      rows = rows.map(r => {
+        const norm = {};
+        Object.keys(r).forEach(k => { norm[k.toLowerCase().trim()] = String(r[k]).trim(); });
+        return norm;
+      });
+    }
+
+    // Validate columns
+    const required = ['first_name','last_name','email'];
+    const firstRow = rows[0] || {};
+    const missing = required.filter(c => !(c in firstRow));
+    if (missing.length) {
+      showMsg(`Missing required columns: ${missing.join(', ')}. Please use the template.`, 'red'); return;
+    }
+
+    // Validate & collect rows
+    const errors = [];
+    const valid = [];
+    const emailSeen = new Set();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    rows.forEach((row, i) => {
+      const rowNum = i + 2;
+      const fn = (row.first_name||'').trim();
+      const ln = (row.last_name||'').trim();
+      const em = (row.email||'').trim().toLowerCase();
+      const role = (row.role||document.getElementById('bulkRoleSelect')?.value||'player').trim().toLowerCase();
+
+      if (!fn) { errors.push(`Row ${rowNum}: missing first_name`); return; }
+      if (!ln) { errors.push(`Row ${rowNum}: missing last_name`); return; }
+      if (!em) { errors.push(`Row ${rowNum}: missing email`); return; }
+      if (!emailRegex.test(em)) { errors.push(`Row ${rowNum}: invalid email "${em}"`); return; }
+      if (emailSeen.has(em)) { errors.push(`Row ${rowNum}: duplicate email "${em}"`); return; }
+      if (!['player','coach','admin'].includes(role)) { errors.push(`Row ${rowNum}: role must be player, coach, or admin`); return; }
+      emailSeen.add(em);
+      valid.push({ first_name: fn, last_name: ln, email: em, role });
+    });
+
+    if (!valid.length) {
+      showMsg(`No valid rows found. ${errors.length} error(s) detected.`, 'red');
+      if (errors.length) showErrorList(errors);
+      return;
+    }
+
+    _bulkUsers = valid;
+
+    // Show preview table
+    const roleColor = r => r==='coach'?'#60a5fa':r==='admin'?'#fb923c':'rgba(255,255,255,0.7)';
+    preview.innerHTML = `
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:8px;">
+        <span style="color:#4ade80;font-weight:700;">${valid.length} valid user${valid.length!==1?'s':''}</span> ready to import
+        ${errors.length ? `<span style="color:#f87171;margin-left:12px;">· ${errors.length} row${errors.length!==1?'s':''} skipped</span>` : ''}
+      </div>
+      <div style="max-height:200px;overflow-y:auto;border:1px solid #222;border-radius:6px;">
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <thead><tr style="background:#0d0d0d;">
+            <th style="padding:6px 8px;text-align:left;color:rgba(255,255,255,0.4);font-family:'Barlow Condensed',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #222;">Name</th>
+            <th style="padding:6px 8px;text-align:left;color:rgba(255,255,255,0.4);font-family:'Barlow Condensed',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #222;">Email</th>
+            <th style="padding:6px 8px;text-align:left;color:rgba(255,255,255,0.4);font-family:'Barlow Condensed',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid #222;">Role</th>
+          </tr></thead>
+          <tbody>
+            ${valid.slice(0,50).map((u,i) => `<tr style="border-bottom:1px solid #1a1a1a;background:${i%2===0?'transparent':'rgba(255,255,255,0.02)'};">
+              <td style="padding:6px 8px;color:rgba(255,255,255,0.75);">${u.first_name} ${u.last_name}</td>
+              <td style="padding:6px 8px;color:rgba(255,255,255,0.45);font-size:10px;">${u.email}</td>
+              <td style="padding:6px 8px;color:${roleColor(u.role)};font-weight:700;font-size:10px;text-transform:uppercase;">${u.role}</td>
+            </tr>`).join('')}
+            ${valid.length > 50 ? `<tr><td colspan="3" style="padding:8px;text-align:center;color:rgba(255,255,255,0.3);font-size:11px;">... and ${valid.length - 50} more</td></tr>` : ''}
+          </tbody>
+        </table>
+      </div>
+      ${errors.length ? `<div style="margin-top:8px;font-size:11px;color:#f87171;">Skipped rows: ${errors.join(' · ')}</div>` : ''}`;
+    preview.style.display = 'block';
+    btn.style.display = 'inline-block';
+    showMsg(`Ready to upload ${valid.length} user${valid.length!==1?'s':''}.`, 'green');
+
+  } catch(e) {
+    showMsg('Error reading file: ' + e.message, 'red');
+    console.error(e);
+  }
+}
+
+function showErrorList(errors) {
+  const msg = document.getElementById('bulkMsg');
+  msg.innerHTML = `<strong>Errors:</strong><br>${errors.map(e => `· ${e}`).join('<br>')}`;
+}
+
+async function confirmBulkUpload() {
+  const btn = document.getElementById('bulkUploadBtn');
+  const msg = document.getElementById('bulkMsg');
+  const teamId = document.getElementById('bulkTeamSelect')?.value || null;
+  const tempPassword = document.getElementById('bulkTempPassword')?.value.trim();
+
+  if (!_bulkUsers.length) return;
+
+  const showMsg = (text, color) => {
+    msg.innerHTML = text;
+    msg.style.background = color === 'red' ? 'rgba(248,113,113,0.1)' : color === 'green' ? 'rgba(74,222,128,0.1)' : 'rgba(59,130,246,0.1)';
+    msg.style.color = color === 'red' ? '#f87171' : color === 'green' ? '#4ade80' : '#60a5fa';
+    msg.style.display = 'block';
+  };
+
+  if (!tempPassword || tempPassword.length < 8) {
+    showMsg('Temp password must be at least 8 characters.', 'red'); return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Uploading...';
+  showMsg(`Creating ${_bulkUsers.length} accounts...`, 'blue');
+
+  try {
+    const orgId = window._userOrgId || 'individual';
+    const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
+
+    const resp = await fetch(`${SUPABASE_URL}/functions/v1/create-users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY`
+      },
+      body: JSON.stringify({
+        users: _bulkUsers,
+        teamId,
+        orgId,
+        tempPassword
+      })
+    });
+
+    const result = await resp.json();
+    if (!resp.ok) throw new Error(result.error || 'Upload failed');
+
+    const created = result.created?.length || 0;
+    const skipped = result.skipped?.length || 0;
+    const errors = result.errors?.length || 0;
+
+    let summary = `✓ ${created} account${created!==1?'s':''} created`;
+    if (skipped) summary += ` · ${skipped} already existed`;
+    if (errors) summary += ` · ${errors} failed`;
+    if (result.errors?.length) {
+      summary += '<br><span style="font-size:10px;opacity:0.7;">' + result.errors.map(e=>`${e.email}: ${e.error}`).join(' · ') + '</span>';
+    }
+
+    showMsg(summary, created > 0 ? 'green' : 'red');
+    _bulkUsers = [];
+    document.getElementById('bulkPreview').style.display = 'none';
+    btn.style.display = 'none';
+    document.getElementById('bulkFileInput').value = '';
+    loadPlayerList(window._isSuperAdmin);
+    loadTeams();
+
+  } catch(e) {
+    showMsg('Upload failed: ' + e.message, 'red');
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Upload Users';
+  }
+}
 
 async function loadDashboard() {
   const el = document.getElementById('dashboardContent');
@@ -5123,6 +5438,45 @@ async function loadAdminPanel(user) {
       </div>
     </div>
 
+    <div class="card" style="margin-bottom:1rem;" id="bulkUploadPanel">
+      <div class="ch"><span class="cht">Bulk Upload Users</span></div>
+      <div class="cb">
+        <p style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.6;margin-bottom:14px;">Upload a spreadsheet to add multiple users at once. Select a team, then upload your file.</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div>
+            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Assign to Team</label>
+            <select id="bulkTeamSelect" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+              <option value="">Loading teams...</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Temp Password <span style="color:rgba(255,255,255,0.25);font-size:9px;">(players must reset on login)</span></label>
+            <input id="bulkTempPassword" type="text" placeholder="e.g. Tigers2025!" value="Trainr2025!" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;font-family:monospace;">
+          </div>
+        </div>
+
+        <div id="bulkDropZone" onclick="document.getElementById('bulkFileInput').click()"
+          style="border:2px dashed #333;border-radius:8px;padding:28px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:12px;"
+          ondragover="event.preventDefault();this.style.borderColor='var(--primary-color)'"
+          ondragleave="this.style.borderColor='#333'"
+          ondrop="event.preventDefault();this.style.borderColor='#333';handleBulkDrop(event)">
+          <div style="font-size:28px;margin-bottom:8px;">📄</div>
+          <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.7);margin-bottom:4px;">Drop your spreadsheet here</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);">.xlsx or .csv · columns: first_name, last_name, email</div>
+          <input type="file" id="bulkFileInput" accept=".xlsx,.csv" style="display:none;" onchange="handleBulkFile(this.files[0])">
+        </div>
+
+        <div id="bulkPreview" style="display:none;margin-bottom:12px;"></div>
+        <div id="bulkMsg" style="display:none;font-size:12px;padding:8px 10px;border-radius:6px;margin-bottom:10px;"></div>
+
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button onclick="confirmBulkUpload()" id="bulkUploadBtn" style="display:none;background:var(--primary-color);border:none;color:#fff;font-size:13px;font-weight:700;padding:9px 20px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Upload Users</button>
+          <a href="https://hockey-training.vercel.app/trainr_user_upload_template.xlsx" download style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:none;border:1px solid #333;padding:8px 12px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">⬇ Download Template</a>
+        </div>
+      </div>
+    </div>
+
     <div class="card" style="margin-bottom:1rem;" id="superAdminPanel">
       <div class="ch">
         <span class="cht">Add User</span>
@@ -5234,6 +5588,7 @@ async function loadAdminPanel(user) {
   loadTeams();
   populateTeamDropdown();
   populateAdminTeamDropdown();
+  populateBulkTeamDropdown();
   
   // Add embed card at the bottom
   const adminContentDiv = document.getElementById('adminContent');
