@@ -4181,6 +4181,7 @@ function showSec(id){
   if (id === 'schedule') {
     setTimeout(updateProgramStatus, 100);
     loadCustomSettings();
+    loadCustomWorkoutOptions(); // show selector if custom workouts exist
   }
   
   // Load leaderboard with org parameter and date filters if set
