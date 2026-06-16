@@ -289,16 +289,11 @@ select:focus{border-color:var(--or);outline:none;}
 
 <div class="nav">
   <button class="nb" id="dashTab" onclick="showSec('dashboard')" style="display:none;">Dashboard</button>
-  <button class="nb active" onclick="showSec('overview')">Create Plan</button>
-  <button class="nb" onclick="showSec('schedule')">Program</button>
-  <button class="nb" onclick="showSec('baseline')">Testing & Progress</button>
-  <button class="nb" onclick="showSec('nutrition')">Nutrition</button>
-  <button class="nb" onclick="showSec('mobility')">Mobility</button>
-  <button class="nb" onclick="showSec('sticklog')">Stickhandling Log</button>
-  <button class="nb" onclick="showSec('shotlog')">Shot Log</button>
-  <span style="width:1px;height:20px;background:#333;margin:0 8px;"></span>
+  <button class="nb active" id="homeTab" onclick="showSec('home')">Home</button>
+  <button class="nb" id="programTab" onclick="showSec('schedule')">Program</button>
+  <button class="nb" id="progressTab" onclick="showSec('baseline')">Progress</button>
+  <button class="nb" id="resourcesTab" onclick="showSec('resources')">Resources</button>
   <button class="nb" onclick="showSec('account')">Account</button>
-  <button class="nb" onclick="showSec('leaderboard')">Leaderboard</button>
   <button class="nb" id="adminTab" onclick="showSec('admin')" style="display:none;margin-left:8px;background:rgba(var(--primary-rgb),0.1);border-color:var(--primary-color);">Admin</button>
 </div>
 
@@ -330,7 +325,13 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <!-- OVERVIEW -->
-<div id="overview" class="sec">
+<div id="home" class="sec">
+  <div id="homeContent">
+    <div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.3);font-size:13px;">Loading...</div>
+  </div>
+</div>
+
+<div id="overview" class="sec" style="display:none;">
   <div style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:16px;margin-bottom:1rem;">
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);margin-bottom:8px;">⚡ Quick Start</div>
     <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:10px;">
@@ -605,7 +606,15 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <!-- SCHEDULE -->
-<div id="schedule" class="sec active">
+<div id="schedule" class="sec">
+  <div style="margin-bottom:1rem;">
+    <button onclick="toggleCustomize()" id="customizeToggle"
+      style="width:100%;background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,0.7);">⚙ Customize Program</span>
+      <span id="customizeChev" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.3);transition:transform .2s;">▼</span>
+    </button>
+    <div id="customizePanel" style="display:none;border:1px solid #333;border-top:none;border-radius:0 0 8px 8px;background:#111;padding:16px;"></div>
+  </div>
   <div id="schedBanner"></div>
   <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:8px;padding:12px;margin-bottom:16px;">
     <div style="font-size:12px;color:rgba(255,255,255,0.6);">💡 Customize your program settings (age, season, days) by clicking <strong>Apply Settings</strong> below, then your program will update!</div>
@@ -654,7 +663,7 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <!-- NUTRITION -->
-<div id="nutrition" class="sec">
+<div id="nutrition" class="sec-hidden" style="display:none;">
   <div class="nut-hero"><div class="nut-icon">🥗</div><div class="nut-hero-text"><h2>Fuel Your Performance</h2><p>What you eat and drink directly impacts performance, recovery, and energy. Guidelines built for youth hockey players ages 8–18 training through a 12-week program.</p></div></div>
 
   <div class="sh">Daily Hydration</div>
@@ -689,7 +698,7 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <!-- MOBILITY -->
-<div id="mobility" class="sec">
+<div id="mobility" class="sec-hidden" style="display:none;">
   <div class="ibox">
     <strong>Daily Mobility Routine:</strong> 10-15 minutes of targeted stretching improves skating stride, shot power, and injury prevention. Do this after workouts or on rest days.
   </div>
@@ -800,6 +809,161 @@ select:focus{border-color:var(--or);outline:none;}
   </div>
 </div>
 
+<div id="resources" class="sec">
+  <div style="display:grid;gap:1.5rem;">
+    <div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid #222;">🥗 Nutrition</div>
+      
+  <div class="nut-hero"><div class="nut-icon">🥗</div><div class="nut-hero-text"><h2>Fuel Your Performance</h2><p>What you eat and drink directly impacts performance, recovery, and energy. Guidelines built for youth hockey players ages 8–18 training through a 12-week program.</p></div></div>
+
+  <div class="sh">Daily Hydration</div>
+  <div class="card" style="margin-bottom:1rem;"><div class="ch"><span class="cht">How Much Water Per Day</span></div><div class="cb">
+    <div class="hydro-bar"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:6px;">Ages 8–12: Target 6–8 cups (48–64 oz) daily + more on training days</div><div style="font-size:20px;letter-spacing:4px;">💧💧💧💧💧💧💧</div></div>
+    <div class="hydro-bar"><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:6px;">Ages 13–18: Target 8–12 cups (64–96 oz) daily + more on training days</div><div style="font-size:20px;letter-spacing:4px;">💧💧💧💧💧💧💧💧💧💧</div></div>
+    <div class="tgrid" style="margin-top:10px;"><div class="ti"><div class="tn" style="font-size:12px;">Morning</div><div class="th">Drink 1–2 cups immediately upon waking before anything else.</div></div><div class="ti"><div class="tn" style="font-size:12px;">Before Training</div><div class="th">Drink 1–2 cups 30–60 minutes before any workout.</div></div></div>
+  </div></div>
+
+  <div class="sh">Meal Timing Around Training</div>
+  <div style="margin-bottom:1rem;">
+    <div class="timing-row"><div class="timing-label">2–3 hrs before</div><div class="timing-text"><strong>Full meal</strong> — carbs + protein + some fat. Pasta with chicken, rice and eggs, turkey sandwich.</div></div>
+    <div class="timing-row"><div class="timing-label">30–60 min before</div><div class="timing-text"><strong>Light snack only</strong> — banana, apple with peanut butter, yogurt, granola bar.</div></div>
+    <div class="timing-row"><div class="timing-label">Within 30 min after</div><div class="timing-text"><strong>Recovery snack</strong> — protein + carbs. Chocolate milk, Greek yogurt with fruit, peanut butter toast.</div></div>
+    <div class="timing-row"><div class="timing-label">1–2 hrs after</div><div class="timing-text"><strong>Full recovery meal</strong> — protein + carbs + vegetables. Chicken with rice, pasta with meat sauce.</div></div>
+  </div>
+
+  <div class="sh">What to Eat</div>
+  <div class="g2" style="margin-bottom:1rem;">
+    <div class="ncard"><div class="ncard-h"><span class="ncard-icon">🍞</span><span class="ncard-title">Carbohydrates — Primary Fuel</span></div><div class="ncard-body"><div class="nrow"><div class="ndot"></div><div class="ntext"><strong>Whole grain bread, pasta, rice</strong> — slow-burning energy</div></div><div class="nrow"><div class="ndot"></div><div class="ntext"><strong>Oatmeal</strong> — excellent pre-training breakfast</div></div><div class="nrow"><div class="ndot"></div><div class="ntext"><strong>Fruits</strong> — bananas, apples, berries. Natural quick energy</div></div><div class="nrow"><div class="ndot"></div><div class="ntext"><strong>Aim for 50–60%</strong> of daily calories from carbs on training days</div></div></div></div>
+    <div class="ncard"><div class="ncard-h"><span class="ncard-icon">🍗</span><span class="ncard-title">Protein — Build &amp; Repair</span></div><div class="ncard-body"><div class="nrow"><div class="ndot"></div><div class="ntext"><strong>Chicken, turkey, lean beef</strong> — complete protein</div></div><div class="nrow"><div class="ndot"></div><div class="ntext"><strong>Eggs</strong> — best protein source, great any time of day</div></div><div class="nrow"><div class="ndot"></div><div class="ntext"><strong>Greek yogurt, cottage cheese</strong> — high protein + calcium</div></div><div class="nrow"><div class="ndot"></div><div class="ntext"><strong>Target 0.6–0.8g per lb</strong> bodyweight on training days</div></div></div></div>
+  </div>
+
+  <div class="sh">Avoid</div>
+  <div class="g2" style="margin-bottom:1rem;">
+    <div class="ncard"><div class="ncard-body"><div class="avoid-grid"><div class="avoid-item"><div class="avoid-name">Energy Drinks</div><div class="avoid-why">Not for youth athletes. Harmful to developing hearts.</div></div><div class="avoid-item"><div class="avoid-name">Soda / Pop / Candy</div><div class="avoid-why">Empty sugar, no nutrition. Spikes energy then crashes it.</div></div><div class="avoid-item"><div class="avoid-name">Fast Food on Game Days</div><div class="avoid-why">High fat, high sodium. Avoid within 3 hrs of training.</div></div><div class="avoid-item"><div class="avoid-name">Skipping Meals</div><div class="avoid-why">Especially breakfast on training days. You can't train hard on an empty tank.</div></div></div></div></div>
+    <div class="ncard"><div class="ncard-h"><span class="ncard-icon">✅</span><span class="ncard-title">Great Snacks</span></div><div class="ncard-body"><div class="nrow"><div class="ndot"></div><div class="ntext">Apple or banana with peanut butter</div></div><div class="nrow"><div class="ndot"></div><div class="ntext">Greek yogurt with granola or berries</div></div><div class="nrow"><div class="ndot"></div><div class="ntext">Cheese and whole grain crackers</div></div><div class="nrow"><div class="ndot"></div><div class="ntext">Hard-boiled eggs with fruit</div></div><div class="nrow"><div class="ndot"></div><div class="ntext"><strong>Chocolate milk</strong> — best post-workout recovery drink</div></div></div></div>
+  </div>
+
+  <div class="sh">Sleep</div>
+  <div class="card"><div class="ch"><span class="cht">Sleep Goals for Youth Athletes</span></div><div class="cb"><div class="tgrid"><div class="ti"><div class="tn">Ages 8–12</div><div class="th">Target 9–11 hours per night. Growth hormone releases during deep sleep — this is when muscles repair and grow.</div></div><div class="ti"><div class="tn">Ages 13–18</div><div class="th">Target 8–10 hours per night. Skimping on sleep kills performance gains more than skipping a workout.</div></div><div class="ti"><div class="tn">Screen-Free Wind Down</div><div class="th">No screens 30–60 min before bed. Blue light disrupts sleep hormones.</div></div><div class="ti"><div class="tn">Consistent Schedule</div><div class="th">Same bedtime and wake time even on weekends. Your body performs best on a rhythm.</div></div></div></div></div>
+</div>
+
+<!-- MOBILITY -->
+    </div>
+    <div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid #222;">🧘 Mobility</div>
+      
+  <div class="ibox">
+    <strong>Daily Mobility Routine:</strong> 10-15 minutes of targeted stretching improves skating stride, shot power, and injury prevention. Do this after workouts or on rest days.
+  </div>
+  
+  <div class="card" style="margin-top:1rem;">
+    <div class="ch"><span class="cht">Lower Body Mobility</span></div>
+    <div class="cb">
+      <div class="stretch-grid">
+        <div class="stretch-item">
+          <div class="stretch-name">Hip Flexor Stretch</div>
+          <div class="stretch-desc">Kneeling lunge position, push hips forward. Key for skating stride length.</div>
+          <div class="stretch-time">60 sec each side</div>
+          <a href="https://www.youtube.com/results?search_query=hip+flexor+stretch+hockey" target="_blank" class="stretch-link">▶ Watch Video</a>
+        </div>
+        
+        <div class="stretch-item">
+          <div class="stretch-name">90/90 Hip Stretch</div>
+          <div class="stretch-desc">Seated with both knees at 90°. Rotates hips, critical for crossovers and tight turns.</div>
+          <div class="stretch-time">45 sec each side</div>
+          <a href="https://www.youtube.com/results?search_query=90+90+hip+stretch" target="_blank" class="stretch-link">▶ Watch Video</a>
+        </div>
+        
+        <div class="stretch-item">
+          <div class="stretch-name">Groin Stretch (Butterfly)</div>
+          <div class="stretch-desc">Seated, soles together, push knees toward floor. Prevents groin strains.</div>
+          <div class="stretch-time">90 sec hold</div>
+          <a href="https://www.youtube.com/results?search_query=butterfly+groin+stretch" target="_blank" class="stretch-link">▶ Watch Video</a>
+        </div>
+        
+        <div class="stretch-item">
+          <div class="stretch-name">Ankle Dorsiflexion</div>
+          <div class="stretch-desc">Knee-to-wall test. Improves forward knee bend for skating power.</div>
+          <div class="stretch-time">60 sec each side</div>
+          <a href="https://www.youtube.com/results?search_query=ankle+dorsiflexion+stretch+wall" target="_blank" class="stretch-link">▶ Watch Video</a>
+        </div>
+        
+        <div class="stretch-item">
+          <div class="stretch-name">Pigeon Stretch</div>
+          <div class="stretch-desc">Front leg bent, back leg extended. Opens hips for skating stance.</div>
+          <div class="stretch-time">90 sec each side</div>
+          <a href="https://www.youtube.com/results?search_query=pigeon+stretch+hockey" target="_blank" class="stretch-link">▶ Watch Video</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card" style="margin-top:1rem;">
+    <div class="ch"><span class="cht">Upper Body Mobility</span></div>
+    <div class="cb">
+      <div class="stretch-grid">
+        <div class="stretch-item">
+          <div class="stretch-name">Shoulder Dislocates</div>
+          <div class="stretch-desc">Hold stick wide, pass overhead front-to-back. Opens shoulders for shooting.</div>
+          <div class="stretch-time">10 reps</div>
+          <a href="https://www.youtube.com/results?search_query=shoulder+dislocates+stick" target="_blank" class="stretch-link">▶ Watch Video</a>
+        </div>
+        
+        <div class="stretch-item">
+          <div class="stretch-name">Thoracic Rotation</div>
+          <div class="stretch-desc">On hands/knees, rotate upper back. Improves shot rotation and stick reach.</div>
+          <div class="stretch-time">10 reps each side</div>
+          <a href="https://www.youtube.com/results?search_query=thoracic+rotation+quadruped" target="_blank" class="stretch-link">▶ Watch Video</a>
+        </div>
+        
+        <div class="stretch-item">
+          <div class="stretch-name">Lat Stretch</div>
+          <div class="stretch-desc">Arm overhead, lean to side. Lengthens lats for better stick reach.</div>
+          <div class="stretch-time">45 sec each side</div>
+          <a href="https://www.youtube.com/results?search_query=lat+stretch+overhead" target="_blank" class="stretch-link">▶ Watch Video</a>
+        </div>
+        
+        <div class="stretch-item">
+          <div class="stretch-name">Wrist Rolls</div>
+          <div class="stretch-desc">Hold stick, roll wrists in circles. Loosens up for stickhandling.</div>
+          <div class="stretch-time">20 reps each direction</div>
+          <a href="https://www.youtube.com/results?search_query=wrist+mobility+hockey" target="_blank" class="stretch-link">▶ Watch Video</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card" style="margin-top:1rem;">
+    <div class="ch"><span class="cht">Full Body Flow</span></div>
+    <div class="cb">
+      <div class="stretch-grid">
+        <div class="stretch-item">
+          <div class="stretch-name">World's Greatest Stretch</div>
+          <div class="stretch-desc">Lunge + rotation + reach. Hits hips, t-spine, and ankles in one move.</div>
+          <div class="stretch-time">5 reps each side</div>
+          <a href="https://www.youtube.com/results?search_query=worlds+greatest+stretch" target="_blank" class="stretch-link">▶ Watch Video</a>
+        </div>
+        
+        <div class="stretch-item">
+          <div class="stretch-name">Cat-Cow</div>
+          <div class="stretch-desc">On hands/knees, arch and round the spine. Warms up the back.</div>
+          <div class="stretch-time">15 reps</div>
+          <a href="https://www.youtube.com/results?search_query=cat+cow+stretch" target="_blank" class="stretch-link">▶ Watch Video</a>
+        </div>
+        
+        <div class="stretch-item">
+          <div class="stretch-name">Leg Swings</div>
+          <div class="stretch-desc">Forward/back and side-to-side. Dynamic warm-up for hips.</div>
+          <div class="stretch-time">10 reps each direction</div>
+          <a href="https://www.youtube.com/results?search_query=leg+swings+dynamic" target="_blank" class="stretch-link">▶ Watch Video</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+</div>
 
   <div style="margin:2.5rem 0;border-top:2px solid #222;position:relative;">
     <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#0D0D0D;padding:0 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.3);">Progress Tracking</div>
@@ -1632,10 +1796,10 @@ Check Supabase Table Editor:
         loadAdminPanel(user);
       }
 
-      // Load org branding then dashboard
+      // Load org branding then navigate
       await loadOrgBranding();
-      loadDashboard();
-      showSec('dashboard');
+      const landingTab = (role === 'player') ? 'home' : 'dashboard';
+      showSec(landingTab);
 
       
       // All checks passed - user can access the program
@@ -2422,6 +2586,42 @@ async function handleLogoUpload(file) {
   } else {
     if (msg) { msg.textContent = 'Upload failed. Make sure the org-logos bucket exists and is public.'; msg.style.background='rgba(248,113,113,0.1)'; msg.style.color='#f87171'; }
   }
+}
+
+
+// ── HOME TAB ──────────────────────────────────────────────────────────────
+function loadHomeSec() {
+  const el = document.getElementById('homeContent');
+  if (!el) return;
+  const role = window._userRole;
+  const isPlayer = role === 'player';
+
+  // Quick log buttons for players
+  const quickLog = isPlayer ? `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.2rem;">
+      <button onclick="showSec('shotlog')" style="background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:14px;cursor:pointer;text-align:center;">
+        <div style="font-size:22px;margin-bottom:4px;">🏒</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#fff;">Log Shots</div>
+      </button>
+      <button onclick="showSec('sticklog')" style="background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:14px;cursor:pointer;text-align:center;">
+        <div style="font-size:22px;margin-bottom:4px;">🎯</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#fff;">Log Stickhandling</div>
+      </button>
+    </div>` : '';
+
+  el.innerHTML = quickLog + '<div id="dashboardContent"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">Loading...</div></div>';
+  loadDashboard();
+}
+
+function _activateTab(id) {
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('active'));
+  const sec = document.getElementById(id);
+  if (sec) sec.classList.add('active');
+  // Find matching nav button
+  document.querySelectorAll('.nb').forEach(b => {
+    if (b.getAttribute('onclick')?.includes("'" + id + "'")) b.classList.add('active');
+  });
 }
 
 async function loadDashboard() {
@@ -3876,6 +4076,28 @@ function viewPlayer(playerId, playerName) {
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
 }
 
+
+function toggleCustomize() {
+  const panel = document.getElementById('customizePanel');
+  const chev = document.getElementById('customizeChev');
+  const open = panel.style.display === 'none';
+  if (open) {
+    // Lazy-load the overview content into the panel
+    const overview = document.getElementById('overview');
+    if (overview && !panel._loaded) {
+      panel.innerHTML = overview.innerHTML;
+      panel._loaded = true;
+      // Re-run any init that overview needs
+      loadCustomSettings();
+    }
+    panel.style.display = 'block';
+    if (chev) chev.style.transform = 'rotate(180deg)';
+  } else {
+    panel.style.display = 'none';
+    if (chev) chev.style.transform = '';
+  }
+}
+
 function toggleWeek(wdiv) {
   wdiv.classList.toggle('collapsed');
 }
@@ -3889,6 +4111,17 @@ function collapseAllWeeks() {
 }
 
 function showSec(id){
+  // Home tab
+  if (id === 'home') {
+    document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nb').forEach(b => b.classList.remove('active'));
+    const homeSec = document.getElementById('home');
+    if (homeSec) homeSec.classList.add('active');
+    const homeBtn = document.getElementById('homeTab');
+    if (homeBtn) homeBtn.classList.add('active');
+    loadHomeSec();
+    return;
+  }
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   const sec = document.getElementById(id);
   if(sec) sec.classList.add('active');
