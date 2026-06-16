@@ -115,6 +115,17 @@ export default async function handler(req, res) {
         } else {
           console.log('✓ Subscription activated for:', customerEmail, 'expires:', expiresAt);
         }
+
+        // For associations: update org-level expiry so all members are covered
+        if (isAssociation && orgId && orgId !== 'individual') {
+          await supabase.from('organizations').update({
+            expires_at: expiresAt,
+            status: 'active',
+            stripe_subscription_id: subscriptionId,
+            stripe_customer_id: customerId
+          }).eq('id', orgId);
+          console.log('✓ Organization expiry updated:', orgId, expiresAt);
+        }
         break;
       }
 
@@ -138,6 +149,11 @@ export default async function handler(req, res) {
           } else {
             console.log('✓ Subscription renewed, expires:', expiresAt);
           }
+
+          // Also update org-level expiry
+          await supabase.from('organizations')
+            .update({ expires_at: expiresAt, status: 'active' })
+            .eq('stripe_subscription_id', subscriptionId);
         } catch(e) {
           console.error('Error processing renewal:', e.message);
         }
@@ -172,6 +188,11 @@ export default async function handler(req, res) {
         } else {
           console.log('✓ Subscription cancelled:', subscriptionId);
         }
+
+        // Also cancel at org level
+        await supabase.from('organizations')
+          .update({ status: 'cancelled' })
+          .eq('stripe_subscription_id', subscriptionId);
         break;
       }
 

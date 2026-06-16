@@ -1638,13 +1638,34 @@ Check Supabase Table Editor:
         return;
       }
       
-      // Check expiration for EVERYONE (admins and players)
-      if (userSub.expires_at) {
-        const expiresAt = new Date(userSub.expires_at);
-        if (expiresAt < new Date()) {
-          await supabase.from('subscriptions').update({ status: 'expired' }).eq('id', userSub.id);
-          showRenewalWall(user.email, 'expired');
-          return;
+      // Check expiration — use org-level for association members, row-level for individuals
+      const orgId = userSub.organization_id || 'individual';
+      const isAssocMember = orgId !== 'individual' && role !== 'admin' && role !== 'super_admin';
+      const isAssocAdmin = orgId !== 'individual' && (role === 'admin' || role === 'super_admin');
+
+      if (isAssocMember || isAssocAdmin) {
+        // Check org-level expiry
+        const { data: orgData } = await supabase.from('organizations').select('expires_at, status').eq('id', orgId).single();
+        if (orgData) {
+          const orgExpired = orgData.expires_at && new Date(orgData.expires_at) < new Date();
+          const orgInactive = orgData.status && orgData.status !== 'active';
+          if (orgExpired || orgInactive) {
+            if (isAssocAdmin) {
+              await supabase.from('organizations').update({ status: 'expired' }).eq('id', orgId);
+            }
+            showRenewalWall(user.email, orgExpired ? 'expired' : 'cancelled');
+            return;
+          }
+        }
+      } else {
+        // Individual — check their own row
+        if (userSub.expires_at) {
+          const expiresAt = new Date(userSub.expires_at);
+          if (expiresAt < new Date()) {
+            await supabase.from('subscriptions').update({ status: 'expired' }).eq('id', userSub.id);
+            showRenewalWall(user.email, 'expired');
+            return;
+          }
         }
       }
       
@@ -6247,6 +6268,18 @@ async function loadAdminPanel(user) {
         </div>
       </div>
     </div>
+
+    <!-- SUPER ADMIN SUBSCRIPTIONS PANEL -->
+    <div class="card" style="margin-bottom:1rem;display:none;" id="superAdminSubsPanel">
+      <div class="ch">
+        <span class="cht">All Subscriptions</span>
+        <button onclick="loadSuperAdminSubs()" style="margin-left:auto;background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Refresh</button>
+      </div>
+      <div class="cb">
+        <div id="superAdminSubsContent"><div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">Loading...</div></div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="ch">
         <span class="cht">All Players</span>
@@ -6287,6 +6320,7 @@ async function loadAdminPanel(user) {
   populateAdminTeamDropdown();
   populateBulkTeamDropdown();
   loadBrandingPanel();
+  if (window._isSuperAdmin) loadSuperAdminSubs();
   
   // Add embed card at the bottom
   const adminContentDiv = document.getElementById('adminContent');
@@ -7343,6 +7377,94 @@ async function savePlayerTeam(subId) {
     loadPlayerList(window._isSuperAdmin);
   } catch(e) {
     if (msg) { msg.textContent = 'Error: ' + e.message; msg.style.color='#f87171'; msg.style.display='block'; }
+  }
+}
+
+
+// ── SUPER ADMIN SUBSCRIPTIONS PANEL ──────────────────────────────────────
+async function loadSuperAdminSubs() {
+  if (!window._isSuperAdmin) return;
+  const panel = document.getElementById('superAdminSubsPanel');
+  if (panel) panel.style.removeProperty('display');
+  const el = document.getElementById('superAdminSubsContent');
+  if (!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">Loading...</div>';
+
+  try {
+    const sb = await getSupabaseClient();
+
+    // Fetch all organizations
+    const { data: orgs } = await sb.from('organizations')
+      .select('id, name, status, expires_at, stripe_subscription_id')
+      .order('name');
+
+    // Fetch individual subscribers (no association)
+    const { data: individuals } = await sb.from('subscriptions')
+      .select('id, email, first_name, last_name, status, expires_at, role, created_at')
+      .eq('organization_id', 'individual')
+      .order('created_at', { ascending: false });
+
+    const now = new Date();
+    const fmt = d => d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+    const statusBadge = (status, expires) => {
+      const expired = expires && new Date(expires) < now;
+      if (expired) return '<span style="color:#f87171;font-size:10px;font-weight:700;background:rgba(248,113,113,0.1);padding:2px 6px;border-radius:3px;">EXPIRED</span>';
+      if (status === 'active') return '<span style="color:#4ade80;font-size:10px;font-weight:700;background:rgba(74,222,128,0.1);padding:2px 6px;border-radius:3px;">ACTIVE</span>';
+      if (status === 'cancelled') return '<span style="color:#fb923c;font-size:10px;font-weight:700;background:rgba(251,146,60,0.1);padding:2px 6px;border-radius:3px;">CANCELLED</span>';
+      return '<span style="color:rgba(255,255,255,0.4);font-size:10px;font-weight:700;background:#1a1a1a;padding:2px 6px;border-radius:3px;">' + (status||'UNKNOWN').toUpperCase() + '</span>';
+    };
+
+    let html = '';
+
+    // ── Associations ─────────────────────────────────────────────────────
+    html += `<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:10px;margin-top:4px;">Associations / Teams (${(orgs||[]).filter(o=>o.id!=='individual').length})</div>`;
+
+    const assocOrgs = (orgs||[]).filter(o => o.id !== 'individual');
+    if (assocOrgs.length === 0) {
+      html += '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:10px 0;">No associations yet</div>';
+    } else {
+      html += '<div style="border:1px solid #222;border-radius:8px;overflow:hidden;margin-bottom:20px;">';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
+      html += '<thead><tr style="background:#0d0d0d;"><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Association</th><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Status</th><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Expires</th><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Org ID</th></tr></thead><tbody>';
+      assocOrgs.forEach((o, i) => {
+        const expired = o.expires_at && new Date(o.expires_at) < now;
+        const rowBg = expired ? 'rgba(248,113,113,0.04)' : i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)';
+        html += `<tr style="border-top:1px solid #1a1a1a;background:${rowBg};">
+          <td style="padding:10px;color:#fff;font-weight:600;">${o.name || o.id}</td>
+          <td style="padding:10px;">${statusBadge(o.status, o.expires_at)}</td>
+          <td style="padding:10px;color:${expired?'#f87171':'rgba(255,255,255,0.6)'};">${fmt(o.expires_at)}</td>
+          <td style="padding:10px;color:rgba(255,255,255,0.35);font-size:11px;">${o.id}</td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+    }
+
+    // ── Individuals ───────────────────────────────────────────────────────
+    html += `<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:10px;">Individual Subscribers (${(individuals||[]).length})</div>`;
+
+    if (!individuals || individuals.length === 0) {
+      html += '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:10px 0;">No individual subscribers yet</div>';
+    } else {
+      html += '<div style="border:1px solid #222;border-radius:8px;overflow:hidden;">';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
+      html += '<thead><tr style="background:#0d0d0d;"><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Name</th><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Email</th><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Status</th><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Expires</th></tr></thead><tbody>';
+      individuals.forEach((s, i) => {
+        const expired = s.expires_at && new Date(s.expires_at) < now;
+        const rowBg = expired ? 'rgba(248,113,113,0.04)' : i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)';
+        const name = [s.first_name, s.last_name].filter(Boolean).join(' ') || '—';
+        html += `<tr style="border-top:1px solid #1a1a1a;background:${rowBg};">
+          <td style="padding:10px;color:#fff;font-weight:600;">${name}</td>
+          <td style="padding:10px;color:rgba(255,255,255,0.55);font-size:11px;">${s.email}</td>
+          <td style="padding:10px;">${statusBadge(s.status, s.expires_at)}</td>
+          <td style="padding:10px;color:${expired?'#f87171':'rgba(255,255,255,0.6)'};">${fmt(s.expires_at)}</td>
+        </tr>`;
+      });
+      html += '</tbody></table></div>';
+    }
+
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div style="color:#f87171;font-size:12px;padding:10px;">Error loading: ' + e.message + '</div>';
   }
 }
 
