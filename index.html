@@ -275,22 +275,14 @@ select:focus{border-color:var(--or);outline:none;}
   <div class="hdr-stripe" id="hdrStripe"></div>
   <div class="hdr-inner" style="justify-content:space-between;">
     <div style="display:flex;align-items:center;gap:12px;">
-      <img id="orgLogoImg" class="hdr-logo" src="" alt="" style="display:none;">
-      <div id="orgNameBlock">
-        <div class="hdr-text">
-          <h1 id="orgNameEl">TRAINR</h1>
-          <p id="orgSubtitle">Youth Hockey Training</p>
-        </div>
+      <img id="orgLogoImg" class="hdr-logo" src="" alt="" style="display:none;width:56px;height:56px;object-fit:contain;border-radius:8px;">
+      <div>
+        <div id="orgNameEl" style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;line-height:1.1;"></div>
+        <div id="orgSubtitle" style="font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;">Youth Hockey Training</div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:16px;">
-      <div id="hdrBadgeWrap" style="display:none;">
-        <div class="hdr-badge" id="hdrBadge"></div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#fff;">TRAIN<span style="color:var(--primary-color);">R</span></div>
-        <div style="font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;">Hockey Development</div>
-      </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <img src="apple-touch-icon.png" alt="TRAINR" style="width:52px;height:52px;object-fit:contain;border-radius:10px;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5));">
     </div>
   </div>
 </div>
@@ -2217,39 +2209,43 @@ function applyBranding(org) {
   const primary = org.primary_color || '#E07820';
   const secondary = org.secondary_color || '#ffffff';
 
-  // Update CSS variables
-  const r = document.documentElement;
-  r.style.setProperty('--primary-color', primary);
-  r.style.setProperty('--or', primary);
-
-  // Parse RGB for rgba() usage
+  // Parse RGB
   const hex = primary.replace('#','');
   const rgb = [
     parseInt(hex.substring(0,2),16),
     parseInt(hex.substring(2,4),16),
     parseInt(hex.substring(4,6),16)
   ].join(', ');
+
+  // Set all CSS variables directly on :root
+  const r = document.documentElement;
+  r.style.setProperty('--primary-color', primary);
+  r.style.setProperty('--or', primary);
+  r.style.setProperty('--orl', primary);
   r.style.setProperty('--primary-rgb', rgb);
+
+  // Also inject a style tag to override any cached stylesheet values
+  let styleTag = document.getElementById('_brandStyle');
+  if (!styleTag) {
+    styleTag = document.createElement('style');
+    styleTag.id = '_brandStyle';
+    document.head.appendChild(styleTag);
+  }
+  styleTag.textContent = `:root{--primary-color:${primary}!important;--or:${primary}!important;--orl:${primary}!important;--primary-rgb:${rgb}!important;}`;
 
   // Org name in header
   const nameEl = document.getElementById('orgNameEl');
-  const subtitleEl = document.getElementById('orgSubtitle');
-  if (org.name && nameEl) {
-    nameEl.textContent = org.name.toUpperCase();
-    if (subtitleEl) subtitleEl.textContent = 'Youth Hockey Training';
-    const badge = document.getElementById('hdrBadge');
-    const badgeWrap = document.getElementById('hdrBadgeWrap');
-    if (badge) badge.textContent = org.name;
-    if (badgeWrap) badgeWrap.style.display = 'block';
-  }
+  if (nameEl) nameEl.textContent = org.name ? org.name.toUpperCase() : '';
 
   // Org logo
-  if (org.logo_url) {
-    const img = document.getElementById('orgLogoImg');
-    if (img) {
+  const img = document.getElementById('orgLogoImg');
+  if (img) {
+    if (org.logo_url) {
       img.src = org.logo_url;
-      img.alt = (org.name || 'Logo');
+      img.alt = org.name || 'Logo';
       img.style.display = 'block';
+    } else {
+      img.style.display = 'none';
     }
   }
 }
