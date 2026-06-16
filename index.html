@@ -1512,8 +1512,8 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <div class="ftr">
-  <div class="ftr-brand">Delano Youth Hockey Association</div>
-  <div class="ftr-copy">Delano Tigers · Training Program</div>
+  <div class="ftr-brand" id="ftrBrand">TRAINR</div>
+  <div class="ftr-copy" id="ftrCopy">Hockey Development Platform</div>
 </div>
 
 </div><!-- /wrap -->
@@ -2243,6 +2243,12 @@ function applyBranding(org) {
   // Org name in header
   const nameEl = document.getElementById('orgNameEl');
   if (nameEl) nameEl.textContent = org.name ? org.name.toUpperCase() : '';
+
+  // Footer
+  const ftrBrand = document.getElementById('ftrBrand');
+  const ftrCopy = document.getElementById('ftrCopy');
+  if (ftrBrand && org.name) ftrBrand.textContent = org.name;
+  if (ftrCopy && org.name) ftrCopy.textContent = org.name + ' · Training Program';
 
   // Org logo
   const img = document.getElementById('orgLogoImg');
@@ -4861,16 +4867,7 @@ function loadCustomSettings(){
 }
 
 function updateHeader(name){
-  const h1 = document.querySelector('.hdr-text h1');
-  const subtitle = document.querySelector('.hdr-text p');
-  if(!h1 || !subtitle) return;
-  if(name && name.length){
-    h1.innerHTML = name + "'s <span>Hockey</span> Training";
-    subtitle.textContent = 'Year-Round Off-Ice Development Program  ·  Delano Tigers';
-  } else {
-    h1.innerHTML = '<span>Delano</span> Youth Hockey';
-    subtitle.textContent = 'Year-Round Off-Ice Development Program';
-  }
+  // Header is now managed by applyBranding() — do nothing here
 }
 
 function updateOverview(settings){
