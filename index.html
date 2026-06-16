@@ -228,6 +228,7 @@ select:focus{border-color:var(--or);outline:none;}
   overflow-x: auto !important;
   max-width: 100%;
   scrollbar-gutter: stable;
+  direction: rtl;
   border: 1px solid #1a1a1a;
   border-radius: 8px;
   background: #0d0d0d;
@@ -7626,7 +7627,7 @@ async function loadSuperAdminSubs() {
     // ── Individuals ───────────────────────────────────────────────────────
     html += `<div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:10px;">Individual Subscribers (${(individuals||[]).length})</div>`;
 
-    if (!filteredIndividuals || filteredIndividuals.length === 0) {
+    if (!individuals || individuals.length === 0) {
       html += '<div style="color:rgba(255,255,255,0.3);font-size:12px;padding:10px 0;">No individual subscribers yet</div>';
     } else {
       html += '<div style="border:1px solid #222;border-radius:8px;overflow:hidden;">';
