@@ -1560,8 +1560,14 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       console.log('Role:', userSub?.role);
       
       // Store user's organization_id globally for filtering
-      window._userOrgId = userSub?.organization_id || 'individual';
       window._isSuperAdmin = (user.email === 'brandonanderson1393@gmail.com');
+      if (window._isSuperAdmin) {
+        // Super admin picks which org to view
+        const orgChoice = await superAdminPickOrg();
+        window._userOrgId = orgChoice || userSub?.organization_id || 'delano';
+      } else {
+        window._userOrgId = userSub?.organization_id || 'individual';
+      }
       console.log('Organization:', window._userOrgId, 'Super admin:', window._isSuperAdmin);
       
       // Apply branding based on organization
@@ -2189,6 +2195,49 @@ async function confirmBulkUpload() {
 // ORG BRANDING
 // ═══════════════════════════════════════════════════════════════════════════
 
+
+// ── SUPER ADMIN ORG PICKER ────────────────────────────────────────────────
+async function superAdminPickOrg() {
+  return new Promise(async (resolve) => {
+    try {
+      const sb = await getSupabaseClient();
+      const { data: orgs } = await sb.from('organizations').select('id, name').order('name');
+      const list = orgs && orgs.length ? orgs : [{ id: 'delano', name: 'Delano' }];
+
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+      modal.innerHTML = `
+        <div style="background:#141414;border:1px solid #333;border-radius:14px;padding:28px;width:100%;max-width:400px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:6px;">Select Association</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:20px;">Which organization do you want to view?</div>
+          <div style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;">
+            ${list.map(o => `
+              <button onclick="document.body.removeChild(this.closest('[style*=fixed]'));window._pickedOrg='${o.id}';"
+                style="background:#0d0d0d;border:1px solid #333;color:#fff;text-align:left;padding:12px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:border-color .15s;"
+                onmouseover="this.style.borderColor='var(--primary-color)'"
+                onmouseout="this.style.borderColor='#333'">
+                <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">${o.name || o.id}</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;">${o.id}</div>
+              </button>`).join('')}
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+
+      // Poll for pick
+      const check = setInterval(() => {
+        if (window._pickedOrg !== undefined) {
+          clearInterval(check);
+          const picked = window._pickedOrg;
+          delete window._pickedOrg;
+          resolve(picked);
+        }
+      }, 100);
+    } catch(e) {
+      resolve(null);
+    }
+  });
+}
+
 async function loadOrgBranding() {
   const orgId = window._userOrgId;
   console.log('loadOrgBranding: orgId =', orgId);
@@ -2326,8 +2375,6 @@ function loadBrandingPanel() {
   if (nameEl) nameEl.value = b.name || '';
   if (primaryEl) primaryEl.value = b.primary_color || '#E07820';
   if (primaryHex) primaryHex.value = b.primary_color || '#E07820';
-  if (secondaryEl) secondaryEl.value = b.secondary_color || '#ffffff';
-  if (secondaryHex) secondaryHex.value = b.secondary_color || '#ffffff';
   if (preview && b.logo_url) { preview.src = b.logo_url; preview.style.display = 'block'; }
 
   // Sync color pickers to hex inputs
@@ -2358,7 +2405,7 @@ function previewBranding() {
 async function saveBrandingPanel() {
   const name = document.getElementById('brandName')?.value.trim();
   const primary = document.getElementById('brandPrimaryHex')?.value || '#E07820';
-  const secondary = document.getElementById('brandSecondaryHex')?.value || '#ffffff';
+  const secondary = '#ffffff';
   const msg = document.getElementById('brandMsg');
 
   const showMsg = (text, color) => {
@@ -5827,36 +5874,20 @@ async function loadAdminPanel(user) {
             </div>
           </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-          <div>
-            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block;">Primary Color</label>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <input type="color" id="brandPrimary" value="#E07820"
-                style="width:44px;height:36px;border:none;border-radius:6px;cursor:pointer;background:none;padding:0;">
-              <input type="text" id="brandPrimaryHex" value="#E07820" maxlength="7"
-                oninput="syncColorFromHex('brandPrimary','brandPrimaryHex')"
-                style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;font-family:monospace;">
-            </div>
-          </div>
-          <div>
-            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block;">Secondary Color</label>
-            <div style="display:flex;gap:8px;align-items:center;">
-              <input type="color" id="brandSecondary" value="#ffffff"
-                style="width:44px;height:36px;border:none;border-radius:6px;cursor:pointer;background:none;padding:0;">
-              <input type="text" id="brandSecondaryHex" value="#ffffff" maxlength="7"
-                oninput="syncColorFromHex('brandSecondary','brandSecondaryHex')"
-                style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;font-family:monospace;">
-            </div>
+        <div style="margin-bottom:16px;">
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block;">Color</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="color" id="brandPrimary" value="#E07820"
+              style="width:44px;height:36px;border:none;border-radius:6px;cursor:pointer;background:none;padding:0;">
+            <input type="text" id="brandPrimaryHex" value="#E07820" maxlength="7"
+              oninput="syncColorFromHex('brandPrimary','brandPrimaryHex')"
+              style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;font-family:monospace;">
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
           <button onclick="saveBrandingPanel()"
             style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:13px;font-weight:700;padding:9px 20px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">
             Save Branding
-          </button>
-          <button onclick="previewBranding()"
-            style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:13px;font-weight:700;padding:9px 16px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">
-            Preview
           </button>
           <div id="brandMsg" style="font-size:12px;display:none;padding:6px 10px;border-radius:4px;"></div>
         </div>
