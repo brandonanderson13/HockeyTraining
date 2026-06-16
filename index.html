@@ -297,6 +297,9 @@ select:focus{border-color:var(--or);outline:none;}
   <button class="nb" id="adminTab" onclick="showSec('admin')" style="display:none;margin-left:8px;background:rgba(var(--primary-rgb),0.1);border-color:var(--primary-color);">Admin</button>
 </div>
 
+<!-- SHARED DASHBOARD CONTENT -->
+<div id="dashboardContent" style="display:none;"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Loading...</div></div>
+
 <!-- PASSWORD RESET SCREEN -->
 <div id="passwordResetScreen" style="display:none;position:fixed;inset:0;background:#0d0d0d;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#141414;border:1px solid #333;border-radius:14px;padding:32px;width:100%;max-width:400px;">
@@ -321,13 +324,14 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="sec">
-  <div id="dashboardContent"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Loading...</div></div>
+  <div id="dashDcSlot"></div>
 </div>
 
 <!-- OVERVIEW -->
 <div id="home" class="sec">
   <div id="homeContent">
-    <div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.3);font-size:13px;">Loading...</div>
+    <div id="homeQuickLog"></div>
+    <div id="homeDcSlot"></div>
   </div>
 </div>
 
@@ -2618,7 +2622,16 @@ function loadHomeSec() {
       </button>
     </div>` : '';
 
-  el.innerHTML = quickLog + '<div id="dashboardContent"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">Loading...</div></div>';
+  // Set quick log buttons
+  const quickLogEl = document.getElementById('homeQuickLog');
+  if (quickLogEl) quickLogEl.innerHTML = isPlayer ? quickLog : '';
+
+  // Move dashboardContent into homeContent if not already there
+  const dc = document.getElementById('dashboardContent');
+  const homeDcSlot = document.getElementById('homeDcSlot');
+  if (dc && homeDcSlot && !homeDcSlot.contains(dc)) {
+    homeDcSlot.appendChild(dc);
+  }
   loadDashboard();
 }
 
@@ -4120,6 +4133,18 @@ function collapseAllWeeks() {
 }
 
 function showSec(id){
+  // Move dashboardContent to the right slot when switching tabs
+  const dc = document.getElementById('dashboardContent');
+  if (dc) {
+    dc.style.display = '';
+    if (id === 'home') {
+      const slot = document.getElementById('homeDcSlot');
+      if (slot && !slot.contains(dc)) slot.appendChild(dc);
+    } else if (id === 'dashboard') {
+      const slot = document.getElementById('dashDcSlot');
+      if (slot && !slot.contains(dc)) slot.appendChild(dc);
+    }
+  }
   // Home tab
   if (id === 'home') {
     document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
