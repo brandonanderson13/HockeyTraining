@@ -1556,6 +1556,48 @@ select:focus{border-color:var(--or);outline:none;}
 </div><!-- /wrap -->
 
 <script>
+// Early definitions — must be available before Supabase auth callback fires
+function showRenewalWall(email, reason) {
+  // Find or create renewal wall
+  const wall = document.getElementById('renewalWall');
+  if (!wall) { setTimeout(() => showRenewalWall(email, reason), 100); return; }
+  const role = window._pendingRole || 'player';
+  const orgId = window._pendingOrgId || 'individual';
+  const isIndividualOrAdmin = role === 'admin' || role === 'super_admin' || orgId === 'individual';
+  const title = document.getElementById('renewalTitle');
+  const msg = document.getElementById('renewalMsg');
+  const portalBtn = document.getElementById('renewalPortalBtn');
+  const newBtn = document.getElementById('renewalNewBtn');
+  const renewBtn = document.querySelector('[onclick="renewalCheckStatus()"]');
+  if (isIndividualOrAdmin) {
+    if (title) title.textContent = reason === 'expired' ? 'Subscription Expired' : reason === 'cancelled' ? 'Subscription Cancelled' : 'Subscription Inactive';
+    if (msg) msg.textContent = reason === 'expired' ? 'Your subscription has expired. Your data is safe — renew to pick up right where you left off.' : 'Your subscription has been cancelled. Renew anytime to restore full access.';
+    if (newBtn) { newBtn.href = 'subscribe.html?email=' + encodeURIComponent(email||''); newBtn.style.display = 'block'; }
+    if (portalBtn) portalBtn.style.display = 'block';
+    if (renewBtn) renewBtn.style.display = 'inline-block';
+  } else {
+    if (title) title.textContent = 'Access Unavailable';
+    if (msg) msg.innerHTML = "Your association\'s subscription is currently inactive.<br><br>Please contact your association admin to restore access.<br><br><span style=\"font-size:11px;color:rgba(255,255,255,0.35)\">Your training data and progress are safe.</span>";
+    if (portalBtn) portalBtn.style.display = 'none';
+    if (newBtn) newBtn.style.display = 'none';
+    if (renewBtn) renewBtn.style.display = 'none';
+  }
+  wall.style.setProperty('display', 'flex', 'important');
+}
+function checkShowWizard() {
+  const role = window._pendingRole || 'player';
+  const done = localStorage.getItem('trainrWizardDone');
+  const hasSettings = localStorage.getItem('tigersCustomSettings');
+  if (role === 'player' && !done && !hasSettings) {
+    setTimeout(() => {
+      const w = document.getElementById('setupWizard');
+      if (w) w.style.setProperty('display','flex','important');
+    }, 800);
+  }
+}
+</script>
+
+<script>
 // ═══════════════════════════════════════════════════════════════════════════
 // SUPABASE AUTH CHECK - Verifies user is logged in with active subscription
 // ═══════════════════════════════════════════════════════════════════════════
