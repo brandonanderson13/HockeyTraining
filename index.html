@@ -332,6 +332,7 @@ select:focus{border-color:var(--or);outline:none;}
 <div id="home" class="sec">
   <div id="homeContent">
     <div id="homeQuickLog"></div>
+    <div id="homeSetupGuide" style="display:none;"></div>
     <div id="playerDashContent"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Loading...</div></div>
   </div>
 </div>
@@ -1695,6 +1696,7 @@ Check Supabase Table Editor:
       // Navigate to landing tab
       const landingTab = (userSub?.role === 'player') ? 'home' : 'dashboard';
       showSec(landingTab);
+      checkShowWizard();
 
       // Add a logout button to the header
       addLogoutButton(supabase, user, isAdmin);
@@ -2634,6 +2636,22 @@ function loadHomeSec() {
   // Set quick log buttons
   const quickLogEl = document.getElementById('homeQuickLog');
   if (quickLogEl) quickLogEl.innerHTML = isPlayer ? quickLog : '';
+
+  // Show setup guide button for players
+  const guideEl = document.getElementById('homeSetupGuide');
+  if (guideEl && isPlayer) {
+    const hasSettings = localStorage.getItem('tigersCustomSettings');
+    guideEl.style.display = 'block';
+    guideEl.innerHTML = hasSettings
+      ? `<div style="text-align:right;margin-bottom:8px;"><button onclick="showSetupWizard()" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:11px;cursor:pointer;text-decoration:underline;">⚙ Redo Program Setup</button></div>`
+      : `<div style="background:rgba(var(--primary-rgb),0.08);border:1px solid rgba(var(--primary-rgb),0.2);border-radius:8px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);">Program Not Set Up</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">Complete setup to get your training plan</div>
+          </div>
+          <button onclick="showSetupWizard()" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">Set Up Now</button>
+        </div>`;
+  }
 
   // Load dashboard into player-specific content div
   loadDashboard('playerDashContent');
@@ -5443,28 +5461,25 @@ function adjustVolumeForSeason(volumeStr) {
 function updateProgramStatus() {
   const statusDiv = document.getElementById('programStatus');
   if (!statusDiv) return;
-  
   try {
     const settings = getCustSettings();
     const seasonEl = document.getElementById('cust-season');
-    const season = seasonEl ? seasonEl.value : 'offseason';
-    
+    const season = seasonEl ? seasonEl.value : 'earlyoffseason';
     const seasonNames = {
-      'offseason': 'Off-Season — Maximum Development',
-      'preseason': 'Pre-Season — Intensity Ramp',
-      'inseason': 'In-Season — Maintenance Mode'
+      'earlyoffseason': 'Early Off-Season — Foundation & Strength',
+      'lateoffseason':  'Late Off-Season — Power & Development',
+      'preseason':      'Pre-Season — Sharpen & Peak',
+      'inseason_a':     'In-Season Block A — Early Season',
+      'inseason_b':     'In-Season Block B — Mid/Late Season'
     };
-    
-    const dayCount = settings.activeDays.length || 6;
-    const volumeNote = season === 'inseason' ? ' (volumes reduced)' : '';
-    
+    const dayCount = settings.activeDays ? settings.activeDays.length : 5;
     if (window._isCustomProgram && window._selectedCustomWorkoutName) {
       statusDiv.innerHTML = `Custom Workout: ${window._selectedCustomWorkoutName}`;
     } else {
-      statusDiv.innerHTML = `${seasonNames[season] || 'Off-Season'} · ${dayCount} days/week${volumeNote}`;
+      statusDiv.innerHTML = `${seasonNames[season] || 'Early Off-Season — Foundation & Strength'} · ${dayCount} days/week`;
     }
-  } catch (e) {
-    statusDiv.innerHTML = 'Off-Season — Maximum Development · 6 days/week';
+  } catch(e) {
+    statusDiv.innerHTML = 'Early Off-Season — Foundation & Strength · 5 days/week';
   }
 }
 
@@ -8605,3 +8620,75 @@ window.addEventListener('load', async () => {
 
 </body>
 </html>
+// ── SETUP WIZARD ─────────────────────────────────────────────────────────
+let _wizAge = 'bantam';
+let _wizSeason = 'earlyoffseason';
+
+function showSetupWizard() {
+  const w = document.getElementById('setupWizard');
+  if (w) { w.style.setProperty('display','flex','important'); }
+}
+
+function dismissWizard() {
+  const w = document.getElementById('setupWizard');
+  if (w) w.style.setProperty('display','none','important');
+  localStorage.setItem('trainrWizardDone', '1');
+}
+
+function wizSetAge(age) {
+  _wizAge = age;
+  // Highlight selected
+  document.querySelectorAll('#wizStep1 .wiz-opt').forEach(b => {
+    b.style.borderColor = b.onclick.toString().includes(age) ? 'var(--primary-color)' : '#333';
+    b.style.background = b.onclick.toString().includes(age) ? 'rgba(var(--primary-rgb),0.1)' : '#0d0d0d';
+  });
+  setTimeout(() => {
+    document.getElementById('wizStep1').style.display = 'none';
+    document.getElementById('wizStep2').style.display = 'block';
+  }, 300);
+}
+
+function wizSetSeason(season) {
+  _wizSeason = season;
+  const dayMap = {
+    earlyoffseason: ['Mon','Tue','Thu','Fri','Sat'],
+    lateoffseason:  ['Mon','Tue','Thu','Fri','Sat'],
+    preseason:      ['Mon','Tue','Thu','Sat'],
+    inseason_a:     ['Mon','Wed','Fri'],
+    inseason_b:     ['Mon','Wed','Fri']
+  };
+  const days = dayMap[season] || dayMap.earlyoffseason;
+  const dayEl = document.getElementById('wizDayDisplay');
+  if (dayEl) {
+    dayEl.innerHTML = days.map(d =>
+      `<span style="background:var(--primary-color);color:var(--secondary-color);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;padding:6px 14px;border-radius:6px;text-transform:uppercase;">${d}</span>`
+    ).join('');
+  }
+  document.getElementById('wizStep2').style.display = 'none';
+  document.getElementById('wizStep3').style.display = 'block';
+}
+
+function wizFinish() {
+  // Apply settings from wizard to customize panel
+  const seasonEl = document.getElementById('cust-season');
+  const ageEl = document.getElementById('cust-age');
+  if (seasonEl) seasonEl.value = _wizSeason;
+  if (ageEl) ageEl.value = _wizAge;
+  syncDaysToSeason();
+  applyCustomization();
+  dismissWizard();
+  // Navigate to Program tab
+  showSec('schedule');
+}
+
+function checkShowWizard() {
+  // Show wizard for new players who haven't set up yet
+  const role = window._userRole;
+  const done = localStorage.getItem('trainrWizardDone');
+  const hasSettings = localStorage.getItem('tigersCustomSettings');
+  if (role === 'player' && !done && !hasSettings) {
+    setTimeout(showSetupWizard, 800);
+  }
+}
+
+
