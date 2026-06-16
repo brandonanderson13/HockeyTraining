@@ -334,7 +334,7 @@ select:focus{border-color:var(--or);outline:none;}
   </div>
 </div>
 
-<div id="overview" class="sec" style="display:none;">
+<div id="overview" style="display:none;">
   <div style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:16px;margin-bottom:1rem;">
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);margin-bottom:8px;">⚡ Quick Start</div>
     <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:10px;">
@@ -551,7 +551,92 @@ select:focus{border-color:var(--or);outline:none;}
       <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,0.7);">⚙ Customize Program</span>
       <span id="customizeChev" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.3);transition:transform .2s;">▼</span>
     </button>
-    <div id="customizePanel" style="display:none;border:1px solid #333;border-top:none;border-radius:0 0 8px 8px;background:#111;padding:16px;"></div>
+    <div id="customizePanel" style="display:block;border:1px solid #333;border-top:none;border-radius:0 0 8px 8px;background:#111;padding:16px;">
+  <div style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:16px;margin-bottom:1rem;">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);margin-bottom:8px;">⚡ Quick Start</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:10px;">
+      First time? Select your <strong>age group</strong> and <strong>training days</strong> below, then hit <strong>Apply Settings</strong>. The program adjusts automatically.
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button onclick="showSec('baseline');" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Start Testing →</button>
+    </div>
+  </div>
+  
+  <div class="ibox"><strong>Program Goal:</strong> Build hockey-ready athletes year-round with cyclable training phases of structured off-ice training.
+    <div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,0.65);line-height:1.6;">
+      <strong style="color:var(--primary-color);">How it works:</strong> Three progressive 4-week phases. <strong>Foundation</strong> builds movement quality and clean technique. <strong>Development</strong> adds strength, volume, and advanced skills. <strong>Performance</strong> converts everything into game-speed power.
+    </div>
+    <div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,0.65);line-height:1.6;">
+      <strong style="color:var(--primary-color);">Why it works:</strong> Every session pairs strength or conditioning with hockey-specific skills — stickhandling and shooting are integrated into every training day so the gains transfer directly to the ice. Volume and intensity progress week by week to drive real adaptation. Customizable by age, available days, and goals so each player trains at the right level.
+    </div>
+  </div>
+  <div class="g3">
+    <div class="pc">
+      <div class="pct">
+        <div class="pn">Off-Season Program</div>
+        <div class="pt">Maximum Development</div>
+        <div class="pw">6 days/week · Full volume</div>
+      </div>
+      <div class="pcb">
+        <span class="ptag ptago">Strength Building</span>
+        <span class="ptag">Power Development</span>
+        <span class="ptag ptago">High Volume</span>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">
+        This is when you make the biggest gains. Train 6 days/week with full volumes. Progress through all 12 weeks, then restart the cycle. Use the heavier weights and push intensity in Weeks 9-12.
+      </div>
+    </div>
+    
+    <div class="pc">
+      <div class="pct">
+        <div class="pn">Pre-Season Program</div>
+        <div class="pt">Intensity Ramp</div>
+        <div class="pw">5 days/week · Peak preparation</div>
+      </div>
+      <div class="pcb">
+        <span class="ptag ptago">Game Speed</span>
+        <span class="ptag">Conditioning Peak</span>
+        <span class="ptag ptago">Power Focus</span>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">
+        4-6 weeks before season starts, ramp up intensity. Train 5 days/week. Focus on Weeks 9-12 exercises (performance phase) to peak your power and conditioning right before games begin.
+      </div>
+    </div>
+    
+    <div class="pc">
+      <div class="pct">
+        <div class="pn">In-Season Program</div>
+        <div class="pt">Maintenance</div>
+        <div class="pw">3 days/week · Reduced volume</div>
+      </div>
+      <div class="pcb">
+        <span class="ptag ptago">Strength Maintenance</span>
+        <span class="ptag">Injury Prevention</span>
+        <span class="ptag ptago">Recovery Focus</span>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">
+        During games, train 3 days/week (Mon/Thu/Sat recommended). All volumes automatically reduce by 1 set. Use Weeks 1-4 exercises only. Goal: maintain strength without adding fatigue.
+      </div>
+    </div>
+  </div>
+
+    <div class="card" style="margin-bottom:1rem;">
+    <div class="ch"><span class="cht">Weekly Training Split</span><span class="chs" id="overview-split-subtitle">5 training days/week · Balanced focus</span></div>
+    <div class="cb" id="overview-split">
+      <div class="dr"><span class="dl">Mon</span><div><span class="dtag ts">Lower Body</span><span class="dtag ta">Agility</span><span class="dtag tk">Stickhandling</span></div></div>
+      <div class="dr"><span class="dl">Tue</span><div><span class="dtag tk">Shooting</span><span class="dtag ts">Stickhandling</span><span class="dtag tc">Conditioning</span></div></div>
+      <div class="dr"><span class="dl">Wed</span><div><span class="dtag tr">Active Recovery</span></div></div>
+      <div class="dr"><span class="dl">Thu</span><div><span class="dtag ts">Upper Body</span><span class="dtag ta">Core</span><span class="dtag tk">Stickhandling</span></div></div>
+      <div class="dr"><span class="dl">Fri</span><div><span class="dtag tk">Full Skills</span><span class="dtag tc">Conditioning</span></div></div>
+      <div class="dr"><span class="dl">Sat</span><div><span class="dtag ts">Total Body</span><span class="dtag tk">Shooting Volume</span></div></div>
+      <div class="dr"><span class="dl">Sun</span><div><span class="dtag tr">Rest</span></div></div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="card" style="margin-bottom:0;"><div class="ch"><span class="cht">Equipment</span><span class="chs" id="equip-subtitle">Bantam (15U) tier</span></div><div class="cb" id="equip-list" style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.9;"></div></div>
+    <div class="card" style="margin-bottom:0;"><div class="ch"><span class="cht">Coaches' Notes</span></div><div class="cb" style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.9;">Always warm up 5–8 min first<br>Form over weight — always<br>Rest 60–90 sec between sets<br>Hydrate throughout every session<br>Skip or modify if injured<br>Aim for 7–9 hours sleep nightly</div></div>
+  </div>
+</div>
   </div>
   <div id="schedBanner"></div>
 
@@ -4042,22 +4127,8 @@ function toggleProgramCustomize() {
   const panel = document.getElementById('customizePanel');
   const chev = document.getElementById('customizeChev');
   const open = panel.style.display === 'none';
-  if (open) {
-    if (!panel._loaded) {
-      // Copy overview content into panel
-      const overview = document.getElementById('overview');
-      if (overview) {
-        panel.innerHTML = overview.innerHTML;
-        panel._loaded = true;
-        loadCustomSettings();
-      }
-    }
-    panel.style.display = 'block';
-    if (chev) chev.style.transform = 'rotate(180deg)';
-  } else {
-    panel.style.display = 'none';
-    if (chev) chev.style.transform = '';
-  }
+  panel.style.display = open ? 'block' : 'none';
+  if (chev) chev.style.transform = open ? 'rotate(180deg)' : '';
 }
 
 function toggleWeek(wdiv) {
@@ -4106,21 +4177,7 @@ function showSec(id){
   // Update program status when Training Plan is shown
   if (id === 'schedule') {
     setTimeout(updateProgramStatus, 100);
-    // Auto-populate customize panel if not loaded
-    setTimeout(() => {
-      const panel = document.getElementById('customizePanel');
-      if (panel && !panel._loaded) {
-        const overview = document.getElementById('overview');
-        if (overview) {
-          panel.innerHTML = overview.innerHTML;
-          panel._loaded = true;
-          loadCustomSettings();
-        }
-        panel.style.display = 'block';
-        const chev = document.getElementById('customizeChev');
-        if (chev) chev.style.transform = 'rotate(180deg)';
-      }
-    }, 50);
+    loadCustomSettings();
   }
   
   // Load leaderboard with org parameter and date filters if set
