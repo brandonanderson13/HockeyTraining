@@ -3137,6 +3137,16 @@ function filterDashByTeam(teamId) {
 }
 
 // ── ASSIGNMENT MODAL ──────────────────────────────────────────────────────
+function buildPlayerChecks(players, selectedId, cls) {
+  return (players||[]).map(p => {
+    const n = [p.first_name,p.last_name].filter(Boolean).join(' ') || p.email;
+    const chk = p.user_id === selectedId ? 'checked' : '';
+    return '<label style="display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:4px;cursor:pointer;">'
+      + '<input type="checkbox" class="'+cls+'" value="'+p.user_id+'" '+chk+' style="width:14px;height:14px;accent-color:var(--primary-color);cursor:pointer;">'
+      + '<span style="font-size:13px;color:rgba(255,255,255,0.75);">'+n+'</span></label>';
+  }).join('');
+}
+
 function openAssignModal(playerId, playerName, isAll) {
   const existing = document.getElementById('dashModal');
   if (existing) existing.remove();
@@ -3166,8 +3176,10 @@ function openAssignModal(playerId, playerName, isAll) {
             <button type="button" id="modeSel" onclick="dashSetMode('select')" style="flex:1;padding:7px;background:${!allMode?'var(--primary-color)':'transparent'};border:none;color:${!allMode?'#fff':'rgba(255,255,255,0.4)'};font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">Select Players</button>
           </div>
           <div id="modeSelDiv" style="display:${allMode?'none':'block'};">
-            <select id="mAssignTo" multiple style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;min-height:90px;">${playerOpts}</select>
-            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;">Hold Ctrl/Cmd to select multiple</div>
+            <div id="aPlayerList" style="max-height:160px;overflow-y:auto;background:#0d0d0d;border:1px solid #333;border-radius:6px;padding:6px;">
+              ${buildPlayerChecks(_dashPlayers, playerId, "aPlayerCheck")}
+            </div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;">Check all players you want to assign this task to</div>
           </div>
           <div id="modeAllDiv" style="display:${allMode?'block':'none'};font-size:12px;color:rgba(255,255,255,0.5);padding:8px 10px;background:#0d0d0d;border:1px solid #222;border-radius:6px;">Will assign to all ${_dashPlayers.length} players</div>
         </div>
@@ -3364,8 +3376,10 @@ function openGoalModal(playerId, playerName, isAll) {
             <button type="button" id="gModeSel" onclick="goalSetMode('select')" style="flex:1;padding:7px;background:${!allMode?'#60a5fa':'transparent'};border:none;color:${!allMode?'#fff':'rgba(255,255,255,0.4)'};font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">Select Players</button>
           </div>
           <div id="gSelDiv" style="display:${allMode?'none':'block'};">
-            <select id="gPlayer" multiple style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;min-height:90px;">${playerOpts}</select>
-            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;">Hold Ctrl/Cmd to select multiple</div>
+            <div id="gPlayerList" style="max-height:160px;overflow-y:auto;background:#0d0d0d;border:1px solid #333;border-radius:6px;padding:6px;">
+              ${buildPlayerChecks(_dashPlayers, playerId, "gPlayerCheck")}
+            </div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;">Check all players you want to assign this goal to</div>
           </div>
           <div id="gAllDiv" style="display:${allMode?'block':'none'};font-size:12px;color:rgba(255,255,255,0.5);padding:8px 10px;background:#0d0d0d;border:1px solid #222;border-radius:6px;">Will assign to all ${_dashPlayers.length} players</div>
         </div>` : ''}
@@ -3373,7 +3387,7 @@ function openGoalModal(playerId, playerName, isAll) {
         <div>
           <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Goal Type</label>
           <div style="display:flex;gap:0;background:#0d0d0d;border:1px solid #222;border-radius:6px;overflow:hidden;">
-            <button type="button" id="gTypeCheck" onclick="goalSetType('checkbox')" style="flex:1;padding:7px;background:#60a5fa;border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">✓ Check Off</button>
+            <button type="button" id="gTypeCheck" onclick="goalSetType('checkbox')" style="flex:1;padding:7px;background:var(--primary-color);border:none;color:var(--secondary-color);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">✓ Check Off</button>
             <button type="button" id="gTypeNum" onclick="goalSetType('numeric')" style="flex:1;padding:7px;background:transparent;border:none;color:rgba(255,255,255,0.4);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">123 Numeric</button>
             <button type="button" id="gTypeTrack" onclick="goalSetType('tracked')" style="flex:1;padding:7px;background:transparent;border:none;color:rgba(255,255,255,0.4);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">📊 Tracked</button>
           </div>
@@ -3453,7 +3467,7 @@ function goalSetType(t) {
     if (btn) { btn.style.background='transparent'; btn.style.color='rgba(255,255,255,0.4)'; }
   });
   const active = document.getElementById(t==='checkbox'?'gTypeCheck':t==='numeric'?'gTypeNum':'gTypeTrack');
-  if (active) { active.style.background='#60a5fa'; active.style.color='#fff'; }
+  if (active) { active.style.background='var(--primary-color)'; active.style.color='var(--secondary-color)'; }
   document.getElementById('gNumericFields').style.display = t==='numeric' ? 'block' : 'none';
   document.getElementById('gTrackedFields').style.display = t==='tracked' ? 'block' : 'none';
   const nameInput = document.getElementById('gName');
@@ -3507,6 +3521,7 @@ async function saveGoal() {
     if (!trackedMetric) { showMsg('Please select a metric to track.', 'red'); return; }
     if (!targetValue) { showMsg('Please enter a target number.', 'red'); return; }
   }
+  // checkbox type needs no target value — just mark complete
   const currentValue = type === 'numeric' ? (parseFloat(document.getElementById('gCurrent')?.value) || 0) : 0;
 
   // Determine player IDs
@@ -3517,8 +3532,8 @@ async function saveGoal() {
     if (isAll) {
       playerIds = _dashPlayers.map(p => p.user_id);
     } else {
-      const sel = document.getElementById('gPlayer');
-      playerIds = sel ? Array.from(sel.selectedOptions).map(o=>o.value).filter(Boolean) : [];
+      const checks = document.querySelectorAll('.gPlayerCheck:checked');
+      playerIds = Array.from(checks).map(c => c.value).filter(Boolean);
     }
     if (!playerIds.length) { showMsg('Please select at least one player.', 'red'); return; }
   } else {
