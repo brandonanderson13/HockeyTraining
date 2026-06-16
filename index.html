@@ -569,7 +569,7 @@ select:focus{border-color:var(--or);outline:none;}
 
         <div>
           <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Season Phase</label>
-          <select id="cust-season" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;">
+          <select id="cust-season" onchange="syncDaysToSeason()" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;">
             <option value="offseason" selected>Off-Season — Build (5 days/wk)</option>
             <option value="preseason">Pre-Season — Peak (4 days/wk)</option>
             <option value="inseason">In-Season — Maintain (3 days/wk)</option>
@@ -5034,6 +5034,20 @@ function toggleCustomize(){
   if(arrow) arrow.style.transform=open?'rotate(90deg)':'';
 }
 
+
+function syncDaysToSeason() {
+  const season = document.getElementById('cust-season')?.value || 'offseason';
+  const dayMap = {
+    offseason: ['Monday','Tuesday','Thursday','Friday','Saturday'],
+    preseason: ['Monday','Tuesday','Thursday','Friday'],
+    inseason:  ['Monday','Wednesday','Friday']
+  };
+  const activeDays = dayMap[season] || dayMap.offseason;
+  document.querySelectorAll('.day-toggle input[type=checkbox]').forEach(cb => {
+    cb.checked = activeDays.includes(cb.value);
+  });
+}
+
 function applyCustomization(){
   console.log('applyCustomization called');
   
@@ -5042,8 +5056,8 @@ function applyCustomization(){
   
   // Validate day count based on season
   const requiredDays = {
-    'offseason': 6,
-    'preseason': 5,
+    'offseason': 5,
+    'preseason': 4,
     'inseason': 3
   };
   
