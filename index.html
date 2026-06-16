@@ -228,7 +228,6 @@ select:focus{border-color:var(--or);outline:none;}
   overflow-x: auto !important;
   max-width: 100%;
   scrollbar-gutter: stable;
-  direction: rtl;
   border: 1px solid #1a1a1a;
   border-radius: 8px;
   background: #0d0d0d;
@@ -6435,11 +6434,7 @@ async function loadAdminPanel(user) {
             <option value="player">Players Only</option>
             <option value="coach">Coaches Only</option>
           </select>
-          <select id="statusFilter" onchange="filterPlayers()" style="background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:6px 10px;border-radius:4px;">
-            <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
+
           <select id="teamFilter" onchange="filterPlayers()" style="background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:6px 10px;border-radius:4px;">
             <option value="">All Teams</option>
           </select>
@@ -7032,7 +7027,7 @@ let allPlayers = []; // Store all player data for filtering
 function filterPlayers() {
   const search = document.getElementById('playerSearch').value.toLowerCase();
   const roleFilter = document.getElementById('roleFilter').value;
-  const statusFilter = document.getElementById('statusFilter').value;
+  const statusFilter = '';
   const teamFilter = document.getElementById('teamFilter')?.value || '';
 
   const filtered = allPlayers.filter(p => {
