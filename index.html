@@ -1558,6 +1558,25 @@ select:focus{border-color:var(--or);outline:none;}
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
 // SUPABASE AUTH CHECK - Verifies user is logged in with active subscription
+// ── EARLY STUBS — defined before auth runs so onload callbacks can use them ──
+function showRenewalWall(email, reason) {
+  // Full implementation defined later — this stub queues until DOM ready
+  window._pendingRenewalWall = { email, reason };
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.showRenewalWallFull) window.showRenewalWallFull(email, reason);
+  });
+  // Try immediately in case DOM is already ready
+  if (document.readyState !== 'loading' && window.showRenewalWallFull) {
+    window.showRenewalWallFull(email, reason);
+  }
+}
+function checkShowWizard() {
+  window._pendingWizardCheck = true;
+  if (document.readyState !== 'loading' && window.checkShowWizardFull) {
+    window.checkShowWizardFull();
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY';
@@ -1638,6 +1657,9 @@ Check Supabase Table Editor:
         return;
       }
       
+      // Super admin bypasses expiry — they need access to manage everything
+      const _isSA = (user.email === 'brandonanderson1393@gmail.com');
+
       // Check expiration — use org-level for association members, row-level for individuals
       const _expOrgId = userSub.organization_id || 'individual';
       const _expRole = userSub.role || 'player';
@@ -1645,13 +1667,17 @@ Check Supabase Table Editor:
       const _isAssocAdmin = _expOrgId !== 'individual' && (_expRole === 'admin' || _expRole === 'super_admin');
 
       try {
-        if (_isAssocMember || _isAssocAdmin) {
+        if (_isSA) {
+          console.log('Super admin — bypassing expiry check');
+        } else if (_isAssocMember || _isAssocAdmin) {
           // Check org-level expiry
           const { data: orgData } = await supabase.from('organizations').select('expires_at, status').eq('id', _expOrgId).single();
+          console.log('Org expiry check:', _expOrgId, orgData);
           if (orgData) {
             const orgExpired = orgData.expires_at && new Date(orgData.expires_at) < new Date();
             // Only treat as inactive if status is explicitly 'cancelled' or 'expired' — not null
             const orgInactive = orgData.status === 'cancelled' || orgData.status === 'expired';
+            console.log('orgExpired:', orgExpired, 'orgInactive:', orgInactive);
             if (orgExpired || orgInactive) {
               if (_isAssocAdmin) {
                 await supabase.from('organizations').update({ status: 'expired' }).eq('id', _expOrgId);
@@ -8777,7 +8803,8 @@ function wizFinish() {
   showSec('schedule');
 }
 
-function checkShowWizard() {
+function checkShowWizardFull() {
+  window.checkShowWizardFull = checkShowWizardFull;
   // Show wizard for new players who haven't set up yet
   const role = window._userRole;
   const done = localStorage.getItem('trainrWizardDone');
@@ -8789,7 +8816,8 @@ function checkShowWizard() {
 
 
 // ── RENEWAL WALL ──────────────────────────────────────────────────────────
-function showRenewalWall(email, reason) {
+function showRenewalWallFull(email, reason) {
+  window.showRenewalWallFull = showRenewalWallFull;
   const wall = document.getElementById('renewalWall');
   if (!wall) return;
 
@@ -8857,5 +8885,16 @@ async function renewalSignOut() {
   } catch(e) {}
   window.location.href = 'login.html';
 }
+
+
+// Flush any pending calls that happened before DOM was ready
+document.addEventListener('DOMContentLoaded', function() {
+  if (window._pendingRenewalWall && window.showRenewalWallFull) {
+    window.showRenewalWallFull(window._pendingRenewalWall.email, window._pendingRenewalWall.reason);
+  }
+  if (window._pendingWizardCheck && window.checkShowWizardFull) {
+    window.checkShowWizardFull();
+  }
+});
 
 
