@@ -10,7 +10,7 @@
 :root{--primary-color:#E07820;--primary-rgb:224, 120, 32;--or:#E07820;--orl:#E07820;--secondary-color:#ffffff;--bk:#0D0D0D;--ch:#1a1a1a;--g2:#222;--g3:#2a2a2a;--white:#fff;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh;}
-.wrap{max-width:1100px;margin:0 auto;padding:1.5rem;overflow-x:hidden;}
+.wrap{max-width:1100px;margin:0 auto;padding:1.5rem;}
 
 /* HEADER */
 .hdr{background:var(--bk);border-radius:12px;overflow:hidden;margin-bottom:1.5rem;border:1px solid var(--g3);}
@@ -3980,7 +3980,7 @@ function showSec(id){
   }
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   const sec = document.getElementById(id);
-  if(sec) sec.classList.add('active');
+  if(sec) { sec.classList.add('active'); window.scrollTo(0,0); }
   
   // Update button active states
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
