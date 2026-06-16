@@ -1696,7 +1696,7 @@ Check Supabase Table Editor:
       // Navigate to landing tab
       const landingTab = (userSub?.role === 'player') ? 'home' : 'dashboard';
       showSec(landingTab);
-      checkShowWizard();
+      try { checkShowWizard(); } catch(e) { console.warn('Wizard check error:', e); }
 
       // Add a logout button to the header
       addLogoutButton(supabase, user, isAdmin);
@@ -5459,6 +5459,7 @@ function adjustVolumeForSeason(volumeStr) {
 
 
 function updateProgramStatus() {
+  try {
   const statusDiv = document.getElementById('programStatus');
   if (!statusDiv) return;
   try {
@@ -5479,8 +5480,9 @@ function updateProgramStatus() {
       statusDiv.innerHTML = `${seasonNames[season] || 'Early Off-Season — Foundation & Strength'} · ${dayCount} days/week`;
     }
   } catch(e) {
-    statusDiv.innerHTML = 'Early Off-Season — Foundation & Strength · 5 days/week';
+    if(statusDiv) statusDiv.innerHTML = 'Early Off-Season — Foundation & Strength · 5 days/week';
   }
+  } catch(e) { console.warn('updateProgramStatus error:', e); }
 }
 
 function renderWeeks(){
