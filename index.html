@@ -1885,91 +1885,91 @@ function addLogoutButton(supabase, user, isAdmin) {
 const phases={
   1:{label:'Phase 1 — Foundation (Wks 1–4)',desc:'Build the foundation. Focus on form and consistency — every rep counts. Skill work is integrated into every session from day one.',color:'#60a5fa',weeks:[
     {num:1,focus:'Establishing Movement Patterns',days:[
-      {n:'Monday',t:'Lower Body + Agility',items:[['Goblet Squat','4×12'],['Romanian Deadlift','4×10'],['Lateral Lunge','3×12 each'],['Calf Raises','4×20'],['Cone Shuffle','4×30s'],['Crossover Run','4×25 yds']]},
-      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — Mechanics Focus','4×20 shots'],['Snap Shot — Short Backswing','4×15 shots'],['Backhand Shots','3×15 shots'],['Speed Taps (30s)','4 sets — count and record'],['Shuttle Runs','5 rounds'],['Burpees','4×12']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','4×10'],['Bent-Over Row','4×10'],['Shoulder Press','3×12'],['Plank','4×45s'],['Dead Bug','3×12 each'],['Russian Twists','4×20']]},
-      {n:'Friday',t:'Full Skills + Conditioning',items:[['Cone Weave with Puck','6 runs — timed'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Snap Shot','4×15 shots'],['Lateral Bound Intervals','8 rounds'],['Shuttle Runs','5 rounds'],['Burpees','3×10']]},
-      {n:'Saturday',t:'Total Body + Shooting Volume',items:[['Goblet Squat','4×12'],['Push-Up','4×15'],['Bent-Over Row','4×10'],['Wrist Shot — 50-shot session','Log total'],['Speed Taps (30s)','4 sets — count and record'],['Side Plank','3×30s each']]}
+      {n:'Monday',t:'Lower Body + Agility',items:[['Goblet Squat','4×12'],['Romanian Deadlift','4×10'],['Lateral Lunge','3×10 each'],['Calf Raises','3×20'],['Cone Shuffle','3×30s'],['Broad Jump','3×5']]},
+      {n:'Tuesday',t:'Upper Body + Core',items:[['Push-Up','4×12'],['Dumbbell Row','4×10 each'],['Shoulder Press','3×10'],['Plank','3×40s'],['Dead Bug','3×10 each'],['Mountain Climbers','3×15']]},
+      {n:'Thursday',t:'Lower Body + Power',items:[['Step-Up with Knee Drive','3×10 each'],['Lateral Lunge','3×10 each'],['Box Jump','3×5'],['Calf Raises','3×20'],['5-10-5 Shuttle','4 runs'],['Lateral Bound','3×6 each']]},
+      {n:'Friday',t:'Upper Body + Conditioning',items:[['Push-Up','4×12'],['Bent-Over Row','4×10'],['Bicep Curl','3×12'],['Tricep Dip','3×10'],['Burpees','3×10'],['Shuttle Runs','4 rounds']]},
+      {n:'Saturday',t:'Full Body Circuit',items:[['Goblet Squat','3×12'],['Push-Up','3×12'],['Dumbbell Row','3×10 each'],['Box Jump','3×5'],['Plank','3×40s'],['Burpees','3×8']]}
     ]},
     {num:2,focus:'Adding Volume & Consistency',days:[
-      {n:'Monday',t:'Lower Body + Agility',items:[['Goblet Squat','4×12'],['Romanian Deadlift','4×10'],['Step-Up with Knee Drive','4×10 each'],['Calf Raises','4×20'],['Box Drill','4×60s'],['Lateral Bound','4×8 each']]},
-      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','4×10 shots — log score'],['Snap Shot','4×15 shots'],['Backhand Shots','4×12 shots'],['Speed Taps (30s)','4 sets — count and record'],['Shuttle Runs','6 rounds'],['Burpees','4×12']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','4×10'],['Renegade Row','3×10 each'],['Shoulder Press','4×10'],['Plank','4×50s'],['Dead Bug','3×14 each'],['Russian Twists','4×20'],['Burpees','3×10']]},
-      {n:'Friday',t:'Full Skills + Conditioning',items:[['Cone Weave with Puck','6 runs — timed'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Snap Shot','4×15 shots'],['Backhand Shots','3×12 shots'],['Lateral Bound Intervals','8 rounds'],['Shuttle Runs','5 rounds'],['Jump Rope','3×90s']]},
-      {n:'Saturday',t:'Total Body + Shooting Volume',items:[['Bulgarian Split Squat','4×10 each'],['Push-Up','4×15'],['Bent-Over Row','4×12'],['Wrist Shot — 60-shot session','Log total'],['Speed Taps (30s)','4 sets — count and record'],['Side Plank','3×35s each']]}
+      {n:'Monday',t:'Lower Body + Agility',items:[['Goblet Squat','4×12'],['Romanian Deadlift','4×10'],['Step-Up with Knee Drive','3×10 each'],['Calf Raises','3×20'],['Box Drill','3×45s'],['Lateral Bound','3×8 each']]},
+      {n:'Tuesday',t:'Upper Body + Core',items:[['Push-Up','4×15'],['Dumbbell Row','4×10 each'],['Shoulder Press','3×12'],['Plank','3×45s'],['Dead Bug','3×12 each'],['Russian Twists','3×20']]},
+      {n:'Thursday',t:'Lower Body + Power',items:[['Bulgarian Split Squat','3×10 each'],['Romanian Deadlift','4×10'],['Box Jump','3×6'],['5-10-5 Shuttle','5 runs'],['Lateral Bound','3×8 each'],['Calf Raises','3×20']]},
+      {n:'Friday',t:'Upper Body + Conditioning',items:[['Push-Up','4×15'],['Bent-Over Row','4×10'],['Renegade Row','3×8 each'],['Burpees','4×10'],['Shuttle Runs','5 rounds'],['Jump Rope','3×1 min']]},
+      {n:'Saturday',t:'Full Body Circuit',items:[['Bulgarian Split Squat','3×10 each'],['Push-Up','3×15'],['Dumbbell Row','3×10 each'],['Box Jump','3×6'],['Plank','3×45s'],['Burpees','3×10']]}
     ]},
     {num:3,focus:'Building Strength & Control',days:[
-      {n:'Monday',t:'Lower Body + Agility',items:[['Bulgarian Split Squat','4×10 each'],['Romanian Deadlift','4×12'],['Lateral Lunge','3×12 each'],['Ladder Drills','5×full'],['5-10-5 Shuttle','5 runs — timed'],['Box Jump','4×6']]},
-      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','4×10 shots — log score'],['Snap Shot','4×15 shots'],['Backhand Shots','4×12 shots'],['Slap Shot — Mechanics','3×12 shots'],['Speed Taps (30s)','5 sets — count and record'],['Shuttle Runs','6 rounds'],['Burpees','4×12']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','4×10'],['Bent-Over Row','4×12'],['Bicep Curl','3×12'],['Tricep Dip','3×12'],['Plank','4×50s'],['Side Plank','3×35s each'],['Russian Twists','4×22'],['Mountain Climbers','4×20']]},
-      {n:'Friday',t:'Full Skills + Conditioning',items:[['Cone Weave with Puck','6 runs — timed'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Snap Shot','4×15 shots'],['Backhand Shots','4×12 shots'],['Lateral Bound Intervals','8 rounds'],['Jump Rope','4×90s']]},
-      {n:'Saturday',t:'Total Body + Shooting Volume',items:[['Goblet Squat','4×14'],['Push-Up','4×15'],['Renegade Row','3×10 each'],['Wrist Shot — 70-shot session','Log total'],['Speed Taps (30s)','5 sets — count and record'],['Ab Wheel','4×10']]}
+      {n:'Monday',t:'Lower Body + Agility',items:[['Bulgarian Split Squat','4×10 each'],['Romanian Deadlift','4×12'],['Lateral Lunge','3×12 each'],['Ladder Drills','4×full'],['5-10-5 Shuttle','5 runs'],['Box Jump','3×6']]},
+      {n:'Tuesday',t:'Upper Body + Core',items:[['Push-Up','4×15'],['Bent-Over Row','4×10'],['Shoulder Press','4×10'],['Ab Wheel','3×10'],['Plank','4×45s'],['Mountain Climbers','3×20']]},
+      {n:'Thursday',t:'Lower Body + Power',items:[['Goblet Squat','4×14'],['Nordic Curl (or Hamstring Curl)','3×6'],['Depth Jump','3×6'],['Broad Jump','4×5'],['5-10-5 Shuttle','5 runs'],['Lateral Bound','4×8 each']]},
+      {n:'Friday',t:'Upper Body + Conditioning',items:[['Push-Up','4×15'],['Renegade Row','3×10 each'],['Tricep Dip','3×12'],['Burpees','4×12'],['Shuttle Runs','5 rounds'],['Jump Rope','3×90s']]},
+      {n:'Saturday',t:'Full Body Circuit',items:[['Bulgarian Split Squat','3×12 each'],['Push-Up','4×15'],['Bent-Over Row','4×10'],['Box Jump','3×6'],['Ab Wheel','3×10'],['Burpees','3×10']]}
     ]},
     {num:4,focus:'Foundation Peak — Prep for Phase 2',days:[
-      {n:'Monday',t:'Lower Body + Agility',items:[['Bulgarian Split Squat','4×12 each'],['Romanian Deadlift','4×12'],['Step-Up with Knee Drive','3×12 each'],['5-10-5 Shuttle','6 runs — timed'],['Box Drill','5×60s'],['Box Jump','4×8']]},
-      {n:'Tuesday',t:'Shooting Focus Day',items:[['Wrist Shot — 100-shot session','Log all types'],['Snap Shot','4×20 shots'],['Backhand Shots','4×15 shots'],['Slap Shot','3×15 shots'],['Speed Taps (30s)','5 sets — count and record'],['Shuttle Runs','6 rounds'],['Burpees','4×12']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','4×12'],['Bent-Over Row','4×12'],['Shoulder Press','4×10'],['Ab Wheel','4×12'],['Dead Bug','3×14 each'],['Plank','4×55s'],['Mountain Climbers','4×22']]},
-      {n:'Friday',t:'Full Skills + Conditioning',items:[['Cone Weave with Puck','6 runs — timed'],['Wrist Shot — 5-spot accuracy','10 shots — log score'],['Snap Shot','4×20 shots'],['Backhand Shots','4×15 shots'],['Shuttle Runs','6 rounds'],['Jump Rope','4×90s'],['Burpees','4×12']]},
-      {n:'Saturday',t:'Full Body + Shooting Volume',items:[['Goblet Squat','4×14'],['Dumbbell Bench Press','4×12'],['Bent-Over Row','4×12'],['Plank','4×55s'],['Wrist Shot — 80-shot session','Log total'],['Speed Taps (30s)','5 sets — count and record']]}
+      {n:'Monday',t:'Lower Body + Agility',items:[['Bulgarian Split Squat','4×12 each'],['Romanian Deadlift','4×12'],['Box Jump','4×8'],['5-10-5 Shuttle','6 runs'],['Ladder Drills','5×full'],['Lateral Bound','4×8 each']]},
+      {n:'Tuesday',t:'Upper Body + Core',items:[['Push-Up','5×15'],['Bent-Over Row','5×10'],['Shoulder Press','4×10'],['Ab Wheel','4×10'],['Plank','4×55s'],['Mountain Climbers','4×20']]},
+      {n:'Thursday',t:'Lower Body + Power',items:[['Goblet Squat','5×12'],['Nordic Curl (or Hamstring Curl)','3×8'],['Depth Jump','4×8'],['Broad Jump','4×6'],['Box Drill','4×45s'],['Calf Raises','4×20']]},
+      {n:'Friday',t:'Upper Body + Conditioning',items:[['Push-Up','5×15'],['Renegade Row','4×10 each'],['Tricep Dip','4×12'],['Burpees','4×12'],['Shuttle Runs','6 rounds'],['Jump Rope','4×90s']]},
+      {n:'Saturday',t:'Full Body Test',items:[['Bulgarian Split Squat','4×12 each'],['Push-Up — max reps','2 sets'],['Bent-Over Row','4×12'],['Box Jump — max height','3×6'],['Plank — max hold','2 sets'],['Burpees','4×10']]}
     ]}
   ]},
   2:{label:'Phase 2 — Development (Wks 5–8)',desc:'Step it up. Harder movements, more volume, advanced skill work. This phase bridges foundation training with game-ready performance.',color:'#4ade80',weeks:[
-    {num:5,focus:'Increasing Load & Skill',days:[
-      {n:'Monday',t:'Lower Body + Power',items:[['Barbell/DB Squat','4×8'],['Romanian Deadlift','4×10'],['Walking Lunge','3×12 each'],['Calf Raises','4×25'],['Box Jump','4×8'],['5-10-5 Shuttle','6 runs — timed']]},
-      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','5×10 shots — log score'],['Snap Shot','4×20 shots'],['Backhand Toe Drag Shot','3×15 shots'],['Speed Taps (30s)','5 sets — count and record'],['Shuttle Runs','6 rounds'],['Burpees','4×15']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','4×10'],['Pull-Up or Lat Pulldown','4×8'],['Shoulder Press','4×10'],['Farmer Carry','3×40 yds'],['Plank','4×55s'],['Ab Wheel','4×12'],['Russian Twists','4×24']]},
-      {n:'Friday',t:'Full Skills + Conditioning',items:[['Cone Weave with Puck — Speed','6 runs — timed'],['Wrist Shot','5×10 shots — log score'],['Backhand Shots','4×15 shots'],['Slap Shot — Power','3×15 shots'],['Lateral Bound Intervals','10 rounds'],['Jump Rope','4×90s']]},
-      {n:'Saturday',t:'Total Body + Shooting Volume',items:[['Goblet Squat','4×14'],['Push-Up','4×20'],['Bent-Over Row','4×12'],['Wrist Shot — 80-shot session','Log total'],['Speed Taps (30s)','5 sets — count and record'],['Side Plank','4×35s each']]}
+    {num:5,focus:'Increasing Load & Intensity',days:[
+      {n:'Monday',t:'Lower Body + Power',items:[['Squat (Barbell or Dumbbell)','4×8'],['Romanian Deadlift','4×10'],['Walking Lunge','3×12 each'],['Box Jump','4×8'],['5-10-5 Shuttle','6 runs'],['Broad Jump','3×6']]},
+      {n:'Tuesday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','4×10'],['Pull-Up or Lat Pulldown','4×8'],['Shoulder Press','4×10'],['Farmer Carry','3×40 yds'],['Plank','4×55s'],['Ab Wheel','4×12']]},
+      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Bulgarian Split Squat','4×10 each'],['Nordic Curl (or Hamstring Curl)','3×8'],['Depth Jump','4×8'],['Lateral Bound Intervals','8 rounds'],['5-10-5 Shuttle','6 runs'],['Broad Jump','4×6']]},
+      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','4×10'],['Bent-Over Row','4×12'],['Explosive Push-Up','3×10'],['Farmer Carry','3×40 yds'],['Burpees','4×15'],['Jump Rope','4×90s']]},
+      {n:'Saturday',t:'Full Body Circuit',items:[['Squat (Barbell or Dumbbell)','4×10'],['Pull-Up or Lat Pulldown','4×8'],['Walking Lunge','3×12 each'],['Explosive Push-Up','3×10'],['Plank','4×55s'],['Burpees','4×12']]}
     ]},
-    {num:6,focus:'Power & Skill Acceleration',days:[
-      {n:'Monday',t:'Lower Body + Power',items:[['Barbell/DB Squat','5×6'],['Romanian Deadlift','4×10'],['Single-Leg Press','3×10 each'],['Box Jump','4×8'],['Broad Jump','4×5'],['5-10-5 Shuttle','6 runs — timed']]},
-      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','5×10 shots — log score'],['Snap Shot — Rapid Fire','4×15 shots'],['Backhand Toe Drag Shot','4×15 shots'],['Speed Taps (30s)','5 sets — count and record'],['Shuttle Runs','7 rounds'],['Burpees','4×15']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','5×8'],['Pull-Up or Lat Pulldown','4×8'],['Arnold Press','3×12'],['Farmer Carry','3×50 yds'],['Plank','5×55s'],['Ab Wheel','4×12'],['Mountain Climbers','4×25']]},
-      {n:'Friday',t:'Full Skills + Conditioning',items:[['Cone Weave with Puck — Speed','7 runs — timed'],['Wrist Shot — 5-spot accuracy','5×10 shots — log score'],['Backhand Shots','4×15 shots'],['Slap Shot','4×15 shots'],['Lateral Bound Intervals','10 rounds'],['Jump Rope','5×90s']]},
-      {n:'Saturday',t:'Total Body + Shooting Volume',items:[['Barbell/DB Squat','4×10'],['Push-Up','4×20'],['Bent-Over Row','5×10'],['Wrist Shot — 100-shot session','Log total'],['Speed Taps (30s)','5 sets — count and record'],['Side Plank','4×40s each']]}
+    {num:6,focus:'Strength & Explosiveness',days:[
+      {n:'Monday',t:'Lower Body + Power',items:[['Squat (Barbell or Dumbbell)','5×6'],['Romanian Deadlift','4×10'],['Single-Leg Press','3×10 each'],['Box Jump','4×8'],['Broad Jump','4×6'],['5-10-5 Shuttle','6 runs']]},
+      {n:'Tuesday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','5×8'],['Pull-Up or Lat Pulldown','4×8'],['Arnold Press','3×12'],['Farmer Carry','3×50 yds'],['Ab Wheel','4×12'],['Mountain Climbers','4×25']]},
+      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Bulgarian Split Squat','4×12 each'],['Nordic Curl (or Hamstring Curl)','3×8'],['Depth Jump','4×8'],['Lateral Bound Intervals','10 rounds'],['Shuttle Runs','6 rounds'],['Broad Jump','4×6']]},
+      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','4×10'],['Renegade Row','4×10 each'],['Explosive Push-Up','4×10'],['Farmer Carry','4×50 yds'],['Burpees','4×15'],['Jump Rope','5×90s']]},
+      {n:'Saturday',t:'Full Body Circuit',items:[['Squat (Barbell or Dumbbell)','4×10'],['Pull-Up or Lat Pulldown','4×8'],['Bulgarian Split Squat','3×10 each'],['Explosive Push-Up','4×10'],['Plank','5×55s'],['Burpees','4×15']]}
     ]},
-    {num:7,focus:'Strength + Skill Integration',days:[
-      {n:'Monday',t:'Lower Body + Power',items:[['Barbell/DB Squat','5×6'],['Bulgarian Split Squat','4×10 each'],['Nordic Curl','3×6'],['Box Jump','5×8'],['Broad Jump','4×6'],['5-10-5 Shuttle','7 runs — timed']]},
-      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','5×10 shots — log score'],['Snap Shot — Rapid Fire','5×15 shots'],['Backhand Toe Drag Shot','4×15 shots'],['Slap Shot — Power Focus','4×12 shots'],['Speed Taps (30s)','6 sets — count and record'],['Shuttle Runs','7 rounds'],['Burpees','5×12']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','5×8'],['Pull-Up or Lat Pulldown','4×10'],['Shoulder Press','4×10'],['Farmer Carry','4×50 yds'],['Ab Wheel','5×12'],['Plank','5×60s'],['Russian Twists','4×26']]},
-      {n:'Friday',t:'Full Skills + Conditioning',items:[['Cone Weave with Puck — Speed','7 runs — timed'],['Wrist Shot — 5-spot accuracy','5×10 shots — log score'],['Backhand Shots','4×15 shots'],['Slap Shot','4×15 shots'],['Lateral Bound Intervals','12 rounds'],['Jump Rope','5×2 min']]},
-      {n:'Saturday',t:'Total Body + Shooting Volume',items:[['Barbell/DB Squat','4×12'],['Push-Up with Weight Vest/Plate','4×15'],['Bent-Over Row','5×10'],['Wrist Shot — 100-shot session','Log total'],['Speed Taps (30s)','6 sets — count and record'],['Side Plank','4×45s each']]}
+    {num:7,focus:'Strength + Power Integration',days:[
+      {n:'Monday',t:'Lower Body + Power',items:[['Squat (Barbell or Dumbbell)','5×6'],['Bulgarian Split Squat','4×10 each'],['Nordic Curl (or Hamstring Curl)','3×8'],['Box Jump','5×8'],['Broad Jump','4×6'],['5-10-5 Shuttle','7 runs']]},
+      {n:'Tuesday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','5×8'],['Pull-Up or Lat Pulldown','4×10'],['Shoulder Press','4×10'],['Farmer Carry','4×50 yds'],['Ab Wheel','5×12'],['Plank','5×60s']]},
+      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Squat (Barbell or Dumbbell)','4×8'],['Depth Jump','4×8'],['Lateral Bound Intervals','10 rounds'],['5-10-5 Shuttle','7 runs'],['Broad Jump','5×6'],['Calf Raises','4×25']]},
+      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','5×8'],['Explosive Push-Up','4×12'],['Renegade Row','4×10 each'],['Farmer Carry','4×50 yds'],['Burpees','5×15'],['Jump Rope','5×2 min']]},
+      {n:'Saturday',t:'Full Body Circuit',items:[['Squat (Barbell or Dumbbell)','4×12'],['Pull-Up or Lat Pulldown','5×8'],['Walking Lunge','4×12 each'],['Explosive Push-Up','4×12'],['Ab Wheel','5×12'],['Burpees','5×12']]}
     ]},
     {num:8,focus:'Development Peak — Prep for Phase 3',days:[
-      {n:'Monday',t:'Lower Body + Power',items:[['Barbell/DB Squat','5×8'],['Bulgarian Split Squat','4×12 each'],['Nordic Curl','3×8'],['Box Jump','5×8'],['Broad Jump','5×6'],['5-10-5 Shuttle','8 runs — timed']]},
-      {n:'Tuesday',t:'Shooting Benchmark Day',items:[['Wrist Shot — 5-spot accuracy','5×10 shots — log score'],['Snap Shot','5×20 shots'],['Backhand Toe Drag Shot','5×15 shots'],['Slap Shot — Power','4×15 shots'],['Speed Taps (30s)','6 sets — count and record'],['Shuttle Runs','8 rounds'],['Burpees','5×15']]},
-      {n:'Thursday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','5×10'],['Pull-Up or Lat Pulldown','5×8'],['Arnold Press','4×10'],['Farmer Carry','4×50 yds'],['Ab Wheel','5×14'],['Plank','5×65s'],['Mountain Climbers','5×25']]},
-      {n:'Friday',t:'Full Skills + Conditioning',items:[['Cone Weave with Puck — Speed','8 runs — timed'],['Wrist Shot — 5-spot accuracy','5×10 shots — log score'],['Backhand Shots','5×15 shots'],['Slap Shot','5×15 shots'],['Lateral Bound Intervals','12 rounds'],['Jump Rope','5×2 min']]},
-      {n:'Saturday',t:'Full Body + Shooting Volume',items:[['Barbell/DB Squat','5×10'],['Push-Up with Weight Vest/Plate','4×18'],['Bent-Over Row','5×12'],['Ab Wheel','5×14'],['Wrist Shot — 120-shot session','Log total'],['Speed Taps (30s)','6 sets — count and record']]}
+      {n:'Monday',t:'Lower Body + Power',items:[['Squat (Barbell or Dumbbell)','5×8'],['Bulgarian Split Squat','4×12 each'],['Nordic Curl (or Hamstring Curl)','3×10'],['Box Jump','5×8'],['Broad Jump','5×6'],['5-10-5 Shuttle','8 runs']]},
+      {n:'Tuesday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','5×10'],['Pull-Up or Lat Pulldown','5×8'],['Arnold Press','4×10'],['Farmer Carry','4×50 yds'],['Ab Wheel','5×14'],['Plank','5×65s']]},
+      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Squat (Barbell or Dumbbell)','4×10'],['Depth Jump','5×8'],['Lateral Bound Intervals','12 rounds'],['5-10-5 Shuttle','8 runs'],['Broad Jump','5×8'],['Calf Raises','5×25']]},
+      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','5×10'],['Explosive Push-Up','5×12'],['Renegade Row','4×10 each'],['Farmer Carry','5×50 yds'],['Burpees','5×15'],['Jump Rope','5×2 min']]},
+      {n:'Saturday',t:'Full Body Test',items:[['Squat — challenging weight','4×8'],['Pull-Up','4×max reps'],['Explosive Push-Up','4×15'],['Box Jump — max height','5×8'],['Plank — max hold','3 sets'],['Burpees','5×15']]}
     ]}
   ]},
-  3:{label:'Phase 3 — Performance (Wks 9–12)',desc:'Peak performance. Everything you\'ve built comes together — explosive power, high-volume shooting, and conditioning that holds up all game.',color:'#fb923c',weeks:[
+  3:{label:'Phase 3 — Performance (Wks 9–12)',desc:'Peak performance. Everything you\'ve built comes together — explosive power, maximum output, conditioning that holds up all game.',color:'#fb923c',weeks:[
     {num:9,focus:'Explosive Power Introduction',days:[
-      {n:'Monday',t:'Lower Body — Explosive',items:[['Barbell/DB Squat','4×5 — challenging weight'],['Power Clean or Jump Squat','4×5'],['Nordic Curl','4×8'],['Depth Jump','4×6'],['5-10-5 Shuttle','8 runs — timed'],['Broad Jump','5×6']]},
-      {n:'Tuesday',t:'Shooting + Max Conditioning',items:[['Wrist Shot — 5-spot accuracy','6×10 shots — log score'],['Snap Shot — Rapid Fire','5×20 shots'],['Backhand Toe Drag Shot','5×15 shots'],['Slap Shot — Power','5×15 shots'],['Speed Taps (30s)','6 sets — count and record'],['Shuttle Runs','8 rounds'],['Burpees','5×15']]},
-      {n:'Thursday',t:'Upper Body — Power',items:[['Dumbbell Bench Press','4×8 — challenging weight'],['Pull-Up','5×8'],['Explosive Push-Up','4×10'],['Farmer Carry','5×50 yds'],['Ab Wheel','5×15'],['Plank','5×70s'],['Russian Twists','5×28']]},
-      {n:'Friday',t:'Full Skills + Power Conditioning',items:[['Cone Weave with Puck — Max Speed','8 runs — timed'],['Wrist Shot — 5-spot accuracy','6×10 shots — log score'],['Backhand Shots','5×15 shots'],['Slap Shot — Power','5×15 shots'],['Lateral Bound Intervals','12 rounds'],['Jump Rope','6×2 min']]},
-      {n:'Saturday',t:'Total Body + Shooting Volume',items:[['Barbell/DB Squat','4×8 — challenging weight'],['Explosive Push-Up','4×12'],['Bent-Over Row','5×10'],['Wrist Shot — 120-shot session','Log total'],['Speed Taps (30s)','6 sets — count and record'],['Side Plank','5×45s each']]}
+      {n:'Monday',t:'Lower Body — Explosive',items:[['Squat (Barbell or Dumbbell)','5×5 — challenging weight'],['Power Clean or Jump Squat','4×5'],['Nordic Curl (or Hamstring Curl)','4×8'],['Depth Jump','4×6'],['5-10-5 Shuttle','8 runs'],['Broad Jump','5×6']]},
+      {n:'Tuesday',t:'Upper Body — Power',items:[['Dumbbell Bench Press','5×8'],['Weighted Pull-Up or Lat Pulldown','4×6'],['Explosive Push-Up','4×10'],['Farmer Carry','5×50 yds'],['Ab Wheel','5×15'],['Plank','5×70s']]},
+      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Bulgarian Split Squat','5×10 each'],['Depth Jump','4×8'],['Lateral Bound Intervals','12 rounds'],['5-10-5 Shuttle','8 runs'],['Broad Jump','5×8'],['Box Jump','4×8']]},
+      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','4×10'],['Explosive Push-Up','5×12'],['Renegade Row','4×10 each'],['Farmer Carry','4×60 yds'],['Burpees','5×15'],['Jump Rope','6×2 min']]},
+      {n:'Saturday',t:'Full Body Power Circuit',items:[['Squat (Barbell or Dumbbell)','4×8'],['Explosive Push-Up','4×12'],['Weighted Pull-Up or Lat Pulldown','4×8'],['Depth Jump','4×6'],['Plank','5×65s'],['Burpees','4×15']]}
     ]},
     {num:10,focus:'Peak Power & Volume',days:[
-      {n:'Monday',t:'Lower Body — Max Power',items:[['Barbell/DB Squat','4×5 — challenging weight'],['Power Clean or Jump Squat','4×6'],['Nordic Curl','4×8'],['Depth Jump','5×6'],['5-10-5 Shuttle','8 runs — timed'],['Broad Jump','5×8']]},
-      {n:'Tuesday',t:'Shooting + Max Conditioning',items:[['Wrist Shot — 5-spot accuracy','6×10 shots — log score'],['Snap Shot','5×20 shots'],['Backhand Toe Drag Shot','5×18 shots'],['Slap Shot — Power','5×18 shots'],['Speed Taps (30s)','7 sets — count and record'],['Shuttle Runs','8 rounds'],['Burpees','5×18']]},
-      {n:'Thursday',t:'Upper Body — Max Strength',items:[['Dumbbell Bench Press','4×8 — challenging weight'],['Weighted Pull-Up','4×6'],['Explosive Push-Up','4×12'],['Farmer Carry','5×60 yds'],['Ab Wheel','5×15'],['Plank','5×75s'],['Mountain Climbers','5×30']]},
-      {n:'Friday',t:'Full Skills + Max Conditioning',items:[['Cone Weave with Puck — Max Speed','8 runs — timed'],['Wrist Shot — 5-spot accuracy','6×10 shots — log score'],['Backhand Shots','5×18 shots'],['Slap Shot','5×18 shots'],['Lateral Bound Intervals','14 rounds'],['Jump Rope','6×2 min']]},
-      {n:'Saturday',t:'Total Body + Shooting Volume',items:[['Barbell/DB Squat','4×10 — challenging weight'],['Explosive Push-Up','5×12'],['Bent-Over Row','5×12'],['Wrist Shot — 150-shot session','Log total'],['Speed Taps (30s)','7 sets — count and record'],['Side Plank','5×50s each']]}
+      {n:'Monday',t:'Lower Body — Max Power',items:[['Squat (Barbell or Dumbbell)','5×5 — challenging weight'],['Power Clean or Jump Squat','4×6'],['Nordic Curl (or Hamstring Curl)','4×8'],['Depth Jump','5×6'],['5-10-5 Shuttle','8 runs'],['Broad Jump','5×8']]},
+      {n:'Tuesday',t:'Upper Body — Max Strength',items:[['Dumbbell Bench Press','5×8'],['Weighted Pull-Up or Lat Pulldown','4×6'],['Explosive Push-Up','4×12'],['Farmer Carry','5×60 yds'],['Ab Wheel','5×15'],['Mountain Climbers','5×30']]},
+      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Bulgarian Split Squat','5×12 each'],['Power Clean or Jump Squat','4×6'],['Depth Jump','5×8'],['Lateral Bound Intervals','14 rounds'],['5-10-5 Shuttle','10 runs'],['Broad Jump','5×8']]},
+      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','5×10'],['Explosive Push-Up','5×15'],['Farmer Carry','5×60 yds'],['Burpees','5×18'],['Jump Rope','6×2 min'],['Ab Wheel','5×15']]},
+      {n:'Saturday',t:'Full Body Power Circuit',items:[['Squat (Barbell or Dumbbell)','4×10'],['Explosive Push-Up','5×12'],['Weighted Pull-Up or Lat Pulldown','4×8'],['Depth Jump','4×8'],['Plank','5×75s'],['Burpees','5×15']]}
     ]},
     {num:11,focus:'Peak Performance Week',days:[
-      {n:'Monday',t:'Lower Body — Peak',items:[['Barbell/DB Squat','5×5 — challenging weight'],['Power Clean or Jump Squat','5×5'],['Nordic Curl','5×8'],['Depth Jump','5×8'],['5-10-5 Shuttle','10 runs — timed'],['Broad Jump','5×8']]},
-      {n:'Tuesday',t:'Shooting + Conditioning',items:[['Wrist Shot — 5-spot accuracy','7×10 shots — log score'],['Snap Shot','6×20 shots'],['Backhand Toe Drag Shot','5×18 shots'],['Slap Shot — Power','5×20 shots'],['Speed Taps (30s)','7 sets — count and record'],['Shuttle Runs','10 rounds'],['Burpees','5×20']]},
-      {n:'Thursday',t:'Upper Body — Peak Strength',items:[['Dumbbell Bench Press','5×6 — challenging weight'],['Weighted Pull-Up','5×6'],['Explosive Push-Up','5×12'],['Farmer Carry','5×60 yds'],['Ab Wheel','6×15'],['Plank','6×75s'],['Russian Twists','5×30']]},
-      {n:'Friday',t:'Full Skills + Peak Conditioning',items:[['Cone Weave with Puck — Max Speed','10 runs — timed'],['Wrist Shot — 5-spot accuracy','7×10 shots — log score'],['Backhand Shots','6×18 shots'],['Slap Shot — Power','6×18 shots'],['Lateral Bound Intervals','16 rounds'],['Jump Rope','6×2 min']]},
-      {n:'Saturday',t:'Total Body + Peak Shooting',items:[['Barbell/DB Squat','4×10 — challenging weight'],['Explosive Push-Up','5×15'],['Weighted Pull-Up','4×6'],['Wrist Shot — 150-shot session','Log total'],['Speed Taps (30s)','7 sets — count and record'],['Ab Wheel','6×15']]}
+      {n:'Monday',t:'Lower Body — Peak',items:[['Squat (Barbell or Dumbbell)','6×5 — challenging weight'],['Power Clean or Jump Squat','5×5'],['Nordic Curl (or Hamstring Curl)','5×8'],['Depth Jump','5×8'],['5-10-5 Shuttle','10 runs'],['Broad Jump','5×8']]},
+      {n:'Tuesday',t:'Upper Body — Peak Strength',items:[['Dumbbell Bench Press','6×6'],['Weighted Pull-Up or Lat Pulldown','5×6'],['Explosive Push-Up','5×12'],['Farmer Carry','5×60 yds'],['Ab Wheel','6×15'],['Plank','6×75s']]},
+      {n:'Thursday',t:'Lower Body + Peak Conditioning',items:[['Bulgarian Split Squat','5×12 each'],['Power Clean or Jump Squat','5×5'],['Depth Jump','5×8'],['Lateral Bound Intervals','16 rounds'],['5-10-5 Shuttle','10 runs'],['Box Jump','5×8']]},
+      {n:'Friday',t:'Upper Body + Peak Conditioning',items:[['Dumbbell Bench Press','5×10'],['Explosive Push-Up','5×15'],['Renegade Row','5×10 each'],['Farmer Carry','6×60 yds'],['Burpees','5×20'],['Jump Rope','6×2 min']]},
+      {n:'Saturday',t:'Full Body Peak Circuit',items:[['Squat (Barbell or Dumbbell)','5×8'],['Explosive Push-Up','5×15'],['Weighted Pull-Up or Lat Pulldown','4×8'],['Depth Jump','5×8'],['Ab Wheel','6×15'],['Burpees','5×18']]}
     ]},
     {num:12,focus:'Final Test & Celebrate Progress',days:[
-      {n:'Monday',t:'Lower Body — Final Test',items:[['Barbell/DB Squat','3×5 — test your limit'],['Box Jump','5×8 — test max height'],['5-10-5 Shuttle','5 runs — best time'],['Broad Jump','5 attempts — best distance'],[' ','Rest — well earned']]},
-      {n:'Tuesday',t:'Shooting Benchmark',items:[['Wrist Shot — 5-spot accuracy','10×10 shots — log all'],['Snap Shot','5×20 shots'],['Backhand Shots','5×20 shots'],['Slap Shot','5×20 shots'],['Speed Taps (30s)','8 sets — beat your Week 1 score']]},
-      {n:'Thursday',t:'Upper Body — Final Test',items:[['Dumbbell Bench Press','3×5 — test your limit'],['Pull-Up','Max reps — 3 sets'],['Explosive Push-Up','3×max'],['Plank','3×max hold'],['Ab Wheel','3×max']]},
-      {n:'Friday',t:'Full Skills — Final Benchmark',items:[['Cone Weave with Puck — Max Speed','10 runs — beat best time'],['Wrist Shot — 5-spot accuracy','10×10 shots — log all'],['5-10-5 Shuttle','5 runs — beat Week 1'],['Speed Taps','8 sets — beat Week 1 score']]},
+      {n:'Monday',t:'Lower Body — Final Test',items:[['Squat — test your best weight','3×5'],['Box Jump — test max height','5 attempts'],['5-10-5 Shuttle','5 runs — beat your best'],['Broad Jump','5 attempts — beat your best']]},
+      {n:'Tuesday',t:'Upper Body — Final Test',items:[['Dumbbell Bench Press — test best weight','3×5'],['Pull-Up — max reps','3 sets'],['Explosive Push-Up — max reps','3 sets'],['Plank — max hold','2 sets'],['Ab Wheel — max reps','2 sets']]},
+      {n:'Thursday',t:'Conditioning — Final Test',items:[['5-10-5 Shuttle — 5 runs','Beat Week 1 time'],['Broad Jump — 5 attempts','Beat Week 1 distance'],['Burpees — 1 min','Count and record'],['Jump Rope — 2 min','Beat Week 1 count']]},
+      {n:'Friday',t:'Full Body — Final Benchmark',items:[['Squat — challenging weight','4×8'],['Explosive Push-Up','4×15'],['Weighted Pull-Up or Lat Pulldown','4×8'],['Depth Jump','4×8'],['Plank','3×max hold'],['Burpees','4×15']]},
       {n:'Saturday',t:'Celebration + Review',items:[['Enter all results in Progress Tracker',''],['Compare to baseline numbers',''],['Great work! Keep it up!','']]}
     ]}
   ]}
