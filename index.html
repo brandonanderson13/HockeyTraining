@@ -10,7 +10,7 @@
 :root{--primary-color:#E07820;--primary-rgb:224, 120, 32;--or:#E07820;--orl:#E07820;--secondary-color:#ffffff;--bk:#0D0D0D;--ch:#1a1a1a;--g2:#222;--g3:#2a2a2a;--white:#fff;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh;}
-.wrap{max-width:1100px;margin:0 auto;padding:1.5rem;}
+.wrap{max-width:1100px;margin:0 auto;padding:1.5rem;overflow-x:hidden;}
 
 /* HEADER */
 .hdr{background:var(--bk);border-radius:12px;overflow:hidden;margin-bottom:1.5rem;border:1px solid var(--g3);}
@@ -223,7 +223,8 @@ select:focus{border-color:var(--or);outline:none;}
 .player-table-wrapper {
   max-height: 500px;
   overflow-y: scroll !important;
-  overflow-x: scroll !important;
+  overflow-x: auto !important;
+  max-width: 100%;
   border: 1px solid #1a1a1a;
   border-radius: 8px;
   background: #0d0d0d;
@@ -340,7 +341,7 @@ select:focus{border-color:var(--or);outline:none;}
       First time? <strong>Scroll down to "Customize Your Program"</strong> and select your age group and season phase. The program will automatically adjust for you.
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button onclick="document.getElementById('customize-panel').scrollIntoView({behavior:'smooth'});" style="background:var(--primary-color);color:var(--secondary-color);border:none;font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Go to Customize ↓</button>
+<button onclick="showSec('schedule')" style="background:var(--primary-color);color:var(--secondary-color);border:none;font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Go to Program →</button>
       <button onclick="showSec('baseline');" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Start Testing →</button>
     </div>
   </div>
@@ -402,69 +403,6 @@ select:focus{border-color:var(--or);outline:none;}
       </div>
     </div>
   </div>
-  <!-- CUSTOMIZATION PANEL -->
-  <div class="card" style="margin-bottom:1rem;">
-    <div class="ch" style="cursor:pointer;" onclick="toggleCustomize()">
-      <span class="cht">&#9881; Customize Your Program</span>
-      <span id="customize-arrow" style="font-size:12px;color:rgba(255,255,255,0.35);transition:transform .2s;display:inline-block;">&#9654;</span>
-    </div>
-    <div id="customize-panel" style="display:block;">
-      <div class="cb">
-        <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:14px;line-height:1.6;">Pick your age group first — it adjusts exercises and loads to be appropriate. Then customize the rest. Hit Apply Settings to save.</div>
-
-        <!-- AGE GROUP SELECTOR (most important setting) -->
-        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
-          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:8px;">&#x1F3D2; Age Group <span style="color:rgba(255,255,255,0.4);font-weight:400;">(adjusts exercises &amp; loads)</span></div>
-          <select id="cust-age" onchange="updateAgeDescription()" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;font-family:'Barlow',sans-serif;font-weight:600;">
-            <option value="squirt">Squirts &mdash; 10U &mdash; Bodyweight only, focus on movement quality</option>
-            <option value="peewee">Peewee &mdash; 12U &mdash; Bodyweight + light dumbbells (5-10 lb)</option>
-            <option value="bantam" selected>Bantam &mdash; 15U &mdash; Moderate dumbbells (15-30 lb)</option>
-            <option value="hs">High School &mdash; 16-18 &mdash; Heavier loads, full volume</option>
-          </select>
-          <div id="age-description" style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:8px;line-height:1.5;"></div>
-        </div>
-        
-        <!-- SEASON PHASE SELECTOR -->
-        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
-          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:8px;">🏒 Season Phase <span style="color:rgba(255,255,255,0.4);font-weight:400;">(adjusts volume &amp; frequency)</span></div>
-          <select id="cust-season" onchange="updateSeasonDescription()" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;font-family:'Barlow',sans-serif;font-weight:600;">
-            <option value="offseason" selected>Off-Season — Full Program (6 days/week)</option>
-            <option value="preseason">Pre-Season — Ramp Up (5 days/week)</option>
-            <option value="inseason">In-Season — Maintenance (3 days/week)</option>
-          </select>
-          <div id="season-description" style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:8px;line-height:1.5;"></div>
-        </div>
-        
-        <div style="margin-bottom:14px;">
-          <div>
-            <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:8px;">Include in My Program</div>
-            <label class="cust-check"><input type="checkbox" id="cust-strength" checked> Strength Training</label>
-            <label class="cust-check"><input type="checkbox" id="cust-agility" checked> Agility &amp; Speed</label>
-            <label class="cust-check"><input type="checkbox" id="cust-skills" checked> Stickhandling &amp; Shooting</label>
-            <label class="cust-check"><input type="checkbox" id="cust-conditioning" checked> Conditioning</label>
-          </div>
-
-        </div>
-        <div style="margin-bottom:14px;">
-          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:8px;">Available Training Days</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <label class="day-toggle"><input type="checkbox" value="Monday" checked><span>Mon</span></label>
-            <label class="day-toggle"><input type="checkbox" value="Tuesday" checked><span>Tue</span></label>
-            <label class="day-toggle"><input type="checkbox" value="Wednesday"><span>Wed</span></label>
-            <label class="day-toggle"><input type="checkbox" value="Thursday" checked><span>Thu</span></label>
-            <label class="day-toggle"><input type="checkbox" value="Friday" checked><span>Fri</span></label>
-            <label class="day-toggle"><input type="checkbox" value="Saturday" checked><span>Sat</span></label>
-            <label class="day-toggle"><input type="checkbox" value="Sunday"><span>Sun</span></label>
-          </div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;" id="dayCountHelp">Off-Season requires 6 days. Pick any 6 calendar days that work for you.</div>
-        </div>
-        <div style="margin-top:18px;padding-top:14px;border-top:1px solid #1f1f1f;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-          <button class="btn-o" style="margin-top:0;" onclick="applyCustomization()">Apply Settings</button>
-          <button onclick="resetCustomization()" style="background:transparent;border:1px solid #333;color:rgba(255,255,255,0.5);font-size:12px;padding:7px 14px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;">Reset to Default</button>
-          <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">&#10003; Settings applied!</div>
-        </div>
-      </div>
-    </div>
   </div>
 
     <div class="card" style="margin-bottom:1rem;">
@@ -3880,7 +3818,7 @@ function openItemDetail(type, id) {
         ${isCoach?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Player</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${pName}</div></div>`:''}
       </div>
       ${item.notes?`<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px 14px;margin-bottom:16px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Coach Notes</div><div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;font-style:italic;">${item.notes}</div></div>`:''}
-      ${item.target_value ? (
+      ${item.target_value && !item.tracked_metric && item.target_value > 0 ? (
         !isDone ? `
         <div style="margin-bottom:6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;">Update Progress</div>
         <div style="display:flex;gap:8px;margin-bottom:16px;">
