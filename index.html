@@ -6465,10 +6465,11 @@ async function loadPlayerList(isSuperAdmin = false) {
           ${sub.stripe_subscription_id ? '<button onclick="adminCancelStripe(\''+sub.id+'\',\''+sub.email+'\',\''+sub.stripe_subscription_id+'\')" style="background:#fb923c;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Cancel</button>' : ''}
           ${isSuperAdmin ? '<button onclick="editExpiration(\''+sub.id+'\',\''+sub.email+'\',\''+(sub.expires_at||'')+'\')" style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;color:#3b82f6;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Set Expires</button>' : ''}
           ${sub.email === 'brandonanderson1393@gmail.com' ? '<button onclick="editOrgLimit()" style="background:#60a5fa;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Edit Org Limit</button>' : ''}
-          ${sub.role === 'player' ? (sub.status === 'active' ? 
+          <button onclick="editPlayerTeam('${sub.id}','${sub.team_id||''}')" style="background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.3);color:#60a5fa;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Team</button>
+          ${(sub.role === 'player' || sub.role === 'coach') ? (sub.status === 'active' ? 
               '<button onclick="deactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
               '<button onclick="reactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
-          ${sub.role === 'admin' ? (sub.status === 'active' ? 
+          ${sub.role === 'admin' && isSuperAdmin ? (sub.status === 'active' ? 
               '<button onclick="deactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
               '<button onclick="reactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
         </td>
@@ -7148,6 +7149,50 @@ async function editExpiration(subId, email, currentExpires) {
 }
 
 
+
+
+async function editPlayerTeam(subId, currentTeamId) {
+  // Build team options from loaded teams
+  const sb = await getSupabaseClient();
+  const { data: teams } = await sb.from('teams').select('id, team_name').eq('organization_id', window._userOrgId || 'individual').order('team_name');
+
+  const modal = document.createElement('div');
+  modal.id = 'editTeamModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  const teamOpts = '<option value="">No team</option>' + (teams||[]).map(t =>
+    `<option value="${t.id}" ${t.id === currentTeamId ? 'selected' : ''}>${t.team_name}</option>`
+  ).join('');
+
+  modal.innerHTML = `
+    <div style="background:#141414;border:1px solid #333;border-radius:12px;padding:24px;width:100%;max-width:360px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin-bottom:16px;">Edit Team</div>
+      <select id="editTeamSelect" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:9px 10px;border-radius:6px;margin-bottom:16px;">
+        ${teamOpts}
+      </select>
+      <div id="editTeamMsg" style="font-size:12px;display:none;margin-bottom:10px;"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="savePlayerTeam('${subId}')" style="flex:1;background:var(--primary-color);border:none;color:var(--secondary-color);font-size:13px;font-weight:700;padding:9px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;">Save</button>
+        <button onclick="document.getElementById('editTeamModal').remove()" style="flex:1;background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:13px;font-weight:700;padding:9px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;">Cancel</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+async function savePlayerTeam(subId) {
+  const teamId = document.getElementById('editTeamSelect')?.value || null;
+  const msg = document.getElementById('editTeamMsg');
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('subscriptions').update({ team_id: teamId || null }).eq('id', subId);
+    if (error) throw error;
+    document.getElementById('editTeamModal')?.remove();
+    loadPlayerList(window._isSuperAdmin);
+  } catch(e) {
+    if (msg) { msg.textContent = 'Error: ' + e.message; msg.style.color='#f87171'; msg.style.display='block'; }
+  }
+}
 
 async function deactivateAdmin(subId, email) {
   if (!confirm(`Deactivate admin ${email}?\n\nThey will lose access to the app. Their data is preserved and they can be reactivated.`)) return;
