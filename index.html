@@ -551,158 +551,105 @@ select:focus{border-color:var(--or);outline:none;}
       <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,0.7);">⚙ Customize Program</span>
       <span id="customizeChev" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.3);transition:transform .2s;">▼</span>
     </button>
-    <div id="customizePanel" style="display:block;border:1px solid #333;border-top:none;border-radius:0 0 8px 8px;background:#111;padding:16px;">
+    <div id="customizePanel" style="display:block;border:1px solid #222;border-top:none;border-radius:0 0 10px 10px;background:#111;padding:20px;">
 
-        <!-- AGE GROUP -->
-        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
-          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:8px;">🏒 Age Group <span style="color:rgba(255,255,255,0.4);font-weight:400;">(adjusts exercises &amp; loads)</span></div>
-          <select id="cust-age" onchange="updateAgeDescription()" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;">
-            <option value="squirt">Squirts — 10U — Bodyweight only, focus on movement quality</option>
-            <option value="peewee">Peewees — 12U — Light resistance, technique first</option>
-            <option value="bantam" selected>Bantams — 15U — Moderate loads, full program</option>
-            <option value="midget">Midgets/18U — Heavy loads, advanced training</option>
-            <option value="senior">Senior/Adult — Full program, max intensity</option>
+      <!-- SETTINGS GRID -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Age Group</label>
+          <select id="cust-age" onchange="updateAgeDescription()" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;">
+            <option value="squirt">Squirts — 10U</option>
+            <option value="peewee">Peewees — 12U</option>
+            <option value="bantam" selected>Bantams — 15U</option>
+            <option value="midget">Midgets — 18U</option>
+            <option value="senior">Senior / Adult</option>
           </select>
-          <div id="age-desc" style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:8px;line-height:1.5;"></div>
+          <div id="age-desc" style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:5px;line-height:1.5;"></div>
         </div>
 
-        <!-- SEASON PHASE -->
-        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
-          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:8px;">🏟 Season Phase <span style="color:rgba(255,255,255,0.4);font-weight:400;">(adjusts volume &amp; frequency)</span></div>
-          <select id="cust-season" style="width:100%;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;">
-            <option value="offseason" selected>Off-Season — Max development, 6 days/week</option>
-            <option value="preseason">Pre-Season — Intensity ramp, 5 days/week</option>
-            <option value="inseason">In-Season — Maintenance, 3 days/week</option>
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Season Phase</label>
+          <select id="cust-season" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:9px 10px;border-radius:6px;">
+            <option value="offseason" selected>Off-Season (6 days/wk)</option>
+            <option value="preseason">Pre-Season (5 days/wk)</option>
+            <option value="inseason">In-Season (3 days/wk)</option>
           </select>
         </div>
 
-        <!-- TRAINING DAYS -->
-        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
-          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:10px;">📅 Training Days</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            <label class="day-toggle"><input type="checkbox" value="Monday" checked><span>Mon</span></label>
-            <label class="day-toggle"><input type="checkbox" value="Tuesday" checked><span>Tue</span></label>
-            <label class="day-toggle"><input type="checkbox" value="Wednesday"><span>Wed</span></label>
-            <label class="day-toggle"><input type="checkbox" value="Thursday" checked><span>Thu</span></label>
-            <label class="day-toggle"><input type="checkbox" value="Friday" checked><span>Fri</span></label>
-            <label class="day-toggle"><input type="checkbox" value="Saturday" checked><span>Sat</span></label>
-            <label class="day-toggle"><input type="checkbox" value="Sunday"><span>Sun</span></label>
-          </div>
-        </div>
+      </div>
 
-        <!-- FOCUS -->
-        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
-          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:10px;">🎯 Training Focus</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <!-- TRAINING DAYS -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Training Days</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <label class="day-toggle"><input type="checkbox" value="Monday" checked><span>Mon</span></label>
+          <label class="day-toggle"><input type="checkbox" value="Tuesday" checked><span>Tue</span></label>
+          <label class="day-toggle"><input type="checkbox" value="Wednesday"><span>Wed</span></label>
+          <label class="day-toggle"><input type="checkbox" value="Thursday" checked><span>Thu</span></label>
+          <label class="day-toggle"><input type="checkbox" value="Friday" checked><span>Fri</span></label>
+          <label class="day-toggle"><input type="checkbox" value="Saturday" checked><span>Sat</span></label>
+          <label class="day-toggle"><input type="checkbox" value="Sunday"><span>Sun</span></label>
+        </div>
+      </div>
+
+      <!-- FOCUS + INCLUDE -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Training Focus</label>
+          <div style="display:flex;flex-direction:column;gap:6px;">
             <label class="cust-radio"><input type="radio" name="focus" value="balanced" checked><span>Balanced</span></label>
             <label class="cust-radio"><input type="radio" name="focus" value="strength"><span>Strength</span></label>
             <label class="cust-radio"><input type="radio" name="focus" value="skills"><span>Skills</span></label>
             <label class="cust-radio"><input type="radio" name="focus" value="conditioning"><span>Conditioning</span></label>
           </div>
         </div>
-
-        <!-- TRAINING TYPES -->
-        <div style="background:rgba(var(--primary-rgb),0.06);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:12px 14px;margin-bottom:16px;">
-          <div style="font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--primary-color);margin-bottom:10px;">⚡ Include in Program</div>
-          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Include</label>
+          <div style="display:flex;flex-direction:column;gap:6px;">
             <label class="cust-check"><input type="checkbox" id="cust-strength" checked><span>Strength</span></label>
             <label class="cust-check"><input type="checkbox" id="cust-agility" checked><span>Agility</span></label>
             <label class="cust-check"><input type="checkbox" id="cust-skills" checked><span>Skills</span></label>
             <label class="cust-check"><input type="checkbox" id="cust-conditioning" checked><span>Conditioning</span></label>
           </div>
         </div>
+      </div>
 
-        <div style="display:flex;align-items:center;gap:12px;">
-          <button onclick="applyCustomization()" class="btn-o" style="margin-top:0;">Apply Settings</button>
-          <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">✓ Settings applied!</div>
+      <!-- APPLY -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+        <button onclick="applyCustomization()" class="btn-o" style="margin-top:0;">Apply Settings</button>
+        <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">✓ Settings applied!</div>
+      </div>
+
+      <!-- EQUIPMENT -->
+      <div style="border-top:1px solid #1a1a1a;padding-top:16px;margin-bottom:16px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Equipment Needed <span id="equip-subtitle" style="color:rgba(255,255,255,0.2);">— Bantam (15U) tier</span></div>
+        <div id="equip-list" style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.9;"></div>
+      </div>
+
+      <!-- PROGRAM CARDS -->
+      <div style="border-top:1px solid #1a1a1a;padding-top:16px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">About the Phases</div>
+        <div class="g3">
+          <div class="pc">
+            <div class="pct"><div class="pn">Off-Season</div><div class="pt">Maximum Development</div><div class="pw">6 days/week · Full volume</div></div>
+            <div class="pcb"><span class="ptag ptago">Strength Building</span><span class="ptag">Power Development</span><span class="ptag ptago">High Volume</span></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">This is when you make the biggest gains. Train 6 days/week with full volumes. Progress through all 12 weeks, then restart the cycle.</div>
+          </div>
+          <div class="pc">
+            <div class="pct"><div class="pn">Pre-Season</div><div class="pt">Intensity Ramp</div><div class="pw">5 days/week · Peak preparation</div></div>
+            <div class="pcb"><span class="ptag ptago">Game Speed</span><span class="ptag">Conditioning Peak</span><span class="ptag ptago">Power Focus</span></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">4–6 weeks before season. Ramp up intensity, train 5 days/week. Focus on Weeks 9–12 exercises to peak power before games.</div>
+          </div>
+          <div class="pc">
+            <div class="pct"><div class="pn">In-Season</div><div class="pt">Maintenance</div><div class="pw">3 days/week · Reduced volume</div></div>
+            <div class="pcb"><span class="ptag ptago">Strength Maintenance</span><span class="ptag">Injury Prevention</span><span class="ptag ptago">Recovery Focus</span></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">During games, train 3 days/week. All volumes reduce by 1 set. Use Weeks 1–4 exercises. Goal: maintain strength without added fatigue.</div>
+          </div>
         </div>
+      </div>
 
-  <div style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:16px;margin-bottom:1rem;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);margin-bottom:8px;">⚡ Quick Start</div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:10px;">
-      First time? Select your <strong>age group</strong> and <strong>training days</strong> below, then hit <strong>Apply Settings</strong>. The program adjusts automatically.
     </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button onclick="showSec('baseline');" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Start Testing →</button>
-    </div>
-  </div>
-  
-  <div class="ibox"><strong>Program Goal:</strong> Build hockey-ready athletes year-round with cyclable training phases of structured off-ice training.
-    <div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,0.65);line-height:1.6;">
-      <strong style="color:var(--primary-color);">How it works:</strong> Three progressive 4-week phases. <strong>Foundation</strong> builds movement quality and clean technique. <strong>Development</strong> adds strength, volume, and advanced skills. <strong>Performance</strong> converts everything into game-speed power.
-    </div>
-    <div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,0.65);line-height:1.6;">
-      <strong style="color:var(--primary-color);">Why it works:</strong> Every session pairs strength or conditioning with hockey-specific skills — stickhandling and shooting are integrated into every training day so the gains transfer directly to the ice. Volume and intensity progress week by week to drive real adaptation. Customizable by age, available days, and goals so each player trains at the right level.
-    </div>
-  </div>
-  <div class="g3">
-    <div class="pc">
-      <div class="pct">
-        <div class="pn">Off-Season Program</div>
-        <div class="pt">Maximum Development</div>
-        <div class="pw">6 days/week · Full volume</div>
-      </div>
-      <div class="pcb">
-        <span class="ptag ptago">Strength Building</span>
-        <span class="ptag">Power Development</span>
-        <span class="ptag ptago">High Volume</span>
-      </div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">
-        This is when you make the biggest gains. Train 6 days/week with full volumes. Progress through all 12 weeks, then restart the cycle. Use the heavier weights and push intensity in Weeks 9-12.
-      </div>
-    </div>
-    
-    <div class="pc">
-      <div class="pct">
-        <div class="pn">Pre-Season Program</div>
-        <div class="pt">Intensity Ramp</div>
-        <div class="pw">5 days/week · Peak preparation</div>
-      </div>
-      <div class="pcb">
-        <span class="ptag ptago">Game Speed</span>
-        <span class="ptag">Conditioning Peak</span>
-        <span class="ptag ptago">Power Focus</span>
-      </div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">
-        4-6 weeks before season starts, ramp up intensity. Train 5 days/week. Focus on Weeks 9-12 exercises (performance phase) to peak your power and conditioning right before games begin.
-      </div>
-    </div>
-    
-    <div class="pc">
-      <div class="pct">
-        <div class="pn">In-Season Program</div>
-        <div class="pt">Maintenance</div>
-        <div class="pw">3 days/week · Reduced volume</div>
-      </div>
-      <div class="pcb">
-        <span class="ptag ptago">Strength Maintenance</span>
-        <span class="ptag">Injury Prevention</span>
-        <span class="ptag ptago">Recovery Focus</span>
-      </div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">
-        During games, train 3 days/week (Mon/Thu/Sat recommended). All volumes automatically reduce by 1 set. Use Weeks 1-4 exercises only. Goal: maintain strength without adding fatigue.
-      </div>
-    </div>
-  </div>
-
-    <div class="card" style="margin-bottom:1rem;">
-    <div class="ch"><span class="cht">Weekly Training Split</span><span class="chs" id="overview-split-subtitle">5 training days/week · Balanced focus</span></div>
-    <div class="cb" id="overview-split">
-      <div class="dr"><span class="dl">Mon</span><div><span class="dtag ts">Lower Body</span><span class="dtag ta">Agility</span><span class="dtag tk">Stickhandling</span></div></div>
-      <div class="dr"><span class="dl">Tue</span><div><span class="dtag tk">Shooting</span><span class="dtag ts">Stickhandling</span><span class="dtag tc">Conditioning</span></div></div>
-      <div class="dr"><span class="dl">Wed</span><div><span class="dtag tr">Active Recovery</span></div></div>
-      <div class="dr"><span class="dl">Thu</span><div><span class="dtag ts">Upper Body</span><span class="dtag ta">Core</span><span class="dtag tk">Stickhandling</span></div></div>
-      <div class="dr"><span class="dl">Fri</span><div><span class="dtag tk">Full Skills</span><span class="dtag tc">Conditioning</span></div></div>
-      <div class="dr"><span class="dl">Sat</span><div><span class="dtag ts">Total Body</span><span class="dtag tk">Shooting Volume</span></div></div>
-      <div class="dr"><span class="dl">Sun</span><div><span class="dtag tr">Rest</span></div></div>
-    </div>
-  </div>
-  <div class="g2">
-    <div class="card" style="margin-bottom:0;"><div class="ch"><span class="cht">Equipment</span><span class="chs" id="equip-subtitle">Bantam (15U) tier</span></div><div class="cb" id="equip-list" style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.9;"></div></div>
-    <div class="card" style="margin-bottom:0;"><div class="ch"><span class="cht">Coaches' Notes</span></div><div class="cb" style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.9;">Always warm up 5–8 min first<br>Form over weight — always<br>Rest 60–90 sec between sets<br>Hydrate throughout every session<br>Skip or modify if injured<br>Aim for 7–9 hours sleep nightly</div></div>
-  </div>
-</div>
-  </div>
   <div id="schedBanner"></div>
 
   
