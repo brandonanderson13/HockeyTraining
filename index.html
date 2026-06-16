@@ -2240,26 +2240,24 @@ async function superAdminPickOrg() {
 }
 
 async function loadOrgBranding() {
-  const orgId = window._userOrgId;
-  console.log('loadOrgBranding: orgId =', orgId);
-  if (!orgId || orgId === 'individual') {
-    applyBranding({ name: null, primary_color: '#E07820', secondary_color: '#ffffff', logo_url: null });
-    return;
-  }
+  const orgId = window._userOrgId || 'individual';
   try {
     const sb = await getSupabaseClient();
     const { data, error } = await sb.from('organizations').select('*').eq('id', orgId).single();
-    console.log('Org branding data:', data, 'error:', error);
     if (error || !data) {
-      // Org row missing — insert default and continue
-      await sb.from('organizations').upsert({ id: orgId, name: orgId, primary_color: '#E07820', secondary_color: '#ffffff' });
-      window._orgBranding = { id: orgId, name: orgId, primary_color: '#E07820', secondary_color: '#ffffff', logo_url: null };
-      applyBranding(window._orgBranding);
+      // No row yet — create default and apply
+      const defaults = { id: orgId, name: orgId === 'individual' ? null : orgId, primary_color: '#E07820', secondary_color: '#ffffff', logo_url: null };
+      await sb.from('organizations').upsert({ id: orgId, name: defaults.name || 'TRAINR', primary_color: '#E07820', secondary_color: '#ffffff' });
+      window._orgBranding = defaults;
+      applyBranding(defaults);
       return;
     }
     window._orgBranding = data;
     applyBranding(data);
-  } catch(e) { console.error('Branding load error:', e); }
+  } catch(e) {
+    console.error('Branding load error:', e);
+    applyBranding({ name: null, primary_color: '#E07820', secondary_color: '#ffffff', logo_url: null });
+  }
 }
 
 function applyBranding(org) {
