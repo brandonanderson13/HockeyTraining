@@ -6156,7 +6156,17 @@ async function loadAdminPanel(user) {
   const sb = await getSupabaseClient();
   const { data: adminSub } = await sb.from('subscriptions').select('*').eq('user_id', user.id).single();
   window._adminSubscription = adminSub;
-  const hasPlayers = adminSub && adminSub.seat_limit && adminSub.subscription_type === 'association';
+  // Load org-level seat_limit
+  const orgId = adminSub?.organization_id || window._userOrgId || 'individual';
+  if (orgId !== 'individual') {
+    const { data: orgData } = await sb.from('organizations').select('seat_limit, expires_at, status').eq('id', orgId).single();
+    if (orgData) {
+      window._orgSeatLimit = orgData.seat_limit;
+      // Merge org data into adminSub for backward compat
+      if (adminSub) { adminSub.seat_limit = orgData.seat_limit; adminSub.expires_at = orgData.expires_at; }
+    }
+  }
+  const hasPlayers = adminSub && (window._orgSeatLimit || adminSub.seat_limit) && adminSub.subscription_type === 'association';
   
   content.innerHTML = `
     <div class="card" style="margin-bottom:1rem;">
@@ -6200,7 +6210,7 @@ async function loadAdminPanel(user) {
             <div style="font-size:14px;font-weight:700;">
               <span id="seatsUsedDetail" style="color:#4ade80;">-</span>
               <span style="color:rgba(255,255,255,0.3);"> / </span>
-              <span style="color:rgba(255,255,255,0.6);">${adminSub.seat_limit === 999999 ? '∞' : adminSub.seat_limit}</span>
+              <span style="color:rgba(255,255,255,0.6);">${(window._orgSeatLimit||adminSub.seat_limit) === 999999 ? '∞' : (window._orgSeatLimit||adminSub.seat_limit)}</span>
               <span id="seatsRemainingText" style="display:block;font-size:11px;color:rgba(255,255,255,0.4);font-weight:400;margin-top:2px;">- remaining</span>
             </div>
           </div>
@@ -6515,14 +6525,15 @@ async function handleAddPlayer(e) {
   msg.style.display = 'none';
   
   // Check player limit if admin is association admin
-  if (window._adminSubscription && window._adminSubscription.seat_limit && role === 'player') {
+  const _effectiveSeatLimit = window._orgSeatLimit || window._adminSubscription?.seat_limit;
+  if (_effectiveSeatLimit && role === 'player') {
     const sb = await getSupabaseClient();
     const { data: players } = await sb.from('subscriptions')
       .select('id')
       .eq('role', 'player'); // Only count players, not admins
     
     const currentPlayers = (players || []).length;
-    const limit = window._adminSubscription.seat_limit;
+    const limit = _effectiveSeatLimit;
     
     if (limit !== 999999 && currentPlayers >= limit) {
       msg.style.color = '#f87171';
@@ -6883,12 +6894,14 @@ async function editPlayers(subId, email, currentLimit) {
   
   try {
     const sb = await getSupabaseClient();
-    const { error } = await sb.from('subscriptions')
-      .update({ seat_limit: limitNum })
-      .eq('id', subId);
-    
+    // Get this sub's org and update at org level
+    const { data: thisSub } = await sb.from('subscriptions').select('organization_id').eq('id', subId).single();
+    const _subOrgId = thisSub?.organization_id;
+    if (_subOrgId && _subOrgId !== 'individual') {
+      await sb.from('organizations').update({ seat_limit: limitNum }).eq('id', _subOrgId);
+    }
+    const { error } = await sb.from('subscriptions').update({ seat_limit: limitNum }).eq('id', subId);
     if (error) throw error;
-    
     alert(`✓ Seat limit updated to ${limitNum === 999999 ? 'unlimited' : limitNum}`);
     loadPlayerList(window._isSuperAdmin);
   } catch (error) {
@@ -7692,13 +7705,14 @@ async function editOrgLimit() {
   
   try {
     const sb = await getSupabaseClient();
-    // Update super admin's seat_limit as the org global limit
-    const { error } = await sb.from('subscriptions')
+    // Update at org level
+    const _orgId = window._adminSubscription?.organization_id || window._userOrgId || 'individual';
+    const { error } = await sb.from('organizations')
       .update({ seat_limit: limit })
-      .eq('email', 'brandonanderson1393@gmail.com');
-    
+      .eq('id', _orgId);
     if (error) throw error;
-    
+    // Also update subscriptions for backward compat
+    await sb.from('subscriptions').update({ seat_limit: limit }).eq('organization_id', _orgId).eq('role', 'admin');
     window._orgSeatLimit = limit;
     alert(`✓ Organization player limit set to ${limit === 999999 ? 'Unlimited' : limit}`);
     loadPlayerList(window._isSuperAdmin);
