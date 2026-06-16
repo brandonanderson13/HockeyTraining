@@ -1684,8 +1684,8 @@ Check Supabase Table Editor:
           }
         }
       } catch(e) {
-        console.warn('Expiry check error (non-fatal):', e.message);
-        // Continue to app — don't lock out on error
+        console.error('Expiry check error:', e.message);
+        // On error, still let user in — don't lock out for technical issues
       }
       
       // Set up nav tabs by role
@@ -1750,7 +1750,7 @@ function addLogoutButton(supabase, user, isAdmin) {
   if (!header) return;
   
   const container = document.createElement('div');
-  container.style.cssText = 'position:absolute;top:12px;right:12px;display:flex;gap:8px;align-items:center;';
+  container.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:8px;justify-content:flex-end;';
   
   // Only show Manage Subscription for individual users (not association members)
   const isIndividual = (window._userOrgId === 'individual' || !window._userOrgId);
@@ -1773,7 +1773,13 @@ function addLogoutButton(supabase, user, isAdmin) {
   };
   
   container.appendChild(btn);
-  header.appendChild(container);
+  // Insert below nav bar
+  const nav = document.querySelector('.nav');
+  if (nav && nav.parentNode) {
+    nav.parentNode.insertBefore(container, nav.nextSibling);
+  } else {
+    header.appendChild(container);
+  }
 }
 
 
