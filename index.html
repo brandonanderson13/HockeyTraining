@@ -2325,7 +2325,7 @@ function applyBranding(org) {
 
 async function saveOrgBranding(name, primaryColor, secondaryColor) {
   const orgId = window._userOrgId;
-  if (!orgId || orgId === 'individual') return;
+  if (!orgId) return;
   try {
     const sb = await getSupabaseClient();
     const { error } = await sb.from('organizations').upsert({
@@ -2343,7 +2343,7 @@ async function saveOrgBranding(name, primaryColor, secondaryColor) {
 
 async function uploadOrgLogo(file) {
   const orgId = window._userOrgId;
-  if (!orgId || orgId === 'individual') return null;
+  if (!orgId) return null;
   try {
     const sb = await getSupabaseClient();
     const ext = file.name.split('.').pop().toLowerCase();
@@ -6328,9 +6328,9 @@ async function loadPlayerList(isSuperAdmin = false) {
           ${isSuperAdmin ? '<button onclick="editExpiration(\''+sub.id+'\',\''+sub.email+'\',\''+(sub.expires_at||'')+'\')" style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;color:#3b82f6;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Set Expires</button>' : ''}
           ${sub.email === 'brandonanderson1393@gmail.com' ? '<button onclick="editOrgLimit()" style="background:#60a5fa;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Edit Org Limit</button>' : ''}
           ${sub.role === 'player' ? (sub.status === 'active' ? 
-              '<button onclick="deactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#fb923c;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
+              '<button onclick="deactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
               '<button onclick="reactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
-          ${sub.role === 'admin' && isSuperAdmin ? (sub.status === 'active' ? 
+          ${sub.role === 'admin' ? (sub.status === 'active' ? 
               '<button onclick="deactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
               '<button onclick="reactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
         </td>
