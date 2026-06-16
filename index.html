@@ -24,7 +24,7 @@ body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh
 
 /* NAV */
 .nav{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:1.5rem;background:var(--bk);border-radius:8px;padding:4px;border:1px solid var(--g2);}
-.nb{flex:1;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:7px 13px;border:none;border-radius:5px;background:transparent;color:rgba(255,255,255,0.4);cursor:pointer;transition:all .15s;}
+.nb{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:7px 13px;border:none;border-radius:5px;background:transparent;color:rgba(255,255,255,0.4);cursor:pointer;transition:all .15s;}
 .nb:hover{background:var(--g2);color:rgba(255,255,255,0.85);}
 .nb.active{background:var(--or);color:var(--secondary-color);}
 
@@ -3967,6 +3967,7 @@ function collapseAllWeeks() {
 }
 
 function showSec(id){
+  console.log('showSec called:', id);
   // Home tab
   if (id === 'home') {
     document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
@@ -3980,7 +3981,7 @@ function showSec(id){
   }
   document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
   const sec = document.getElementById(id);
-  if(sec) { sec.classList.add('active'); window.scrollTo(0,0); }
+  if(sec) { sec.classList.add('active'); window.scrollTo(0,0); console.log('activated sec:', id, sec); } else { console.error('sec not found:', id); }
   
   // Update button active states
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
