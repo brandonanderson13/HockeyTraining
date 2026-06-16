@@ -1618,6 +1618,42 @@ function checkShowWizard() {
     }, 800);
   }
 }
+async function renewalCheckStatus() {
+  const msg = document.getElementById('renewalCheckMsg');
+  if (msg) { msg.textContent = 'Checking...'; msg.style.display = 'block'; msg.style.color = '#60a5fa'; }
+  try {
+    const sb = window._supabaseClient || (window.supabase && window.supabase.createClient('https://sfkdwprzwtegfkohqsdy.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY'));
+    if (!sb) { if (msg) { msg.textContent = 'Not ready yet. Try again in a moment.'; msg.style.color = '#f87171'; } return; }
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) { if (msg) { msg.textContent = 'Not signed in.'; msg.style.color = '#f87171'; } return; }
+    const orgId = window._pendingOrgId || 'individual';
+    const role = window._pendingRole || 'player';
+    const isAssoc = orgId !== 'individual';
+    let active = false;
+    if (isAssoc) {
+      const { data: org } = await sb.from('organizations').select('status, expires_at').eq('id', orgId).single();
+      active = org && org.status === 'active' && (!org.expires_at || new Date(org.expires_at) > new Date());
+    } else {
+      const { data: sub } = await sb.from('subscriptions').select('status, expires_at').eq('user_id', user.id).single();
+      active = sub && sub.status === 'active' && (!sub.expires_at || new Date(sub.expires_at) > new Date());
+    }
+    if (active) {
+      if (msg) { msg.textContent = '✓ Active! Reloading...'; msg.style.color = '#4ade80'; }
+      setTimeout(() => window.location.reload(), 1000);
+    } else {
+      if (msg) { msg.textContent = 'Subscription not yet active. Complete payment first, then check again.'; msg.style.color = '#f87171'; }
+    }
+  } catch(e) {
+    if (msg) { msg.textContent = 'Error: ' + e.message; msg.style.color = '#f87171'; }
+  }
+}
+async function renewalSignOut() {
+  try {
+    const sb = window._supabaseClient || (window.supabase && window.supabase.createClient('https://sfkdwprzwtegfkohqsdy.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY'));
+    if (sb) await sb.auth.signOut();
+  } catch(e) {}
+  window.location.href = 'login.html';
+}
 </script>
 
 <script>
@@ -1639,6 +1675,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
   script.onload = async () => {
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    window._supabaseClient = supabase;
     
     try {
       // Check if user is logged in
