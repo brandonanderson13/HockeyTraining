@@ -654,29 +654,27 @@ select:focus{border-color:var(--or);outline:none;}
     <div id="programStatus" style="font-size:14px;color:#fff;font-weight:600;margin-top:4px;">Loading...</div>
   </div>
   
-  <div style="margin-bottom:1rem;">
+  <!-- Program type selector — only shown if custom workouts exist -->
+  <div id="programTypeWrapper" style="display:none;margin-bottom:1rem;">
     <label style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block;">Select Program</label>
     <select id="workoutTypeSelect" onchange="switchWorkoutType()" style="width:100%;max-width:400px;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 12px;border-radius:6px;margin-bottom:12px;">
       <option value="standard">TRAINR Program</option>
       <option value="custom">Custom Workout</option>
     </select>
-    
     <select id="customWorkoutSelect" onchange="displayCustomWorkout()" style="display:none;width:100%;max-width:400px;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:9px 12px;border-radius:6px;margin-bottom:12px;">
       <option value="">Select a custom workout...</option>
     </select>
   </div>
   
   <div id="standardProgramArea">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:10px;">
-    <select id="phaseSelect" onchange="renderWeeks()" style="flex:1;min-width:250px;">
-    <option value="1">Early Off-Season — Foundation &amp; Strength (12 Weeks)</option>
-    <option value="2">Late Off-Season — Power &amp; Development (10 Weeks)</option>
-    <option value="3">Pre-Season — Sharpen &amp; Peak (4 Weeks)</option>
-    <option value="4">In-Season Block A — Early Season (4 Weeks)</option>
-    <option value="5">In-Season Block B — Mid/Late Season (4 Weeks)</option>
+  <!-- phaseSelect hidden — controlled by Customize Program panel -->
+  <select id="phaseSelect" onchange="renderWeeks()" style="display:none;">
+    <option value="1">Early Off-Season</option>
+    <option value="2">Late Off-Season</option>
+    <option value="3">Pre-Season</option>
+    <option value="4">In-Season Block A</option>
+    <option value="5">In-Season Block B</option>
   </select>
-    <button onclick="startNewCycle()" style="background:rgba(var(--primary-rgb),0.15);border:1px solid var(--primary-color);color:var(--primary-color);font-size:11px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">🔄 Start New Cycle</button>
-  </div>
   <div style="font-size:11px;color:rgba(255,255,255,0.38);margin-bottom:8px;">Tap any exercise for description + YouTube. Skills sessions have quick-log buttons to log directly into Stickhandling Log or Shot Log.</div>
   <div id="phaseInfo"></div>
   <div style="display:flex;gap:8px;margin-bottom:10px;">
@@ -5076,6 +5074,11 @@ function syncDaysToSeason() {
 
 function applyCustomization(){
   console.log('applyCustomization called');
+  // Sync season to phaseSelect
+  const _seasonToPhase = {earlyoffseason:'1', lateoffseason:'2', preseason:'3', inseason_a:'4', inseason_b:'5'};
+  const _syncSeason = document.getElementById('cust-season')?.value || 'earlyoffseason';
+  const phaseEl = document.getElementById('phaseSelect');
+  if (phaseEl) phaseEl.value = _seasonToPhase[_syncSeason] || '1';
   
   const season = (document.getElementById('cust-season')||{}).value || 'offseason';
   const selectedDays = Array.from(document.querySelectorAll('.day-toggle input:checked'));
@@ -5156,6 +5159,13 @@ function resetCustomization(){
 }
 
 function loadCustomSettings(){
+  // Sync phaseSelect from saved season on load
+  setTimeout(() => {
+    const seasonToPhase = {earlyoffseason:'1', lateoffseason:'2', preseason:'3', inseason_a:'4', inseason_b:'5'};
+    const season = document.getElementById('cust-season')?.value || 'earlyoffseason';
+    const phaseEl = document.getElementById('phaseSelect');
+    if (phaseEl) phaseEl.value = seasonToPhase[season] || '1';
+  }, 100);
   try{
     const raw = localStorage.getItem('tigersCustomSettings');
     if(!raw) return;
@@ -7673,17 +7683,18 @@ async function loadCustomWorkoutOptions() {
     
     if (error) throw error;
     
-    let options = '<option value="">Select a custom workout...</option>';
-    if (data && data.length > 0) {
+    const wrapper = document.getElementById('programTypeWrapper');
+    if (!data || data.length === 0) {
+      if (wrapper) wrapper.style.setProperty('display','none','important');
+    } else {
+      if (wrapper) wrapper.style.setProperty('display','block','important');
+      let options = '<option value="">Select a custom workout...</option>';
       data.forEach(w => {
         options += `<option value="${w.id}">${w.workout_name}</option>`;
       });
-    } else {
-      options += '<option value="" disabled>No custom workouts available</option>';
+      select.innerHTML = options;
+      select.onchange = displayCustomWorkout;
     }
-    
-    select.innerHTML = options;
-    select.onchange = displayCustomWorkout;
     
   } catch (error) {
     console.error('Error loading custom workouts:', error);
