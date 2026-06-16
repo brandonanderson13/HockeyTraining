@@ -5976,6 +5976,9 @@ async function loadAdminPanel(user) {
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
+          <select id="teamFilter" onchange="filterPlayers()" style="background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:6px 10px;border-radius:4px;">
+            <option value="">All Teams</option>
+          </select>
         </div>
         <div id="playerListContainer">Loading...</div>
       </div>
@@ -6164,6 +6167,12 @@ async function loadPlayerList(isSuperAdmin = false) {
     const { data: teamsData } = await sb.from('teams').select('id, team_name').eq('organization_id', window._userOrgId || 'individual');
     const teamNameMap = {};
     (teamsData || []).forEach(t => { teamNameMap[t.id] = t.team_name; });
+    // Populate team filter dropdown
+    const teamFilterEl = document.getElementById('teamFilter');
+    if (teamFilterEl && teamsData) {
+      teamFilterEl.innerHTML = '<option value="">All Teams</option>' +
+        teamsData.map(t => `<option value="${t.id}">${t.team_name}</option>`).join('');
+    }
 
     // Query subscriptions - super admin sees all, regular admin sees only their org
     let query = sb.from('subscriptions').select('*');
@@ -6323,12 +6332,16 @@ async function loadPlayerList(isSuperAdmin = false) {
           ${sub.role === 'player' ? (sub.status === 'active' ? 
               '<button onclick="deactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#fb923c;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
               '<button onclick="reactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
+          ${sub.role === 'admin' && isSuperAdmin ? (sub.status === 'active' ? 
+              '<button onclick="deactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
+              '<button onclick="reactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
         </td>
       </tr>`;
       
       allPlayers.push({
         name: displayName,
         team: teamName,
+        team_id: sub.team_id || '',
         email: sub.email,
         role: sub.role || 'player',
         status: statusText,
@@ -6537,16 +6550,18 @@ function filterPlayers() {
   const search = document.getElementById('playerSearch').value.toLowerCase();
   const roleFilter = document.getElementById('roleFilter').value;
   const statusFilter = document.getElementById('statusFilter').value;
-  
+  const teamFilter = document.getElementById('teamFilter')?.value || '';
+
   const filtered = allPlayers.filter(p => {
-    const matchesSearch = !search || 
+    const matchesSearch = !search ||
       (p.name && p.name.toLowerCase().includes(search)) ||
       (p.email && p.email.toLowerCase().includes(search));
     const matchesRole = !roleFilter || p.role === roleFilter;
     const matchesStatus = !statusFilter || p.status === statusFilter;
-    return matchesSearch && matchesRole && matchesStatus;
+    const matchesTeam = !teamFilter || p.team_id === teamFilter;
+    return matchesSearch && matchesRole && matchesStatus && matchesTeam;
   });
-  
+
   renderPlayerTable(filtered);
 }
 
@@ -6996,6 +7011,27 @@ async function editExpiration(subId, email, currentExpires) {
   }
 }
 
+
+
+async function deactivateAdmin(subId, email) {
+  if (!confirm(`Deactivate admin ${email}?\n\nThey will lose access to the app. Their data is preserved and they can be reactivated.`)) return;
+  try {
+    const sb = await getSupabaseClient();
+    await sb.from('subscriptions').update({ status: 'inactive' }).eq('id', subId);
+    alert(`✓ ${email} deactivated`);
+    loadPlayerList(window._isSuperAdmin);
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function reactivateAdmin(subId, email) {
+  if (!confirm(`Reactivate admin ${email}?`)) return;
+  try {
+    const sb = await getSupabaseClient();
+    await sb.from('subscriptions').update({ status: 'active' }).eq('id', subId);
+    alert(`✓ ${email} reactivated`);
+    loadPlayerList(window._isSuperAdmin);
+  } catch(e) { alert('Error: ' + e.message); }
+}
 
 async function deactivatePlayer(subId, email) {
   // Prevent deactivating super admin
