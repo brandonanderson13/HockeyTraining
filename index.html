@@ -2898,8 +2898,8 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
       <div class="ch">
         <span class="cht">Tasks & Goals</span>
         <div style="margin-left:auto;display:flex;gap:6px;">
-          <button onclick="openGoalModal(null,null,false)" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
           <button onclick="openAssignModal(window._userId,null,false)" style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.25);color:var(--primary-color);font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Task</button>
+          <button onclick="openGoalModal(null,null,false)" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
         </div>
       </div>
       <div class="cb">${openHtml}${doneHtml}</div>
@@ -3105,9 +3105,8 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
       <div class="ch">
         <span class="cht">Tasks & Goals</span>
         <div style="margin-left:auto;display:flex;gap:6px;">
-          <button onclick="openGoalModal(null,null,true)" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
-          <button onclick="openAssignModal(null,null,true)" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">All Players</button>
           <button onclick="openAssignModal(null,null,false)" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Task</button>
+          <button onclick="openGoalModal(null,null,true)" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
         </div>
       </div>
       <div class="cb">${openCoachHtml}${doneCoachHtml}</div>
