@@ -1657,13 +1657,12 @@ Check Supabase Table Editor:
           console.log('Super admin — bypassing expiry check');
         } else if (_isAssocMember || _isAssocAdmin) {
           // Check org-level expiry
-          const { data: orgData } = await supabase.from('organizations').select('expires_at, status').eq('id', _expOrgId).single();
-          console.log('Org expiry check:', _expOrgId, orgData);
+          const { data: orgData, error: orgErr } = await supabase.from('organizations').select('expires_at, status').eq('id', _expOrgId).single();
+          console.log('Org expiry check:', _expOrgId, 'data:', orgData, 'error:', orgErr);
           if (orgData) {
             const orgExpired = orgData.expires_at && new Date(orgData.expires_at) < new Date();
-            // Only treat as inactive if status is explicitly 'cancelled' or 'expired' — not null
             const orgInactive = orgData.status === 'cancelled' || orgData.status === 'expired';
-            console.log('orgExpired:', orgExpired, 'orgInactive:', orgInactive);
+            console.log('expires_at:', orgData.expires_at, 'status:', orgData.status, 'orgExpired:', orgExpired, 'orgInactive:', orgInactive);
             if (orgExpired || orgInactive) {
               if (_isAssocAdmin) {
                 await supabase.from('organizations').update({ status: 'expired' }).eq('id', _expOrgId);
@@ -1746,11 +1745,11 @@ Check Supabase Table Editor:
 })();
 
 function addLogoutButton(supabase, user, isAdmin) {
-  const header = document.querySelector('.hdr');
-  if (!header) return;
+  const wrap = document.querySelector('.wrap');
+  if (!wrap) return;
   
   const container = document.createElement('div');
-  container.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:8px;justify-content:flex-end;';
+  container.style.cssText = 'display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-bottom:8px;margin-top:-4px;';
   
   // Only show Manage Subscription for individual users (not association members)
   const isIndividual = (window._userOrgId === 'individual' || !window._userOrgId);
@@ -1773,13 +1772,9 @@ function addLogoutButton(supabase, user, isAdmin) {
   };
   
   container.appendChild(btn);
-  // Insert below nav bar
-  const nav = document.querySelector('.nav');
-  if (nav && nav.parentNode) {
-    nav.parentNode.insertBefore(container, nav.nextSibling);
-  } else {
-    header.appendChild(container);
-  }
+  // Insert at top of wrap, before header
+  const hdr = wrap.querySelector('.hdr');
+  wrap.insertBefore(container, hdr);
 }
 
 
