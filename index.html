@@ -1700,8 +1700,9 @@ function addLogoutButton(supabase, user, isAdmin) {
   const container = document.createElement('div');
   container.style.cssText = 'position:absolute;top:12px;right:12px;display:flex;gap:8px;align-items:center;';
   
-  // Only show Manage Subscription for non-admins
-  if (!isAdmin) {
+  // Only show Manage Subscription for individual users (not association members)
+  const isIndividual = (window._userOrgId === 'individual' || !window._userOrgId);
+  if (!isAdmin && isIndividual) {
     const manageBtn = document.createElement('a');
     manageBtn.href = 'https://billing.stripe.com/p/login/14AcN4fnrf2y4DBdiadjO00';
     manageBtn.target = '_blank';
