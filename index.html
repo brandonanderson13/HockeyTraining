@@ -2477,27 +2477,113 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
     </div>`;
   }
 
-  const assignOpenHtml = openAssign.length
-    ? openAssign.map(assignRow).join('')
+  // ── Unified item row (assignment or goal) ──────────────────────────────
+  function itemRow(item) {
+    const isGoal = item._type === 'goal';
+    const isTracked = !!item.tracked_metric;
+    const isCheckbox = isGoal && !item.target_value;
+    const progress = item._progress !== undefined ? item._progress : (item.current_value || 0);
+    const pct = !isCheckbox && item.target_value ? Math.min(100, Math.round(progress / item.target_value * 100)) : 0;
+    const due = item.due_date ? new Date(item.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    const tabMap = {shots:'shotlog',stickhandling:'sticklog',workouts:'schedule'};
+    const metricLabels = {shots:'pucks',stickhandling:'mins',workouts:'days'};
+
+    const isDone = isGoal
+      ? (isCheckbox ? item.completed : progress >= (item.target_value||0))
+      : (item.status === 'completed' || (isTracked && pct >= 100));
+
+    const checkBg = isDone ? '#4ade80' : 'transparent';
+    const checkBorder = isDone ? '#4ade80' : '#444';
+    const canCheck = !isTracked;
+
+    const onCheck = isGoal
+      ? (canCheck ? `toggleGoalComplete('${item.id}',${isDone})` : '')
+      : (canCheck ? `toggleAssignment('${item.id}',${isDone})` : '');
+
+    const typeColor = isGoal ? '#60a5fa' : 'var(--primary-color)';
+    const typeLabel = isGoal ? 'Goal' : (item.type || 'Task');
+    const title = isGoal ? item.metric : item.title;
+    const openFn = isGoal ? `openItemDetail('goal','${item.id}')` : `openItemDetail('assignment','${item.id}')`;
+
+    let subLine = '';
+    if (isTracked && !isDone) {
+      subLine = `<span style="font-size:10px;color:rgba(255,255,255,0.35);">${progress}/${item.target_value} ${metricLabels[item.tracked_metric]||''}</span>
+        <span style="font-size:10px;color:#60a5fa;cursor:pointer;" onclick="event.stopPropagation();showSec('${tabMap[item.tracked_metric]||'schedule'}')">→ Log now</span>`;
+    } else if (!isGoal && item.description) {
+      subLine = `<span style="font-size:10px;color:rgba(255,255,255,0.35);">${item.description.slice(0,60)}${item.description.length>60?'…':''}</span>`;
+    }
+    if (due) subLine += `${subLine?'<span style="font-size:10px;color:rgba(255,255,255,0.2);margin:0 3px;">·</span>':''}
+      <span style="font-size:10px;color:rgba(255,255,255,0.3);">Due ${due}</span>`;
+
+    return `<div style="padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="${openFn}">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div onclick="event.stopPropagation();${onCheck}"
+          style="width:20px;height:20px;border-radius:5px;border:2px solid ${checkBorder};background:${checkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;${canCheck?'cursor:pointer;':'opacity:0.5;'}transition:all .15s;">
+          ${isDone?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:11px;font-weight:700;color:${typeColor};background:${isGoal?'rgba(96,165,250,0.1)':'rgba(var(--primary-rgb),0.1)'};padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">${typeLabel}</span>
+            <span style="font-size:13px;font-weight:600;color:${isDone?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.85)'};${isDone?'text-decoration:line-through;':''}">${title}</span>
+            ${isTracked?'<span style="font-size:9px;font-weight:700;color:#60a5fa;background:rgba(96,165,250,0.1);padding:1px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">Auto</span>':''}
+          </div>
+          ${subLine?`<div style="display:flex;gap:6px;margin-top:3px;flex-wrap:wrap;align-items:center;">${subLine}</div>`:''}
+        </div>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:0.2;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      ${isTracked && !isDone ? `<div style="margin-top:5px;margin-left:30px;"><div style="background:#1a1a1a;border-radius:3px;height:4px;"><div style="height:4px;width:${pct}%;background:${isGoal?'#60a5fa':'#60a5fa'};border-radius:3px;transition:width .3s;"></div></div><div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:2px;">${pct}%</div></div>` : ''}
+    </div>`;
+  }
+
+  // ── Combine and split ──────────────────────────────────────────────────
+  const allItems = [
+    ...assignments.map(a => ({...a, _type:'assignment'})),
+    ...goals.map(g => ({...g, _type:'goal'}))
+  ];
+
+  const openItems = allItems.filter(item => {
+    if (item._type === 'goal') {
+      const isCheckbox = !item.target_value;
+      const progress = item._progress !== undefined ? item._progress : (item.current_value||0);
+      return isCheckbox ? !item.completed : progress < (item.target_value||0);
+    }
+    const isTracked = !!item.tracked_metric;
+    const pct = isTracked && item.target_value ? Math.min(100,Math.round((item._progress||0)/item.target_value*100)) : 0;
+    return item.status !== 'completed' && !(isTracked && pct >= 100);
+  });
+
+  const doneItems = allItems.filter(item => {
+    if (item._type === 'goal') {
+      const isCheckbox = !item.target_value;
+      const progress = item._progress !== undefined ? item._progress : (item.current_value||0);
+      return isCheckbox ? item.completed : progress >= (item.target_value||0);
+    }
+    const isTracked = !!item.tracked_metric;
+    const pct = isTracked && item.target_value ? Math.min(100,Math.round((item._progress||0)/item.target_value*100)) : 0;
+    return item.status === 'completed' || (isTracked && pct >= 100);
+  });
+
+  const openHtml = openItems.length
+    ? openItems.map(itemRow).join('')
     : '<div style="text-align:center;padding:16px;color:rgba(255,255,255,0.25);font-size:12px;">All caught up! ✓</div>';
 
-  const assignDoneHtml = doneAssign.length
+  const doneHtml = doneItems.length
     ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #1a1a1a;">
         <div style="font-size:10px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Completed</div>
-        ${doneAssign.map(assignRow).join('')}
+        ${doneItems.map(itemRow).join('')}
       </div>` : '';
 
   el.innerHTML = `
     ${statsHtml}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-      <div class="card" style="margin-bottom:0;">
-        <div class="ch"><span class="cht">My Assignments</span></div>
-        <div class="cb">${assignOpenHtml}${assignDoneHtml}</div>
+    <div class="card">
+      <div class="ch">
+        <span class="cht">Tasks & Goals</span>
+        <div style="margin-left:auto;display:flex;gap:6px;">
+          <button onclick="openGoalModal(null,null,false)" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
+          <button onclick="openAssignModal(window._userId,null,false)" style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.25);color:var(--primary-color);font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Task</button>
+        </div>
       </div>
-      <div class="card" style="margin-bottom:0;">
-        <div class="ch"><span class="cht">My Goals</span><button onclick="openPlayerGoalModal()" style="margin-left:auto;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button></div>
-        <div class="cb">${goalsOpenHtml}${goalsDoneHtml}</div>
-      </div>
+      <div class="cb">${openHtml}${doneHtml}</div>
     </div>`;
 }
 
@@ -2578,7 +2664,71 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
     rosterHtml += '</div>';
   }
 
-  // Activity log — group bulk assignments into one row
+  // ── Unified coach item row ─────────────────────────────────────────────
+  function coachItemRow(item) {
+    const isGoal = item._type === 'goal';
+    const isTracked = !!item.tracked_metric;
+    const isCheckbox = isGoal && !item.target_value;
+    const progress = item._progress !== undefined ? item._progress : (item.current_value||0);
+    const pct = !isCheckbox && item.target_value ? Math.min(100,Math.round(progress/item.target_value*100)) : 0;
+    const due = item.due_date ? new Date(item.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    const metricLabels = {shots:'pucks',stickhandling:'mins',workouts:'days'};
+
+    const isDone = isGoal
+      ? (isCheckbox ? item.completed : progress >= (item.target_value||0))
+      : item.allDone !== undefined ? item.allDone : item.status === 'completed';
+
+    const checkBg = isDone ? '#4ade80' : 'transparent';
+    const checkBorder = isDone ? '#4ade80' : '#444';
+    const typeColor = isGoal ? '#60a5fa' : 'var(--primary-color)';
+    const typeLabel = isGoal ? 'Goal' : (item.type || 'Task');
+    const title = isGoal ? item.metric : item.title;
+
+    // Player label
+    const ids = item.ids || [item.id];
+    const players = item.players || [item.player_id];
+    const isAllP = players.length === _dashPlayers.length && _dashPlayers.length > 1;
+    const isBulk = players.length > 1;
+    const pLabel = isAllP ? 'All Players' : isBulk ? `${players.length} Players` : (playerMap[players[0]]||'Unknown');
+
+    const onCheck = isGoal
+      ? `toggleGoalComplete('${item.id}',${isDone})`
+      : `toggleBulkAssignment(${JSON.stringify(ids)},${isDone})`;
+
+    const openFn = isGoal
+      ? `openItemDetail('goal','${item.id}')`
+      : `openItemDetail('assignment','${ids[0]}')`;
+
+    return `<div style="padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="${openFn}">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div onclick="event.stopPropagation();${onCheck}"
+          style="width:20px;height:20px;border-radius:5px;border:2px solid ${checkBorder};background:${checkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s;">
+          ${isDone?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:11px;font-weight:700;color:${typeColor};background:${isGoal?'rgba(96,165,250,0.1)':'rgba(var(--primary-rgb),0.1)'};padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">${typeLabel}</span>
+            <span style="font-size:13px;font-weight:600;color:${isDone?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.85)'};${isDone?'text-decoration:line-through;':''}">${title}</span>
+            ${isTracked?'<span style="font-size:9px;font-weight:700;color:#60a5fa;background:rgba(96,165,250,0.1);padding:1px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">Auto</span>':''}
+          </div>
+          <div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap;align-items:center;">
+            <span style="font-size:11px;color:${isBulk?'rgba(96,165,250,0.7)':'rgba(255,255,255,0.35)'};">→ ${pLabel}</span>
+            ${isTracked?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">· avg ${progress}/${item.target_value} ${metricLabels[item.tracked_metric]||''}</span>`:''}
+            ${due?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">· Due ${due}</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="opacity:0.2;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          ${isGoal
+            ? `<button onclick="event.stopPropagation();deleteGoal('${item.id}')" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:12px;padding:0 2px;line-height:1;">✕</button>`
+            : `<button onclick="event.stopPropagation();deleteBulkAssignment(${JSON.stringify(ids)})" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:12px;padding:0 2px;line-height:1;">✕</button>`}
+        </div>
+      </div>
+      ${isTracked && !isDone ? `<div style="margin-top:5px;margin-left:30px;"><div style="background:#1a1a1a;border-radius:3px;height:4px;"><div style="height:4px;width:${pct}%;background:#60a5fa;border-radius:3px;"></div></div><div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:2px;">${pct}%</div></div>` : ''}
+    </div>`;
+  }
+
+  // Group bulk assignments
   const groupedLog = [];
   const seenGroups = {};
   assignments.forEach(a => {
@@ -2589,49 +2739,41 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
       if (a.status !== 'completed') seenGroups[key].allDone = false;
       if (a._progress !== undefined) seenGroups[key]._progress = (seenGroups[key]._progress||0) + (a._progress||0);
     } else {
-      seenGroups[key] = { ids:[a.id], players:[a.player_id], title:a.title, type:a.type, due_date:a.due_date, tracked_metric:a.tracked_metric, target_value:a.target_value, allDone:a.status==='completed', _progress:a._progress||0 };
+      seenGroups[key] = { _type:'assignment', ids:[a.id], players:[a.player_id], title:a.title, type:a.type, due_date:a.due_date, tracked_metric:a.tracked_metric, target_value:a.target_value, allDone:a.status==='completed', _progress:a._progress||0 };
       groupedLog.push(seenGroups[key]);
     }
   });
 
-  const logHtml = groupedLog.slice(0,15).map(g => {
-    const isAll = g.players.length === _dashPlayers.length && _dashPlayers.length > 1;
-    const isBulk = g.players.length > 1;
-    const pLabel = isAll ? 'All Players' : isBulk ? `${g.players.length} Players` : (playerMap[g.players[0]] || 'Unknown');
-    const isDone = g.allDone;
-    const due = g.due_date ? new Date(g.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-    const checkBg = isDone ? '#4ade80' : 'transparent';
-    const checkBorder = isDone ? '#4ade80' : '#444';
-    const firstId = g.ids[0];
-    const isTracked = !!g.tracked_metric;
-    const avgProgress = isTracked && g.players.length ? Math.round(g._progress / g.players.length) : 0;
-    const pct = isTracked && g.target_value ? Math.min(100, Math.round(avgProgress/g.target_value*100)) : 0;
-    const metricLabels = {shots:'pucks',stickhandling:'mins',workouts:'days'};
-    return `<div style="padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="openItemDetail('assignment','${firstId}')">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div onclick="event.stopPropagation();toggleBulkAssignment(${JSON.stringify(g.ids)},${isDone})"
-          style="width:20px;height:20px;border-radius:5px;border:2px solid ${checkBorder};background:${checkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s;">
-          ${isDone ? '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
-        </div>
-        <div style="flex:1;min-width:0;">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:12px;font-weight:600;color:${isDone?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.85)'};${isDone?'text-decoration:line-through;':''}">${g.title}</span>
-            ${isTracked?'<span style="font-size:9px;font-weight:700;color:#60a5fa;background:rgba(96,165,250,0.12);padding:1px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">Auto</span>':''}
-          </div>
-          <div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap;">
-            <span style="font-size:11px;color:${isBulk?'rgba(96,165,250,0.7)':'rgba(255,255,255,0.35)'};">→ ${pLabel}</span>
-            ${isTracked?`<span style="font-size:10px;color:rgba(255,255,255,0.35);">· avg ${avgProgress}/${g.target_value} ${metricLabels[g.tracked_metric]||''}</span>`:''}
-            ${due?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">· Due ${due}</span>`:''}
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="opacity:0.25;"><polyline points="5,3 9,7 5,11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <button onclick="event.stopPropagation();deleteBulkAssignment(${JSON.stringify(g.ids)})" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:12px;padding:0 2px;line-height:1;">✕</button>
-        </div>
-      </div>
-      ${isTracked && !isDone ? `<div style="margin-top:5px;margin-left:30px;"><div style="background:#1a1a1a;border-radius:3px;height:4px;"><div style="height:4px;width:${pct}%;background:#60a5fa;border-radius:3px;"></div></div><div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:2px;">avg ${pct}% complete</div></div>` : ''}
-    </div>`;
-  }).join('') || '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">No assignments yet</div>';
+  // Add goals to unified list
+  const goalItems = goals.map(g => ({...g, _type:'goal', ids:[g.id], players:[g.player_id]}));
+  const allCoachItems = [...groupedLog, ...goalItems];
+
+  const openCoachItems = allCoachItems.filter(item => {
+    if (item._type === 'goal') {
+      const isCheckbox = !item.target_value;
+      const progress = item._progress !== undefined ? item._progress : (item.current_value||0);
+      return isCheckbox ? !item.completed : progress < (item.target_value||0);
+    }
+    return !item.allDone;
+  });
+  const doneCoachItems = allCoachItems.filter(item => {
+    if (item._type === 'goal') {
+      const isCheckbox = !item.target_value;
+      const progress = item._progress !== undefined ? item._progress : (item.current_value||0);
+      return isCheckbox ? item.completed : progress >= (item.target_value||0);
+    }
+    return item.allDone;
+  });
+
+  const openCoachHtml = openCoachItems.length
+    ? openCoachItems.map(coachItemRow).join('')
+    : '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">No open tasks or goals</div>';
+
+  const doneCoachHtml = doneCoachItems.length
+    ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #1a1a1a;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Completed</div>
+        ${doneCoachItems.map(coachItemRow).join('')}
+      </div>` : '';
 
   el.innerHTML = `
     ${filterHtml}
@@ -2642,14 +2784,14 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
     </div>
     <div class="card">
       <div class="ch">
-        <span class="cht">Assignments & Activity</span>
+        <span class="cht">Tasks & Goals</span>
         <div style="margin-left:auto;display:flex;gap:6px;">
           <button onclick="openGoalModal(null,null,true)" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
           <button onclick="openAssignModal(null,null,true)" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">All Players</button>
-          <button onclick="openAssignModal(null,null,false)" style="background:var(--primary-color);border:none;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ New Task</button>
+          <button onclick="openAssignModal(null,null,false)" style="background:var(--primary-color);border:none;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Task</button>
         </div>
       </div>
-      <div class="cb">${logHtml}</div>
+      <div class="cb">${openCoachHtml}${doneCoachHtml}</div>
     </div>`;
 }
 
