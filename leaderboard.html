@@ -3,21 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Leaderboard - Delano Tigers Training</title>
+<title>Leaderboard - TRAINR</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+  :root { --primary-color: #E07820; --primary-rgb: 224, 120, 32; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Barlow', sans-serif; background: #0D0D0D; color: #fff; padding: 20px; min-height: 100vh; }
   .container { max-width: 900px; margin: 0 auto; }
   .header { text-align: center; margin-bottom: 32px; padding: 24px; background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%); border: 1px solid #222; border-radius: 12px; }
   .header h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
-  .header h1 span { color: #E07820; }
+  .header h1 span { color: var(--primary-color); }
   .header p { font-size: 14px; color: rgba(255,255,255,0.5); }
   .reset-info { text-align: center; font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 24px; }
   .tabs { display: flex; gap: 8px; margin-bottom: 20px; justify-content: center; }
   .tab-btn { background: #1a1a1a; border: 1px solid #333; color: rgba(255,255,255,0.6); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 10px 20px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
-  .tab-btn.active { background: #E07820; border-color: #E07820; color: #fff; }
-  .tab-btn:hover:not(.active) { border-color: #E07820; }
+  .tab-btn.active { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+  .tab-btn:hover:not(.active) { border-color: var(--primary-color); }
   .leaderboard { background: #141414; border: 1px solid #222; border-radius: 12px; overflow: hidden; }
   table { width: 100%; border-collapse: collapse; }
   thead { background: #1a1a1a; }
@@ -69,8 +70,23 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Get parameters from URL
 const urlParams = new URLSearchParams(window.location.search);
 const orgId = urlParams.get('org') || 'delano';
-const startDate = urlParams.get('start'); // Optional: YYYY-MM-DD format
-const endDate = urlParams.get('end'); // Optional: YYYY-MM-DD format
+const orgName = urlParams.get('name') ? decodeURIComponent(urlParams.get('name')) : null;
+const orgColor = urlParams.get('color') ? decodeURIComponent(urlParams.get('color')) : null;
+const startDate = urlParams.get('start');
+const endDate = urlParams.get('end');
+
+// Apply org branding immediately
+if (orgColor) {
+  document.documentElement.style.setProperty('--primary-color', orgColor);
+  const hex = orgColor.replace('#','');
+  const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
+  document.documentElement.style.setProperty('--primary-rgb', `${r}, ${g}, ${b}`);
+}
+if (orgName) {
+  document.getElementById('orgName').textContent = orgName.toUpperCase();
+  document.getElementById('teamName').textContent = '';
+  document.title = `${orgName} Leaderboard`;
+}
 
 let currentBoard = 'shots';
 
@@ -94,13 +110,10 @@ async function loadLeaderboard() {
     resetInfo.textContent = 'All-time stats';
   }
   
-  // Update header based on org
-  if (orgId === 'delano') {
-    document.getElementById('orgName').textContent = 'Delano';
-    document.getElementById('teamName').textContent = 'Tigers';
-  } else if (orgId === 'individual') {
-    document.getElementById('orgName').textContent = 'Individual';
-    document.getElementById('teamName').textContent = 'Players';
+  // Update header if no name param passed
+  if (!orgName) {
+    document.getElementById('orgName').textContent = orgId === 'individual' ? 'Individual' : orgId.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    document.getElementById('teamName').textContent = orgId === 'individual' ? 'Players' : '';
   }
   
   try {
