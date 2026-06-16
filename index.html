@@ -2202,7 +2202,8 @@ async function superAdminPickOrg() {
     try {
       const sb = await getSupabaseClient();
       const { data: orgs } = await sb.from('organizations').select('id, name').order('name');
-      const list = orgs && orgs.length ? orgs : [{ id: 'delano', name: 'Delano' }];
+      // Remove any 'individual' row from DB results (we add it manually at the end)
+      const list = (orgs || [{ id: 'delano', name: 'Delano' }]).filter(o => o.id !== 'individual');
       list.push({ id: 'individual', name: 'Individuals (no association)' });
 
       const modal = document.createElement('div');
@@ -6174,7 +6175,13 @@ async function loadPlayerList(isSuperAdmin = false) {
 
     // Always filter by the current org (super admin picks org on login)
     const orgId = window._userOrgId || 'individual';
-    let query = sb.from('subscriptions').select('*').eq('organization_id', orgId);
+    let query = sb.from('subscriptions').select('*');
+    if (orgId === 'individual') {
+      // Show users with org = 'individual' OR null (no association)
+      query = query.or('organization_id.eq.individual,organization_id.is.null');
+    } else {
+      query = query.eq('organization_id', orgId);
+    }
     const { data: subs, error } = await query.order('created_at', {ascending: false});
     if (error) throw error;
     
