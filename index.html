@@ -1665,20 +1665,21 @@ Check Supabase Table Editor:
         window._userOrgId = orgChoice || userSub?.organization_id || 'delano';
       }
 
-      // Load org branding then navigate
+      // Load org branding
       await loadOrgBranding();
-      const landingTab = (userSub?.role === 'player') ? 'home' : 'dashboard';
-      showSec(landingTab);
 
-      
-      // All checks passed - user can access the program
+      // All checks passed
       console.log('Access granted for:', user.email);
 
-      // Check if forced password reset is required
+      // Check forced password reset BEFORE showing anything
       if (userSub?.force_password_reset) {
         showPasswordResetScreen();
         return;
       }
+
+      // Navigate to landing tab
+      const landingTab = (userSub?.role === 'player') ? 'home' : 'dashboard';
+      showSec(landingTab);
 
       // Add a logout button to the header
       addLogoutButton(supabase, user, isAdmin);
