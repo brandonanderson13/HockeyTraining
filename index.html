@@ -2203,6 +2203,7 @@ async function superAdminPickOrg() {
       const sb = await getSupabaseClient();
       const { data: orgs } = await sb.from('organizations').select('id, name').order('name');
       const list = orgs && orgs.length ? orgs : [{ id: 'delano', name: 'Delano' }];
+      list.push({ id: 'individual', name: 'Individuals (no association)' });
 
       const modal = document.createElement('div');
       modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
@@ -2369,21 +2370,13 @@ function loadBrandingPanel() {
   const nameEl = document.getElementById('brandName');
   const primaryEl = document.getElementById('brandPrimary');
   const primaryHex = document.getElementById('brandPrimaryHex');
-  const secondaryEl = document.getElementById('brandSecondary');
-  const secondaryHex = document.getElementById('brandSecondaryHex');
-  const preview = document.getElementById('brandLogoPreview');
+  const logoPreview = document.getElementById('brandLogoPreview');
   if (nameEl) nameEl.value = b.name || '';
   if (primaryEl) primaryEl.value = b.primary_color || '#E07820';
   if (primaryHex) primaryHex.value = b.primary_color || '#E07820';
-  if (preview && b.logo_url) { preview.src = b.logo_url; preview.style.display = 'block'; }
-
-  // Sync color pickers to hex inputs
+  if (logoPreview && b.logo_url) { logoPreview.src = b.logo_url; logoPreview.style.display = 'block'; }
   document.getElementById('brandPrimary')?.addEventListener('input', e => {
     const h = document.getElementById('brandPrimaryHex');
-    if (h) h.value = e.target.value;
-  });
-  document.getElementById('brandSecondary')?.addEventListener('input', e => {
-    const h = document.getElementById('brandSecondaryHex');
     if (h) h.value = e.target.value;
   });
 }
@@ -2396,11 +2389,7 @@ function syncColorFromHex(pickerId, hexId) {
   }
 }
 
-function previewBranding() {
-  const primary = document.getElementById('brandPrimaryHex')?.value || '#E07820';
-  const name = document.getElementById('brandName')?.value;
-  applyBranding({ name, primary_color: primary, secondary_color: document.getElementById('brandSecondaryHex')?.value || '#ffffff', logo_url: window._orgBranding?.logo_url });
-}
+
 
 async function saveBrandingPanel() {
   const name = document.getElementById('brandName')?.value.trim();
