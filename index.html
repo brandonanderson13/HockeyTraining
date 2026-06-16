@@ -3955,6 +3955,7 @@ function openItemDetail(type, id) {
   if (isAssign) {
     const isDone = item.status === 'completed';
     const due = item.due_date ? new Date(item.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'No due date';
+    const dueDateVal = item.due_date ? item.due_date.split('T')[0] : '';
     const pName = playerMap[item.player_id] || 'Unknown';
     const sc = isDone?'#4ade80':item.status==='in_progress'?'#fbbf24':'rgba(255,255,255,0.5)';
     const checkBg = isDone ? '#4ade80' : 'transparent';
@@ -3976,8 +3977,8 @@ function openItemDetail(type, id) {
         <div style="background:#0d0d0d;border-radius:6px;padding:10px;">
           <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Due</div>
           ${isCoach
-            ? `<input type="date" id="detailDueDate" value="${item.due_date||''}" onchange="updateItemDueDate('assignment','${item.id}',this.value)" style="background:transparent;border:none;border-bottom:1px solid #333;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:2px 0;width:100%;cursor:pointer;">`
-            : `<input type="date" value="${item.due_date||''}" onchange="updateItemDueDate('assignment','${item.id}',this.value)" style="background:transparent;border:none;border-bottom:1px solid #333;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:2px 0;width:100%;cursor:pointer;">`
+            ? `<input type="date" id="detailDueDate" value="${dueDateVal}" onchange="updateItemDueDate('assignment','${item.id}',this.value)" style="background:transparent;border:none;border-bottom:1px solid #333;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:2px 0;width:100%;cursor:pointer;">`
+            : `<input type="date" value="${dueDateVal}" onchange="updateItemDueDate('assignment','${item.id}',this.value)" style="background:transparent;border:none;border-bottom:1px solid #333;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:2px 0;width:100%;cursor:pointer;">`
           }
         </div>
         ${item.type?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Type</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${item.type.replace(/\w/g,c=>c.toUpperCase())}</div></div>`:''}
@@ -4001,6 +4002,7 @@ function openItemDetail(type, id) {
     const bc = pct>=100?'#4ade80':pct>=50?'var(--primary-color)':'#60a5fa';
     const isDone = pct >= 100;
     const due = item.due_date ? new Date(item.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'No due date';
+    const dueDateVal = item.due_date ? item.due_date.split('T')[0] : '';
     const pName = playerMap[item.player_id] || 'Unknown';
 
     bodyHtml = `
@@ -4016,7 +4018,7 @@ function openItemDetail(type, id) {
         <div style="text-align:center;font-size:12px;color:rgba(255,255,255,0.35);">${pct}% complete${isDone?' · 🎯 Goal Achieved!':''}</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-        <div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Due</div><input type="date" value="${item.due_date||''}" onchange="updateItemDueDate('goal','${item.id}',this.value)" style="background:transparent;border:none;border-bottom:1px solid #333;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:2px 0;width:100%;cursor:pointer;"></div>
+        <div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Due</div><input type="date" value="${dueDateVal}" onchange="updateItemDueDate('goal','${item.id}',this.value)" style="background:transparent;border:none;border-bottom:1px solid #333;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:2px 0;width:100%;cursor:pointer;"></div>
         ${isCoach?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Player</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${pName}</div></div>`:''}
       </div>
       ${item.notes?`<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px 14px;margin-bottom:16px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Coach Notes</div><div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;font-style:italic;">${item.notes}</div></div>`:''}
