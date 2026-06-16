@@ -75,18 +75,41 @@ const orgColor = urlParams.get('color') ? decodeURIComponent(urlParams.get('colo
 const startDate = urlParams.get('start');
 const endDate = urlParams.get('end');
 
-// Apply org branding immediately
-if (orgColor) {
-  document.documentElement.style.setProperty('--primary-color', orgColor);
-  const hex = orgColor.replace('#','');
-  const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
-  document.documentElement.style.setProperty('--primary-rgb', `${r}, ${g}, ${b}`);
+// Apply org branding — from URL params or fetch from Supabase
+async function applyLeaderboardBranding() {
+  let name = orgName;
+  let color = orgColor;
+
+  // If no color passed (direct link), fetch from Supabase
+  if (!color && orgId && orgId !== 'individual') {
+    try {
+      const res = await fetch(`https://sfkdwprzwtegfkohqsdy.supabase.co/rest/v1/organizations?id=eq.${orgId}&select=name,primary_color`, {
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY',
+          'Accept': 'application/json'
+        }
+      });
+      const data = await res.json();
+      if (data && data[0]) {
+        color = data[0].primary_color || '#E07820';
+        name = name || data[0].name;
+      }
+    } catch(e) { console.error('Branding fetch error:', e); }
+  }
+
+  if (color) {
+    document.documentElement.style.setProperty('--primary-color', color);
+    const hex = color.replace('#','');
+    const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
+    document.documentElement.style.setProperty('--primary-rgb', `${r}, ${g}, ${b}`);
+  }
+  if (name) {
+    document.getElementById('orgName').textContent = name.toUpperCase();
+    document.getElementById('teamName').textContent = '';
+    document.title = `${name} Leaderboard`;
+  }
 }
-if (orgName) {
-  document.getElementById('orgName').textContent = orgName.toUpperCase();
-  document.getElementById('teamName').textContent = '';
-  document.title = `${orgName} Leaderboard`;
-}
+applyLeaderboardBranding();
 
 let currentBoard = 'shots';
 
