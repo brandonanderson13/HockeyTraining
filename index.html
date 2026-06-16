@@ -223,10 +223,11 @@ select:focus{border-color:var(--or);outline:none;}
 
 /* Custom scrollbar styling for player table */
 .player-table-wrapper {
-  max-height: 500px;
-  overflow-y: scroll !important;
+  max-height: 400px;
+  overflow-y: auto !important;
   overflow-x: auto !important;
   max-width: 100%;
+  scrollbar-gutter: stable;
   border: 1px solid #1a1a1a;
   border-radius: 8px;
   background: #0d0d0d;
@@ -7055,7 +7056,7 @@ function renderPlayerTable(players) {
     return;
   }
   
-  let html = '<div class="player-table-wrapper"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1400px;"><thead><tr style="border-bottom:1px solid #222;"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'name\')">Name ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'team\')">Team ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'email\')">Email ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'role\')">Role ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'status\')">Status ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'shots\')">Shots ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'mins\')">Stick Min ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'workouts\')">Workouts ↕</th><th style="text-align:center;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Expires</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Actions</th></tr></thead><tbody>';
+  let html = '<div class="player-table-wrapper"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1400px;"><thead><tr style="border-bottom:1px solid #222;"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'name\')">Name ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'team\')">Team ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'email\')">Email ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'role\')">Role ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'status\')">Status ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'shots\')">Shots ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'mins\')">Stick Min ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'workouts\')">Workouts ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Actions</th></tr></thead><tbody>';
   
   players.forEach(p => {
     html += p.html;
@@ -7571,7 +7572,7 @@ async function loadSuperAdminSubs() {
 
     // Fetch all organizations
     const { data: orgs } = await sb.from('organizations')
-      .select('id, name, status, expires_at, stripe_subscription_id')
+      .select('id, name, status, expires_at, stripe_subscription_id, seat_limit')
       .order('name');
 
     // Fetch individual subscribers (no association)
@@ -7607,7 +7608,7 @@ async function loadSuperAdminSubs() {
     } else {
       html += '<div style="border:1px solid #222;border-radius:8px;overflow:hidden;margin-bottom:20px;">';
       html += '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
-      html += '<thead><tr style="background:#0d0d0d;"><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Association</th><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Status</th><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Expires</th><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Org ID</th><th style="padding:8px 10px;"></th></tr></thead><tbody>';
+      html += '<thead><tr style="background:#0d0d0d;"><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Association</th><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Status</th><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Expires</th><th style="padding:8px 10px;text-align:left;color:rgba(255,255,255,0.4);font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Seat Limit</th><th style="padding:8px 10px;"></th></tr></thead><tbody>';
       assocOrgs.forEach((o, i) => {
         const expired = o.expires_at && new Date(o.expires_at) < now;
         const rowBg = expired ? 'rgba(248,113,113,0.04)' : i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)';
@@ -7615,7 +7616,7 @@ async function loadSuperAdminSubs() {
           <td style="padding:10px;color:#fff;font-weight:600;">${o.name || o.id}</td>
           <td style="padding:10px;">${statusBadge(o.status, o.expires_at)}</td>
           <td style="padding:10px;color:${expired?'#f87171':'rgba(255,255,255,0.6)'};">${fmt(o.expires_at)}</td>
-          <td style="padding:10px;color:rgba(255,255,255,0.35);font-size:11px;">${o.id}</td>
+          <td style="padding:10px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;">${o.seat_limit === 999999 ? 'Unlimited' : (o.seat_limit || '—')}</td>
           <td style="padding:8px;"><button onclick="editOrgExpiration('${o.id}','${o.name||o.id}','${o.expires_at||''}')" style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;color:#3b82f6;font-size:10px;padding:3px 7px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Set Expires</button></td>
         </tr>`;
       });
