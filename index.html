@@ -680,7 +680,7 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <!-- NUTRITION -->
-<div id="nutrition" class="sec"><div style="background:red;color:white;font-size:24px;padding:20px;border-radius:8px;margin-bottom:16px;">NUTRITION SECTION IS VISIBLE</div>
+<div id="nutrition" class="sec">
   <div class="nut-hero"><div class="nut-icon">🥗</div><div class="nut-hero-text"><h2>Fuel Your Performance</h2><p>What you eat and drink directly impacts performance, recovery, and energy. Guidelines built for youth hockey players ages 8–18 training through a 12-week program.</p></div></div>
 
   <div class="sh">Daily Hydration</div>
@@ -715,7 +715,7 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <!-- MOBILITY -->
-<div id="mobility" class="sec"><div style="background:blue;color:white;font-size:24px;padding:20px;border-radius:8px;margin-bottom:16px;">MOBILITY SECTION IS VISIBLE</div>
+<div id="mobility" class="sec">
   <div class="ibox">
     <strong>Daily Mobility Routine:</strong> 10-15 minutes of targeted stretching improves skating stride, shot power, and injury prevention. Do this after workouts or on rest days.
   </div>
@@ -3972,7 +3972,6 @@ function collapseAllWeeks() {
 }
 
 function showSec(id){
-  console.log('showSec called:', id);
   // Home tab
   if (id === 'home') {
     document.querySelectorAll('.sec').forEach(s => {
@@ -3996,8 +3995,7 @@ function showSec(id){
     sec.classList.add('active');
     sec.style.setProperty('display', 'block', 'important');
     window.scrollTo(0,0);
-    console.log('activated sec:', id, sec);
-  } else { console.error('sec not found:', id); }
+  }
   
   // Update button active states
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
