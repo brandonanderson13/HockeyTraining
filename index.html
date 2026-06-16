@@ -1639,34 +1639,41 @@ Check Supabase Table Editor:
       }
       
       // Check expiration — use org-level for association members, row-level for individuals
-      const orgId = userSub.organization_id || 'individual';
-      const isAssocMember = orgId !== 'individual' && role !== 'admin' && role !== 'super_admin';
-      const isAssocAdmin = orgId !== 'individual' && (role === 'admin' || role === 'super_admin');
+      const _expOrgId = userSub.organization_id || 'individual';
+      const _expRole = userSub.role || 'player';
+      const _isAssocMember = _expOrgId !== 'individual' && _expRole !== 'admin' && _expRole !== 'super_admin';
+      const _isAssocAdmin = _expOrgId !== 'individual' && (_expRole === 'admin' || _expRole === 'super_admin');
 
-      if (isAssocMember || isAssocAdmin) {
-        // Check org-level expiry
-        const { data: orgData } = await supabase.from('organizations').select('expires_at, status').eq('id', orgId).single();
-        if (orgData) {
-          const orgExpired = orgData.expires_at && new Date(orgData.expires_at) < new Date();
-          const orgInactive = orgData.status && orgData.status !== 'active';
-          if (orgExpired || orgInactive) {
-            if (isAssocAdmin) {
-              await supabase.from('organizations').update({ status: 'expired' }).eq('id', orgId);
+      try {
+        if (_isAssocMember || _isAssocAdmin) {
+          // Check org-level expiry
+          const { data: orgData } = await supabase.from('organizations').select('expires_at, status').eq('id', _expOrgId).single();
+          if (orgData) {
+            const orgExpired = orgData.expires_at && new Date(orgData.expires_at) < new Date();
+            // Only treat as inactive if status is explicitly 'cancelled' or 'expired' — not null
+            const orgInactive = orgData.status === 'cancelled' || orgData.status === 'expired';
+            if (orgExpired || orgInactive) {
+              if (_isAssocAdmin) {
+                await supabase.from('organizations').update({ status: 'expired' }).eq('id', _expOrgId);
+              }
+              showRenewalWall(user.email, orgExpired ? 'expired' : 'cancelled');
+              return;
             }
-            showRenewalWall(user.email, orgExpired ? 'expired' : 'cancelled');
-            return;
+          }
+        } else {
+          // Individual — check their own row
+          if (userSub.expires_at) {
+            const expiresAt = new Date(userSub.expires_at);
+            if (expiresAt < new Date()) {
+              await supabase.from('subscriptions').update({ status: 'expired' }).eq('id', userSub.id);
+              showRenewalWall(user.email, 'expired');
+              return;
+            }
           }
         }
-      } else {
-        // Individual — check their own row
-        if (userSub.expires_at) {
-          const expiresAt = new Date(userSub.expires_at);
-          if (expiresAt < new Date()) {
-            await supabase.from('subscriptions').update({ status: 'expired' }).eq('id', userSub.id);
-            showRenewalWall(user.email, 'expired');
-            return;
-          }
-        }
+      } catch(e) {
+        console.warn('Expiry check error (non-fatal):', e.message);
+        // Continue to app — don't lock out on error
       }
       
       // Set up nav tabs by role
