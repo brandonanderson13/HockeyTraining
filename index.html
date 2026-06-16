@@ -3839,19 +3839,18 @@ function openItemDetail(type, id) {
           <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${due}</div>
         </div>
         ${item.type?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Type</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${item.type.replace(/\w/g,c=>c.toUpperCase())}</div></div>`:''}
-        ${isCoach?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Player</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${pName}</div></div>`:''}
+        ${isCoach?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Assigned To</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${
+          (() => {
+            const sameTitle = (window._dashAssignments||[]).filter(a => a.title === item.title && a.due_date === item.due_date);
+            if (sameTitle.length > 1) {
+              const allP = sameTitle.length === (_dashPlayers||[]).length && (_dashPlayers||[]).length > 1;
+              return allP ? 'All Players' : sameTitle.length + ' Players';
+            }
+            return pName;
+          })()
+        }</div></div>`:''}
       </div>
       ${item.description?`<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px 14px;margin-bottom:16px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Description</div><div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;">${item.description}</div></div>`:''}
-      <div style="margin-bottom:6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;">Update Status</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        ${['assigned','in_progress','completed'].map(s => {
-          const active = item.status === s;
-          const colors = {assigned:'rgba(255,255,255,0.4)',in_progress:'#fbbf24',completed:'#4ade80'};
-          const labels = {assigned:'Assigned',in_progress:'In Progress',completed:'Completed ✓'};
-          return `<button onclick="updateAssignmentStatus('${item.id}','${s}');document.getElementById('itemDetailModal').remove();loadDashboard();"
-            style="flex:1;padding:8px;border-radius:6px;border:1px solid ${active?colors[s]:'#333'};background:${active?'rgba(255,255,255,0.06)':'transparent'};color:${active?colors[s]:'rgba(255,255,255,0.4)'};font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">${labels[s]}</button>`;
-        }).join('')}
-      </div>
       ${isCoach?`<button onclick="deleteAssignment('${item.id}');document.getElementById('itemDetailModal').remove();" style="width:100%;margin-top:10px;padding:8px;border-radius:6px;border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.08);color:#f87171;font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Delete Assignment</button>`:''}`;
 
   } else {
