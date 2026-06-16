@@ -6409,16 +6409,7 @@ async function loadAdminPanel(user) {
       </div>
     </div>
 
-    <!-- SUPER ADMIN SUBSCRIPTIONS PANEL -->
-    <div class="card" style="margin-bottom:1rem;display:none;" id="superAdminSubsPanel">
-      <div class="ch">
-        <span class="cht" id="superAdminSubsTitle">All Subscriptions</span>
-        <button onclick="loadSuperAdminSubs()" style="margin-left:auto;background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Refresh</button>
-      </div>
-      <div class="cb">
-        <div id="superAdminSubsContent"><div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:12px;">Loading...</div></div>
-      </div>
-    </div>
+
 
     <div class="card">
       <div class="ch">
@@ -6456,7 +6447,6 @@ async function loadAdminPanel(user) {
   populateAdminTeamDropdown();
   populateBulkTeamDropdown();
   loadBrandingPanel();
-  if (window._isSuperAdmin) loadSuperAdminSubs();
   
   // Add embed card at the bottom
   const adminContentDiv = document.getElementById('adminContent');
