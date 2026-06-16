@@ -6684,11 +6684,13 @@ async function loadPlayerList(isSuperAdmin = false) {
     
     const playerCount = subs.filter(s => s.role === 'player').length; // Don't count admins
     
-    // Calculate org-wide seat limit (use max among all admins in org)
-    const orgAdmins = subs.filter(s => s.role === 'admin' && s.seat_limit);
-    const maxSeats = orgAdmins.length > 0 
-      ? Math.max(...orgAdmins.map(a => a.seat_limit))
-      : (window._adminSubscription?.seat_limit || 0);
+    // Calculate org-wide seat limit — use org table value as source of truth
+    const maxSeats = window._orgSeatLimit || (() => {
+      const orgAdmins = subs.filter(s => s.role === 'admin' && s.seat_limit);
+      return orgAdmins.length > 0
+        ? Math.max(...orgAdmins.map(a => a.seat_limit))
+        : (window._adminSubscription?.seat_limit || 0);
+    })();
     
     const playersUsedEl = document.getElementById('seatsUsed');
     const playersUsedDetailEl = document.getElementById('seatsUsedDetail');
@@ -6704,8 +6706,9 @@ async function loadPlayerList(isSuperAdmin = false) {
     if (mySubPlanLimit) mySubPlanLimit.textContent = maxSeats === 999999 ? 'Unlimited Players' : maxSeats + ' Players';
     
     // Calculate and show remaining players
-    if (window._adminSubscription && window._adminSubscription.seat_limit) {
-      const limit = window._adminSubscription.seat_limit;
+    const _displayLimit = window._orgSeatLimit || window._adminSubscription?.seat_limit;
+    if (_displayLimit) {
+      const limit = _displayLimit;
       if (limit !== 999999) {
         const remaining = limit - playerCount;
         
@@ -6999,9 +7002,12 @@ async function loadAccountDetails() {
     }
     
     // Renewal date
+    const renewsLabel = renewalDate === 'Not set'
+      ? (isAssoc ? 'Managed by Stripe' : 'No expiration set')
+      : renewalDate;
     html += `<div>
       <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Renews</div>
-      <div style="font-size:14px;color:rgba(255,255,255,0.85);">${renewalDate}</div>
+      <div style="font-size:14px;color:rgba(255,255,255,0.85);">${renewsLabel}</div>
     </div>`;
     
     html += '</div>';
