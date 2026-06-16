@@ -3358,45 +3358,11 @@ function openAssignModal(playerId, playerName, isAll) {
           <input id="mTitle" type="text" placeholder="e.g. 100 wrist shots daily" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
         </div>
         <div>
-          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Type</label>
-          <div style="display:flex;gap:0;background:#0d0d0d;border:1px solid #222;border-radius:6px;overflow:hidden;">
-            <button type="button" id="typeGeneral" onclick="dashSetAssignType('general')" style="flex:1;padding:7px;background:var(--primary-color);border:none;color:var(--secondary-color);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">General</button>
-            <button type="button" id="typeTracked" onclick="dashSetAssignType('tracked')" style="flex:1;padding:7px;background:transparent;border:none;color:rgba(255,255,255,0.4);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">Tracked 📊</button>
-          </div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Description</label>
+          <textarea id="mDesc" placeholder="Details, instructions, or context..." style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;resize:vertical;height:70px;font-family:'Barlow',sans-serif;"></textarea>
         </div>
-        <div id="generalFields">
-          <div style="margin-bottom:12px;">
-            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Category</label>
-            <select id="mType" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
-              <option value="workout">Workout</option>
-              <option value="shooting">Shooting</option>
-              <option value="stickhandling">Stickhandling</option>
-              <option value="conditioning">Conditioning</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Description</label>
-            <textarea id="mDesc" placeholder="Details, reps, sets, notes..." style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;resize:vertical;height:70px;font-family:'Barlow',sans-serif;"></textarea>
-          </div>
-        </div>
-        <div id="trackedFields" style="display:none;">
-          <div style="background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.15);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;">
-            Progress is tracked <strong style="color:rgba(255,255,255,0.7);">automatically</strong> from the player's Shot Log, Stickhandling Log, or Workouts — no manual updates needed.
-          </div>
-          <div style="margin-bottom:12px;">
-            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Track By</label>
-            <div style="display:flex;gap:6px;">
-              <button type="button" class="tracked-metric-btn" data-metric="shots" onclick="dashSetMetric('shots')" style="flex:1;padding:8px 6px;border-radius:6px;border:1px solid #333;background:#0d0d0d;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">🏒 Shots</button>
-              <button type="button" class="tracked-metric-btn" data-metric="stickhandling" onclick="dashSetMetric('stickhandling')" style="flex:1;padding:8px 6px;border-radius:6px;border:1px solid #333;background:#0d0d0d;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">🎯 Stick Mins</button>
-              <button type="button" class="tracked-metric-btn" data-metric="workouts" onclick="dashSetMetric('workouts')" style="flex:1;padding:8px 6px;border-radius:6px;border:1px solid #333;background:#0d0d0d;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">💪 Workouts</button>
-            </div>
-          </div>
-          <div>
-            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Target <span id="mMetricUnit" style="color:rgba(255,255,255,0.25);">(select metric above)</span></label>
-            <input id="mTarget" type="number" min="1" placeholder="e.g. 500" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
-          </div>
-        </div>
+        <input type="hidden" id="mType" value="general">
+        <input type="hidden" id="mTarget" value="">
         <div>
           <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Due Date</label>
           <input id="mDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
@@ -3459,6 +3425,7 @@ async function saveAssignment() {
   const desc = document.getElementById('mDesc')?.value.trim();
   const due = document.getElementById('mDue')?.value;
   const msg = document.getElementById('mMsg');
+  const type = 'general'; // simplified — tasks are always check-off
   const allDiv = document.getElementById('modeAllDiv');
   const isAll = allDiv && allDiv.style.display !== 'none';
 
@@ -3966,7 +3933,8 @@ async function toggleGoalComplete(id, currentlyDone) {
     if (error) throw error;
     const g = (window._dashGoals||[]).find(x=>x.id===id);
     if (g) g.completed = !currentlyDone;
-    loadDashboard();
+    const targetId = window._userRole === 'player' ? 'playerDashContent' : undefined;
+    loadDashboard(targetId);
   } catch(e) { alert('Error: ' + e.message); }
 }
 
@@ -3978,7 +3946,8 @@ async function toggleAssignment(id, currentlyDone) {
     if (error) throw error;
     const a = (window._dashAssignments||[]).find(x=>x.id===id);
     if (a) a.status = newStatus;
-    loadDashboard();
+    const targetId = window._userRole === 'player' ? 'playerDashContent' : undefined;
+    loadDashboard(targetId);
   } catch(e) { alert('Error: ' + e.message); }
 }
 
