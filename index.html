@@ -302,6 +302,24 @@ select:focus{border-color:var(--or);outline:none;}
   <button class="nb" id="adminTab" onclick="showSec('admin')" style="display:none;margin-left:8px;background:rgba(var(--primary-rgb),0.1);border-color:var(--primary-color);">Admin</button>
 </div>
 
+<!-- RENEWAL WALL -->
+<div id="renewalWall" style="display:none;position:fixed;inset:0;background:#0d0d0d;z-index:999999;align-items:center;justify-content:center;padding:20px;visibility:visible;">
+  <div style="background:#141414;border:1px solid #333;border-radius:14px;padding:32px;width:100%;max-width:440px;text-align:center;">
+    <div style="font-size:40px;margin-bottom:16px;">🔒</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin-bottom:8px;" id="renewalTitle">Subscription Expired</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:24px;" id="renewalMsg">Your subscription has expired. Your data is safe — renew to get back in.</div>
+    <div style="display:grid;gap:10px;margin-bottom:20px;">
+      <a id="renewalPortalBtn" href="https://billing.stripe.com/p/login/14AcN4fnrf2y4DBdiadjO00" target="_blank" style="display:block;background:var(--primary-color);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:14px;border-radius:8px;text-decoration:none;">Manage / Renew Subscription</a>
+      <a id="renewalNewBtn" href="" style="display:block;background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:12px;border-radius:8px;text-decoration:none;">Subscribe with a New Account</a>
+    </div>
+    <div style="border-top:1px solid #222;padding-top:16px;">
+      <button onclick="renewalCheckStatus()" style="background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.25);color:#4ade80;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:8px 16px;border-radius:6px;cursor:pointer;margin-bottom:10px;">✓ I've Renewed — Check Now</button>
+      <div id="renewalCheckMsg" style="font-size:12px;color:rgba(255,255,255,0.4);display:none;margin-bottom:10px;"></div>
+      <div><button onclick="renewalSignOut()" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:11px;cursor:pointer;text-decoration:underline;">Sign out</button></div>
+    </div>
+  </div>
+</div>
+
 <!-- v2-nav-fix PASSWORD RESET SCREEN -->
 <div id="passwordResetScreen" style="display:none;position:fixed;inset:0;background:#0d0d0d;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#141414;border:1px solid #333;border-radius:14px;padding:32px;width:100%;max-width:400px;">
@@ -1582,7 +1600,12 @@ function showRenewalWall(email, reason) {
     if (newBtn) newBtn.style.display = 'none';
     if (renewBtn) renewBtn.style.display = 'none';
   }
+  wall.style.display = 'flex';
   wall.style.setProperty('display', 'flex', 'important');
+  wall.removeAttribute('hidden');
+  wall.style.visibility = 'visible';
+  wall.style.opacity = '1';
+  wall.style.zIndex = '999999';
 }
 function checkShowWizard() {
   const role = window._pendingRole || 'player';
