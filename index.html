@@ -3976,8 +3976,8 @@ function openItemDetail(type, id) {
         <div style="background:#0d0d0d;border-radius:6px;padding:10px;">
           <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Due</div>
           ${isCoach
-            ? `<input type="date" id="detailDueDate" value="${item.due_date||''}" onchange="updateItemDueDate('${type}','${item.id}',this.value)" style="background:transparent;border:none;border-bottom:1px solid #333;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:2px 0;width:100%;cursor:pointer;">`
-            : `<div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${due}</div>`
+            ? `<input type="date" id="detailDueDate" value="${item.due_date||''}" onchange="updateItemDueDate('assignment','${item.id}',this.value)" style="background:transparent;border:none;border-bottom:1px solid #333;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:2px 0;width:100%;cursor:pointer;">`
+            : `<input type="date" value="${item.due_date||''}" onchange="updateItemDueDate('assignment','${item.id}',this.value)" style="background:transparent;border:none;border-bottom:1px solid #333;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:2px 0;width:100%;cursor:pointer;">`
           }
         </div>
         ${item.type?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Type</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${item.type.replace(/\w/g,c=>c.toUpperCase())}</div></div>`:''}
@@ -4016,7 +4016,7 @@ function openItemDetail(type, id) {
         <div style="text-align:center;font-size:12px;color:rgba(255,255,255,0.35);">${pct}% complete${isDone?' · 🎯 Goal Achieved!':''}</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-        <div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Due</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${due}</div></div>
+        <div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Due</div><input type="date" value="${item.due_date||''}" onchange="updateItemDueDate('goal','${item.id}',this.value)" style="background:transparent;border:none;border-bottom:1px solid #333;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:2px 0;width:100%;cursor:pointer;"></div>
         ${isCoach?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Player</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${pName}</div></div>`:''}
       </div>
       ${item.notes?`<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px 14px;margin-bottom:16px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Coach Notes</div><div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;font-style:italic;">${item.notes}</div></div>`:''}
