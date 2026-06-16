@@ -10,7 +10,7 @@
 :root{--primary-color:#E07820;--primary-rgb:224, 120, 32;--or:#E07820;--orl:#E07820;--secondary-color:#ffffff;--bk:#0D0D0D;--ch:#1a1a1a;--g2:#222;--g3:#2a2a2a;--white:#fff;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh;}
-.wrap{max-width:860px;margin:0 auto;padding:1.5rem;}
+.wrap{max-width:1100px;margin:0 auto;padding:1.5rem;}
 
 /* HEADER */
 .hdr{background:var(--bk);border-radius:12px;overflow:hidden;margin-bottom:1.5rem;border:1px solid var(--g3);}
@@ -24,8 +24,7 @@ body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh
 
 /* NAV */
 .nav{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:1.5rem;background:var(--bk);border-radius:8px;padding:4px;border:1px solid var(--g2);}
-.nb{flex:1;text-align:center;}
-.nb{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:7px 13px;border:none;border-radius:5px;background:transparent;color:rgba(255,255,255,0.4);cursor:pointer;transition:all .15s;}
+.nb{flex:1;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:7px 13px;border:none;border-radius:5px;background:transparent;color:rgba(255,255,255,0.4);cursor:pointer;transition:all .15s;}
 .nb:hover{background:var(--g2);color:rgba(255,255,255,0.85);}
 .nb.active{background:var(--or);color:var(--secondary-color);}
 
@@ -4159,6 +4158,11 @@ function showSec(id){
   const btn = document.querySelector(`.nb[onclick*="${id}"]`);
   if(btn) btn.classList.add('active');
   
+  // Load dashboard when dashboard tab shown
+  if (id === 'dashboard') {
+    loadDashboard();
+  }
+
   // Load account details when Account tab is shown
   if (id === 'account') {
     loadAccountDetails();
