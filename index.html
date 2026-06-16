@@ -593,25 +593,15 @@ select:focus{border-color:var(--or);outline:none;}
         </div>
       </div>
 
-      <!-- FOCUS + INCLUDE -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
-        <div>
-          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Training Focus</label>
-          <div style="display:flex;flex-direction:column;gap:6px;">
-            <label class="cust-radio"><input type="radio" name="focus" value="balanced" checked><span>Balanced</span></label>
-            <label class="cust-radio"><input type="radio" name="focus" value="strength"><span>Strength</span></label>
-            <label class="cust-radio"><input type="radio" name="focus" value="skills"><span>Skills</span></label>
-            <label class="cust-radio"><input type="radio" name="focus" value="conditioning"><span>Conditioning</span></label>
-          </div>
-        </div>
-        <div>
-          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Include</label>
-          <div style="display:flex;flex-direction:column;gap:6px;">
-            <label class="cust-check"><input type="checkbox" id="cust-strength" checked><span>Strength</span></label>
-            <label class="cust-check"><input type="checkbox" id="cust-agility" checked><span>Agility</span></label>
-            <label class="cust-check"><input type="checkbox" id="cust-skills" checked><span>Skills</span></label>
-            <label class="cust-check"><input type="checkbox" id="cust-conditioning" checked><span>Conditioning</span></label>
-          </div>
+      <!-- INCLUDE -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Include in Program</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <label class="cust-check"><input type="checkbox" id="cust-strength" checked><span>Strength</span></label>
+          <label class="cust-check"><input type="checkbox" id="cust-agility" checked><span>Agility</span></label>
+          <label class="cust-check"><input type="checkbox" id="cust-skills" checked><span>Skills</span></label>
+          <label class="cust-check"><input type="checkbox" id="cust-conditioning" checked><span>Conditioning</span></label>
+          <input type="hidden" name="focus" value="balanced">
         </div>
       </div>
 
@@ -619,12 +609,6 @@ select:focus{border-color:var(--or);outline:none;}
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
         <button onclick="applyCustomization()" class="btn-o" style="margin-top:0;">Apply Settings</button>
         <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">✓ Settings applied!</div>
-      </div>
-
-      <!-- EQUIPMENT -->
-      <div style="border-top:1px solid #1a1a1a;padding-top:16px;margin-bottom:16px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Equipment Needed <span id="equip-subtitle" style="color:rgba(255,255,255,0.2);">— Bantam (15U) tier</span></div>
-        <div id="equip-list" style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.9;"></div>
       </div>
 
       <!-- PROGRAM CARDS -->
