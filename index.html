@@ -6164,6 +6164,13 @@ async function loadAdminPanel(user) {
       window._orgSeatLimit = orgData.seat_limit;
       // Merge org data into adminSub for backward compat
       if (adminSub) { adminSub.seat_limit = orgData.seat_limit; adminSub.expires_at = orgData.expires_at; }
+      // Update renewal date display in admin panel
+      setTimeout(() => {
+        const rdEl = document.getElementById('renewalDate');
+        if (rdEl && orgData.expires_at) {
+          rdEl.textContent = new Date(orgData.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+      }, 100);
     }
   }
   const hasPlayers = adminSub && (window._orgSeatLimit || adminSub.seat_limit) && adminSub.subscription_type === 'association';
@@ -6931,17 +6938,14 @@ async function loadAccountDetails() {
 
     // Fetch seat_limit and expires_at from organizations table (org-level data)
     const orgId = sub.organization_id || 'individual';
-    console.log('Account orgId:', orgId, 'sub.expires_at:', sub.expires_at);
     if (orgId !== 'individual') {
-      const { data: orgData, error: orgFetchErr } = await sb.from('organizations').select('seat_limit, expires_at, name').eq('id', orgId).single();
-      console.log('Org data:', orgData, 'error:', orgFetchErr);
+      const { data: orgData } = await sb.from('organizations').select('seat_limit, expires_at, name').eq('id', orgId).single();
       if (orgData) {
         if (orgData.seat_limit != null) sub.seat_limit = orgData.seat_limit;
         if (orgData.expires_at) sub.expires_at = orgData.expires_at;
         if (orgData.name && !sub.organization_name) sub.organization_name = orgData.name;
       }
     }
-    console.log('After org fetch - sub.expires_at:', sub.expires_at, 'sub.seat_limit:', sub.seat_limit);
 
     const isAssoc = sub.subscription_type === 'association';
     const renewalDate = sub.expires_at ? new Date(sub.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null;
