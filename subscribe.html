@@ -416,11 +416,13 @@
     </div>
     
     <div>
-      <label>Select Your Association</label>
-      <select id="organizationId" required onchange="updateSubscribeBranding()" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;font-family:'Barlow',sans-serif;margin-bottom:14px;">
-        <option value="delano">Delano Youth Hockey Association</option>
-        <option value="individual">Individual (No Association)</option>
-      </select>
+<div id="orgNameField" style="display:none;">
+      <label>Association / Team Name</label>
+      <input type="text" id="organizationName" placeholder="e.g. Eden Prairie Youth Hockey" required
+        style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;font-family:'Barlow',sans-serif;margin-bottom:14px;"
+        oninput="updateSubscribeBranding()">
+      <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:-10px;margin-bottom:14px;">Enter your association or team name exactly as you'd like it to appear in the app</div>
+</div>
     </div>
     
     <div>
@@ -451,6 +453,8 @@ let subscriptionType = 'individual'; // 'individual' or 'association'
 let selectedPlan = null;
 
 function selectType(type) {
+  const orgField = document.getElementById('orgNameField');
+  if (orgField) orgField.style.display = type === 'association' ? 'block' : 'none';
   subscriptionType = type;
   document.getElementById('typeIndividual').classList.toggle('active', type === 'individual');
   document.getElementById('typeAssociation').classList.toggle('active', type === 'association');
@@ -508,8 +512,8 @@ async function proceedToCheckout() {
   const firstName = document.getElementById('firstName').value.trim();
   const lastName = document.getElementById('lastName').value.trim();
   const email = document.getElementById('email').value.trim();
-  const organizationId = document.getElementById('organizationId').value;
-  const orgName = organizationId === 'delano' ? 'Delano Youth Hockey Association' : 'Individual';
+  const orgName = document.getElementById('organizationName')?.value.trim() || '';
+  const organizationId = orgName ? orgName.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'') : 'individual';
   
   if (!firstName || !lastName || !email) {
     const msg = document.getElementById('message');
@@ -533,8 +537,6 @@ async function proceedToCheckout() {
   
   try {
     let priceAmount, interval, metadata;
-    
-    const organizationId = document.getElementById('organizationId').value;
     
     if (selectedPlan.type === 'individual') {
       priceAmount = selectedPlan.plan === 'monthly' ? 1900 : 19900;
@@ -590,19 +592,11 @@ async function proceedToCheckout() {
 
 
 function updateSubscribeBranding() {
-  const orgId = document.getElementById('organizationId').value;
-  
-  if (orgId === 'delano') {
-    document.documentElement.style.setProperty('--primary-color', '#E07820');
-    document.documentElement.style.setProperty('--primary-rgb', '224, 120, 32');
-    document.getElementById('subOrgName').textContent = 'Delano';
-    document.getElementById('subTeamName').textContent = 'Tigers Training';
-  } else {
-    document.documentElement.style.setProperty('--primary-color', '#3b82f6');
-    document.documentElement.style.setProperty('--primary-rgb', '59, 130, 246');
-    document.getElementById('subOrgName').textContent = 'Hockey';
-    document.getElementById('subTeamName').textContent = 'Training';
-  }
+  const orgName = document.getElementById('organizationName')?.value.trim();
+  const nameEl = document.getElementById('subOrgName');
+  const teamEl = document.getElementById('subTeamName');
+  if (nameEl) nameEl.textContent = orgName || 'Your Association';
+  if (teamEl) teamEl.textContent = 'Hockey Training';
 }
 
 
