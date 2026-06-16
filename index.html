@@ -24,6 +24,7 @@ body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh
 
 /* NAV */
 .nav{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:1.5rem;background:var(--bk);border-radius:8px;padding:4px;border:1px solid var(--g2);}
+.nb{flex:1;text-align:center;}
 .nb{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:7px 13px;border:none;border-radius:5px;background:transparent;color:rgba(255,255,255,0.4);cursor:pointer;transition:all .15s;}
 .nb:hover{background:var(--g2);color:rgba(255,255,255,0.85);}
 .nb.active{background:var(--or);color:var(--secondary-color);}
@@ -292,13 +293,11 @@ select:focus{border-color:var(--or);outline:none;}
   <button class="nb active" id="homeTab" onclick="showSec('home')">Home</button>
   <button class="nb" id="programTab" onclick="showSec('schedule')">Program</button>
   <button class="nb" id="progressTab" onclick="showSec('baseline')">Progress</button>
-  <button class="nb" id="resourcesTab" onclick="showSec('resources')">Resources</button>
+  <button class="nb" id="nutritionTab" onclick="showSec('nutrition')">Nutrition</button>
+  <button class="nb" id="mobilityTab" onclick="showSec('mobility')">Mobility</button>
   <button class="nb" onclick="showSec('account')">Account</button>
   <button class="nb" id="adminTab" onclick="showSec('admin')" style="display:none;margin-left:8px;background:rgba(var(--primary-rgb),0.1);border-color:var(--primary-color);">Admin</button>
 </div>
-
-<!-- SHARED DASHBOARD CONTENT -->
-<div id="dashboardContent" style="display:none;"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Loading...</div></div>
 
 <!-- PASSWORD RESET SCREEN -->
 <div id="passwordResetScreen" style="display:none;position:fixed;inset:0;background:#0d0d0d;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;">
@@ -324,14 +323,14 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="sec">
-  <div id="dashDcSlot"></div>
+  <div id="dashboardContent"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Loading...</div></div>
 </div>
 
 <!-- OVERVIEW -->
 <div id="home" class="sec">
   <div id="homeContent">
     <div id="homeQuickLog"></div>
-    <div id="homeDcSlot"></div>
+    <div id="playerDashContent"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Loading...</div></div>
   </div>
 </div>
 
@@ -667,7 +666,7 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <!-- NUTRITION -->
-<div id="nutrition" class="sec-hidden" style="display:none;">
+<div id="nutrition" class="sec">
   <div class="nut-hero"><div class="nut-icon">🥗</div><div class="nut-hero-text"><h2>Fuel Your Performance</h2><p>What you eat and drink directly impacts performance, recovery, and energy. Guidelines built for youth hockey players ages 8–18 training through a 12-week program.</p></div></div>
 
   <div class="sh">Daily Hydration</div>
@@ -702,7 +701,7 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <!-- MOBILITY -->
-<div id="mobility" class="sec-hidden" style="display:none;">
+<div id="mobility" class="sec">
   <div class="ibox">
     <strong>Daily Mobility Routine:</strong> 10-15 minutes of targeted stretching improves skating stride, shot power, and injury prevention. Do this after workouts or on rest days.
   </div>
@@ -2638,13 +2637,8 @@ function loadHomeSec() {
   const quickLogEl = document.getElementById('homeQuickLog');
   if (quickLogEl) quickLogEl.innerHTML = isPlayer ? quickLog : '';
 
-  // Move dashboardContent into homeContent if not already there
-  const dc = document.getElementById('dashboardContent');
-  const homeDcSlot = document.getElementById('homeDcSlot');
-  if (dc && homeDcSlot && !homeDcSlot.contains(dc)) {
-    homeDcSlot.appendChild(dc);
-  }
-  loadDashboard();
+  // Load dashboard into player-specific content div
+  loadDashboard('playerDashContent');
 }
 
 function _activateTab(id) {
@@ -2658,8 +2652,8 @@ function _activateTab(id) {
   });
 }
 
-async function loadDashboard() {
-  const el = document.getElementById('dashboardContent');
+async function loadDashboard(targetId) {
+  const el = document.getElementById(targetId || 'dashboardContent');
   if (!el) return;
   el.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Loading...</div>';
 
@@ -2720,7 +2714,7 @@ async function loadDashboard() {
       // Render banners on log tabs
       renderTrackedBanners(window._dashAssignments);
 
-      renderPlayerDashboard(totalShots, totalMins, totalWorkouts, window._dashAssignments, window._dashGoals);
+      renderPlayerDashboard(totalShots, totalMins, totalWorkouts, window._dashAssignments, window._dashGoals, targetId);
       return;
     }
 
@@ -2785,18 +2779,18 @@ async function loadDashboard() {
     window._dashAssignments = assignRes.data || [];
     window._dashGoals = goalRes.data || [];
     window._dashStatsMap = statsMap;
-    renderCoachDashboard(players, statsMap, teamName, window._dashAssignments, window._dashGoals);
+    renderCoachDashboard(players, statsMap, teamName, window._dashAssignments, window._dashGoals, targetId);
 
   } catch(e) {
-    document.getElementById('dashboardContent').innerHTML = '<div style="color:#f87171;padding:20px;">Error: ' + e.message + '</div>';
+    (document.getElementById(targetId||'dashboardContent')||document.getElementById('dashboardContent')).innerHTML = '<div style="color:#f87171;padding:20px;">Error: ' + e.message + '</div>';
     console.error('Dashboard error:', e);
   }
 }
 
 // ── PLAYER DASHBOARD ──────────────────────────────────────────────────────
 // ── PLAYER DASHBOARD ──────────────────────────────────────────────────────
-function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments, goals) {
-  const el = document.getElementById('dashboardContent');
+function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments, goals, targetId) {
+  const el = document.getElementById(targetId||'dashboardContent');
   const open = assignments.filter(a => a.status !== 'completed');
   const done = assignments.filter(a => a.status === 'completed');
 
@@ -3066,8 +3060,8 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
     </div>`;
 }
 
-function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
-  const el = document.getElementById('dashboardContent');
+function renderCoachDashboard(players, statsMap, teamName, assignments, goals, targetId) {
+  const el = document.getElementById(targetId||'dashboardContent');
   const role = window._userRole;
   const isAdmin = role === 'admin' || role === 'super_admin';
   const playerMap = {};
@@ -4145,18 +4139,6 @@ function collapseAllWeeks() {
 }
 
 function showSec(id){
-  // Move dashboardContent to the right slot when switching tabs
-  const dc = document.getElementById('dashboardContent');
-  if (dc) {
-    dc.style.display = '';
-    if (id === 'home') {
-      const slot = document.getElementById('homeDcSlot');
-      if (slot && !slot.contains(dc)) slot.appendChild(dc);
-    } else if (id === 'dashboard') {
-      const slot = document.getElementById('dashDcSlot');
-      if (slot && !slot.contains(dc)) slot.appendChild(dc);
-    }
-  }
   // Home tab
   if (id === 'home') {
     document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
