@@ -610,7 +610,7 @@ select:focus{border-color:var(--or);outline:none;}
 <!-- SCHEDULE -->
 <div id="schedule" class="sec">
   <div style="margin-bottom:1rem;">
-    <button onclick="toggleCustomize()" id="customizeToggle"
+    <button onclick="toggleProgramCustomize()" id="customizeToggle"
       style="width:100%;background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:10px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;text-align:left;">
       <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,0.7);">⚙ Customize Program</span>
       <span id="customizeChev" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.3);transition:transform .2s;">▼</span>
@@ -4104,18 +4104,19 @@ function viewPlayer(playerId, playerName) {
 }
 
 
-function toggleCustomize() {
+function toggleProgramCustomize() {
   const panel = document.getElementById('customizePanel');
   const chev = document.getElementById('customizeChev');
   const open = panel.style.display === 'none';
   if (open) {
-    // Lazy-load the overview content into the panel
-    const overview = document.getElementById('overview');
-    if (overview && !panel._loaded) {
-      panel.innerHTML = overview.innerHTML;
-      panel._loaded = true;
-      // Re-run any init that overview needs
-      loadCustomSettings();
+    if (!panel._loaded) {
+      // Copy overview content into panel
+      const overview = document.getElementById('overview');
+      if (overview) {
+        panel.innerHTML = overview.innerHTML;
+        panel._loaded = true;
+        loadCustomSettings();
+      }
     }
     panel.style.display = 'block';
     if (chev) chev.style.transform = 'rotate(180deg)';
