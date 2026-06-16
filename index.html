@@ -23,7 +23,7 @@ body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh
 .hdr-badge{margin-left:auto;background:var(--or);color:var(--secondary-color);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:4px;white-space:nowrap;}
 
 /* NAV */
-.nav{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:1.5rem;background:var(--bk);border-radius:8px;padding:4px;border:1px solid var(--g2);}
+.nav{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:1.5rem;background:var(--bk);border-radius:8px;padding:4px;border:1px solid var(--g2);justify-content:center;}
 .nb{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:7px 13px;border:none;border-radius:5px;background:transparent;color:rgba(255,255,255,0.4);cursor:pointer;transition:all .15s;}
 .nb:hover{background:var(--g2);color:rgba(255,255,255,0.85);}
 .nb.active{background:var(--or);color:var(--secondary-color);}
@@ -3974,18 +3974,29 @@ function showSec(id){
   console.log('showSec called:', id);
   // Home tab
   if (id === 'home') {
-    document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sec').forEach(s => {
+      s.classList.remove('active');
+      s.style.setProperty('display', 'none', 'important');
+    });
     document.querySelectorAll('.nb').forEach(b => b.classList.remove('active'));
     const homeSec = document.getElementById('home');
-    if (homeSec) { homeSec.style.display = ''; homeSec.classList.add('active'); }
+    if (homeSec) { homeSec.classList.add('active'); homeSec.style.setProperty('display', 'block', 'important'); }
     const homeBtn = document.getElementById('homeTab');
     if (homeBtn) homeBtn.classList.add('active');
     loadHomeSec();
     return;
   }
-  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s => {
+    s.classList.remove('active');
+    s.style.setProperty('display', 'none', 'important');
+  });
   const sec = document.getElementById(id);
-  if(sec) { sec.style.display = ''; sec.classList.add('active'); window.scrollTo(0,0); console.log('activated sec:', id, sec); } else { console.error('sec not found:', id); }
+  if(sec) {
+    sec.classList.add('active');
+    sec.style.setProperty('display', 'block', 'important');
+    window.scrollTo(0,0);
+    console.log('activated sec:', id, sec);
+  } else { console.error('sec not found:', id); }
   
   // Update button active states
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
