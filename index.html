@@ -6941,7 +6941,7 @@ async function loadAccountDetails() {
     }
 
     const isAssoc = sub.subscription_type === 'association';
-    // renewalDate calculated after org fetch below
+    const renewalDate = sub.expires_at ? new Date(sub.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null;
     
     let html = '<div style="display:grid;gap:14px;">';
     
@@ -7001,14 +7001,13 @@ async function loadAccountDetails() {
       </div>`;
     }
     
-    // Renewal date
-    const renewsLabel = renewalDate === 'Not set'
-      ? (isAssoc ? 'Managed by Stripe' : 'No expiration set')
-      : renewalDate;
-    html += `<div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Renews</div>
-      <div style="font-size:14px;color:rgba(255,255,255,0.85);">${renewsLabel}</div>
-    </div>`;
+    // Renewal date — only show if we have a date
+    if (renewalDate) {
+      html += `<div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Renews</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.85);">${renewalDate}</div>
+      </div>`;
+    }
     
     html += '</div>';
     container.innerHTML = html;
