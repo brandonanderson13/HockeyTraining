@@ -6925,7 +6925,17 @@ async function loadAccountDetails() {
       container.innerHTML = '<p style="color:rgba(255,255,255,0.5);">No subscription found</p>';
       return;
     }
-    
+
+    // Fetch seat_limit from organizations table
+    const orgId = sub.organization_id || 'individual';
+    if (orgId !== 'individual') {
+      const { data: orgData } = await sb.from('organizations').select('seat_limit, expires_at').eq('id', orgId).single();
+      if (orgData) {
+        if (orgData.seat_limit != null) sub.seat_limit = orgData.seat_limit;
+        if (orgData.expires_at) sub.expires_at = orgData.expires_at;
+      }
+    }
+
     const isAssoc = sub.subscription_type === 'association';
     const renewalDate = sub.expires_at ? new Date(sub.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
     
