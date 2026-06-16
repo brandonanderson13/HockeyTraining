@@ -3975,7 +3975,10 @@ function openItemDetail(type, id) {
         </div>
         <div style="background:#0d0d0d;border-radius:6px;padding:10px;">
           <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Due</div>
-          <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${due}</div>
+          ${isCoach
+            ? `<input type="date" id="detailDueDate" value="${item.due_date||''}" onchange="updateItemDueDate('${type}','${item.id}',this.value)" style="background:transparent;border:none;border-bottom:1px solid #333;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:2px 0;width:100%;cursor:pointer;">`
+            : `<div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${due}</div>`
+          }
         </div>
         ${item.type?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Type</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${item.type.replace(/\w/g,c=>c.toUpperCase())}</div></div>`:''}
         ${isCoach?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Assigned To</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${
@@ -4074,6 +4077,20 @@ async function toggleGoalComplete(id, currentlyDone) {
     const targetId = window._userRole === 'player' ? 'playerDashContent' : undefined;
     loadDashboard(targetId);
   } catch(e) { alert('Error: ' + e.message); }
+}
+
+
+async function updateItemDueDate(type, id, newDate) {
+  try {
+    const sb = await getSupabaseClient();
+    const table = type === 'goal' ? 'goals' : 'assignments';
+    const { error } = await sb.from(table).update({ due_date: newDate || null }).eq('id', id);
+    if (error) throw error;
+    // Update local cache
+    const arr = type === 'goal' ? (window._dashGoals||[]) : (window._dashAssignments||[]);
+    const item = arr.find(x => x.id === id);
+    if (item) item.due_date = newDate;
+  } catch(e) { alert('Error updating due date: ' + e.message); }
 }
 
 async function toggleAssignment(id, currentlyDone) {
