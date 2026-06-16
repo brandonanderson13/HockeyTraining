@@ -2191,17 +2191,24 @@ async function confirmBulkUpload() {
 
 async function loadOrgBranding() {
   const orgId = window._userOrgId;
+  console.log('loadOrgBranding: orgId =', orgId);
   if (!orgId || orgId === 'individual') {
-    // Individuals see default TRAINR branding
     applyBranding({ name: null, primary_color: '#E07820', secondary_color: '#ffffff', logo_url: null });
     return;
   }
   try {
     const sb = await getSupabaseClient();
     const { data, error } = await sb.from('organizations').select('*').eq('id', orgId).single();
-    if (error || !data) return;
-    applyBranding(data);
+    console.log('Org branding data:', data, 'error:', error);
+    if (error || !data) {
+      // Org row missing — insert default and continue
+      await sb.from('organizations').upsert({ id: orgId, name: orgId, primary_color: '#E07820', secondary_color: '#ffffff' });
+      window._orgBranding = { id: orgId, name: orgId, primary_color: '#E07820', secondary_color: '#ffffff', logo_url: null };
+      applyBranding(window._orgBranding);
+      return;
+    }
     window._orgBranding = data;
+    applyBranding(data);
   } catch(e) { console.error('Branding load error:', e); }
 }
 
