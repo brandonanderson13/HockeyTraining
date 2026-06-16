@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--primary-color:#E07820;--primary-rgb:224, 120, 32;--or:#E07820;--orl:#E07820;--bk:#0D0D0D;--ch:#1a1a1a;--g2:#222;--g3:#2a2a2a;--white:#fff;}
+:root{--primary-color:#E07820;--primary-rgb:224, 120, 32;--or:#E07820;--orl:#E07820;--secondary-color:#ffffff;--bk:#0D0D0D;--ch:#1a1a1a;--g2:#222;--g3:#2a2a2a;--white:#fff;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh;}
 .wrap{max-width:860px;margin:0 auto;padding:1.5rem;}
@@ -20,13 +20,13 @@ body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh
 .hdr-text h1{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:.04em;text-transform:uppercase;margin-bottom:3px;}
 .hdr-text h1 span{color:var(--or);}
 .hdr-text p{font-size:11px;color:rgba(255,255,255,0.42);letter-spacing:.05em;text-transform:uppercase;}
-.hdr-badge{margin-left:auto;background:var(--or);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:4px;white-space:nowrap;}
+.hdr-badge{margin-left:auto;background:var(--or);color:var(--secondary-color);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:4px;white-space:nowrap;}
 
 /* NAV */
 .nav{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:1.5rem;background:var(--bk);border-radius:8px;padding:4px;border:1px solid var(--g2);}
 .nb{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:7px 13px;border:none;border-radius:5px;background:transparent;color:rgba(255,255,255,0.4);cursor:pointer;transition:all .15s;}
 .nb:hover{background:var(--g2);color:rgba(255,255,255,0.85);}
-.nb.active{background:var(--or);color:#fff;}
+.nb.active{background:var(--or);color:var(--secondary-color);}
 
 /* SECTIONS */
 .sec{display:none;}.sec.active{display:block;}
@@ -110,7 +110,7 @@ body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh
 .trtable input[type=number]:focus{border-color:var(--or);outline:none;}
 .rd{font-size:11px;font-weight:600;}
 .imp{color:#4ade80;}.dec{color:#f87171;}.sam{color:rgba(255,255,255,0.28);}
-.btn-o{background:var(--or);color:#fff;border:none;padding:9px 22px;border-radius:8px;font-size:13px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;margin-top:12px;}
+.btn-o{background:var(--or);color:var(--secondary-color);border:none;padding:9px 22px;border-radius:8px;font-size:13px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;margin-top:12px;}
 .btn-o:hover{background:var(--orl);}
 
 /* NUTRITION */
@@ -319,7 +319,7 @@ select:focus{border-color:var(--or);outline:none;}
         <input type="password" id="confirmPasswordInput" placeholder="Repeat your password" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;" onkeydown="if(event.key==='Enter')submitPasswordReset()">
       </div>
       <div id="passwordResetMsg" style="display:none;font-size:12px;padding:8px 10px;border-radius:6px;"></div>
-      <button onclick="submitPasswordReset()" style="background:var(--primary-color);border:none;color:#fff;font-size:14px;font-weight:700;padding:12px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Set Password & Continue</button>
+      <button onclick="submitPasswordReset()" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:14px;font-weight:700;padding:12px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Set Password & Continue</button>
     </div>
   </div>
 </div>
@@ -337,7 +337,7 @@ select:focus{border-color:var(--or);outline:none;}
       First time? <strong>Scroll down to "Customize Your Program"</strong> and select your age group and season phase. The program will automatically adjust for you.
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button onclick="document.getElementById('customize-panel').scrollIntoView({behavior:'smooth'});" style="background:var(--primary-color);color:#fff;border:none;font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Go to Customize ↓</button>
+      <button onclick="document.getElementById('customize-panel').scrollIntoView({behavior:'smooth'});" style="background:var(--primary-color);color:var(--secondary-color);border:none;font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Go to Customize ↓</button>
       <button onclick="showSec('baseline');" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.7);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Start Testing →</button>
     </div>
   </div>
@@ -655,7 +655,7 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- NUTRITION -->
 <div id="nutrition" class="sec">
-  <div class="nut-hero"><div class="nut-icon">🥗</div><div class="nut-hero-text"><h2>Fuel Like a Tiger</h2><p>What you eat and drink directly impacts performance, recovery, and energy. Guidelines built for youth hockey players ages 8–18 training through a 12-week program.</p></div></div>
+  <div class="nut-hero"><div class="nut-icon">🥗</div><div class="nut-hero-text"><h2>Fuel Your Performance</h2><p>What you eat and drink directly impacts performance, recovery, and energy. Guidelines built for youth hockey players ages 8–18 training through a 12-week program.</p></div></div>
 
   <div class="sh">Daily Hydration</div>
   <div class="card" style="margin-bottom:1rem;"><div class="ch"><span class="cht">How Much Water Per Day</span></div><div class="cb">
@@ -1783,7 +1783,7 @@ const phases={
       {n:'Wednesday',t:'Rest Between Tests',items:[['Light walk only',''],['Eat well, hydrate fully','']]},
       {n:'Thursday',t:'FINAL TEST — Day 2',items:[['Strength: Push-Up Max, Squat 60s','Record in Progress Tracker'],['Wall Sit, Dead Hang','Record in Progress Tracker']]},
       {n:'Friday',t:'FINAL TEST — Day 3',items:[['Stickhandling (30s) — count','Record'],['Shooting Accuracy — 5-spot (10 shots)','Log score — record in Progress Tracker']]},
-      {n:'Saturday',t:'Celebration + Review',items:[['Enter all results in Progress Tracker',''],['Compare to baseline numbers',''],['Great work Tigers! Go Tigers!','']]}
+      {n:'Saturday',t:'Celebration + Review',items:[['Enter all results in Progress Tracker',''],['Compare to baseline numbers',''],['Great work! Keep it up!','']]}
     ]}
   ]}
 };
@@ -1884,7 +1884,7 @@ function calcDiffs(){
   });
   if(tot>0){
     document.getElementById('summaryBox').style.display='block';
-    const msg=imp>=tot*.75?'Outstanding — Tigers strong! 🏒':imp>=tot*.5?'Solid improvement across the board 💪':'Keep building — great foundation 📈';
+    const msg=imp>=tot*.75?'Outstanding progress! 🏒':imp>=tot*.5?'Solid improvement across the board 💪':'Keep building — great foundation 📈';
     document.getElementById('summaryContent').innerHTML=`<div style="font-size:13px;color:rgba(255,255,255,0.68);line-height:2;">Tests completed: <strong style="color:#fff;">${tot}</strong><br>Improved: <strong style="color:#4ade80;">${imp} of ${tot}</strong><br><span style="color:var(--primary-color);font-size:14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${msg}</span></div>`;
   }
 }
@@ -2230,6 +2230,7 @@ function applyBranding(org) {
   r.style.setProperty('--or', primary);
   r.style.setProperty('--orl', primary);
   r.style.setProperty('--primary-rgb', rgb);
+  r.style.setProperty('--secondary-color', secondary);
 
   // Also inject a style tag to override any cached stylesheet values
   let styleTag = document.getElementById('_brandStyle');
@@ -2245,6 +2246,7 @@ function applyBranding(org) {
     `--or:${primary}!important;`,
     `--orl:${primary}!important;`,
     `--primary-rgb:${rgb}!important;`,
+    `--secondary-color:${secondary}!important;`,
     '}'
   ].join('');
   // Force style recalc by reading a layout property
@@ -2999,7 +3001,7 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals) {
         <div style="margin-left:auto;display:flex;gap:6px;">
           <button onclick="openGoalModal(null,null,true)" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
           <button onclick="openAssignModal(null,null,true)" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">All Players</button>
-          <button onclick="openAssignModal(null,null,false)" style="background:var(--primary-color);border:none;color:#fff;font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Task</button>
+          <button onclick="openAssignModal(null,null,false)" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Task</button>
         </div>
       </div>
       <div class="cb">${openCoachHtml}${doneCoachHtml}</div>
@@ -3070,7 +3072,7 @@ function openAssignModal(playerId, playerName, isAll) {
         <div>
           <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Type</label>
           <div style="display:flex;gap:0;background:#0d0d0d;border:1px solid #222;border-radius:6px;overflow:hidden;">
-            <button type="button" id="typeGeneral" onclick="dashSetAssignType('general')" style="flex:1;padding:7px;background:var(--primary-color);border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">General</button>
+            <button type="button" id="typeGeneral" onclick="dashSetAssignType('general')" style="flex:1;padding:7px;background:var(--primary-color);border:none;color:var(--secondary-color);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">General</button>
             <button type="button" id="typeTracked" onclick="dashSetAssignType('tracked')" style="flex:1;padding:7px;background:transparent;border:none;color:rgba(255,255,255,0.4);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">Tracked 📊</button>
           </div>
         </div>
@@ -3112,7 +3114,7 @@ function openAssignModal(playerId, playerName, isAll) {
           <input id="mDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
         </div>
         <div id="mMsg" style="font-size:12px;display:none;padding:8px 10px;border-radius:4px;"></div>
-        <button onclick="saveAssignment()" style="background:var(--primary-color);border:none;color:#fff;font-size:14px;font-weight:700;padding:11px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Create Assignment</button>
+        <button onclick="saveAssignment()" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:14px;font-weight:700;padding:11px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Create Assignment</button>
       </div>
     </div>`;
   document.body.appendChild(modal);
@@ -5798,7 +5800,7 @@ async function loadAdminPanel(user) {
         <div id="bulkMsg" style="display:none;font-size:12px;padding:8px 10px;border-radius:6px;margin-bottom:10px;"></div>
 
         <div style="display:flex;gap:8px;align-items:center;">
-          <button onclick="confirmBulkUpload()" id="bulkUploadBtn" style="display:none;background:var(--primary-color);border:none;color:#fff;font-size:13px;font-weight:700;padding:9px 20px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Upload Users</button>
+          <button onclick="confirmBulkUpload()" id="bulkUploadBtn" style="display:none;background:var(--primary-color);border:none;color:var(--secondary-color);font-size:13px;font-weight:700;padding:9px 20px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Upload Users</button>
           <a href="https://hockey-training.vercel.app/trainr_user_upload_template.xlsx" download style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:none;border:1px solid #333;padding:8px 12px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">⬇ Download Template</a>
         </div>
       </div>
@@ -5849,7 +5851,7 @@ async function loadAdminPanel(user) {
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
           <button onclick="saveBrandingPanel()"
-            style="background:var(--primary-color);border:none;color:#fff;font-size:13px;font-weight:700;padding:9px 20px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">
+            style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:13px;font-weight:700;padding:9px 20px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">
             Save Branding
           </button>
           <button onclick="previewBranding()"
