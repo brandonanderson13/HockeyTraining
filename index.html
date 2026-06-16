@@ -2363,44 +2363,52 @@ async function confirmBulkUpload() {
 
 // ── SUPER ADMIN ORG PICKER ────────────────────────────────────────────────
 async function superAdminPickOrg() {
+  // Store resolve globally so button click can trigger it directly
   return new Promise(async (resolve) => {
+    window._orgPickerResolve = resolve;
     try {
       const sb = await getSupabaseClient();
       const { data: orgs } = await sb.from('organizations').select('id, name').order('name');
-      // Remove any 'individual' row from DB results (we add it manually at the end)
       const list = (orgs || [{ id: 'delano', name: 'Delano' }]).filter(o => o.id !== 'individual');
       list.push({ id: 'individual', name: 'Individuals (no association)' });
 
+      // Remove any existing picker
+      const existing = document.getElementById('orgPickerModal');
+      if (existing) existing.remove();
+
       const modal = document.createElement('div');
-      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
-      modal.innerHTML = `
-        <div style="background:#141414;border:1px solid #333;border-radius:14px;padding:28px;width:100%;max-width:400px;">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:6px;">Select Association</div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:20px;">Which organization do you want to view?</div>
-          <div style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;">
-            ${list.map(o => `
-              <button onclick="document.body.removeChild(this.closest('[style*=fixed]'));window._pickedOrg='${o.id}';"
-                style="background:#0d0d0d;border:1px solid #333;color:#fff;text-align:left;padding:12px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:border-color .15s;"
-                onmouseover="this.style.borderColor='var(--primary-color)'"
-                onmouseout="this.style.borderColor='#333'">
-                <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">${o.name || o.id}</div>
-                <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;">${o.id}</div>
-              </button>`).join('')}
-          </div>
-        </div>`;
+      modal.id = 'orgPickerModal';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+      const inner = document.createElement('div');
+      inner.style.cssText = 'background:#141414;border:1px solid #333;border-radius:14px;padding:28px;width:100%;max-width:400px;';
+      inner.innerHTML = `
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:6px;">Select Association</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:20px;">Which organization do you want to view?</div>
+        <div id="orgPickerList" style="display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;"></div>`;
+      modal.appendChild(inner);
       document.body.appendChild(modal);
 
-      // Poll for pick
-      const check = setInterval(() => {
-        if (window._pickedOrg !== undefined) {
-          clearInterval(check);
-          const picked = window._pickedOrg;
-          delete window._pickedOrg;
-          resolve(picked);
-        }
-      }, 100);
+      const listEl = document.getElementById('orgPickerList');
+      list.forEach(o => {
+        const btn = document.createElement('button');
+        btn.style.cssText = 'background:#0d0d0d;border:1px solid #333;color:#fff;text-align:left;padding:12px 14px;border-radius:8px;cursor:pointer;width:100%;';
+        btn.innerHTML = `<div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">${o.name || o.id}</div><div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;">${o.id}</div>`;
+        btn.addEventListener('mouseover', () => btn.style.borderColor = '#E07820');
+        btn.addEventListener('mouseout', () => btn.style.borderColor = '#333');
+        btn.addEventListener('click', () => {
+          modal.remove();
+          delete window._orgPickerResolve;
+          resolve(o.id);
+        });
+        listEl.appendChild(btn);
+      });
+
     } catch(e) {
-      resolve(null);
+      console.error('Org picker error:', e);
+      const m = document.getElementById('orgPickerModal');
+      if (m) m.remove();
+      resolve('delano');
     }
   });
 }
