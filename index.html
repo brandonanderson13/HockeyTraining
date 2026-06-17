@@ -1421,7 +1421,7 @@ select:focus{border-color:var(--or);outline:none;}
           <input type="number" id="sl-goal" min="1" placeholder="e.g. 150" style="width:100px;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:18px;padding:6px 10px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-align:center;">
           <span style="font-size:13px;color:rgba(255,255,255,0.35);">pucks / week</span>
         </div>
-        <button class="btn-o" onclick="saveGoal()" style="padding:7px 16px;">Save Goal</button>
+        <button class="btn-o" onclick="saveShotGoal()" style="padding:7px 16px;">Save Goal</button>
         <div id="goal-confirm" style="font-size:12px;color:#4ade80;display:none;">✓ Goal saved!</div>
       </div>
       <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,0.3);line-height:1.7;">
@@ -3579,8 +3579,8 @@ async function saveAssignment() {
   if (isAll) {
     playerIds = _dashPlayers.map(p => p.user_id);
   } else {
-    const sel = document.getElementById('mAssignTo');
-    playerIds = sel ? Array.from(sel.selectedOptions).map(o=>o.value).filter(Boolean) : [];
+    const checks = document.querySelectorAll('.aPlayerCheck:checked');
+    playerIds = Array.from(checks).map(c => c.value).filter(Boolean);
   }
 
   if (!playerIds.length) {
@@ -3623,6 +3623,8 @@ async function saveAssignment() {
 function openGoalModal(playerId, playerName, isAll) {
   const existing = document.getElementById('dashModal');
   if (existing) existing.remove();
+  window._goalType = 'checkbox'; // always reset to checkbox on open
+  window._goalTrackedMetric = null;
   const today = new Date().toISOString().split('T')[0];
   const role = window._userRole;
   const isCoach = role === 'coach' || role === 'admin' || role === 'super_admin';
@@ -4540,7 +4542,7 @@ async function syncBaselineResults(results, testType) {
 
 function saveShotLog(){ try{ localStorage.setItem('tigersShotLog', JSON.stringify(shotLog)); }catch(e){} }
 
-function saveGoal(){
+function saveShotGoal(){
   const v = parseInt(document.getElementById('sl-goal').value)||0;
   if(v<1){ alert('Please enter a goal greater than 0.'); return; }
   weeklyGoal = v;
