@@ -3504,7 +3504,7 @@ function openAssignModal(playerId, playerName, isAll) {
         <input type="hidden" id="mTarget" value="">
         <div>
           <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Due Date</label>
-          <input id="mDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+          <input id="mDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;min-height:44px;position:relative;z-index:1;-webkit-appearance:none;appearance:none;">
         </div>
         <div id="mMsg" style="font-size:12px;display:none;padding:8px 10px;border-radius:4px;"></div>
         <button onclick="saveAssignment()" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:14px;font-weight:700;padding:11px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Create Assignment</button>
@@ -3707,7 +3707,7 @@ function openGoalModal(playerId, playerName, isAll) {
 
         <div>
           <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Due Date</label>
-          <input id="gDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+          <input id="gDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;min-height:44px;position:relative;z-index:1;-webkit-appearance:none;appearance:none;">
         </div>
         <div>
           <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Notes</label>
