@@ -323,6 +323,12 @@ select:focus{border-color:var(--or);outline:none;}
   </div>
 </div>
 
+<!-- LOADING OVERLAY -->
+<div id="appLoader" style="position:fixed;inset:0;background:#0d0d0d;z-index:999998;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+  <img src="apple-touch-icon.png" style="width:64px;height:64px;border-radius:12px;opacity:0.9;">
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,0.3);">Loading...</div>
+</div>
+
 <!-- v2-nav-fix PASSWORD RESET SCREEN -->
 <div id="passwordResetScreen" style="display:none;position:fixed;inset:0;background:#0d0d0d;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#141414;border:1px solid #333;border-radius:14px;padding:32px;width:100%;max-width:400px;">
@@ -1605,6 +1611,7 @@ function showRenewalWall(email, reason) {
   }
   wall.style.display = 'flex';
   wall.style.setProperty('display', 'flex', 'important');
+  const _ld = document.getElementById('appLoader'); if(_ld){_ld.style.opacity='0';setTimeout(()=>_ld.remove(),350);}
 
   wall.removeAttribute('hidden');
   wall.style.visibility = 'visible';
@@ -1838,6 +1845,9 @@ Check Supabase Table Editor:
       const landingTab = (userSub?.role === 'player') ? 'home' : 'dashboard';
       showSec(landingTab);
       try { checkShowWizard(); } catch(e) { console.warn('Wizard check error:', e); }
+      // Hide loading overlay now that everything is ready
+      const loader = document.getElementById('appLoader');
+      if (loader) { loader.style.transition = 'opacity 0.3s'; loader.style.opacity = '0'; setTimeout(() => loader.remove(), 350); }
 
       // Add a logout button to the header
       addLogoutButton(supabase, user, isAdmin);
@@ -2235,6 +2245,7 @@ function showPasswordResetScreen() {
   document.querySelector('.nav')?.style && (document.querySelector('.nav').style.display = 'none');
   const screen = document.getElementById('passwordResetScreen');
   if (screen) { screen.style.display = 'flex'; }
+  const _ldp = document.getElementById('appLoader'); if(_ldp){_ldp.style.opacity='0';setTimeout(()=>_ldp.remove(),350);}
 }
 
 async function submitPasswordReset() {
