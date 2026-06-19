@@ -680,9 +680,12 @@ select:focus{border-color:var(--or);outline:none;}
   <div id="schedBanner"></div>
 
   
-  <div id="currentProgramBanner" style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:14px 16px;margin-bottom:1rem;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);">Current Program</div>
-    <div id="programStatus" style="font-size:14px;color:#fff;font-weight:600;margin-top:4px;">Loading...</div>
+  <div id="currentProgramBanner" style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.3);border-radius:8px;padding:14px 16px;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);">Current Program</div>
+      <div id="programStatus" style="font-size:14px;color:#fff;font-weight:600;margin-top:4px;">Loading...</div>
+    </div>
+    <button onclick="restartCycle()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:6px 12px;border-radius:6px;cursor:pointer;white-space:nowrap;">↺ Restart Cycle</button>
   </div>
   
   <!-- Program type selector — only shown if custom workouts exist -->
@@ -5676,6 +5679,31 @@ function updateProgramStatus() {
     if(statusDiv) statusDiv.innerHTML = 'Early Off-Season — Foundation & Strength · 5 days/week';
   }
   } catch(e) { console.warn('updateProgramStatus error:', e); }
+}
+
+
+function restartCycle() {
+  if (!confirm('Restart the training cycle?\n\nThis will clear all checked-off exercises so you can start fresh. Your completed workout history is preserved.')) return;
+
+  // Clear all exercise completion keys from localStorage
+  // Keys follow patterns: week_day_ex format or cw_ prefix for custom
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key) continue;
+    // Standard workout keys: contain '_ex' or match day completion pattern
+    if (key.match(/^w\d+_|^cw_|_ex\d+$|_ex_/)) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+
+  // Reset program start date so week counter restarts
+  localStorage.removeItem('tigersProgramStart');
+
+  // Re-render the weeks
+  renderWeeks();
+  alert('✓ Cycle restarted! All exercises cleared. Your history has been preserved.');
 }
 
 function renderWeeks(){
