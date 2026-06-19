@@ -1677,11 +1677,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 // Check auth before loading program
 (async function checkAuth() {
-  // Wait for full page script to parse before running auth
-  await new Promise(resolve => {
-    if (document.readyState === 'complete') { resolve(); return; }
-    window.addEventListener('load', resolve, { once: true });
-  });
   // Import Supabase
   const script = document.createElement('script');
   script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
