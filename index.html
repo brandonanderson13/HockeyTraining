@@ -8258,12 +8258,14 @@ async function loadTeams() {
   
   try {
     const sb = await getSupabaseClient();
+    const _teamsOrgId = window._userOrgId || 'individual';
+    console.log('loadTeams: org =', _teamsOrgId);
     const { data, error } = await sb.from('teams')
       .select(`
         *,
         coach:subscriptions!coach_id(email, first_name, last_name)
       `)
-      .eq('organization_id', window._userOrgId)
+      .eq('organization_id', _teamsOrgId)
       .order('team_name');
     
     if (error) throw error;
@@ -8583,8 +8585,13 @@ async function createTeam() {
   
   try {
     const sb = await getSupabaseClient();
+    const orgId = window._userOrgId || 'individual';
+    // Check if team name already exists in this org
+    const { data: existing } = await sb.from('teams')
+      .select('id').eq('organization_id', orgId).eq('team_name', teamName).single();
+    if (existing) { alert(`A team named "${teamName}" already exists.`); return; }
     const { error } = await sb.from('teams').insert({
-      organization_id: window._userOrgId || 'individual',
+      organization_id: orgId,
       team_name: teamName
     });
     
