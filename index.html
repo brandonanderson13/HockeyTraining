@@ -3528,7 +3528,7 @@ function openAssignModal(playerId, playerName, isAll) {
         <button onclick="document.getElementById('dashModal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;line-height:1;">✕</button>
       </div>
       <div style="display:grid;gap:12px;">
-        <div>
+        <div style="${isPlayer?'display:none':''}">
           <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Assign To</label>
           <div style="display:flex;gap:0;background:#0d0d0d;border:1px solid #222;border-radius:6px;overflow:hidden;margin-bottom:8px;">
             <button type="button" id="modeAll" onclick="dashSetMode('all')" style="flex:1;padding:7px;background:${allMode?'var(--primary-color)':'transparent'};border:none;color:${allMode?'#fff':'rgba(255,255,255,0.4)'};font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">All Players</button>
