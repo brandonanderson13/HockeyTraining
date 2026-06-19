@@ -11,8 +11,6 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow',sans-serif;background:#111;color:#ddd;min-height:100vh;}
 .wrap{max-width:1100px;margin:0 auto;padding:1.5rem;}
-.wrap-hidden{opacity:0;transition:opacity 0.2s ease;}
-.wrap-visible{opacity:1;}
 
 /* HEADER */
 .hdr{background:var(--bk);border-radius:12px;overflow:hidden;margin-bottom:1.5rem;border:1px solid var(--g3);}
@@ -277,7 +275,7 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 
-<div class="wrap wrap-hidden" id="mainWrap">
+<div class="wrap" id="mainWrap">
 
 <div class="hdr">
   <div class="hdr-stripe" id="hdrStripe"></div>
@@ -1607,7 +1605,7 @@ function showRenewalWall(email, reason) {
   }
   wall.style.display = 'flex';
   wall.style.setProperty('display', 'flex', 'important');
-  const mw = document.getElementById('mainWrap'); if(mw){mw.classList.remove('wrap-hidden');mw.classList.add('wrap-visible');}
+
   wall.removeAttribute('hidden');
   wall.style.visibility = 'visible';
   wall.style.opacity = '1';
