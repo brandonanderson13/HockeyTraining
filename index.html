@@ -2949,8 +2949,22 @@ async function loadDashboard(targetId) {
     });
     window._dashAssignments = assignRes.data || [];
     window._dashGoals = goalRes.data || [];
-    console.log('Coach goals fetched:', window._dashGoals.length, 'goals');
-    window._dashGoals.forEach(g => console.log('Goal:', g.metric, 'current_value:', g.current_value, 'target_value:', g.target_value, 'completed:', g.completed));
+
+    // Auto-calculate progress for tracked goals (same as player dashboard)
+    window._dashGoals.forEach(g => {
+      if (!g.tracked_metric || !g.target_value) return;
+      const from = new Date(g.created_at);
+      const to = g.due_date ? new Date(g.due_date+'T23:59:59') : new Date();
+      if (g.tracked_metric === 'shots') {
+        g._progress = (shotAllRes.data||[]).filter(s=>s.user_id===g.player_id).filter(s=>{const d=new Date(s.created_at);return d>=from&&d<=to;}).reduce((sum,s)=>sum+(s.total_shots||0),0);
+      } else if (g.tracked_metric === 'stickhandling') {
+        g._progress = (stickAllRes.data||[]).filter(s=>s.user_id===g.player_id).filter(s=>{const d=new Date(s.created_at);return d>=from&&d<=to;}).reduce((sum,s)=>sum+(s.minutes||0),0);
+      } else if (g.tracked_metric === 'workouts') {
+        g._progress = (workAllRes.data||[]).filter(c=>c.user_id===g.player_id).filter(c=>{const d=new Date(c.created_at);return d>=from&&d<=to;}).length;
+      }
+      if (g._progress >= g.target_value) g.completed = true;
+    });
+
     window._dashStatsMap = statsMap;
     renderCoachDashboard(players, statsMap, teamName, window._dashAssignments, window._dashGoals, targetId);
 
