@@ -6212,7 +6212,7 @@ renderStickLog();
 // ═══════════════════════════════════════════════════════════════════════════
 
 async function loadAdminPanel(user) {
-  console.log('loadAdminPanel called, _userOrgId:', window._userOrgId);
+  console.log('loadAdminPanel called, _userOrgId:', window._userOrgId, new Error().stack);
   const content = document.getElementById('adminContent');
   if (!content) { console.log('adminContent not found!'); return; }
   
