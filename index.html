@@ -2949,6 +2949,8 @@ async function loadDashboard(targetId) {
     });
     window._dashAssignments = assignRes.data || [];
     window._dashGoals = goalRes.data || [];
+    console.log('Coach goals fetched:', window._dashGoals.length, 'goals');
+    window._dashGoals.forEach(g => console.log('Goal:', g.metric, 'current_value:', g.current_value, 'target_value:', g.target_value, 'completed:', g.completed));
     window._dashStatsMap = statsMap;
     renderCoachDashboard(players, statsMap, teamName, window._dashAssignments, window._dashGoals, targetId);
 
