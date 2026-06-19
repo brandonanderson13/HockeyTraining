@@ -6870,6 +6870,7 @@ async function loadPlayerList(isSuperAdmin = false) {
           ${sub.role === 'admin' && isSuperAdmin ? (sub.status === 'active' ? 
               '<button onclick="deactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
               '<button onclick="reactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
+          ${isSuperAdmin && sub.email !== 'brandonanderson1393@gmail.com' ? '<button onclick="deleteUserFully(\''+sub.id+'\',\''+sub.user_id+'\',\''+sub.email+'\')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-left:2px;">Delete</button>' : ''}
         </td>
       </tr>`;
       
@@ -7749,27 +7750,35 @@ async function reactivateAdmin(subId, email) {
 }
 
 async function deactivatePlayer(subId, email) {
-  // Prevent deactivating super admin
-  if (email === 'brandonanderson1393@gmail.com') {
-    alert('Cannot deactivate super admin account');
-    return;
-  }
-  
-  if (!confirm(`Deactivate ${email}?\n\nThis will set their status to inactive and free up a player slot. Their data will be preserved and they can be reactivated later.`)) return;
-  
+  if (email === 'brandonanderson1393@gmail.com') { alert('Cannot deactivate super admin'); return; }
+  if (!confirm(`Deactivate ${email}?\n\nThis will set their status to inactive. Their data is preserved and they can be reactivated.`)) return;
   try {
     const sb = await getSupabaseClient();
-    const { error } = await sb.from('subscriptions')
-      .update({ status: 'inactive' })
-      .eq('id', subId);
-    
+    const { error } = await sb.from('subscriptions').update({ status: 'inactive' }).eq('id', subId);
     if (error) throw error;
-    
     alert(`✓ ${email} deactivated`);
     loadPlayerList(window._isSuperAdmin);
-  } catch (error) {
-    alert('Error: ' + error.message);
-  }
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function deleteUserFully(subId, userId, email) {
+  if (email === 'brandonanderson1393@gmail.com') { alert('Cannot delete super admin'); return; }
+  if (!confirm(`⚠️ Permanently delete ${email}?\n\nThis will:\n• Remove them from Supabase Auth\n• Delete their subscription\n• Remove their assignments and goals\n\nThis CANNOT be undone.`)) return;
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token;
+    if (!token) throw new Error('Not authenticated');
+    const res = await fetch('/api/delete-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ userId, orgId: window._userOrgId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Delete failed');
+    alert(`✓ ${email} permanently deleted`);
+    loadPlayerList(window._isSuperAdmin);
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 async function reactivatePlayer(subId, email) {
