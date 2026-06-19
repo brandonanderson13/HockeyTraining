@@ -328,6 +328,7 @@ select:focus{border-color:var(--or);outline:none;}
   <img src="apple-touch-icon.png" style="width:64px;height:64px;border-radius:12px;opacity:0.9;">
   <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,0.3);">Loading...</div>
 </div>
+<script>setTimeout(()=>{const _ld=document.getElementById('appLoader');if(_ld){_ld.style.transition='opacity 0.3s';_ld.style.opacity='0';setTimeout(()=>_ld?.remove(),350);}},6000);</script>
 
 <!-- v2-nav-fix PASSWORD RESET SCREEN -->
 <div id="passwordResetScreen" style="display:none;position:fixed;inset:0;background:#0d0d0d;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;">
@@ -1694,6 +1695,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       
       if (userError || !user) {
         // Not logged in - redirect to login
+        const _ld=document.getElementById('appLoader');if(_ld){_ld.style.transition='opacity 0.3s';_ld.style.opacity='0';setTimeout(()=>_ld?.remove(),350);}
         window.location.href = 'login.html';
         return;
       }
