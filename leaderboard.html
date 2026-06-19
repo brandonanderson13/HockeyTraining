@@ -75,6 +75,10 @@ const orgColor = urlParams.get('color') ? decodeURIComponent(urlParams.get('colo
 const startDate = urlParams.get('start');
 const endDate = urlParams.get('end');
 
+// Store resolved name/color so loadLeaderboard doesn't overwrite them
+let resolvedOrgName = null;
+let resolvedOrgColor = null;
+
 // Apply org branding — from URL params or fetch from Supabase
 async function applyLeaderboardBranding() {
   let name = orgName;
@@ -104,10 +108,12 @@ async function applyLeaderboardBranding() {
     document.documentElement.style.setProperty('--primary-rgb', `${r}, ${g}, ${b}`);
   }
   if (name) {
+    resolvedOrgName = name;
     document.getElementById('orgName').textContent = name.toUpperCase();
     document.getElementById('teamName').textContent = '';
     document.title = `${name} Leaderboard`;
   }
+  if (color) resolvedOrgColor = color;
 }
 applyLeaderboardBranding();
 
@@ -134,7 +140,9 @@ async function loadLeaderboard() {
   }
   
   // Update header if no name param passed
-  if (!orgName) {
+  // Use resolved name from branding fetch, don't overwrite with fallback
+  const displayName = resolvedOrgName || orgName;
+  if (!displayName) {
     document.getElementById('orgName').textContent = orgId === 'individual' ? 'Individual' : orgId.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
     document.getElementById('teamName').textContent = orgId === 'individual' ? 'Players' : '';
   }
