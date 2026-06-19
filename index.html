@@ -4345,6 +4345,8 @@ function showSec(id){
   
   // Load dashboard when dashboard tab shown
   if (id === 'dashboard') {
+    window._dashGoals = null; // force fresh fetch
+    window._dashAssignments = null;
     loadDashboard();
   }
 
