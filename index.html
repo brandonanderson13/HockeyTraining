@@ -1805,6 +1805,14 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       if (window._isSuperAdmin) {
         const orgChoice = await superAdminPickOrg();
         window._userOrgId = orgChoice || userSub?.organization_id || 'delano';
+        // Update super admin's subscription org_id so RLS policies allow cross-org queries
+        if (orgChoice && orgChoice !== userSub?.organization_id) {
+          try {
+            await supabase.from('subscriptions')
+              .update({ organization_id: orgChoice })
+              .eq('user_id', user.id);
+          } catch(e) { console.warn('Could not update super admin org:', e.message); }
+        }
       }
 
       // Load org branding
