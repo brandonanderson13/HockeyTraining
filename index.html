@@ -2797,7 +2797,7 @@ function loadHomeSec() {
     const hasSettings = localStorage.getItem('tigersCustomSettings');
     guideEl.style.display = 'block';
     guideEl.innerHTML = hasSettings
-      ? `<div style="text-align:right;margin-bottom:8px;"><button onclick="showSetupWizard()" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:11px;cursor:pointer;text-decoration:underline;">⚙ Redo Program Setup</button></div>`
+      ? ``
       : `<div style="background:rgba(var(--primary-rgb),0.08);border:1px solid rgba(var(--primary-rgb),0.2);border-radius:8px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
           <div>
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);">Program Not Set Up</div>
