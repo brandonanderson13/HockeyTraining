@@ -1722,28 +1722,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       
       // Check subscription status for EVERYONE (admins and players)
       if (!userSub) {
-        const debugInfo = `DEBUG INFO:
-        
-Logged in as: ${user.email}
-User ID: ${user.id}
-
-Subscription query attempted with email: ${user.email}
-
-Result: NOT FOUND
-
-This means no row in subscriptions table has this email.
-
-Check Supabase Table Editor:
-- subscriptions table
-- Search for: ${user.email}
-- Verify row exists with exact email match`;
-        
-        if (confirm(debugInfo + '\n\nClick OK to stay and debug, Cancel to sign out')) {
-          return; // Stay on page
-        }
-        
+        const _ld2 = document.getElementById('appLoader'); if(_ld2){_ld2.style.opacity='0';setTimeout(()=>_ld2?.remove(),350);}
         await supabase.auth.signOut();
-        window.location.href = 'subscribe.html';
+        window.location.href = 'subscribe.html?email=' + encodeURIComponent(user.email);
         return;
       }
       
