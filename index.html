@@ -4430,6 +4430,8 @@ const BRANDING = {
 // ═══════════════════════════════════════════════════════════════════════════
 
 async function getSupabaseClient() {
+  // Always prefer the authenticated client set during auth flow
+  if (window._supabaseClient) return window._supabaseClient;
   if (window._sbClient) return window._sbClient;
   
   if (!window.supabase) {
@@ -6213,7 +6215,6 @@ renderStickLog();
 // ═══════════════════════════════════════════════════════════════════════════
 
 async function loadAdminPanel(user) {
-  console.log('loadAdminPanel called, _userOrgId:', window._userOrgId, new Error().stack);
   const content = document.getElementById('adminContent');
   if (!content) { console.log('adminContent not found!'); return; }
   
@@ -6671,9 +6672,8 @@ async function handleAddPlayer(e) {
 }
 
 async function loadPlayerList(isSuperAdmin = false) {
-  console.log('loadPlayerList called, _userOrgId:', window._userOrgId);
   const container = document.getElementById('playerListContainer');
-  if (!container) { console.log('playerListContainer not found!'); return; }
+  if (!container) return;
   container.innerHTML = 'Loading...';
   
   try {
@@ -6701,7 +6701,6 @@ async function loadPlayerList(isSuperAdmin = false) {
     }
     query = query.neq('email', 'brandonanderson1393@gmail.com');
     const { data: subs, error } = await query.order('created_at', {ascending: false});
-    console.log('loadPlayerList query result:', subs?.length, 'rows, error:', error, '_userOrgId:', window._userOrgId);
     if (error) throw error;
     
     // Query workout stats filtered by org
@@ -8247,7 +8246,6 @@ async function loadTeams() {
   try {
     const sb = await getSupabaseClient();
     const _teamsOrgId = window._userOrgId || 'individual';
-    console.log('loadTeams: org =', _teamsOrgId);
     const { data, error } = await sb.from('teams')
       .select(`
         *,
