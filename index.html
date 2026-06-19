@@ -6645,6 +6645,7 @@ async function handleAddPlayer(e) {
       status: 'active',
       role: role,
       subscription_type: 'association',
+      team_id: document.getElementById('adminTeam')?.value || null,
       expires_at: window._adminSubscription?.expires_at || null
     });
     
