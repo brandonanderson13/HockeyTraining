@@ -6629,14 +6629,7 @@ async function handleAddPlayer(e) {
     if (authData.error) throw new Error(authData.error);
     
     // Create subscription record
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    await new Promise(r => { script.onload = r; document.head.appendChild(script); });
-    
-    const sb = window.supabase.createClient(
-      'https://sfkdwprzwtegfkohqsdy.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY'
-    );
+    const sb = await getSupabaseClient();
     
     const { error: subError } = await sb.from('subscriptions').insert({
       user_id: authData.userId,
@@ -6679,14 +6672,7 @@ async function loadPlayerList(isSuperAdmin = false) {
   container.innerHTML = 'Loading...';
   
   try {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    if (!window.supabase) await new Promise(r => { script.onload = r; document.head.appendChild(script); });
-    
-    const sb = window.supabase.createClient(
-      'https://sfkdwprzwtegfkohqsdy.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY'
-    );
+    const sb = await getSupabaseClient();
     
     // Fetch teams for team name lookup
     const { data: teamsData } = await sb.from('teams').select('id, team_name').eq('organization_id', window._userOrgId || 'individual');
@@ -6934,15 +6920,7 @@ async function adminDeletePlayer(subId, email) {
   if (!confirm('Delete ' + email + ' from database? This does NOT cancel their Stripe subscription.')) return;
   
   try {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    if (!window.supabase) await new Promise(r => { script.onload = r; document.head.appendChild(script); });
-    
-    const sb = window.supabase.createClient(
-      'https://sfkdwprzwtegfkohqsdy.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY'
-    );
-    
+    const sb = await getSupabaseClient();
     const { error } = await sb.from('subscriptions').delete().eq('id', subId);
     if (error) throw error;
     alert('✓ Deleted: ' + email);
