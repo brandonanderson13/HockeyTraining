@@ -3882,12 +3882,21 @@ async function loadGoalComments(goalId) {
       return;
     }
 
+    // Fetch names for all commenters
+    const uniqueUserIds = [...new Set(data.map(c => c.user_id))];
+    const { data: commenters } = await sb.from('subscriptions')
+      .select('user_id, first_name, last_name')
+      .in('user_id', uniqueUserIds);
+    const nameMap = {};
+    (commenters||[]).forEach(u => { nameMap[u.user_id] = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.email || 'Unknown'; });
+
     el.innerHTML = data.map(c => {
       const isMe = c.user_id === window._userId;
+      const authorName = isMe ? 'You' : (nameMap[c.user_id] || 'Unknown');
       const time = new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
       return `<div style="margin-bottom:10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
-          <span style="font-size:10px;font-weight:700;color:${isMe?'var(--primary-color)':'#60a5fa'};text-transform:uppercase;letter-spacing:.04em;">${isMe?'You':'Coach'}</span>
+          <span style="font-size:10px;font-weight:700;color:${isMe?'var(--primary-color)':'#60a5fa'};text-transform:uppercase;letter-spacing:.04em;">${authorName}</span>
           <div style="display:flex;align-items:center;gap:8px;">
             <span style="font-size:10px;color:rgba(255,255,255,0.25);">${time}</span>
             ${isMe?`<button onclick="deleteGoalComment('${c.id}','${goalId}')" style="background:none;border:none;color:rgba(255,255,255,0.2);cursor:pointer;font-size:11px;padding:0;line-height:1;">✕</button>`:''}
