@@ -6210,8 +6210,9 @@ renderStickLog();
 // ═══════════════════════════════════════════════════════════════════════════
 
 async function loadAdminPanel(user) {
+  console.log('loadAdminPanel called, _userOrgId:', window._userOrgId);
   const content = document.getElementById('adminContent');
-  if (!content) return;
+  if (!content) { console.log('adminContent not found!'); return; }
   
   // Store super admin status globally
   window._isSuperAdmin = (user.email === 'brandonanderson1393@gmail.com');
@@ -6667,8 +6668,9 @@ async function handleAddPlayer(e) {
 }
 
 async function loadPlayerList(isSuperAdmin = false) {
+  console.log('loadPlayerList called, _userOrgId:', window._userOrgId);
   const container = document.getElementById('playerListContainer');
-  if (!container) return;
+  if (!container) { console.log('playerListContainer not found!'); return; }
   container.innerHTML = 'Loading...';
   
   try {
