@@ -2890,12 +2890,28 @@ async function loadDashboard(targetId) {
     let teamName = '';
 
     if (isCoach) {
-      const { data: teamData } = await sb.from('teams').select('id, team_name').eq('coach_id', userId).eq('organization_id', orgId).single();
+      // Try to find team by coach_id first
+      let teamData = null;
+      const { data: td1 } = await sb.from('teams').select('id, team_name').eq('coach_id', userId).eq('organization_id', orgId).single();
+      if (td1) {
+        teamData = td1;
+      } else {
+        // Fallback: use coach's own team_id from their subscription
+        const coachSub = await sb.from('subscriptions').select('team_id').eq('user_id', userId).single();
+        if (coachSub?.data?.team_id) {
+          const { data: td2 } = await sb.from('teams').select('id, team_name').eq('id', coachSub.data.team_id).single();
+          teamData = td2;
+        }
+      }
       if (teamData) {
         _dashTeamId = teamData.id;
         teamName = teamData.team_name;
         const { data: tp } = await sb.from('subscriptions').select('user_id, first_name, last_name, email, team_id').eq('team_id', teamData.id).eq('role', 'player').eq('status', 'active');
         players = tp || [];
+      } else {
+        // No team found — show all org players so coach sees something
+        const { data: allP } = await sb.from('subscriptions').select('user_id, first_name, last_name, email, team_id').eq('organization_id', orgId).eq('role', 'player').eq('status', 'active');
+        players = allP || [];
       }
     } else {
       const { data: allP } = await sb.from('subscriptions').select('user_id, first_name, last_name, email, team_id').eq('organization_id', orgId).eq('role', 'player').eq('status', 'active').order('first_name');
