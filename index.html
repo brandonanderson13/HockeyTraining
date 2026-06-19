@@ -1805,17 +1805,19 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         const orgChoice = await superAdminPickOrg();
         window._userOrgId = orgChoice || userSub?.organization_id || 'delano';
         // Update super admin's subscription org_id so RLS policies allow cross-org queries
-        if (orgChoice && orgChoice !== userSub?.organization_id) {
+        if (orgChoice) {
           try {
             await supabase.from('subscriptions')
               .update({ organization_id: orgChoice })
               .eq('user_id', user.id);
+            // Small wait for RLS to recognize updated org
+            await new Promise(r => setTimeout(r, 300));
           } catch(e) { console.warn('Could not update super admin org:', e.message); }
         }
-      }
-
-      // Now load admin panel with correct org set
-      if (isAdmin) {
+        // Load admin panel now that org is set
+        loadAdminPanel(user);
+      } else if (isAdmin) {
+        // Non-super admin — load immediately
         loadAdminPanel(user);
       }
 
