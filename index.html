@@ -2570,10 +2570,11 @@ async function superAdminPickOrg() {
       });
 
     } catch(e) {
-      console.error('Org picker error:', e);
+      console.error('Org picker error:', e.message, e);
+      // Don't auto-resolve — show error and let user retry
       const m = document.getElementById('orgPickerModal');
-      if (m) m.remove();
-      resolve('delano');
+      if (m) m.innerHTML += `<div style="color:#f87171;padding:10px;font-size:12px;">Error loading orgs: ${e.message}</div>`;
+      else resolve('delano');
     }
   });
 }
