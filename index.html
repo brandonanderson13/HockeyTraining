@@ -3509,7 +3509,8 @@ function openAssignModal(playerId, playerName, isAll) {
   const existing = document.getElementById('dashModal');
   if (existing) existing.remove();
 
-  const allMode = isAll === true;
+  const isPlayer = window._userRole === 'player';
+  const allMode = isAll === true && !isPlayer;
   const today = new Date().toISOString().split('T')[0];
   const playerOpts = _dashPlayers.map(p => {
     const n = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
@@ -3623,7 +3624,9 @@ async function saveAssignment() {
   }
 
   let playerIds = [];
-  if (isAll) {
+  if (window._userRole === 'player') {
+    playerIds = [window._userId];
+  } else if (isAll) {
     playerIds = _dashPlayers.map(p => p.user_id);
   } else {
     const checks = document.querySelectorAll('.aPlayerCheck:checked');
