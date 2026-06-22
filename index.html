@@ -1837,8 +1837,10 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       }
 
       // Navigate to landing tab
+      window._userRole = userSub?.role || 'player'; // ensure set before showSec
       const landingTab = (userSub?.role === 'player') ? 'home' : 'dashboard';
       showSec(landingTab);
+      if (landingTab === 'home') loadHomeSec(); // reload with correct role
       try { checkShowWizard(); } catch(e) { console.warn('Wizard check error:', e); }
       // Hide loading overlay now that everything is ready
       const loader = document.getElementById('appLoader');
