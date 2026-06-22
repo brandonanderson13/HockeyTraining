@@ -3178,7 +3178,7 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
       : (canCheck ? `toggleAssignment('${item.id}',${isDone})` : '');
 
     const typeColor = isGoal ? '#60a5fa' : 'var(--primary-color)';
-    const typeLabel = isGoal ? 'Goal' : (item.type || 'Task');
+    const typeLabel = 'Goal';
     const title = isGoal ? item.metric : item.title;
     const openFn = isGoal ? `openItemDetail('goal','${item.id}')` : `openItemDetail('assignment','${item.id}')`;
 
@@ -3254,7 +3254,7 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
     ${statsHtml}
     <div class="card">
       <div class="ch">
-        <span class="cht">Tasks & Goals</span>
+        <span class="cht">Goals</span>
         <div style="margin-left:auto;display:flex;gap:6px;">
           <button onclick="openCombinedGoalModal(window._userId,null,false)" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:4px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
         </div>
@@ -3334,8 +3334,7 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
         </div>
         ${pGoals.length?`<div style="padding:8px 14px;border-top:1px solid #1a1a1a;">${goalBars}</div>`:''}
         <div style="padding:10px 14px;border-top:1px solid #1a1a1a;display:flex;gap:6px;">
-          <button onclick="openAssignModal('${p.user_id}','${name.replace(/'/g,"\'")}',false)" style="flex:1;background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.25);color:var(--primary-color);font-size:11px;font-weight:700;padding:6px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Task</button>
-          <button onclick="openGoalModal('${p.user_id}','${name.replace(/'/g,"\'")}')" style="flex:1;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:6px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
+          <button onclick="openCombinedGoalModal('${p.user_id}','${name.replace(/'/g,"\'")}')" style="flex:1;background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:6px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
           <button onclick="viewPlayer('${p.user_id}','${name.replace(/'/g,"\'")}' )" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;padding:6px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">View</button>
         </div>
       </div>`;
@@ -3360,7 +3359,7 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
     const checkBg = isDone ? '#4ade80' : 'transparent';
     const checkBorder = isDone ? '#4ade80' : '#444';
     const typeColor = isGoal ? '#60a5fa' : 'var(--primary-color)';
-    const typeLabel = isGoal ? 'Goal' : (item.type || 'Task');
+    const typeLabel = 'Goal';
     const title = isGoal ? item.metric : item.title;
 
     // Player label
@@ -3463,7 +3462,7 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
     </div>
     <div class="card">
       <div class="ch">
-        <span class="cht">Tasks & Goals</span>
+        <span class="cht">Goals</span>
         <div style="margin-left:auto;display:flex;gap:6px;">
           <button onclick="openCombinedGoalModal(null,null,true)" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
         </div>
