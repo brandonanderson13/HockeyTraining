@@ -7,10 +7,6 @@
     "api/create-checkout.js": {
       "memory": 1024,
       "maxDuration": 10
-    },
-    "api/delete-user.js": {
-      "memory": 1024,
-      "maxDuration": 10
     }
   },
   "rewrites": [
@@ -21,10 +17,6 @@
     {
       "source": "/api/create-checkout",
       "destination": "/api/create-checkout.js"
-    },
-    {
-      "source": "/api/delete-user",
-      "destination": "/api/delete-user.js"
     }
   ],
   "headers": [
