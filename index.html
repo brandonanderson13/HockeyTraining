@@ -7828,10 +7828,22 @@ async function savePlayerTeam(subId) {
   const msg = document.getElementById('editTeamMsg');
   try {
     const sb = await getSupabaseClient();
+    // Update subscription team_id
     const { error } = await sb.from('subscriptions').update({ team_id: teamId || null }).eq('id', subId);
     if (error) throw error;
+    // If this user is a coach, also update teams.coach_id
+    const { data: sub } = await sb.from('subscriptions').select('user_id, role').eq('id', subId).single();
+    if (sub?.role === 'coach') {
+      // Remove coach from any previous team
+      await sb.from('teams').update({ coach_id: null }).eq('coach_id', sub.user_id);
+      // Set coach on new team
+      if (teamId) {
+        await sb.from('teams').update({ coach_id: sub.user_id }).eq('id', teamId);
+      }
+    }
     document.getElementById('editTeamModal')?.remove();
     loadPlayerList(window._isSuperAdmin);
+    loadTeams();
   } catch(e) {
     if (msg) { msg.textContent = 'Error: ' + e.message; msg.style.color='#f87171'; msg.style.display='block'; }
   }
