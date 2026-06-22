@@ -3256,8 +3256,7 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
       <div class="ch">
         <span class="cht">Tasks & Goals</span>
         <div style="margin-left:auto;display:flex;gap:6px;">
-          <button onclick="openAssignModal(window._userId,null,false)" style="background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.25);color:var(--primary-color);font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Task</button>
-          <button onclick="openGoalModal(null,null,false)" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:4px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
+          <button onclick="openCombinedGoalModal(window._userId,null,false)" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:4px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
         </div>
       </div>
       <div class="cb">${openHtml}${doneHtml}</div>
@@ -3466,8 +3465,7 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
       <div class="ch">
         <span class="cht">Tasks & Goals</span>
         <div style="margin-left:auto;display:flex;gap:6px;">
-          <button onclick="openAssignModal(null,null,false)" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Task</button>
-          <button onclick="openGoalModal(null,null,true)" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
+          <button onclick="openCombinedGoalModal(null,null,true)" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
         </div>
       </div>
       <div class="cb">${openCoachHtml}${doneCoachHtml}</div>
@@ -3672,6 +3670,194 @@ async function saveAssignment() {
 }
 
 // ── GOAL MODAL ────────────────────────────────────────────────────────────
+
+// ── COMBINED GOAL MODAL ───────────────────────────────────────────────────
+function openCombinedGoalModal(playerId, playerName, isAll) {
+  const existing = document.getElementById('dashModal');
+  if (existing) existing.remove();
+  window._goalType = 'checkbox';
+  window._combinedPlayerId = playerId;
+  window._combinedIsAll = isAll;
+  const today = new Date().toISOString().split('T')[0];
+  const role = window._userRole;
+  const isPlayer = role === 'player';
+  const isCoach = role === 'coach' || role === 'admin' || role === 'super_admin';
+  const allMode = isAll === true && !isPlayer;
+
+  const modal = document.createElement('div');
+  modal.id = 'dashModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.innerHTML = `
+    <div style="background:#141414;border:1px solid #2a2a2a;border-radius:12px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;">New Goal</div>
+        <button onclick="document.getElementById('dashModal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;line-height:1;">×</button>
+      </div>
+
+      ${!isPlayer ? `
+      <div style="margin-bottom:14px;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block;">Assign To</label>
+        <div style="display:flex;gap:0;background:#0d0d0d;border:1px solid #222;border-radius:6px;overflow:hidden;margin-bottom:8px;">
+          <button type="button" onclick="combinedSetMode('all')" id="cgModeAll" style="flex:1;padding:7px;background:${allMode?'var(--primary-color)':'transparent'};border:none;color:${allMode?'var(--secondary-color)':'rgba(255,255,255,0.4)'};font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;">All Players</button>
+          <button type="button" onclick="combinedSetMode('select')" id="cgModeSel" style="flex:1;padding:7px;background:${!allMode?'var(--primary-color)':'transparent'};border:none;color:${!allMode?'var(--secondary-color)':'rgba(255,255,255,0.4)'};font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;">Select Players</button>
+        </div>
+        <div id="cgSelDiv" style="display:${allMode?'none':'block'};">${buildPlayerChecks(_dashPlayers, playerId, 'cgPlayerCheck')}</div>
+        <div id="cgAllDiv" style="display:${allMode?'block':'none'};font-size:12px;color:rgba(255,255,255,0.5);padding:8px 10px;background:#0d0d0d;border:1px solid #222;border-radius:6px;">Will assign to all ${(_dashPlayers||[]).length} players</div>
+      </div>` : ''}
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block;">Type</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+          <button type="button" onclick="combinedSetType('checkbox')" id="cgTypeCheck" style="padding:8px;border-radius:6px;border:1px solid var(--primary-color);background:rgba(var(--primary-rgb),0.15);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;">✓ Check Off</button>
+          <button type="button" onclick="combinedSetType('numeric')" id="cgTypeNum" style="padding:8px;border-radius:6px;border:1px solid #333;background:transparent;color:rgba(255,255,255,0.4);font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;">123 Numeric</button>
+          <button type="button" onclick="combinedSetType('tracked')" id="cgTypeTrack" style="padding:8px;border-radius:6px;border:1px solid #333;background:transparent;color:rgba(255,255,255,0.4);font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;">📊 Tracked</button>
+        </div>
+      </div>
+
+      <div id="cgTrackedFields" style="display:none;margin-bottom:14px;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;display:block;">Track By</label>
+        <div style="display:flex;gap:6px;margin-bottom:10px;">
+          <button type="button" onclick="combinedSetMetric('shots')" class="cg-metric" style="flex:1;padding:7px;border-radius:6px;border:1px solid #333;background:#0d0d0d;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;">🏒 Shots</button>
+          <button type="button" onclick="combinedSetMetric('stickhandling')" class="cg-metric" style="flex:1;padding:7px;border-radius:6px;border:1px solid #333;background:#0d0d0d;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;">🎯 Stick</button>
+          <button type="button" onclick="combinedSetMetric('workouts')" class="cg-metric" style="flex:1;padding:7px;border-radius:6px;border:1px solid #333;background:#0d0d0d;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;">💪 Workouts</button>
+        </div>
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Target</label>
+        <input id="cgTarget" type="number" min="1" placeholder="e.g. 500" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+      </div>
+
+      <div id="cgNumericFields" style="display:none;margin-bottom:14px;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Target Number</label>
+        <input id="cgNumTarget" type="number" min="1" placeholder="e.g. 10" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Title *</label>
+        <input id="cgTitle" type="text" placeholder="e.g. 500 wrist shots this week" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Description</label>
+        <textarea id="cgDesc" placeholder="Details, instructions, or context..." style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;resize:vertical;height:60px;font-family:'Barlow',sans-serif;"></textarea>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Link (optional)</label>
+        <input id="cgLink" type="url" placeholder="https://youtube.com/..." style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Due Date</label>
+        <input id="cgDue" type="date" value="${today}" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+      </div>
+
+      <div id="cgMsg" style="display:none;padding:8px 10px;border-radius:6px;font-size:12px;margin-bottom:10px;"></div>
+      <button onclick="saveCombinedGoal()" style="width:100%;background:var(--primary-color);border:none;color:var(--secondary-color);font-size:14px;font-weight:800;padding:13px;border-radius:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Create Goal</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+function combinedSetMode(mode) {
+  const allBtn = document.getElementById('cgModeAll');
+  const selBtn = document.getElementById('cgModeSel');
+  const allDiv = document.getElementById('cgAllDiv');
+  const selDiv = document.getElementById('cgSelDiv');
+  const isAll = mode === 'all';
+  if (allBtn) { allBtn.style.background = isAll ? 'var(--primary-color)' : 'transparent'; allBtn.style.color = isAll ? 'var(--secondary-color)' : 'rgba(255,255,255,0.4)'; }
+  if (selBtn) { selBtn.style.background = !isAll ? 'var(--primary-color)' : 'transparent'; selBtn.style.color = !isAll ? 'var(--secondary-color)' : 'rgba(255,255,255,0.4)'; }
+  if (allDiv) allDiv.style.display = isAll ? 'block' : 'none';
+  if (selDiv) selDiv.style.display = isAll ? 'none' : 'block';
+  window._cgIsAll = isAll;
+}
+
+function combinedSetType(type) {
+  window._goalType = type;
+  ['cgTypeCheck','cgTypeNum','cgTypeTrack'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) { btn.style.borderColor = '#333'; btn.style.background = 'transparent'; btn.style.color = 'rgba(255,255,255,0.4)'; }
+  });
+  const activeId = type === 'checkbox' ? 'cgTypeCheck' : type === 'numeric' ? 'cgTypeNum' : 'cgTypeTrack';
+  const activeBtn = document.getElementById(activeId);
+  if (activeBtn) { activeBtn.style.borderColor = 'var(--primary-color)'; activeBtn.style.background = 'rgba(var(--primary-rgb),0.15)'; activeBtn.style.color = '#fff'; }
+  document.getElementById('cgTrackedFields').style.display = type === 'tracked' ? 'block' : 'none';
+  document.getElementById('cgNumericFields').style.display = type === 'numeric' ? 'block' : 'none';
+}
+
+function combinedSetMetric(metric) {
+  window._combinedMetric = metric;
+  document.querySelectorAll('.cg-metric').forEach(b => { b.style.borderColor = '#333'; b.style.background = '#0d0d0d'; b.style.color = 'rgba(255,255,255,0.5)'; });
+  event?.target?.style && (event.target.style.borderColor = 'var(--primary-color)', event.target.style.background = 'rgba(var(--primary-rgb),0.15)', event.target.style.color = '#fff');
+}
+
+async function saveCombinedGoal() {
+  const title = document.getElementById('cgTitle')?.value.trim();
+  const desc = document.getElementById('cgDesc')?.value.trim();
+  const due = document.getElementById('cgDue')?.value;
+  const link = document.getElementById('cgLink')?.value.trim();
+  const type = window._goalType || 'checkbox';
+  const msg = document.getElementById('cgMsg');
+
+  if (!title) { if(msg){msg.style.cssText='display:block;background:rgba(248,113,113,0.1);color:#f87171;';msg.textContent='Please enter a title.';} return; }
+
+  const isPlayer = window._userRole === 'player';
+  const isAll = window._cgIsAll || false;
+
+  let playerIds = [];
+  if (isPlayer) {
+    playerIds = [window._userId];
+  } else if (isAll) {
+    playerIds = (_dashPlayers||[]).map(p => p.user_id);
+  } else {
+    const checks = document.querySelectorAll('.cgPlayerCheck:checked');
+    playerIds = Array.from(checks).map(c => c.value).filter(Boolean);
+    if (!playerIds.length) { if(msg){msg.style.cssText='display:block;background:rgba(248,113,113,0.1);color:#f87171;';msg.textContent='Please select at least one player.';} return; }
+  }
+
+  let targetValue = null;
+  let trackedMetric = null;
+  if (type === 'numeric') {
+    targetValue = parseFloat(document.getElementById('cgNumTarget')?.value) || null;
+    if (!targetValue) { if(msg){msg.style.cssText='display:block;background:rgba(248,113,113,0.1);color:#f87171;';msg.textContent='Please enter a target number.';} return; }
+  } else if (type === 'tracked') {
+    trackedMetric = window._combinedMetric || null;
+    targetValue = parseFloat(document.getElementById('cgTarget')?.value) || null;
+    if (!trackedMetric) { if(msg){msg.style.cssText='display:block;background:rgba(248,113,113,0.1);color:#f87171;';msg.textContent='Please select a metric to track.';} return; }
+    if (!targetValue) { if(msg){msg.style.cssText='display:block;background:rgba(248,113,113,0.1);color:#f87171;';msg.textContent='Please enter a target number.';} return; }
+  }
+
+  if(msg){msg.style.cssText='display:block;background:rgba(59,130,246,0.1);color:#60a5fa;';msg.textContent='Saving...';}
+
+  try {
+    const sb = await getSupabaseClient();
+    const orgId = window._userOrgId || 'individual';
+    const now = new Date().toISOString();
+
+    const inserts = playerIds.map(pid => ({
+      organization_id: orgId,
+      coach_id: isPlayer ? pid : window._userId,
+      player_id: pid,
+      metric: title,
+      notes: (desc || '') + (link ? '\n\nLink: ' + link : ''),
+      link_url: link || null,
+      type: type,
+      tracked_metric: trackedMetric,
+      target_value: targetValue,
+      current_value: 0,
+      completed: false,
+      due_date: due || null,
+      created_at: now
+    }));
+
+    const { error } = await sb.from('goals').insert(inserts);
+    if (error) throw error;
+
+    document.getElementById('dashModal')?.remove();
+    loadDashboard();
+  } catch(e) {
+    if(msg){msg.style.cssText='display:block;background:rgba(248,113,113,0.1);color:#f87171;';msg.textContent='Error: '+e.message;}
+  }
+}
+
 function openGoalModal(playerId, playerName, isAll) {
   const existing = document.getElementById('dashModal');
   if (existing) existing.remove();
@@ -4322,8 +4508,7 @@ function viewPlayer(playerId, playerName) {
         ${assignRows}
       </div>
       <div style="display:flex;gap:8px;margin-top:16px;">
-        <button onclick="document.getElementById('dashPlayerModal').remove();openAssignModal('${playerId}','${playerName}')" style="flex:1;background:rgba(var(--primary-rgb),0.1);border:1px solid rgba(var(--primary-rgb),0.25);color:var(--primary-color);font-size:12px;font-weight:700;padding:8px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Assignment</button>
-        <button onclick="document.getElementById('dashPlayerModal').remove();openGoalModal('${playerId}','${playerName}')" style="flex:1;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);color:#60a5fa;font-size:12px;font-weight:700;padding:8px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
+        <button onclick="document.getElementById('dashPlayerModal').remove();openCombinedGoalModal('${playerId}','${playerName}')" style="flex:1;background:var(--primary-color);border:none;color:var(--secondary-color);font-size:12px;font-weight:700;padding:8px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
       </div>
     </div>`;
   document.body.appendChild(modal);
