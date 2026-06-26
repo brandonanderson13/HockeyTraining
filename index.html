@@ -7997,9 +7997,9 @@ async function deactivatePlayer(subId, email) {
   } catch(e) { alert('Error: ' + e.message); }
 }
 
-async function deleteUserFully(subId, userId, email) {
+async async async function deleteUserFully(subId, userId, email) {
   if (email === 'brandonanderson1393@gmail.com') { alert('Cannot delete super admin'); return; }
-  if (!confirm(`⚠️ Permanently delete ${email}?\n\nThis will:\n• Remove them from Supabase Auth\n• Delete their subscription\n• Remove their assignments and goals\n\nThis CANNOT be undone.`)) return;
+  if (!confirm(`Delete ${email}?\n\nThis will permanently remove their account, subscription, assignments, and goals.\n\nThis CANNOT be undone.`)) return;
   try {
     const sb = await getSupabaseClient();
     const { data: { session } } = await sb.auth.getSession();
@@ -8010,9 +8010,14 @@ async function deleteUserFully(subId, userId, email) {
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({ userId, orgId: window._userOrgId })
     });
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      const text = await res.text();
+      throw new Error(res.ok ? 'Unexpected response from server' : 'Delete failed (status ' + res.status + ')');
+    }
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Delete failed');
-    alert(`✓ ${email} permanently deleted`);
+    alert(`${email} has been permanently deleted.`);
     loadPlayerList(window._isSuperAdmin);
   } catch(e) { alert('Error: ' + e.message); }
 }
