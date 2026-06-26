@@ -971,7 +971,7 @@ select:focus{border-color:var(--or);outline:none;}
     </div>
     <div style="overflow-x:auto;">
       <table class="trtable">
-        <thead><tr><th>Date</th><th>Mins</th><th>Touches (30s)</th><th>Drills</th><th>Notes</th><th></th></tr></thead>
+        <thead><tr><th>Mins</th><th>Touches (30s)</th><th>Drills</th><th>Notes</th><th></th></tr></thead>
         <tbody id="sh-tbody"><tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.25);padding:1.5rem;">No sessions logged yet.</td></tr></tbody>
       </table>
     </div>
@@ -7084,22 +7084,11 @@ async function loadPlayerList(isSuperAdmin = false) {
         <td style="padding:10px 8px;text-align:right;color:#4ade80;font-weight:600;">${stats.shots.toLocaleString()}</td>
         <td style="padding:10px 8px;text-align:right;color:#60a5fa;font-weight:600;">${stats.mins}</td>
         <td style="padding:10px 8px;text-align:right;color:#fb923c;font-weight:600;">${stats.workouts}</td>
-        <td style="padding:10px 8px;text-align:center;font-size:10px;">
-          ${sub.expires_at ? 
-            `<span style="color:rgba(255,255,255,0.5);">${new Date(sub.expires_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'})}</span>` 
-            : '<span style="color:rgba(255,255,255,0.25);">—</span>'}
-        </td>
         <td style="padding:10px 8px;white-space:nowrap;">
           ${sub.stripe_subscription_id ? '<button onclick="adminCancelStripe(\''+sub.id+'\',\''+sub.email+'\',\''+sub.stripe_subscription_id+'\')" style="background:#fb923c;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Cancel</button>' : ''}
           ${(isSuperAdmin && (!sub.organization_id || sub.organization_id === 'individual')) ? '<button onclick="editExpiration(\''+sub.id+'\',\''+sub.email+'\',\''+(sub.expires_at||'')+'\')" style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;color:#3b82f6;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Set Expires</button>' : ''}
           ${sub.email === 'brandonanderson1393@gmail.com' ? '<button onclick="editOrgLimit()" style="background:#60a5fa;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Edit Org Limit</button>' : ''}
           <button onclick="editPlayerTeam('${sub.id}','${sub.team_id||''}')" style="background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.3);color:#60a5fa;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Team</button>
-          ${(sub.role === 'player' || sub.role === 'coach') ? (sub.status === 'active' ? 
-              '<button onclick="deactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
-              '<button onclick="reactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
-          ${sub.role === 'admin' && isSuperAdmin ? (sub.status === 'active' ? 
-              '<button onclick="deactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
-              '<button onclick="reactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
           ${isSuperAdmin && sub.email !== 'brandonanderson1393@gmail.com' ? '<button onclick="deleteUserFully(\''+sub.id+'\',\''+sub.user_id+'\',\''+sub.email+'\')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-left:2px;">Delete</button>' : ''}
         </td>
       </tr>`;
