@@ -617,69 +617,54 @@ select:focus{border-color:var(--or);outline:none;}
 
       </div>
 
-      <!-- TRAINING DAYS -->
-      <div style="margin-bottom:16px;">
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Training Days</label>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          <label class="day-toggle"><input type="checkbox" value="Monday" checked><span>Mon</span></label>
-          <label class="day-toggle"><input type="checkbox" value="Tuesday" checked><span>Tue</span></label>
-          <label class="day-toggle"><input type="checkbox" value="Wednesday"><span>Wed</span></label>
-          <label class="day-toggle"><input type="checkbox" value="Thursday" checked><span>Thu</span></label>
-          <label class="day-toggle"><input type="checkbox" value="Friday" checked><span>Fri</span></label>
-          <label class="day-toggle"><input type="checkbox" value="Saturday" checked><span>Sat</span></label>
-          <label class="day-toggle"><input type="checkbox" value="Sunday"><span>Sun</span></label>
-        </div>
-      </div>
+      <!-- TRAINING DAYS + PHASE CARD (2-col) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
 
-      <!-- INCLUDE -->
-      <div style="margin-bottom:16px;">
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Include in Program</label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          <label class="cust-check"><input type="checkbox" id="cust-strength" checked><span>Strength</span></label>
-          <label class="cust-check"><input type="checkbox" id="cust-agility" checked><span>Agility</span></label>
-          <label class="cust-check"><input type="checkbox" id="cust-skills" checked><span>Skills</span></label>
-          <label class="cust-check"><input type="checkbox" id="cust-conditioning" checked><span>Conditioning</span></label>
-          <input type="hidden" name="focus" value="balanced">
-        </div>
-      </div>
+        <!-- LEFT: training days + include + apply -->
+        <div>
+          <!-- TRAINING DAYS -->
+          <div style="margin-bottom:14px;">
+            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Training Days</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <label class="day-toggle"><input type="checkbox" value="Monday" checked><span>Mon</span></label>
+              <label class="day-toggle"><input type="checkbox" value="Tuesday" checked><span>Tue</span></label>
+              <label class="day-toggle"><input type="checkbox" value="Wednesday"><span>Wed</span></label>
+              <label class="day-toggle"><input type="checkbox" value="Thursday" checked><span>Thu</span></label>
+              <label class="day-toggle"><input type="checkbox" value="Friday" checked><span>Fri</span></label>
+              <label class="day-toggle"><input type="checkbox" value="Saturday" checked><span>Sat</span></label>
+              <label class="day-toggle"><input type="checkbox" value="Sunday"><span>Sun</span></label>
+            </div>
+          </div>
 
-      <!-- APPLY -->
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-        <button onclick="applyCustomization()" class="btn-o" style="margin-top:0;">Apply Settings</button>
-        <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">✓ Settings applied!</div>
-      </div>
+          <!-- INCLUDE -->
+          <div style="margin-bottom:14px;">
+            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Include in Program</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <label class="cust-check"><input type="checkbox" id="cust-strength" checked><span>Strength</span></label>
+              <label class="cust-check"><input type="checkbox" id="cust-agility" checked><span>Agility</span></label>
+              <label class="cust-check"><input type="checkbox" id="cust-skills" checked><span>Skills</span></label>
+              <label class="cust-check"><input type="checkbox" id="cust-conditioning" checked><span>Conditioning</span></label>
+              <input type="hidden" name="focus" value="balanced">
+            </div>
+          </div>
 
-      <!-- PROGRAM CARDS -->
-      <div style="border-top:1px solid #1a1a1a;padding-top:16px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">About the Phases</div>
-        <div class="g3">
-          <div class="pc">
-            <div class="pct"><div class="pn">Early Off-Season</div><div class="pt">Foundation & Strength</div><div class="pw">12 weeks · 5 days/week</div></div>
-            <div class="pcb"><span class="ptag ptago">Strength Build</span><span class="ptag">Movement Quality</span><span class="ptag ptago">High Volume</span></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season.</div>
-          </div>
-          <div class="pc">
-            <div class="pct"><div class="pn">Late Off-Season</div><div class="pt">Power & Development</div><div class="pw">10 weeks · 5 days/week</div></div>
-            <div class="pcb"><span class="ptag ptago">Explosive Power</span><span class="ptag">Complex Training</span><span class="ptag ptago">Peak Development</span></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Convert your strength into explosive hockey power. Heavier loads, jump-and-lift complexes, and peak conditioning.</div>
-          </div>
-          <div class="pc">
-            <div class="pct"><div class="pn">Pre-Season</div><div class="pt">Sharpen & Peak</div><div class="pw">4 weeks · 4 days/week</div></div>
-            <div class="pcb"><span class="ptag ptago">Game Speed</span><span class="ptag">Reduce Volume</span><span class="ptag ptago">Stay Sharp</span></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.</div>
-          </div>
-          <div class="pc">
-            <div class="pct"><div class="pn">In-Season Block A</div><div class="pt">Early Season Maintenance</div><div class="pw">4 weeks · 3 days/week</div></div>
-            <div class="pcb"><span class="ptag ptago">Maintain Strength</span><span class="ptag">Full Recovery</span><span class="ptag ptago">Game Focus</span></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Early season — moderate intensity, full recovery. Keep your strength without adding fatigue on top of games.</div>
-          </div>
-          <div class="pc">
-            <div class="pct"><div class="pn">In-Season Block B</div><div class="pt">Mid/Late Season</div><div class="pw">4 weeks · 3 days/week</div></div>
-            <div class="pcb"><span class="ptag ptago">Low Volume</span><span class="ptag">Recovery First</span><span class="ptag ptago">Stay Sharp</span></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Fatigue is real late in the season. Reduce volume, prioritize recovery, stay sharp for games. Repeat as needed.</div>
+          <!-- APPLY -->
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button onclick="applyCustomization()" class="btn-o" style="margin-top:0;">Apply Settings</button>
+            <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">✓ Settings applied!</div>
           </div>
         </div>
+
+        <!-- RIGHT: selected phase card -->
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Selected Phase</label>
+          <div id="selectedPhaseCard" style="background:#0d0d0d;border:1px solid #333;border-radius:8px;padding:14px;">
+          </div>
+        </div>
+
       </div>
+
+      
 
     </div>
   <div id="schedBanner"></div>
@@ -2810,7 +2795,7 @@ function loadHomeSec() {
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);">Program Not Set Up</div>
             <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">Complete setup to get your training plan</div>
           </div>
-          <button onclick="showSec('schedule')" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">Set Up Now</button>
+          <button onclick="showSetupWizard()" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">Set Up Now</button>
         </div>`;
   }
 
@@ -5480,7 +5465,63 @@ function syncDaysToSeason() {
   document.querySelectorAll('.day-toggle input[type=checkbox]').forEach(cb => {
     cb.checked = activeDays.includes(cb.value);
   });
+  updatePhaseCard();
 }
+
+const _PHASE_INFO = {
+  earlyoffseason: {
+    label: 'Early Off-Season',
+    title: 'Foundation & Strength',
+    weeks: '12 weeks · 5 days/week',
+    tags: ['Strength Build','Movement Quality','High Volume'],
+    desc: 'Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season.'
+  },
+  lateoffseason: {
+    label: 'Late Off-Season',
+    title: 'Power & Development',
+    weeks: '10 weeks · 5 days/week',
+    tags: ['Explosive Power','Complex Training','Peak Development'],
+    desc: 'Convert your strength into explosive hockey power. Heavier loads, jump-and-lift complexes, and peak conditioning.'
+  },
+  preseason: {
+    label: 'Pre-Season',
+    title: 'Sharpen & Peak',
+    weeks: '4 weeks · 4 days/week',
+    tags: ['Game Speed','Reduce Volume','Stay Sharp'],
+    desc: 'Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.'
+  },
+  inseason_a: {
+    label: 'In-Season Block A',
+    title: 'Early Season Maintenance',
+    weeks: '4 weeks · 3 days/week',
+    tags: ['Maintain Strength','Full Recovery','Game Focus'],
+    desc: 'Early season — moderate intensity, full recovery. Keep your strength without adding fatigue on top of games.'
+  },
+  inseason_b: {
+    label: 'In-Season Block B',
+    title: 'Mid/Late Season',
+    weeks: '4 weeks · 3 days/week',
+    tags: ['Low Volume','Recovery First','Stay Sharp'],
+    desc: 'Fatigue is real late in the season. Reduce volume, prioritize recovery, stay sharp for games. Repeat as needed.'
+  }
+};
+
+function updatePhaseCard() {
+  const sel = document.getElementById('cust-season');
+  if (!sel) return;
+  const p = _PHASE_INFO[sel.value];
+  if (!p) return;
+  const card = document.getElementById('selectedPhaseCard');
+  if (!card) return;
+  card.innerHTML = \`
+    <div style="font-size:10px;color:var(--primary-color);font-family:'Barlow Condensed',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">\${p.label}</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;color:#fff;margin-bottom:3px;">\${p.title}</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;">\${p.weeks}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">\${p.tags.map(t=>\`<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(var(--primary-rgb),0.15);color:var(--primary-color);border:1px solid rgba(var(--primary-rgb),0.3);">\${t}</span>\`).join('')}</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;">\${p.desc}</div>
+  \`;
+}
+
 
 function applyCustomization(){
   console.log('applyCustomization called');
@@ -5545,6 +5586,7 @@ function applyCustomization(){
   // Confirmation
   const conf = document.getElementById('cust-apply-confirm');
   if(conf){ conf.style.display='inline'; setTimeout(()=>conf.style.display='none', 2500); }
+  updatePhaseCard();
 }
 
 function resetCustomization(){
@@ -5601,6 +5643,7 @@ function loadCustomSettings(){
     updateHeader(s.name || '');
     updateOverview(s);
   }catch(e){}
+  updatePhaseCard();
 }
 
 function updateHeader(name){
