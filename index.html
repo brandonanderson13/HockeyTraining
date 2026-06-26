@@ -4262,10 +4262,14 @@ function openItemDetail(type, id) {
           <button onclick="updateGoalFromDetail('${item.id}')"
             style="background:${bc};border:none;color:#fff;font-size:12px;font-weight:700;padding:9px 16px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Save</button>
         </div>` : '<div style="text-align:center;padding:10px 0 16px;font-size:14px;color:#4ade80;font-weight:700;">🎯 Goal Complete!</div>'
-      ) : (!item.tracked_metric
-        ? '<button onclick="toggleGoalComplete(\'' + item.id + '\',' + item.completed + ');document.getElementById(\'itemDetailModal\').remove();"
-           style="width:100%;padding:11px;border-radius:6px;border:1px solid ' + (isDone ? '#4ade80' : '#333') + ';background:' + (isDone ? 'rgba(74,222,128,0.1)' : '#0d0d0d') + ';color:' + (isDone ? '#4ade80' : 'rgba(255,255,255,0.6)') + ';font-size:13px;font-weight:700;cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px;">' + (isDone ? '&#10003; Mark as Incomplete' : '&#9711; Mark as Complete') + '</button>'
-        : '')
+      ) : (item.tracked_metric ? '' : (() => {
+        const _btnBorder = isDone ? '#4ade80' : '#333';
+        const _btnBg = isDone ? 'rgba(74,222,128,0.1)' : '#0d0d0d';
+        const _btnColor = isDone ? '#4ade80' : 'rgba(255,255,255,0.6)';
+        const _btnLabel = isDone ? '&#10003; Mark as Incomplete' : '&#9711; Mark as Complete';
+        return `<button onclick="toggleGoalComplete('${item.id}',${item.completed});document.getElementById('itemDetailModal').remove();"
+          style="width:100%;padding:11px;border-radius:6px;border:1px solid ${_btnBorder};background:${_btnBg};color:${_btnColor};font-size:13px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px;">${_btnLabel}</button>`;
+      })())
       }
       <button onclick="deleteGoal('${item.id}');document.getElementById('itemDetailModal').remove();"
         style="width:100%;margin-bottom:16px;padding:8px;border-radius:6px;border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.08);color:#f87171;font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">
@@ -7995,7 +7999,7 @@ async function deactivatePlayer(subId, email) {
   } catch(e) { alert('Error: ' + e.message); }
 }
 
-async async async function deleteUserFully(subId, userId, email) {
+async function deleteUserFully(subId, userId, email) {
   if (email === 'brandonanderson1393@gmail.com') { alert('Cannot delete super admin'); return; }
   if (!confirm(`Delete ${email}?\n\nThis will permanently remove their account, subscription, assignments, and goals.\n\nThis CANNOT be undone.`)) return;
   try {
