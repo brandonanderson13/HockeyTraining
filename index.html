@@ -6631,7 +6631,7 @@ async function loadAdminPanel(user) {
             </div>
             <div>
               <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Role</label>
-              <select id="adminRole" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+              <select id="adminRole" onchange="toggleAdminTeamField(this.value)" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
                 <option value="player">Player</option>
                 <option value="coach">Coach</option>
                 <option value="admin">Admin</option>
@@ -6639,7 +6639,7 @@ async function loadAdminPanel(user) {
             </div>
           </div>
           <div id="teamSelectWrapper">
-            <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Team <span id="teamRequiredMark" style="color:#f87171;">*</span></label>
+            <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Team</label>
             <select id="adminTeam" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;margin-bottom:10px;">
               <option value="">— Select a team —</option>
             </select>
@@ -6916,6 +6916,19 @@ async function handleAddPlayer(e) {
     msg.style.display = 'block';
   }
 }
+
+function toggleAdminTeamField(role) {
+  var wrapper = document.getElementById('teamSelectWrapper');
+  var teamSel = document.getElementById('adminTeam');
+  if (!wrapper) return;
+  if (role === 'admin') {
+    wrapper.style.display = 'none';
+    if (teamSel) teamSel.value = '';
+  } else {
+    wrapper.style.display = 'block';
+  }
+}
+
 
 async function loadPlayerList(isSuperAdmin = false) {
   const container = document.getElementById('playerListContainer');
