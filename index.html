@@ -3350,8 +3350,9 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
     const isBulk = players.length > 1;
     const pLabel = isAllP ? 'All Players' : isBulk ? `${players.length} Players` : (playerMap[players[0]]||'Unknown');
 
+    const isTrackedGoal = isGoal && !!item.tracked_metric;
     const onCheck = isGoal
-      ? `toggleGoalComplete('${item.id}',${isDone})`
+      ? (isTrackedGoal ? '' : `toggleGoalComplete('${item.id}',${isDone})`)
       : `toggleBulkAssignment(${JSON.stringify(ids)},${isDone})`;
 
     const openFn = isGoal
@@ -3360,10 +3361,10 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
 
     return `<div style="padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="${openFn}">
       <div style="display:flex;align-items:center;gap:10px;">
-        <div onclick="event.stopPropagation();${onCheck}"
+        ${!isTrackedGoal ? `<div onclick="event.stopPropagation();${onCheck}"
           style="width:20px;height:20px;border-radius:5px;border:2px solid ${checkBorder};background:${checkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s;">
           ${isDone?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
-        </div>
+        </div>` : ''}
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
             <span style="font-size:11px;font-weight:700;color:${typeColor};background:${isGoal?'rgba(96,165,250,0.1)':'rgba(var(--primary-rgb),0.1)'};padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">${typeLabel}</span>
@@ -4262,10 +4263,10 @@ function openItemDetail(type, id) {
             style="background:${bc};border:none;color:#fff;font-size:12px;font-weight:700;padding:9px 16px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Save</button>
         </div>` : '<div style="text-align:center;padding:10px 0 16px;font-size:14px;color:#4ade80;font-weight:700;">🎯 Goal Complete!</div>'
       ) : `
-        <button onclick="toggleGoalComplete('${item.id}',${item.completed});document.getElementById('itemDetailModal').remove();"
+        ${!item.tracked_metric ? `<button onclick="toggleGoalComplete('${item.id}',${item.completed});document.getElementById('itemDetailModal').remove();"
           style="width:100%;padding:11px;border-radius:6px;border:1px solid ${isDone?'#4ade80':'#333'};background:${isDone?'rgba(74,222,128,0.1)':'#0d0d0d'};color:${isDone?'#4ade80':'rgba(255,255,255,0.6)'};font-size:13px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px;">
           ${isDone ? '✓ Mark as Incomplete' : '○ Mark as Complete'}
-        </button>`
+        </button>` : ''}`
       }
       <button onclick="deleteGoal('${item.id}');document.getElementById('itemDetailModal').remove();"
         style="width:100%;margin-bottom:16px;padding:8px;border-radius:6px;border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.08);color:#f87171;font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">
