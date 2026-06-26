@@ -8885,18 +8885,22 @@ async function loadTeams() {
     // Get coaches for assignment
     const { data: coaches } = await sb
       .from('subscriptions')
-      .select('user_id, first_name, last_name, email')
+      .select('user_id, first_name, last_name, email, team_id')
       .eq('organization_id', window._userOrgId)
       .eq('role', 'coach');
     
     const coachMap = {};
     (coaches || []).forEach(c => coachMap[c.user_id] = c);
+    // Also build a map of coach by team_id (for cases where teams.coach_id is null)
+    const coachByTeamId = {};
+    (coaches || []).forEach(c => { if (c.team_id) coachByTeamId[c.team_id] = c; });
     const { data: allPlayersT } = await sb.from('subscriptions').select('user_id, team_id, first_name, last_name, email').eq('role', 'player').eq('organization_id', window._userOrgId || 'individual');
     const playersByTeam = {};
     (allPlayersT || []).forEach(p => { if (p.team_id) { if (!playersByTeam[p.team_id]) playersByTeam[p.team_id] = []; playersByTeam[p.team_id].push(p); } });
     let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
     for (const team of teams) {
-      const coach = coachMap[team.coach_id];
+      // Look up coach via teams.coach_id first, fall back to subscriptions.team_id
+      const coach = coachMap[team.coach_id] || coachByTeamId[team.id];
       const coachName = coach ? ([coach.first_name, coach.last_name].filter(Boolean).join(' ') || coach.email) : 'No coach assigned';
       const players = playersByTeam[team.id] || [];
       let rosterHtml = players.length ? players.map(p => { const n = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email; return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1a1a1a;font-size:12px;"><span style="color:rgba(255,255,255,0.75);">${n}</span><span style="color:#60a5fa;font-size:10px;font-weight:700;text-transform:uppercase;">Player</span></div>`; }).join('') : '<div style="font-size:11px;color:rgba(255,255,255,0.3);padding:4px 0;">No players assigned</div>';
