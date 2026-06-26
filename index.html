@@ -1,5 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html 
+
+const _PHASE_INFO = {
+  earlyoffseason: {
+    label: 'Early Off-Season',
+    title: 'Foundation & Strength',
+    weeks: '12 weeks · 5 days/week',
+    tags: ['Strength Build','Movement Quality','High Volume'],
+    desc: 'Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season.'
+  },
+  lateoffseason: {
+    label: 'Late Off-Season',
+    title: 'Power & Development',
+    weeks: '10 weeks · 5 days/week',
+    tags: ['Explosive Power','Complex Training','Peak Development'],
+    desc: 'Convert your strength into explosive hockey power. Heavier loads, jump-and-lift complexes, and peak conditioning.'
+  },
+  preseason: {
+    label: 'Pre-Season',
+    title: 'Sharpen & Peak',
+    weeks: '4 weeks · 4 days/week',
+    tags: ['Game Speed','Reduce Volume','Stay Sharp'],
+    desc: 'Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.'
+  },
+  inseason_a: {
+    label: 'In-Season Block A',
+    title: 'Early Season Maintenance',
+    weeks: '4 weeks · 3 days/week',
+    tags: ['Maintain Strength','Full Recovery','Game Focus'],
+    desc: 'Early season - moderate intensity, full recovery. Keep your strength without adding fatigue on top of games.'
+  },
+  inseason_b: {
+    label: 'In-Season Block B',
+    title: 'Mid/Late Season',
+    weeks: '4 weeks · 3 days/week',
+    tags: ['Low Volume','Recovery First','Stay Sharp'],
+    desc: 'Fatigue is real late in the season. Reduce volume, prioritize recovery, stay sharp for games. Repeat as needed.'
+  }
+};
+
+function updatePhaseCard() {
+  var sel = document.getElementById('cust-season');
+  if (!sel) return;
+  var p = _PHASE_INFO[sel.value];
+  if (!p) return;
+  var card = document.getElementById('selectedPhaseCard');
+  if (!card) return;
+  var tagsHtml = '';
+  for (var i = 0; i < p.tags.length; i++) {
+    tagsHtml += '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(var(--primary-rgb),0.15);color:var(--primary-color);border:1px solid rgba(var(--primary-rgb),0.3);">' + p.tags[i] + '</span>';
+  }
+  card.innerHTML = '<div style="font-size:10px;color:var(--primary-color);font-family:\'Barlow Condensed\',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">' + p.label + '</div>'
+    + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;color:#fff;margin-bottom:3px;">' + p.title + '</div>'
+    + '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;">' + p.weeks + '</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">' + tagsHtml + '</div>'
+    + '<div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;">' + p.desc + '</div>';
+}
+lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -622,7 +679,6 @@ select:focus{border-color:var(--or);outline:none;}
 
         <!-- LEFT: training days + include + apply -->
         <div>
-          <!-- TRAINING DAYS -->
           <div style="margin-bottom:14px;">
             <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Training Days</label>
             <div style="display:flex;flex-wrap:wrap;gap:6px;">
@@ -635,8 +691,6 @@ select:focus{border-color:var(--or);outline:none;}
               <label class="day-toggle"><input type="checkbox" value="Sunday"><span>Sun</span></label>
             </div>
           </div>
-
-          <!-- INCLUDE -->
           <div style="margin-bottom:14px;">
             <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Include in Program</label>
             <div style="display:flex;flex-wrap:wrap;gap:8px;">
@@ -647,24 +701,19 @@ select:focus{border-color:var(--or);outline:none;}
               <input type="hidden" name="focus" value="balanced">
             </div>
           </div>
-
-          <!-- APPLY -->
           <div style="display:flex;align-items:center;gap:12px;">
             <button onclick="applyCustomization()" class="btn-o" style="margin-top:0;">Apply Settings</button>
-            <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">✓ Settings applied!</div>
+            <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">&#10003; Settings applied!</div>
           </div>
         </div>
 
         <!-- RIGHT: selected phase card -->
         <div>
           <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Selected Phase</label>
-          <div id="selectedPhaseCard" style="background:#0d0d0d;border:1px solid #333;border-radius:8px;padding:14px;">
-          </div>
+          <div id="selectedPhaseCard" style="background:#0d0d0d;border:1px solid #333;border-radius:8px;padding:14px;"></div>
         </div>
 
       </div>
-
-      
 
     </div>
   <div id="schedBanner"></div>
@@ -5465,67 +5514,8 @@ function syncDaysToSeason() {
   document.querySelectorAll('.day-toggle input[type=checkbox]').forEach(cb => {
     cb.checked = activeDays.includes(cb.value);
   });
-  updatePhaseCard();
-}
 
-const _PHASE_INFO = {
-  earlyoffseason: {
-    label: 'Early Off-Season',
-    title: 'Foundation & Strength',
-    weeks: '12 weeks · 5 days/week',
-    tags: ['Strength Build','Movement Quality','High Volume'],
-    desc: 'Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season.'
-  },
-  lateoffseason: {
-    label: 'Late Off-Season',
-    title: 'Power & Development',
-    weeks: '10 weeks · 5 days/week',
-    tags: ['Explosive Power','Complex Training','Peak Development'],
-    desc: 'Convert your strength into explosive hockey power. Heavier loads, jump-and-lift complexes, and peak conditioning.'
-  },
-  preseason: {
-    label: 'Pre-Season',
-    title: 'Sharpen & Peak',
-    weeks: '4 weeks · 4 days/week',
-    tags: ['Game Speed','Reduce Volume','Stay Sharp'],
-    desc: 'Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.'
-  },
-  inseason_a: {
-    label: 'In-Season Block A',
-    title: 'Early Season Maintenance',
-    weeks: '4 weeks · 3 days/week',
-    tags: ['Maintain Strength','Full Recovery','Game Focus'],
-    desc: 'Early season - moderate intensity, full recovery. Keep your strength without adding fatigue on top of games.'
-  },
-  inseason_b: {
-    label: 'In-Season Block B',
-    title: 'Mid/Late Season',
-    weeks: '4 weeks · 3 days/week',
-    tags: ['Low Volume','Recovery First','Stay Sharp'],
-    desc: 'Fatigue is real late in the season. Reduce volume, prioritize recovery, stay sharp for games. Repeat as needed.'
-  }
-};
-
-function updatePhaseCard() {
-  var sel = document.getElementById('cust-season');
-  if (!sel) return;
-  var p = _PHASE_INFO[sel.value];
-  if (!p) return;
-  var card = document.getElementById('selectedPhaseCard');
-  if (!card) return;
-  var tagsHtml = '';
-  for (var i = 0; i < p.tags.length; i++) {
-    tagsHtml += '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(var(--primary-rgb),0.15);color:var(--primary-color);border:1px solid rgba(var(--primary-rgb),0.3);">' + p.tags[i] + '</span>';
-  }
-  card.innerHTML = '<div style="font-size:10px;color:var(--primary-color);font-family:\'Barlow Condensed\',sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">' + p.label + '</div>'
-    + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;color:#fff;margin-bottom:3px;">' + p.title + '</div>'
-    + '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;">' + p.weeks + '</div>'
-    + '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">' + tagsHtml + '</div>'
-    + '<div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;">' + p.desc + '</div>';
-}
-
-
-
+  updatePhaseCard();}
 
 function applyCustomization(){
   console.log('applyCustomization called');
@@ -5590,8 +5580,8 @@ function applyCustomization(){
   // Confirmation
   const conf = document.getElementById('cust-apply-confirm');
   if(conf){ conf.style.display='inline'; setTimeout(()=>conf.style.display='none', 2500); }
-  updatePhaseCard();
-}
+
+  updatePhaseCard();}
 
 function resetCustomization(){
   if(!confirm('Reset all customization to defaults?')) return;
@@ -5647,8 +5637,8 @@ function loadCustomSettings(){
     updateHeader(s.name || '');
     updateOverview(s);
   }catch(e){}
-  updatePhaseCard();
-}
+
+  updatePhaseCard();}
 
 function updateHeader(name){
   // Header is now managed by applyBranding() — do nothing here
@@ -8696,16 +8686,32 @@ async function saveCoachAssignment(teamId) {
   
   try {
     const sb = await getSupabaseClient();
-    const { error } = await sb.from('teams')
+
+    // 1. Update teams.coach_id
+    const { error: teamErr } = await sb.from('teams')
       .update({ coach_id: coachId })
       .eq('id', teamId);
-    
-    if (error) throw error;
-    
+    if (teamErr) throw teamErr;
+
+    // 2. Clear team_id from any coach previously assigned to this team
+    await sb.from('subscriptions')
+      .update({ team_id: null })
+      .eq('team_id', teamId)
+      .eq('role', 'coach');
+
+    // 3. Set team_id on the newly assigned coach's subscription
+    if (coachId) {
+      const { error: subErr } = await sb.from('subscriptions')
+        .update({ team_id: teamId })
+        .eq('user_id', coachId);
+      if (subErr) throw subErr;
+    }
+
     document.querySelector('div[style*=fixed]').remove();
     loadTeams();
-  populateTeamDropdown();
-  populateAdminTeamDropdown();
+    loadCoaches();
+    populateTeamDropdown();
+    populateAdminTeamDropdown();
   } catch (error) {
     alert('Error: ' + error.message);
   }
@@ -8971,15 +8977,29 @@ async function assignCoach(teamId, coachId) {
   
   try {
     const sb = await getSupabaseClient();
-    const { error } = await sb.from('teams')
+
+    // Update teams.coach_id
+    const { error: teamErr } = await sb.from('teams')
       .update({ coach_id: coachId })
       .eq('id', teamId);
-    
-    if (error) throw error;
-    
+    if (teamErr) throw teamErr;
+
+    // Clear any previous coach's team_id for this team
+    await sb.from('subscriptions')
+      .update({ team_id: null })
+      .eq('team_id', teamId)
+      .eq('role', 'coach');
+
+    // Set team_id on this coach's subscription
+    const { error: subErr } = await sb.from('subscriptions')
+      .update({ team_id: teamId })
+      .eq('user_id', coachId);
+    if (subErr) throw subErr;
+
     loadTeams();
-  populateTeamDropdown();
-  populateAdminTeamDropdown();
+    loadCoaches();
+    populateTeamDropdown();
+    populateAdminTeamDropdown();
   } catch (error) {
     alert('Error: ' + error.message);
   }
