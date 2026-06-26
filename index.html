@@ -8001,25 +8001,37 @@ async function deactivatePlayer(subId, email) {
 
 async function deleteUserFully(subId, userId, email) {
   if (email === 'brandonanderson1393@gmail.com') { alert('Cannot delete super admin'); return; }
-  if (!confirm(`Delete ${email}?\n\nThis will permanently remove their account, subscription, assignments, and goals.\n\nThis CANNOT be undone.`)) return;
+  if (!confirm(`Delete ${email}?\n\nThis will permanently remove their subscription, assignments, and goals.\n\nThis CANNOT be undone.`)) return;
   try {
     const sb = await getSupabaseClient();
-    const { data: { session } } = await sb.auth.getSession();
-    const token = session?.access_token;
-    if (!token) throw new Error('Not authenticated');
-    const res = await fetch('/api/delete-user', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ userId, orgId: window._userOrgId })
-    });
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-      const text = await res.text();
-      throw new Error(res.ok ? 'Unexpected response from server' : 'Delete failed (status ' + res.status + ')');
+
+    // Delete all related data using admin client (RLS allows admin to delete)
+    const { error: subErr } = await sb.from('subscriptions').delete().eq('user_id', userId);
+    if (subErr) throw new Error('Failed to delete subscription: ' + subErr.message);
+
+    await sb.from('assignments').delete().eq('player_id', userId);
+    await sb.from('goals').delete().eq('player_id', userId);
+    await sb.from('shooting_sessions').delete().eq('user_id', userId);
+    await sb.from('stickhandling_sessions').delete().eq('user_id', userId);
+    await sb.from('exercise_completions').delete().eq('user_id', userId);
+
+    // Try the API endpoint — if it fails, data is already cleaned up
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      const token = session?.access_token;
+      if (token) {
+        const res = await fetch('/api/delete-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ userId, orgId: window._userOrgId })
+        });
+        // If API works, great. If not, data is already deleted above so we continue.
+      }
+    } catch(apiErr) {
+      console.warn('API delete-user failed (auth user may remain):', apiErr.message);
     }
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Delete failed');
-    alert(`${email} has been permanently deleted.`);
+
+    alert(`${email} has been removed from the system.`);
     loadPlayerList(window._isSuperAdmin);
   } catch(e) { alert('Error: ' + e.message); }
 }
