@@ -2979,13 +2979,16 @@ async function loadDashboard(targetId) {
 // ── PLAYER DASHBOARD ──────────────────────────────────────────────────────
 function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments, goals, targetId) {
   const el = document.getElementById(targetId||'dashboardContent');
-  // Use goals for Done/Open counts
-  const openGoalCount = (goals||[]).filter(g => !g.completed).length;
-  const doneGoalCount = (goals||[]).filter(g => g.completed).length;
+  // Use goals for Done/Open counts — match same logic as goal list
+  const doneGoalCount = (goals||[]).filter(g => {
+    if (g.tracked_metric && g.target_value) return (g.current_value||0) >= g.target_value;
+    return !!g.completed;
+  }).length;
+  const openGoalCount = (goals||[]).length - doneGoalCount;
 
   const statsHtml = `
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.2rem;">
-      ${[['Total Shots','#fb923c',totalShots.toLocaleString()],['Stick Mins','#a78bfa',totalMins.toLocaleString()],['Workouts','#fbbf24',totalWorkouts],['Done','#4ade80',doneGoalCount],['Open Goals','var(--primary-color)',openGoalCount]].map(([label,color,val])=>`
+      ${[['Total Shots','#fb923c',totalShots.toLocaleString()],['Stick Mins','#a78bfa',totalMins.toLocaleString()],['Workouts','#fbbf24',totalWorkouts],['Open Goals','var(--primary-color)',openGoalCount],['Goals Done','#4ade80',doneGoalCount]].map(([label,color,val])=>`
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
         <div style="font-size:22px;font-weight:800;color:${color};font-family:'Barlow Condensed',sans-serif;">${val}</div>
         <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">${label}</div>
