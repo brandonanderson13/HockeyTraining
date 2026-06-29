@@ -2773,20 +2773,24 @@ function loadHomeSec() {
   const quickLogEl = document.getElementById('homeQuickLog');
   if (quickLogEl) quickLogEl.innerHTML = isPlayer ? quickLog : '';
 
-  // Show setup guide button for players
+  // Show setup banner for players who haven't configured their program
   const guideEl = document.getElementById('homeSetupGuide');
-  if (guideEl && isPlayer) {
+  if (guideEl) {
+    const playerRole = window._userRole === 'player' || (!window._userRole && role === 'player');
     const hasSettings = localStorage.getItem('tigersCustomSettings');
-    guideEl.style.display = 'block';
-    guideEl.innerHTML = hasSettings
-      ? ``
-      : `<div style="background:rgba(var(--primary-rgb),0.08);border:1px solid rgba(var(--primary-rgb),0.2);border-radius:8px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+    if (playerRole && !hasSettings) {
+      guideEl.style.display = 'block';
+      guideEl.innerHTML = `<div style="background:rgba(var(--primary-rgb),0.08);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
           <div>
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);">Program Not Set Up</div>
             <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">Complete setup to get your training plan</div>
           </div>
-          <button onclick="showSec('schedule')" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">Set Up Now</button>
+          <button onclick="showSec('schedule')" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;flex-shrink:0;">Set Up Now</button>
         </div>`;
+    } else {
+      guideEl.style.display = 'none';
+      guideEl.innerHTML = '';
+    }
   }
 
   // Load dashboard into player-specific content div
