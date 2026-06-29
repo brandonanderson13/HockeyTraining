@@ -3283,7 +3283,7 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
   let totShots=0, totMins=0, totWork=0;
   players.forEach(p => { const s=statsMap[p.user_id]||{}; totShots+=s.shots||0; totMins+=s.mins||0; totWork+=s.workouts||0; });
   const summaryHtml = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.2rem;">
-    ${[['Players','#4ade80',players.length],['Total Shots','#fb923c',totShots.toLocaleString()],['Stick Mins','#a78bfa',totMins.toLocaleString()],['Workouts','#fbbf24',totWork],['Open Goals','var(--primary-color)',goals.filter(g=>!g.completed).length]].map(([l,c,v])=>`
+    ${[['Players','#4ade80',players.length],['Total Shots','#fb923c',totShots.toLocaleString()],['Stick Mins','#a78bfa',totMins.toLocaleString()],['Workouts','#fbbf24',totWork],['Open Goals','var(--primary-color)',goals.filter(g=>{const isCb=!g.target_value;return isCb?!g.completed:(g._progress!==undefined?g._progress:(g.current_value||0))<g.target_value;}).length]].map(([l,c,v])=>`
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
       <div style="font-size:22px;font-weight:800;color:${c};font-family:'Barlow Condensed',sans-serif;">${v}</div>
       <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">${l}</div>
