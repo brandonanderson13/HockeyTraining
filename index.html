@@ -2979,10 +2979,10 @@ async function loadDashboard(targetId) {
 // ── PLAYER DASHBOARD ──────────────────────────────────────────────────────
 function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments, goals, targetId) {
   const el = document.getElementById(targetId||'dashboardContent');
-  // Use goals for Done/Open counts — match same logic as goal list
+  // Use goals for Done/Open counts — exact same logic as goal list renderer
   const doneGoalCount = (goals||[]).filter(g => {
-    if (g.tracked_metric && g.target_value) return (g.current_value||0) >= g.target_value;
-    return !!g.completed;
+    const isCheckbox = !g.target_value;
+    return isCheckbox ? !!g.completed : (g._progress !== undefined ? g._progress : (g.current_value||0)) >= g.target_value;
   }).length;
   const openGoalCount = (goals||[]).length - doneGoalCount;
 
