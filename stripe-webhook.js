@@ -6,7 +6,18 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-export default async function handler(req, res) {
+// Fallback: map monthly price amount (cents) to seat limit
+// in case metadata.seat_limit is not set on the Stripe product
+const PRICE_TO_SEAT_LIMIT = {
+  9900:   20,   // $99/mo  — Select
+  99900:  20,   // $999/yr — Select
+  17900:  60,   // $179/mo — Elite
+  179900: 60,   // $1799/yr — Elite
+  29900:  120,  // $299/mo — Premier
+  299900: 120,  // $2999/yr — Premier
+};
+
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -27,12 +38,12 @@ export default async function handler(req, res) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
-        
+
         const customerEmail = session.customer_email || session.customer_details?.email;
         const customerId = session.customer;
         const subscriptionId = session.subscription;
         const metadata = session.metadata || {};
-        
+
         if (!customerEmail) {
           console.error('No email found in checkout session');
           break;
@@ -41,13 +52,12 @@ export default async function handler(req, res) {
         // Get or create user in Supabase Auth
         const { data: existingUsers } = await supabase.auth.admin.listUsers();
         let userId = existingUsers?.users?.find(u => u.email === customerEmail)?.id;
-        
+
         if (!userId) {
           const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
             email: customerEmail,
             email_confirm: true
           });
-          
           if (createError) {
             console.error('Error creating user:', createError);
             break;
@@ -55,30 +65,35 @@ export default async function handler(req, res) {
           userId = newUser.user.id;
         }
 
-        // Fetch subscription to get period end date
+        // Fetch subscription details from Stripe
         let expiresAt = null;
-        let orgId = null;
+        let seatLimit = metadata.seat_limit ? parseInt(metadata.seat_limit) : null;
+
         if (subscriptionId) {
           try {
-            const stripeSub = await stripe.subscriptions.retrieve(subscriptionId);
+            const stripeSub = await stripe.subscriptions.retrieve(subscriptionId, {
+              expand: ['items.data.price']
+            });
             expiresAt = new Date(stripeSub.current_period_end * 1000).toISOString();
-          } catch(e) {
-            console.error('Error fetching subscription period:', e.message);
+
+            // Fallback seat limit from price amount if not in metadata
+            if (!seatLimit) {
+              const priceAmount = stripeSub.items?.data?.[0]?.price?.unit_amount;
+              seatLimit = PRICE_TO_SEAT_LIMIT[priceAmount] || null;
+              if (seatLimit) console.log(`Seat limit resolved from price ${priceAmount}: ${seatLimit}`);
+            }
+          } catch (e) {
+            console.error('Error fetching subscription:', e.message);
           }
         }
 
-        // Create or update subscription record
         const isAssociation = metadata.subscription_type === 'association';
         const role = isAssociation ? 'admin' : 'player';
+        let orgId = isAssociation && metadata.organization_id
+          ? metadata.organization_id
+          : (!isAssociation ? 'individual' : null);
 
-        // Generate org_id from org name if association
-        if (isAssociation && metadata.organization_id) {
-          orgId = metadata.organization_id;
-        } else if (!isAssociation) {
-          orgId = 'individual';
-        }
-
-        // Check if org exists in organizations table, create if not
+        // Create org if needed
         if (orgId && orgId !== 'individual') {
           const { data: existingOrg } = await supabase.from('organizations').select('id').eq('id', orgId).single();
           if (!existingOrg) {
@@ -89,7 +104,7 @@ export default async function handler(req, res) {
             });
           }
         }
-        
+
         const { error: upsertError } = await supabase
           .from('subscriptions')
           .upsert({
@@ -98,7 +113,7 @@ export default async function handler(req, res) {
             first_name: metadata.first_name || null,
             last_name: metadata.last_name || null,
             subscription_type: metadata.subscription_type || 'individual',
-            seat_limit: metadata.seat_limit ? parseInt(metadata.seat_limit) : null,
+            seat_limit: seatLimit,
             organization_name: metadata.organization_name || null,
             organization_id: orgId,
             stripe_customer_id: customerId,
@@ -106,25 +121,24 @@ export default async function handler(req, res) {
             status: 'active',
             role: role,
             expires_at: expiresAt
-          }, {
-            onConflict: 'user_id'
-          });
+          }, { onConflict: 'user_id' });
 
         if (upsertError) {
           console.error('Error upserting subscription:', upsertError);
         } else {
-          console.log('✓ Subscription activated for:', customerEmail, 'expires:', expiresAt);
+          console.log('✓ Subscription activated for:', customerEmail, '| seats:', seatLimit, '| expires:', expiresAt);
         }
 
-        // For associations: update org-level expiry so all members are covered
+        // Update org-level record for associations
         if (isAssociation && orgId && orgId !== 'individual') {
           await supabase.from('organizations').update({
             expires_at: expiresAt,
             status: 'active',
+            seat_limit: seatLimit,
             stripe_subscription_id: subscriptionId,
             stripe_customer_id: customerId
           }).eq('id', orgId);
-          console.log('✓ Organization expiry updated:', orgId, expiresAt);
+          console.log('✓ Organization updated:', orgId, '| seats:', seatLimit);
         }
         break;
       }
@@ -134,27 +148,26 @@ export default async function handler(req, res) {
         const subscriptionId = invoice.subscription;
         if (!subscriptionId) break;
 
-        // Get updated period end from Stripe
         try {
-          const stripeSub = await stripe.subscriptions.retrieve(subscriptionId);
+          const stripeSub = await stripe.subscriptions.retrieve(subscriptionId, {
+            expand: ['items.data.price']
+          });
           const expiresAt = new Date(stripeSub.current_period_end * 1000).toISOString();
 
-          const { error } = await supabase
-            .from('subscriptions')
-            .update({ status: 'active', expires_at: expiresAt })
+          // Re-derive seat limit in case of plan change
+          const priceAmount = stripeSub.items?.data?.[0]?.price?.unit_amount;
+          const seatLimit = PRICE_TO_SEAT_LIMIT[priceAmount] || null;
+
+          await supabase.from('subscriptions')
+            .update({ status: 'active', expires_at: expiresAt, ...(seatLimit && { seat_limit: seatLimit }) })
             .eq('stripe_subscription_id', subscriptionId);
 
-          if (error) {
-            console.error('Error updating renewal:', error);
-          } else {
-            console.log('✓ Subscription renewed, expires:', expiresAt);
-          }
-
-          // Also update org-level expiry
           await supabase.from('organizations')
-            .update({ expires_at: expiresAt, status: 'active' })
+            .update({ expires_at: expiresAt, status: 'active', ...(seatLimit && { seat_limit: seatLimit }) })
             .eq('stripe_subscription_id', subscriptionId);
-        } catch(e) {
+
+          console.log('✓ Renewal processed | expires:', expiresAt, '| seats:', seatLimit);
+        } catch (e) {
           console.error('Error processing renewal:', e.message);
         }
         break;
@@ -165,34 +178,37 @@ export default async function handler(req, res) {
         const expiresAt = new Date(subscription.current_period_end * 1000).toISOString();
         const status = subscription.status === 'active' ? 'active' : subscription.status;
 
-        await supabase
-          .from('subscriptions')
-          .update({ status, expires_at: expiresAt })
+        // Re-derive seat limit on plan upgrade/downgrade
+        const stripeSub = await stripe.subscriptions.retrieve(subscription.id, {
+          expand: ['items.data.price']
+        });
+        const priceAmount = stripeSub.items?.data?.[0]?.price?.unit_amount;
+        const seatLimit = PRICE_TO_SEAT_LIMIT[priceAmount] || null;
+
+        await supabase.from('subscriptions')
+          .update({ status, expires_at: expiresAt, ...(seatLimit && { seat_limit: seatLimit }) })
           .eq('stripe_subscription_id', subscription.id);
 
-        console.log('✓ Subscription updated:', subscription.id, 'status:', status);
+        await supabase.from('organizations')
+          .update({ status, expires_at: expiresAt, ...(seatLimit && { seat_limit: seatLimit }) })
+          .eq('stripe_subscription_id', subscription.id);
+
+        console.log('✓ Subscription updated:', subscription.id, '| status:', status, '| seats:', seatLimit);
         break;
       }
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object;
-        const subscriptionId = subscription.id;
 
-        const { error: updateError } = await supabase
-          .from('subscriptions')
+        await supabase.from('subscriptions')
           .update({ status: 'cancelled' })
-          .eq('stripe_subscription_id', subscriptionId);
+          .eq('stripe_subscription_id', subscription.id);
 
-        if (updateError) {
-          console.error('Error cancelling subscription:', updateError);
-        } else {
-          console.log('✓ Subscription cancelled:', subscriptionId);
-        }
-
-        // Also cancel at org level
         await supabase.from('organizations')
           .update({ status: 'cancelled' })
-          .eq('stripe_subscription_id', subscriptionId);
+          .eq('stripe_subscription_id', subscription.id);
+
+        console.log('✓ Subscription cancelled:', subscription.id);
         break;
       }
 
