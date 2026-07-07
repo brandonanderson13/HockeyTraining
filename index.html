@@ -9298,14 +9298,12 @@ function isRunningAsPWA() {
   return window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
 }
-// If already installed as PWA, permanently dismiss the banner
-if (isRunningAsPWA()) {
-  localStorage.setItem('trainrInstallDismissed', '1');
-}
+// If currently running as PWA (opened from home screen), no need to show banner
+// Don't permanently dismiss — they may use browser too
 
 function shouldShowInstallBanner() {
   if (isRunningAsPWA()) return false;
-  if (localStorage.getItem('trainrInstallDismissed')) return false;
+  if (localStorage.getItem('trainrInstallDismissed') === 'permanent') return false;
   return true;
 }
 
@@ -9344,19 +9342,21 @@ function showInstallBanner() {
       + '<div style="background:#1a1a1a;border-radius:10px;padding:11px 13px;margin-bottom:10px;">'
       +   '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">How to install on iPhone</div>'
       +   '<div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.9;">'
-      +     '<span style="color:#E07820;font-weight:700;">1</span> Tap the Share button <span style="font-size:16px;vertical-align:middle;">⎋</span> at the bottom of Safari<br>'
+      +     '<span style="color:#E07820;font-weight:700;">1</span> Tap the <strong style="color:#fff;">&#8226;&#8226;&#8226;</strong> menu in the bottom right of Safari<br>'
       +     '<span style="color:#E07820;font-weight:700;">2</span> Tap <strong style="color:#fff;">&#8220;Add to Home Screen&#8221;</strong><br>'
       +     '<span style="color:#E07820;font-weight:700;">3</span> Tap <strong style="color:#fff;">&#8220;Add&#8221;</strong> in the top right'
       +   '</div>'
       + '</div>'
-      + '<button onclick="confirmInstalled()" style="width:100%;padding:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;cursor:pointer;">I&#8217;ve added it &#10003;</button>';
+      + '<button onclick="confirmInstalled()" style="width:100%;padding:12px;background:#E07820;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;">I&#8217;ve added it &#10003;</button>'
+      + '<button onclick="permanentlyDismissBanner()" style="width:100%;padding:10px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;">Don&#8217;t show this again</button>';
   } else if (_deferredInstallPrompt) {
     action = '<button onclick="triggerAndroidInstall()" style="width:100%;padding:13px;background:#E07820;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;letter-spacing:.02em;cursor:pointer;">Add to Home Screen</button>';
   } else {
     action = ''
-      + '<div style="background:#1a1a1a;border-radius:10px;padding:11px 13px;font-size:13px;color:rgba(255,255,255,0.6);line-height:1.9;">'
+      + '<div style="background:#1a1a1a;border-radius:10px;padding:11px 13px;font-size:13px;color:rgba(255,255,255,0.6);line-height:1.9;margin-bottom:10px;">'
       +   'Tap the browser menu <strong style="color:#fff;">&#8942;</strong> then tap <strong style="color:#fff;">&#8220;Add to Home Screen&#8221;</strong>'
-      + '</div>';
+      + '</div>'
+      + '<button onclick="permanentlyDismissBanner()" style="width:100%;padding:10px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;">Don&#8217;t show this again</button>';
   }
 
   banner.innerHTML = topRow + action;
@@ -9364,12 +9364,18 @@ function showInstallBanner() {
 }
 
 function dismissInstallBanner() {
+  // × button — hide for this session only
   const banner = document.getElementById('pwaInstallBanner');
   if (banner) banner.remove();
-  localStorage.setItem('trainrInstallDismissed', '1');
+}
+function permanentlyDismissBanner() {
+  // 'Don't show again' — permanent
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) banner.remove();
+  localStorage.setItem('trainrInstallDismissed', 'permanent');
 }
 function confirmInstalled() {
-  dismissInstallBanner();
+  permanentlyDismissBanner();
 }
 
 async function triggerAndroidInstall() {
@@ -9377,7 +9383,7 @@ async function triggerAndroidInstall() {
   _deferredInstallPrompt.prompt();
   const { outcome } = await _deferredInstallPrompt.userChoice;
   if (outcome === 'accepted') {
-    localStorage.setItem('trainrInstallDismissed', '1');
+    localStorage.setItem('trainrInstallDismissed', 'permanent');
   }
   _deferredInstallPrompt = null;
   const banner = document.getElementById('pwaInstallBanner');
