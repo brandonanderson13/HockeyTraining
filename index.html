@@ -1826,6 +1826,27 @@ function confirmInstalled() {
   permanentlyDismissBanner();
 }
 
+async function testBadge() {
+  try {
+    if ('setAppBadge' in navigator) {
+      await navigator.setAppBadge(1);
+      alert('Badge set via navigator.setAppBadge — check your home screen icon');
+    } else if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.ready;
+      if ('setAppBadge' in reg) {
+        await reg.setAppBadge(1);
+        alert('Badge set via registration.setAppBadge');
+      } else {
+        alert('setAppBadge not supported on this device/browser. Badges may not work here.');
+      }
+    } else {
+      alert('setAppBadge not supported on this device/browser.');
+    }
+  } catch(e) {
+    alert('Badge error: ' + e.message);
+  }
+}
+
 async function disableNotifications() {
   try {
     if (!('serviceWorker' in navigator)) return;
@@ -7557,7 +7578,8 @@ async function loadAccountDetails() {
         + '<div style="font-size:13px;color:#4ade80;font-weight:700;">&#10003; Notifications enabled</div>'
         + '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;">You\'ll be notified when a coach assigns a new goal.</div>'
         + '</div></div>'
-        + '<button onclick="disableNotifications()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.4);font-size:12px;padding:8px 14px;cursor:pointer;width:100%;">Disable Notifications</button>';
+        + '<button onclick="disableNotifications()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.4);font-size:12px;padding:8px 14px;cursor:pointer;width:100%;margin-bottom:8px;">Disable Notifications</button>'
+        + '<button onclick="testBadge()" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.25);font-size:11px;padding:6px 14px;cursor:pointer;width:100%;">Test Badge (sets to 1)</button>';
     } else if (_notifOK && Notification.permission === 'denied') {
       notifCardBody.innerHTML = '<div style="font-size:13px;color:#f87171;margin-bottom:10px;">&#x26A0; Notifications blocked</div>'
         + '<div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.7;">'
