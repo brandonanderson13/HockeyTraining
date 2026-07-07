@@ -1839,15 +1839,28 @@ async function disableNotifications() {
         await sb.from('push_subscriptions').delete().eq('user_id', window._userId);
       }
     }
-    // Reload the notifications card
-    if (typeof loadAccountDetails === 'function') loadAccountDetails();
+    // Reload the notifications card — show re-enable button
+    const notifCardBody2 = document.getElementById('notifCardBody');
+    if (notifCardBody2) {
+      notifCardBody2.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Notifications have been disabled.</p>'
+        + '<button onclick="reEnableNotifications()" class="btn-o" style="margin:0;">Re-enable Notifications</button>';
+    }
     // Remove nudge if showing
     const nudge = document.getElementById('notifNudge');
     if (nudge) nudge.remove();
-    alert('Notifications disabled.');
   } catch(e) {
     console.warn('disableNotifications error:', e);
     alert('Could not disable notifications: ' + e.message);
+  }
+}
+
+async function reEnableNotifications() {
+  try {
+    if (typeof registerPushSubscription !== 'function') return;
+    await registerPushSubscription();
+    if (typeof loadAccountDetails === 'function') loadAccountDetails();
+  } catch(e) {
+    alert('Could not re-enable notifications: ' + e.message);
   }
 }
 
@@ -7522,6 +7535,8 @@ async function loadAccountDetails() {
     const _notifOK = (function() { try { return 'Notification' in window && typeof Notification !== 'undefined' && 'PushManager' in window; } catch(e) { return false; } })();
 
     if (_notifOK && Notification.permission === 'granted') {
+      // Permission granted but subscription might be missing — re-register silently
+      if (typeof registerPushSubscription === 'function') registerPushSubscription();
       notifCardBody.innerHTML = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">'
         + '<span style="font-size:18px;">&#x1F514;</span>'
         + '<div>'
