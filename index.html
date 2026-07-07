@@ -2019,9 +2019,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       if (typeof triggerInstallBannerAfterLogin === 'function') {
         triggerInstallBannerAfterLogin();
       }
-      // Register push notifications if permission already granted
-      if (Notification.permission === 'granted' && typeof registerPushSubscription === 'function') {
-        registerPushSubscription();
+      // Register push notifications (requests permission if not yet granted)
+      if (typeof registerPushSubscription === 'function') {
+        setTimeout(registerPushSubscription, 5000);
       }
       
     } catch (error) {
