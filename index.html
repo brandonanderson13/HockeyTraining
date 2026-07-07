@@ -1730,7 +1730,12 @@ async function registerPushSubscription() {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
-      .then(reg => { console.log('SW registered:', reg.scope); })
+      .then(reg => {
+        console.log('SW registered:', reg.scope);
+        // Log which SW version is active
+        const sw = reg.active || reg.installing || reg.waiting;
+        if (sw) sw.postMessage('getVersion');
+      })
       .catch(err => { console.warn('SW registration failed:', err); });
   });
 }

@@ -1,4 +1,5 @@
 // TRAINR Service Worker v5
+const SW_VERSION = 'v5';
 const CACHE_NAME = 'trainr-v5';
 const STATIC_ASSETS = [
   '/',
@@ -8,14 +9,16 @@ const STATIC_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
+  console.log('[SW] Installing', SW_VERSION);
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS)));
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating', SW_VERSION);
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE_NAME && k !== 'trainr-badge').map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
@@ -39,7 +42,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Persist badge count in Cache Storage (survives SW restarts)
+// Persist badge count in Cache Storage
 const BADGE_CACHE = 'trainr-badge';
 const BADGE_KEY = 'badge-count';
 
@@ -57,15 +60,18 @@ async function setBadgeCount(count) {
   try {
     const cache = await caches.open(BADGE_CACHE);
     await cache.put(BADGE_KEY, new Response(String(count)));
-    if ('setAppBadge' in self) {
-      if (count === 0) await self.clearAppBadge();
-      else await self.setAppBadge(count);
+    console.log('[SW] Setting badge to', count);
+    if (count === 0) {
+      if ('clearAppBadge' in self) await self.clearAppBadge();
+    } else {
+      if ('setAppBadge' in self) await self.setAppBadge(count);
     }
-  } catch (e) {}
+  } catch (e) { console.warn('[SW] setBadgeCount error:', e); }
 }
 
-// ── PUSH: show notification + increment badge ─────────────────────────────────
+// ── PUSH ──────────────────────────────────────────────────────────────────────
 self.addEventListener('push', (event) => {
+  console.log('[SW] Push received', SW_VERSION);
   let data = {};
   try { data = event.data ? event.data.json() : {}; }
   catch (e) { data = { title: 'TRAINR', body: event.data ? event.data.text() : '' }; }
@@ -83,15 +89,14 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     getBadgeCount().then(async count => {
       const newCount = count + 1;
-      await Promise.all([
-        self.registration.showNotification(title, options),
-        setBadgeCount(newCount)
-      ]);
+      console.log('[SW] Incrementing badge to', newCount);
+      await self.registration.showNotification(title, options);
+      await setBadgeCount(newCount);
     })
   );
 });
 
-// ── NOTIFICATION CLICK: open app + clear badge ───────────────────────────────
+// ── NOTIFICATION CLICK ────────────────────────────────────────────────────────
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = event.notification.data?.url || '/';
@@ -110,9 +115,11 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// ── MESSAGE FROM APP: clear badge when app opened ────────────────────────────
+// ── MESSAGE ───────────────────────────────────────────────────────────────────
 self.addEventListener('message', (event) => {
-  if (event.data === 'clearBadge') {
-    setBadgeCount(0);
+  if (event.data === 'clearBadge') setBadgeCount(0);
+  if (event.data === 'getVersion') {
+    event.source?.postMessage({ type: 'version', version: SW_VERSION });
+    console.log('[SW] Version:', SW_VERSION);
   }
 });
