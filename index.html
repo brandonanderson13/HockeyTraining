@@ -2157,6 +2157,19 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       if (typeof triggerInstallBannerAfterLogin === 'function') {
         triggerInstallBannerAfterLogin();
       }
+      // Show notification enable prompt for players who haven't enabled yet
+      if (role === 'player') {
+        setTimeout(() => {
+          try {
+            const _notifDone = localStorage.getItem('trainrNotifPromptDone');
+            const _notifOK = typeof Notification !== 'undefined';
+            const _granted = _notifOK && Notification.permission === 'granted';
+            if (!_granted && !_notifDone && _notifOK && Notification.permission !== 'denied') {
+              showNotificationPrompt();
+            }
+          } catch(e) {}
+        }, 5000);
+      }
       // Clear app badge when user opens the app
       try {
         if ('clearAppBadge' in navigator) navigator.clearAppBadge();
@@ -9825,6 +9838,32 @@ async function saveTrainingDaysToSupabase(days) {
     console.warn('Could not save training days:', e.message);
   }
 }
+
+function showNotificationPrompt() {
+  if (document.getElementById('notifPromptModal')) return;
+  const modal = document.createElement('div');
+  modal.id = 'notifPromptModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = '<div style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:24px;max-width:340px;width:100%;text-align:center;">'
+    + '<div style="font-size:36px;margin-bottom:12px;">&#x1F514;</div>'
+    + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin-bottom:8px;">Enable Notifications</div>'
+    + '<div style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:20px;">Get notified when your coach assigns a new goal or a deadline is coming up.</div>'
+    + '<button onclick="enableNotifFromPrompt()" class="btn-o" style="width:100%;margin-bottom:10px;">Enable Notifications</button>'
+    + '<button onclick="dismissNotifPrompt()" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;width:100%;">Not now</button>'
+    + '</div>';
+  document.body.appendChild(modal);
+}
+
+async function enableNotifFromPrompt() {
+  document.getElementById('notifPromptModal')?.remove();
+  localStorage.setItem('trainrNotifPromptDone', '1');
+  await requestNotificationPermission();
+}
+
+function dismissNotifPrompt() {
+  document.getElementById('notifPromptModal')?.remove();
+}
+
 
 </script>
 
