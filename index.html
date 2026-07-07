@@ -2983,26 +2983,6 @@ function loadHomeSec() {
   const role = window._userRole;
   const isPlayer = role === 'player';
 
-  // Notification nudge for users who haven't enabled yet
-  const _isPWAHome = (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
-  const _notifEnabledHome = (function() { try { return 'Notification' in window && Notification.permission === 'granted'; } catch(e) { return false; } })();
-  const _notifDismissed = localStorage.getItem('trainrNotifNudgeDismissed');
-  let notifNudgeHtml = '';
-  if (!_notifEnabledHome && !_notifDismissed) {
-    if (_isPWAHome) {
-      notifNudgeHtml = '<div style="background:rgba(224,120,32,0.08);border:1px solid rgba(224,120,32,0.25);border-radius:8px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">'
-        + '<span style="font-size:20px;flex-shrink:0;">&#x1F514;</span>'
-        + '<div style="flex:1;">'
-        + '<div style="font-size:13px;font-weight:700;color:#E07820;">Enable Goal Notifications</div>'
-        + '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:1px;">Get notified when your coach assigns a goal</div>'
-        + '</div>'
-        + '<div style="display:flex;gap:8px;flex-shrink:0;">'
-        + '<button onclick="showSec(\'account\')" style="background:#E07820;border:none;color:#fff;font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;cursor:pointer;">Turn On</button>'
-        + '<button onclick="localStorage.setItem(\'trainrNotifNudgeDismissed\',\'1\');this.closest(\'div[style*=margin-bottom\']\').remove()" style="background:rgba(255,255,255,0.06);border:none;color:rgba(255,255,255,0.4);font-size:11px;padding:6px 10px;border-radius:6px;cursor:pointer;">Later</button>'
-        + '</div></div>';
-    }
-  }
-
   // Quick log buttons for players
   const quickLog = isPlayer ? `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.2rem;">
@@ -3485,8 +3465,25 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
         ${doneItems.map(itemRow).join('')}
       </div>` : '';
 
+  // Notification nudge
+  const _isPWA = (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
+  const _notifEnabled = (function() { try { return 'Notification' in window && Notification.permission === 'granted'; } catch(e) { return false; } })();
+  const _nudgeDismissed = localStorage.getItem('trainrNotifNudgeDismissed');
+  let notifNudgeHtml = '';
+  if (_isPWA && !_notifEnabled && !_nudgeDismissed) {
+    notifNudgeHtml = '<div style="background:rgba(224,120,32,0.08);border:1px solid rgba(224,120,32,0.25);border-radius:8px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">'
+      + '<span style="font-size:20px;flex-shrink:0;">&#x1F514;</span>'
+      + '<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#E07820;">Enable Goal Notifications</div>'
+      + '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:1px;">Get notified when your coach assigns a goal</div></div>'
+      + '<div style="display:flex;gap:8px;flex-shrink:0;">'
+      + '<button onclick="showSec(\'account\')" style="background:#E07820;border:none;color:#fff;font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;cursor:pointer;">Turn On</button>'
+      + '<button onclick="localStorage.setItem(\'trainrNotifNudgeDismissed\',\'1\');document.getElementById(\'notifNudge\').remove()" style="background:rgba(255,255,255,0.06);border:none;color:rgba(255,255,255,0.4);font-size:11px;padding:6px 10px;border-radius:6px;cursor:pointer;">Later</button>'
+      + '</div></div>';
+    notifNudgeHtml = '<div id="notifNudge">' + notifNudgeHtml + '</div>';
+  }
+
   el.innerHTML = `
-    ${notifNudgeHtml || ''}
+    ${notifNudgeHtml}
     ${statsHtml}
     <div class="card">
       <div class="ch">
