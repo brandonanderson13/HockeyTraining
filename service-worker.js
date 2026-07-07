@@ -8,18 +8,14 @@ const STATIC_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing v3');
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS)));
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating v3');
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
@@ -30,31 +26,24 @@ self.addEventListener('fetch', (event) => {
   if (event.request.url.includes('supabase.co')) return;
   if (event.request.url.includes('stripe.com')) return;
   if (event.request.url.includes('/api/')) return;
-
   event.respondWith(
     fetch(event.request)
-      .then((response) => {
+      .then(response => {
         if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
         }
         return response;
       })
-      .catch(() =>
-        caches.match(event.request).then(cached => cached || caches.match('/index.html'))
-      )
+      .catch(() => caches.match(event.request).then(cached => cached || caches.match('/index.html')))
   );
 });
 
-// ── PUSH: show notification and increment badge ───────────────────────────────
+// ── PUSH: show notification + set badge ──────────────────────────────────────
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push received');
   let data = {};
-  try {
-    data = event.data ? event.data.json() : {};
-  } catch (e) {
-    data = { title: 'TRAINR', body: event.data ? event.data.text() : 'New notification' };
-  }
+  try { data = event.data ? event.data.json() : {}; }
+  catch (e) { data = { title: 'TRAINR', body: event.data ? event.data.text() : '' }; }
 
   const title = data.title || 'TRAINR';
   const options = {
@@ -67,31 +56,25 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    Promise.all([
-      self.registration.showNotification(title, options),
-      // Increment badge count
-      self.registration.getNotifications().then(notifications => {
-        const count = notifications.length + 1;
-        if ('setAppBadge' in navigator) {
-          return navigator.setAppBadge(count);
-        }
-      })
-    ])
+    self.registration.getNotifications().then(existing => {
+      const count = existing.length + 1;
+      const tasks = [self.registration.showNotification(title, options)];
+      // setAppBadge lives on self in service worker context
+      if ('setAppBadge' in self) tasks.push(self.setAppBadge(count));
+      return Promise.all(tasks);
+    })
   );
 });
 
-// ── NOTIFICATION CLICK: open app and clear badge ─────────────────────────────
+// ── NOTIFICATION CLICK: open app + clear badge ───────────────────────────────
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = event.notification.data?.url || '/';
-
   event.waitUntil(
     Promise.all([
-      // Clear badge when user taps notification
-      'clearAppBadge' in navigator ? navigator.clearAppBadge() : Promise.resolve(),
-      // Open or focus the app
-      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-        for (const client of windowClients) {
+      'clearAppBadge' in self ? self.clearAppBadge() : Promise.resolve(),
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+        for (const client of list) {
           if (client.url.includes(self.location.origin) && 'focus' in client) {
             return client.focus();
           }
@@ -102,11 +85,9 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// ── MESSAGE: clear badge when app is opened ───────────────────────────────────
+// ── MESSAGE FROM APP: clear badge when app opened ────────────────────────────
 self.addEventListener('message', (event) => {
   if (event.data === 'clearBadge') {
-    if ('clearAppBadge' in navigator) {
-      navigator.clearAppBadge();
-    }
+    if ('clearAppBadge' in self) self.clearAppBadge();
   }
 });
