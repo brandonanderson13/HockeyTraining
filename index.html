@@ -1678,7 +1678,7 @@ async function sendGoalPushNotifications(playerIds, title, due) {
           body: (title || 'You have a new goal') + dueStr,
           url: '/'
         })
-      }).catch(e => console.warn('Push send failed:', e));
+      }).then(r => r.json()).then(d => console.log('Push send result:', d)).catch(e => console.warn('Push send failed:', e));
     }
   } catch(e) { console.warn('sendGoalPushNotifications error:', e); }
 }
@@ -1711,12 +1711,13 @@ async function registerPushSubscription() {
     const { data: { session } } = await sb.auth.getSession();
     const token = session?.access_token;
     if (!token) return;
-    await fetch('/api/save-push-subscription', {
+    const saveResp = await fetch('/api/save-push-subscription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({ subscription })
     });
-    console.log('Push subscription saved');
+    const saveData = await saveResp.json();
+    console.log('Push subscription save response:', saveResp.status, saveData);
   } catch (err) {
     console.warn('Push subscription failed:', err);
   }
@@ -1822,6 +1823,32 @@ function permanentlyDismissBanner() {
 }
 function confirmInstalled() {
   permanentlyDismissBanner();
+}
+
+async function disableNotifications() {
+  try {
+    if (!('serviceWorker' in navigator)) return;
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) {
+      await sub.unsubscribe();
+      // Remove from Supabase
+      const sb = await getSupabaseClient();
+      const { data: { session } } = await sb.auth.getSession();
+      if (session?.access_token) {
+        await sb.from('push_subscriptions').delete().eq('user_id', window._userId);
+      }
+    }
+    // Reload the notifications card
+    if (typeof loadAccountDetails === 'function') loadAccountDetails();
+    // Remove nudge if showing
+    const nudge = document.getElementById('notifNudge');
+    if (nudge) nudge.remove();
+    alert('Notifications disabled.');
+  } catch(e) {
+    console.warn('disableNotifications error:', e);
+    alert('Could not disable notifications: ' + e.message);
+  }
 }
 
 async function requestNotificationPermission() {
@@ -7495,12 +7522,13 @@ async function loadAccountDetails() {
     const _notifOK = (function() { try { return 'Notification' in window && typeof Notification !== 'undefined' && 'PushManager' in window; } catch(e) { return false; } })();
 
     if (_notifOK && Notification.permission === 'granted') {
-      notifCardBody.innerHTML = '<div style="display:flex;align-items:center;gap:10px;">'
+      notifCardBody.innerHTML = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">'
         + '<span style="font-size:18px;">&#x1F514;</span>'
         + '<div>'
         + '<div style="font-size:13px;color:#4ade80;font-weight:700;">&#10003; Notifications enabled</div>'
         + '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;">You\'ll be notified when a coach assigns a new goal.</div>'
-        + '</div></div>';
+        + '</div></div>'
+        + '<button onclick="disableNotifications()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.4);font-size:12px;padding:8px 14px;cursor:pointer;width:100%;">Disable Notifications</button>';
     } else if (_notifOK && Notification.permission === 'denied') {
       notifCardBody.innerHTML = '<div style="font-size:13px;color:#f87171;margin-bottom:10px;">&#x26A0; Notifications blocked</div>'
         + '<div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.7;">'
