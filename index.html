@@ -1658,6 +1658,128 @@ async function renewalSignOut() {
 </script>
 
 <script>
+// ── SERVICE WORKER REGISTRATION ──────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => { console.log('SW registered:', reg.scope); })
+      .catch(err => { console.warn('SW registration failed:', err); });
+  });
+}
+
+// ── PWA INSTALL PROMPT ────────────────────────────────────────────────────────
+let _deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  _deferredInstallPrompt = e;
+  // Will show our custom banner after login
+});
+
+function isRunningAsPWA() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+}
+// If currently running as PWA (opened from home screen), no need to show banner
+// Don't permanently dismiss — they may use browser too
+
+function shouldShowInstallBanner() {
+  if (isRunningAsPWA()) return false;
+  if (localStorage.getItem('trainrInstallDismissed') === 'permanent') return false;
+  return true;
+}
+
+function showInstallBanner() {
+  if (!shouldShowInstallBanner()) return;
+  if (document.getElementById('pwaInstallBanner')) return;
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const isMobile = isIOS || isAndroid;
+  if (!isMobile) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'pwaInstallBanner';
+  banner.style.cssText = [
+    'position:fixed;bottom:0;left:0;right:0;z-index:999999',
+    'background:#111;border-top:3px solid #E07820',
+    'padding:14px 16px 20px;box-shadow:0 -12px 40px rgba(0,0,0,0.8)',
+    'font-family:system-ui,sans-serif'
+  ].join(';');
+
+  // Top row: icon + text + dismiss
+  const topRow = ''
+    + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+    +   '<img src="/apple-touch-icon.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;">'
+    +   '<div style="flex:1;min-width:0;">'
+    +     '<div style="font-size:15px;font-weight:700;color:#fff;letter-spacing:-.01em;">Add TRAINR to your Home Screen</div>'
+    +     '<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:1px;">Get notifications &amp; faster access</div>'
+    +   '</div>'
+    +   '<button onclick="dismissInstallBanner()" style="background:rgba(255,255,255,0.08);border:none;color:rgba(255,255,255,0.5);width:28px;height:28px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">&times;</button>'
+    + '</div>';
+
+  let action = '';
+  if (isIOS) {
+    action = ''
+      + '<div style="background:#1a1a1a;border-radius:10px;padding:11px 13px;margin-bottom:10px;">'
+      +   '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">How to install on iPhone</div>'
+      +   '<div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.9;">'
+      +     '<span style="color:#E07820;font-weight:700;">1</span> Tap the <strong style="color:#fff;">&#8226;&#8226;&#8226;</strong> menu in the bottom right of Safari<br>'
+      +     '<span style="color:#E07820;font-weight:700;">2</span> Tap <strong style="color:#fff;">&#8220;Add to Home Screen&#8221;</strong><br>'
+      +     '<span style="color:#E07820;font-weight:700;">3</span> Tap <strong style="color:#fff;">&#8220;Add&#8221;</strong> in the top right'
+      +   '</div>'
+      + '</div>'
+      + '<button onclick="confirmInstalled()" style="width:100%;padding:12px;background:#E07820;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;">I&#8217;ve added it &#10003;</button>'
+      + '<button onclick="permanentlyDismissBanner()" style="width:100%;padding:10px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;">Don&#8217;t show this again</button>';
+  } else if (_deferredInstallPrompt) {
+    action = '<button onclick="triggerAndroidInstall()" style="width:100%;padding:13px;background:#E07820;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;letter-spacing:.02em;cursor:pointer;">Add to Home Screen</button>';
+  } else {
+    action = ''
+      + '<div style="background:#1a1a1a;border-radius:10px;padding:11px 13px;font-size:13px;color:rgba(255,255,255,0.6);line-height:1.9;margin-bottom:10px;">'
+      +   'Tap the browser menu <strong style="color:#fff;">&#8942;</strong> then tap <strong style="color:#fff;">&#8220;Add to Home Screen&#8221;</strong>'
+      + '</div>'
+      + '<button onclick="permanentlyDismissBanner()" style="width:100%;padding:10px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;">Don&#8217;t show this again</button>';
+  }
+
+  banner.innerHTML = topRow + action;
+  document.body.appendChild(banner);
+}
+
+function dismissInstallBanner() {
+  // × button — hide for this session only
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) banner.remove();
+}
+function permanentlyDismissBanner() {
+  // 'Don't show again' — permanent
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) banner.remove();
+  localStorage.setItem('trainrInstallDismissed', 'permanent');
+}
+function confirmInstalled() {
+  permanentlyDismissBanner();
+}
+
+async function triggerAndroidInstall() {
+  if (!_deferredInstallPrompt) return;
+  _deferredInstallPrompt.prompt();
+  const { outcome } = await _deferredInstallPrompt.userChoice;
+  if (outcome === 'accepted') {
+    localStorage.setItem('trainrInstallDismissed', 'permanent');
+  }
+  _deferredInstallPrompt = null;
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) banner.remove();
+}
+
+// Banner is triggered directly by auth success — see checkAuth()
+// This function is called after login completes
+function triggerInstallBannerAfterLogin() {
+  setTimeout(showInstallBanner, 4000);
+}
+</script>
+
+<script>
 // ═══════════════════════════════════════════════════════════════════════════
 // SUPABASE AUTH CHECK - Verifies user is logged in with active subscription
 // ═══════════════════════════════════════════════════════════════════════════
@@ -9275,127 +9397,7 @@ window.addEventListener('load', async () => {
 
 
 
-<script>
-// ── SERVICE WORKER REGISTRATION ──────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(reg => { console.log('SW registered:', reg.scope); })
-      .catch(err => { console.warn('SW registration failed:', err); });
-  });
-}
 
-// ── PWA INSTALL PROMPT ────────────────────────────────────────────────────────
-let _deferredInstallPrompt = null;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  _deferredInstallPrompt = e;
-  // Will show our custom banner after login
-});
-
-function isRunningAsPWA() {
-  return window.matchMedia('(display-mode: standalone)').matches
-    || window.navigator.standalone === true;
-}
-// If currently running as PWA (opened from home screen), no need to show banner
-// Don't permanently dismiss — they may use browser too
-
-function shouldShowInstallBanner() {
-  if (isRunningAsPWA()) return false;
-  if (localStorage.getItem('trainrInstallDismissed') === 'permanent') return false;
-  return true;
-}
-
-function showInstallBanner() {
-  if (!shouldShowInstallBanner()) return;
-  if (document.getElementById('pwaInstallBanner')) return;
-
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isAndroid = /android/i.test(navigator.userAgent);
-  const isMobile = isIOS || isAndroid;
-  if (!isMobile) return;
-
-  const banner = document.createElement('div');
-  banner.id = 'pwaInstallBanner';
-  banner.style.cssText = [
-    'position:fixed;bottom:0;left:0;right:0;z-index:999999',
-    'background:#111;border-top:3px solid #E07820',
-    'padding:14px 16px 20px;box-shadow:0 -12px 40px rgba(0,0,0,0.8)',
-    'font-family:system-ui,sans-serif'
-  ].join(';');
-
-  // Top row: icon + text + dismiss
-  const topRow = ''
-    + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
-    +   '<img src="/apple-touch-icon.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;">'
-    +   '<div style="flex:1;min-width:0;">'
-    +     '<div style="font-size:15px;font-weight:700;color:#fff;letter-spacing:-.01em;">Add TRAINR to your Home Screen</div>'
-    +     '<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:1px;">Get notifications &amp; faster access</div>'
-    +   '</div>'
-    +   '<button onclick="dismissInstallBanner()" style="background:rgba(255,255,255,0.08);border:none;color:rgba(255,255,255,0.5);width:28px;height:28px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">&times;</button>'
-    + '</div>';
-
-  let action = '';
-  if (isIOS) {
-    action = ''
-      + '<div style="background:#1a1a1a;border-radius:10px;padding:11px 13px;margin-bottom:10px;">'
-      +   '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">How to install on iPhone</div>'
-      +   '<div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.9;">'
-      +     '<span style="color:#E07820;font-weight:700;">1</span> Tap the <strong style="color:#fff;">&#8226;&#8226;&#8226;</strong> menu in the bottom right of Safari<br>'
-      +     '<span style="color:#E07820;font-weight:700;">2</span> Tap <strong style="color:#fff;">&#8220;Add to Home Screen&#8221;</strong><br>'
-      +     '<span style="color:#E07820;font-weight:700;">3</span> Tap <strong style="color:#fff;">&#8220;Add&#8221;</strong> in the top right'
-      +   '</div>'
-      + '</div>'
-      + '<button onclick="confirmInstalled()" style="width:100%;padding:12px;background:#E07820;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;">I&#8217;ve added it &#10003;</button>'
-      + '<button onclick="permanentlyDismissBanner()" style="width:100%;padding:10px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;">Don&#8217;t show this again</button>';
-  } else if (_deferredInstallPrompt) {
-    action = '<button onclick="triggerAndroidInstall()" style="width:100%;padding:13px;background:#E07820;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;letter-spacing:.02em;cursor:pointer;">Add to Home Screen</button>';
-  } else {
-    action = ''
-      + '<div style="background:#1a1a1a;border-radius:10px;padding:11px 13px;font-size:13px;color:rgba(255,255,255,0.6);line-height:1.9;margin-bottom:10px;">'
-      +   'Tap the browser menu <strong style="color:#fff;">&#8942;</strong> then tap <strong style="color:#fff;">&#8220;Add to Home Screen&#8221;</strong>'
-      + '</div>'
-      + '<button onclick="permanentlyDismissBanner()" style="width:100%;padding:10px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;">Don&#8217;t show this again</button>';
-  }
-
-  banner.innerHTML = topRow + action;
-  document.body.appendChild(banner);
-}
-
-function dismissInstallBanner() {
-  // × button — hide for this session only
-  const banner = document.getElementById('pwaInstallBanner');
-  if (banner) banner.remove();
-}
-function permanentlyDismissBanner() {
-  // 'Don't show again' — permanent
-  const banner = document.getElementById('pwaInstallBanner');
-  if (banner) banner.remove();
-  localStorage.setItem('trainrInstallDismissed', 'permanent');
-}
-function confirmInstalled() {
-  permanentlyDismissBanner();
-}
-
-async function triggerAndroidInstall() {
-  if (!_deferredInstallPrompt) return;
-  _deferredInstallPrompt.prompt();
-  const { outcome } = await _deferredInstallPrompt.userChoice;
-  if (outcome === 'accepted') {
-    localStorage.setItem('trainrInstallDismissed', 'permanent');
-  }
-  _deferredInstallPrompt = null;
-  const banner = document.getElementById('pwaInstallBanner');
-  if (banner) banner.remove();
-}
-
-// Banner is triggered directly by auth success — see checkAuth()
-// This function is called after login completes
-function triggerInstallBannerAfterLogin() {
-  setTimeout(showInstallBanner, 4000);
-}
-</script>
 
 
 <script>
