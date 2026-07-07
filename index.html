@@ -1659,6 +1659,40 @@ async function renewalSignOut() {
 
 <script>
 // ── SERVICE WORKER REGISTRATION ──────────────────────────────────────────────
+const VAPID_PUBLIC_KEY = 'BI6YztwVujEwDgVYIg9rVigNRI1gL9HZa8FYaJCQU2M59DVljIhIw08PhkAwrVnJLWfeap7NuTkUPDYQqq7N5ro';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+async function registerPushSubscription() {
+  try {
+    if (!('PushManager' in window)) return;
+    const reg = await navigator.serviceWorker.ready;
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+    const subscription = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    const sb = await getSupabaseClient();
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token;
+    if (!token) return;
+    await fetch('/api/save-push-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ subscription })
+    });
+    console.log('Push subscription saved');
+  } catch (err) {
+    console.warn('Push subscription failed:', err);
+  }
+}
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js')
@@ -1962,6 +1996,10 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       // Trigger install banner after login
       if (typeof triggerInstallBannerAfterLogin === 'function') {
         triggerInstallBannerAfterLogin();
+      }
+      // Register push notifications if permission already granted
+      if (Notification.permission === 'granted' && typeof registerPushSubscription === 'function') {
+        registerPushSubscription();
       }
       
     } catch (error) {
@@ -3973,6 +4011,9 @@ async function saveCombinedGoal() {
     const { error } = await sb.from('goals').insert(inserts);
     if (error) throw error;
 
+    // Send push notification to assigned players
+    sendGoalPushNotifications(playerIds, title, due);
+
     document.getElementById('dashModal')?.remove();
     loadDashboard();
   } catch(e) {
@@ -4200,6 +4241,8 @@ async function saveGoal() {
     const { error } = await sb.from('goals').insert(rows);
     if (error) throw error;
     showMsg(`✓ Goal${playerIds.length>1?' created for '+playerIds.length+' players':'created'}!`, 'green');
+    // Send push notification to assigned players
+    sendGoalPushNotifications(playerIds, title, due);
     setTimeout(() => { document.getElementById('dashModal')?.remove(); loadDashboard(); }, 700);
   } catch(e) {
     showMsg('Error: ' + e.message, 'red');
@@ -9535,6 +9578,28 @@ async function renewalCheckStatus() {
     if (msg) { msg.textContent = 'Error checking: ' + e.message; msg.style.color = '#f87171'; }
   }
 }
+async function sendGoalPushNotifications(playerIds, title, due) {
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token;
+    if (!token || !playerIds || !playerIds.length) return;
+    const dueStr = due ? ' — due ' + new Date(due).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    for (const pid of playerIds) {
+      fetch('/api/send-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({
+          userId: pid,
+          title: 'New Goal Assigned',
+          body: (title || 'You have a new goal') + dueStr,
+          url: '/'
+        })
+      }).catch(e => console.warn('Push send failed:', e));
+    }
+  } catch(e) { console.warn('sendGoalPushNotifications error:', e); }
+}
+
 
 async function renewalSignOut() {
   try {
