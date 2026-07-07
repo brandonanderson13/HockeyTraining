@@ -1,11 +1,14 @@
-// TRAINR Service Worker v3
-const CACHE_NAME = 'trainr-v3';
+// TRAINR Service Worker v4
+const CACHE_NAME = 'trainr-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/apple-touch-icon.png',
   '/manifest.json'
 ];
+
+// Track badge count in SW memory
+let badgeCount = 0;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS)));
@@ -39,11 +42,13 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// ── PUSH: show notification + set badge ──────────────────────────────────────
+// ── PUSH: show notification + increment badge ─────────────────────────────────
 self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; }
   catch (e) { data = { title: 'TRAINR', body: event.data ? event.data.text() : '' }; }
+
+  badgeCount += 1;
 
   const title = data.title || 'TRAINR';
   const options = {
@@ -55,21 +60,17 @@ self.addEventListener('push', (event) => {
     requireInteraction: false
   };
 
-  event.waitUntil(
-    self.registration.getNotifications().then(existing => {
-      const count = existing.length + 1;
-      const tasks = [self.registration.showNotification(title, options)];
-      // setAppBadge lives on self in service worker context
-      if ('setAppBadge' in self) tasks.push(self.setAppBadge(count));
-      return Promise.all(tasks);
-    })
-  );
+  const tasks = [self.registration.showNotification(title, options)];
+  if ('setAppBadge' in self) tasks.push(self.setAppBadge(badgeCount));
+
+  event.waitUntil(Promise.all(tasks));
 });
 
 // ── NOTIFICATION CLICK: open app + clear badge ───────────────────────────────
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = event.notification.data?.url || '/';
+  badgeCount = 0;
   event.waitUntil(
     Promise.all([
       'clearAppBadge' in self ? self.clearAppBadge() : Promise.resolve(),
@@ -88,6 +89,7 @@ self.addEventListener('notificationclick', (event) => {
 // ── MESSAGE FROM APP: clear badge when app opened ────────────────────────────
 self.addEventListener('message', (event) => {
   if (event.data === 'clearBadge') {
+    badgeCount = 0;
     if ('clearAppBadge' in self) self.clearAppBadge();
   }
 });
