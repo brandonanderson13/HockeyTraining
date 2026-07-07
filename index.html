@@ -1900,6 +1900,8 @@ async function testBadge() {
 
 async function disableNotifications() {
   try {
+    // Mark as intentionally disabled so auto-register doesn't re-enable it
+    localStorage.setItem('trainrNotifDisabled', '1');
     if (!('serviceWorker' in navigator)) return;
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.getSubscription();
@@ -1929,6 +1931,7 @@ async function disableNotifications() {
 
 async function reEnableNotifications() {
   try {
+    localStorage.removeItem('trainrNotifDisabled');
     if (typeof registerPushSubscription !== 'function') return;
     await registerPushSubscription();
     if (typeof loadAccountDetails === 'function') loadAccountDetails();
@@ -1939,6 +1942,7 @@ async function reEnableNotifications() {
 
 async function requestNotificationPermission() {
   try {
+    localStorage.removeItem('trainrNotifDisabled');
     if (typeof Notification === 'undefined') { alert('Notifications are not supported on this device.'); return; }
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
@@ -2164,7 +2168,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
             const _notifDone = localStorage.getItem('trainrNotifPromptDone');
             const _notifOK = typeof Notification !== 'undefined';
             const _granted = _notifOK && Notification.permission === 'granted';
-            if (!_granted && !_notifDone && _notifOK && Notification.permission !== 'denied') {
+            const _notifDisabled = localStorage.getItem('trainrNotifDisabled');
+            if (!_granted && !_notifDone && !_notifDisabled && _notifOK && Notification.permission !== 'denied') {
               showNotificationPrompt();
             }
           } catch(e) {}
@@ -2181,7 +2186,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       } catch(e) {}
       // Re-register push subscription if already granted (players only)
       try {
-        if (role === 'player' && typeof Notification !== 'undefined' && Notification.permission === 'granted' && typeof registerPushSubscription === 'function') {
+        if (role === 'player' && typeof Notification !== 'undefined' && Notification.permission === 'granted' && typeof registerPushSubscription === 'function' && !localStorage.getItem('trainrNotifDisabled')) {
           setTimeout(registerPushSubscription, 3000);
         }
       } catch(notifErr) { console.warn('Notification check failed:', notifErr); }
@@ -9857,6 +9862,7 @@ function showNotificationPrompt() {
 async function enableNotifFromPrompt() {
   document.getElementById('notifPromptModal')?.remove();
   localStorage.setItem('trainrNotifPromptDone', '1');
+  localStorage.removeItem('trainrNotifDisabled');
   await requestNotificationPermission();
 }
 
