@@ -9531,59 +9531,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-</script>
-
-<script>
-window.addEventListener('load', async () => {
-  setTimeout(async () => {
-    const panel = document.getElementById('debugPanel');
-    const content = document.getElementById('debugContent');
-    if (!panel || !content) return;
-    
-    panel.style.display = 'block';
-    
-    try {
-      const sb = await getSupabaseClient();
-      const { data: { user }, error: userError } = await sb.auth.getUser();
-      
-      let html = '';
-      if (userError) {
-        html = '<span style="color:#f87171;">Auth error: ' + userError.message + '</span>';
-      } else if (!user) {
-        html = '<span style="color:#fbbf24;">Not logged in</span>';
-      } else {
-        html = '<strong>User:</strong><br>Email: ' + user.email + '<br>ID: ' + user.id.substring(0,20) + '...<br><br>';
-        
-        // Try to get subscription
-        const { data: subs, error: subError } = await sb.from('subscriptions').select('*').eq('email', user.email);
-        
-        html += '<strong>Subscription:</strong><br>';
-        if (subError) {
-          html += '<span style="color:#f87171;">Error: ' + subError.message + '</span>';
-        } else if (!subs || subs.length === 0) {
-          html += '<span style="color:#fbbf24;">NOT FOUND</span><br>';
-          html += '<br>Tried query: email = ' + user.email;
-        } else {
-          html += '<span style="color:#4ade80;">FOUND</span><br>';
-          html += 'Role: ' + subs[0].role + '<br>';
-          html += 'Org: ' + subs[0].organization_id + '<br>';
-          html += 'Status: ' + subs[0].status;
-        }
-      }
-      
-      content.innerHTML = html;
-    } catch (e) {
-      content.innerHTML = '<span style="color:#f87171;">' + e.message + '</span>';
-    }
-  }, 2000);
-});
 
 
-
-
-
-
-<script>
 // ── SETUP WIZARD ─────────────────────────────────────────────────────────
 let _wizAge = 'bantam';
 let _wizSeason = 'earlyoffseason';
@@ -9726,6 +9675,54 @@ async function renewalSignOut() {
   } catch(e) {}
   window.location.href = 'login.html';
 }
+
 </script>
+
+<script>
+window.addEventListener('load', async () => {
+  setTimeout(async () => {
+    const panel = document.getElementById('debugPanel');
+    const content = document.getElementById('debugContent');
+    if (!panel || !content) return;
+    
+    panel.style.display = 'block';
+    
+    try {
+      const sb = await getSupabaseClient();
+      const { data: { user }, error: userError } = await sb.auth.getUser();
+      
+      let html = '';
+      if (userError) {
+        html = '<span style="color:#f87171;">Auth error: ' + userError.message + '</span>';
+      } else if (!user) {
+        html = '<span style="color:#fbbf24;">Not logged in</span>';
+      } else {
+        html = '<strong>User:</strong><br>Email: ' + user.email + '<br>ID: ' + user.id.substring(0,20) + '...<br><br>';
+        
+        // Try to get subscription
+        const { data: subs, error: subError } = await sb.from('subscriptions').select('*').eq('email', user.email);
+        
+        html += '<strong>Subscription:</strong><br>';
+        if (subError) {
+          html += '<span style="color:#f87171;">Error: ' + subError.message + '</span>';
+        } else if (!subs || subs.length === 0) {
+          html += '<span style="color:#fbbf24;">NOT FOUND</span><br>';
+          html += '<br>Tried query: email = ' + user.email;
+        } else {
+          html += '<span style="color:#4ade80;">FOUND</span><br>';
+          html += 'Role: ' + subs[0].role + '<br>';
+          html += 'Org: ' + subs[0].organization_id + '<br>';
+          html += 'Status: ' + subs[0].status;
+        }
+      }
+      
+      content.innerHTML = html;
+    } catch (e) {
+      content.innerHTML = '<span style="color:#f87171;">' + e.message + '</span>';
+    }
+  }, 2000);
+});
+</script>
+
 </body>
 </html>
