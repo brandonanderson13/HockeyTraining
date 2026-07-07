@@ -9370,8 +9370,8 @@ window.addEventListener('trainrReady', () => {
 });
 </script>
 
-</body>
-</html>
+
+<script>
 // ── SETUP WIZARD ─────────────────────────────────────────────────────────
 let _wizAge = 'bantam';
 let _wizSeason = 'earlyoffseason';
@@ -9478,7 +9478,7 @@ function showRenewalWall(email, reason) {
   } else {
     // Player or coach at an association — contact admin wall
     if (title) title.textContent = 'Access Unavailable';
-    if (msg) msg.innerHTML = 'Your association's subscription is currently inactive.<br><br>Please contact your association admin to restore access.<br><br><span style="font-size:11px;color:rgba(255,255,255,0.35);">Your training data and progress are safe.</span>';
+    if (msg) msg.innerHTML = "Your association's subscription is currently inactive.<br><br>Please contact your association admin to restore access.<br><br><span style='font-size:11px;color:rgba(255,255,255,0.35);'>Your training data and progress are safe.</span>";
     if (portalBtn) portalBtn.style.display = 'none';
     if (newBtn) newBtn.style.display = 'none';
     if (renewBtn) renewBtn.style.display = 'none';
@@ -9513,6 +9513,6 @@ async function renewalSignOut() {
   } catch(e) {}
   window.location.href = 'login.html';
 }
-
-
-
+</script>
+</body>
+</html>
