@@ -1711,10 +1711,14 @@ async function registerPushSubscription() {
     const { data: { session } } = await sb.auth.getSession();
     const token = session?.access_token;
     if (!token) { console.warn('No session token - cannot save subscription'); return; }
-    console.log('Saving push subscription for user:', window._userId, 'role:', window._userRole);
-    // Delete any existing subscription for this device endpoint (from previous logged-in user)
+    // Confirm the actual logged-in user from the token
+    const { data: { user: currentUser } } = await sb.auth.getUser();
+    const actualUserId = currentUser?.id;
+    if (!actualUserId) { console.warn('Cannot determine current user'); return; }
+    console.log('Saving push subscription — actual user:', actualUserId, 'window._userId:', window._userId, 'role:', window._userRole);
+    // Delete any existing subscription for this device endpoint under any other user
     const endpointUrl = subscription.endpoint;
-    await sb.from('push_subscriptions').delete().eq('subscription->>endpoint', endpointUrl).neq('user_id', window._userId || '');
+    await sb.from('push_subscriptions').delete().eq('subscription->>endpoint', endpointUrl).neq('user_id', actualUserId);
     const saveResp = await fetch('/api/save-push-subscription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
