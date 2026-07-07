@@ -1,6 +1,6 @@
-// TRAINR Service Worker v7
-const SW_VERSION = 'v7';
-const CACHE_NAME = 'trainr-v7';
+// TRAINR Service Worker v8
+const SW_VERSION = 'v8';
+const CACHE_NAME = 'trainr-v8';
 const BADGE_CACHE = 'trainr-badge';
 const BADGE_KEY = 'badge-count';
 const STATIC_ASSETS = ['/', '/index.html', '/apple-touch-icon.png', '/manifest.json'];
@@ -26,13 +26,18 @@ self.addEventListener('fetch', (event) => {
   if (event.request.url.includes('supabase.co')) return;
   if (event.request.url.includes('stripe.com')) return;
   if (event.request.url.includes('/api/')) return;
+
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        if (response.ok) caches.open(CACHE_NAME).then(c => c.put(event.request, response.clone()));
-        return response;
-      })
-      .catch(() => caches.match(event.request).then(c => c || caches.match('/index.html')))
+    fetch(event.request).then(response => {
+      // Clone BEFORE doing anything else with the response
+      const responseToCache = response.clone();
+      if (response.ok) {
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
+      }
+      return response;
+    }).catch(() =>
+      caches.match(event.request).then(cached => cached || caches.match('/index.html'))
+    )
   );
 });
 
@@ -53,21 +58,18 @@ async function saveBadgeCount(count) {
 }
 
 async function broadcastBadge(count) {
-  // Tell all open page clients to set badge via navigator (works on iOS)
   try {
     const allClients = await clients.matchAll({ includeUncontrolled: true });
     for (const client of allClients) {
       client.postMessage({ type: count > 0 ? 'setBadge' : 'clearBadge', count });
     }
   } catch(e) {}
-  // Also try from SW context as fallback
   try {
     if (count > 0) { if ('setAppBadge' in self) self.setAppBadge(count); }
     else { if ('clearAppBadge' in self) self.clearAppBadge(); }
   } catch(e) {}
 }
 
-// ── PUSH ──────────────────────────────────────────────────────────────────────
 self.addEventListener('push', (event) => {
   console.log('[SW] Push received', SW_VERSION);
   let data = {};
@@ -77,7 +79,6 @@ self.addEventListener('push', (event) => {
   event.waitUntil((async () => {
     const count = await getBadgeCount();
     const newCount = count + 1;
-    console.log('[SW] Badge:', count, '->', newCount);
     await saveBadgeCount(newCount);
     await self.registration.showNotification(data.title || 'TRAINR', {
       body: data.body || '',
@@ -90,7 +91,6 @@ self.addEventListener('push', (event) => {
   })());
 });
 
-// ── NOTIFICATION CLICK ────────────────────────────────────────────────────────
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = event.notification.data?.url || '/';
@@ -105,16 +105,13 @@ self.addEventListener('notificationclick', (event) => {
   })());
 });
 
-// ── MESSAGE ───────────────────────────────────────────────────────────────────
 self.addEventListener('message', (event) => {
   if (event.data === 'clearBadge') {
     saveBadgeCount(0);
     broadcastBadge(0);
   }
   if (event.data === 'getBadgeCount') {
-    // Page is asking for current count — report it back so page can sync badge
     getBadgeCount().then(count => {
-      console.log('[SW] Reporting badge count to page:', count);
       event.source?.postMessage({ type: 'badgeCount', count });
     });
   }
