@@ -1707,10 +1707,12 @@ async function registerPushSubscription() {
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
     });
+    console.log('Push subscription obtained:', subscription.endpoint.slice(-20));
     const sb = await getSupabaseClient();
     const { data: { session } } = await sb.auth.getSession();
     const token = session?.access_token;
-    if (!token) return;
+    if (!token) { console.warn('No session token - cannot save subscription'); return; }
+    console.log('Saving subscription for user:', window._userId);
     const saveResp = await fetch('/api/save-push-subscription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
