@@ -1668,7 +1668,8 @@ async function sendGoalPushNotifications(playerIds, title, due) {
     const token = session?.access_token;
     if (!token || !playerIds || !playerIds.length) return;
     const dueStr = due ? ' — due ' + new Date(due).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-    console.log('Sending push to playerIds:', [...playerIds]);
+    console.log('Sending push to playerIds:', JSON.stringify([...playerIds]));
+    console.log('Current user (coach) _userId:', window._userId);
     for (const pid of playerIds) {
       console.log('Sending push to userId:', pid);
       fetch('/api/send-push', {
@@ -1715,6 +1716,7 @@ async function registerPushSubscription() {
     const token = session?.access_token;
     if (!token) { console.warn('No session token - cannot save subscription'); return; }
     console.log('Saving subscription for user:', window._userId);
+    console.log('Session user id:', (await sb.auth.getUser()).data.user?.id);
     const saveResp = await fetch('/api/save-push-subscription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
