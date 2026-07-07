@@ -7636,8 +7636,25 @@ async function loadAccountDetails() {
     const _notifOK = (function() { try { return 'Notification' in window && typeof Notification !== 'undefined' && 'PushManager' in window; } catch(e) { return false; } })();
 
     if (_notifOK && Notification.permission === 'granted') {
-      // Permission granted but subscription might be missing — re-register silently (players only)
-      if (window._userRole === 'player' && typeof registerPushSubscription === 'function') registerPushSubscription();
+      // Check if subscription actually exists in Supabase
+      let _hasSub = false;
+      try {
+        if ('serviceWorker' in navigator) {
+          const _reg = await navigator.serviceWorker.ready;
+          const _sub = await _reg.pushManager.getSubscription();
+          _hasSub = !!_sub;
+        }
+      } catch(e) {}
+      if (!_hasSub && window._userRole === 'player' && typeof registerPushSubscription === 'function') {
+        // Permission granted but no subscription — re-register
+        await registerPushSubscription();
+        _hasSub = true;
+      }
+      if (!_hasSub) {
+        // Permission granted but no subscription and not a player
+        notifCardBody.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:14px;">Notifications are not active on this device.</p>'
+          + (window._userRole === 'player' ? '<button onclick="requestNotificationPermission()" class="btn-o" style="margin:0;">Enable Notifications</button>' : '');
+      } else {
       notifCardBody.innerHTML = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">'
         + '<span style="font-size:18px;">&#x1F514;</span>'
         + '<div>'
@@ -7646,6 +7663,7 @@ async function loadAccountDetails() {
         + '</div></div>'
         + '<button onclick="disableNotifications()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.4);font-size:12px;padding:8px 14px;cursor:pointer;width:100%;">Disable Notifications</button>'
 ;
+      }
     } else if (_notifOK && Notification.permission === 'denied') {
       notifCardBody.innerHTML = '<div style="font-size:13px;color:#f87171;margin-bottom:10px;">&#x26A0; Notifications blocked</div>'
         + '<div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.7;">'
