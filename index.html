@@ -7663,7 +7663,7 @@ async function loadAccountDetails() {
           _hasSub = !!_sub;
         }
       } catch(e) {}
-      if (!_hasSub && window._userRole === 'player' && typeof registerPushSubscription === 'function') {
+      if (!_hasSub && window._userRole === 'player' && typeof registerPushSubscription === 'function' && !localStorage.getItem('trainrNotifDisabled')) {
         // Permission granted but no subscription — re-register
         await registerPushSubscription();
         _hasSub = true;
