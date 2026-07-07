@@ -1836,8 +1836,10 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
       // Add a logout button to the header
       addLogoutButton(supabase, user, isAdmin);
-      // Signal app is ready (triggers install prompt)
-      setTimeout(() => window.dispatchEvent(new Event('trainrReady')), 2000);
+      // Trigger install banner after login
+      if (typeof triggerInstallBannerAfterLogin === 'function') {
+        triggerInstallBannerAfterLogin();
+      }
       
     } catch (error) {
       console.error('Auth error:', error);
@@ -9382,14 +9384,11 @@ async function triggerAndroidInstall() {
   if (banner) banner.remove();
 }
 
-// Show banner 3 seconds after app loads (gives time for login to complete)
-window.addEventListener('trainrReady', () => {
+// Banner is triggered directly by auth success — see checkAuth()
+// This function is called after login completes
+function triggerInstallBannerAfterLogin() {
   setTimeout(showInstallBanner, 4000);
-});
-// Fallback in case trainrReady already fired
-setTimeout(() => {
-  if (!document.getElementById('pwaInstallBanner')) showInstallBanner();
-}, 7000);
+}
 </script>
 
 
