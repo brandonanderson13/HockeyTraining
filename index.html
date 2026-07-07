@@ -2053,7 +2053,12 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       
     } catch (error) {
       console.error('Auth error:', error);
-      window.location.href = 'login.html';
+      // Show error briefly before redirecting so we can debug
+      const loader = document.getElementById('appLoader');
+      if (loader) {
+        loader.innerHTML = '<div style="color:#f87171;font-family:monospace;font-size:12px;padding:20px;text-align:center;">Auth error: ' + (error?.message || String(error)) + '<br><br>Redirecting to login...</div>';
+      }
+      setTimeout(() => { window.location.href = 'login.html'; }, 3000);
     }
   };
   document.head.appendChild(script);
