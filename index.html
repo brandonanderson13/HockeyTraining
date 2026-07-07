@@ -2169,7 +2169,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
             const _notifOK = typeof Notification !== 'undefined';
             const _granted = _notifOK && Notification.permission === 'granted';
             const _notifDisabled = localStorage.getItem('trainrNotifDisabled');
-            if (!_granted && !_notifDone && !_notifDisabled && _notifOK && Notification.permission !== 'denied') {
+            // Show prompt if: never enabled, OR intentionally disabled (but not browser-blocked)
+            const _shouldPrompt = (!_granted || _notifDisabled) && !_notifDone && _notifOK && Notification.permission !== 'denied';
+            if (_shouldPrompt) {
               showNotificationPrompt();
             }
           } catch(e) {}
@@ -7653,7 +7655,8 @@ async function loadAccountDetails() {
     const _isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const _notifOK = (function() { try { return 'Notification' in window && typeof Notification !== 'undefined' && 'PushManager' in window; } catch(e) { return false; } })();
 
-    if (_notifOK && Notification.permission === 'granted') {
+    const _userDisabled = !!localStorage.getItem('trainrNotifDisabled');
+    if (_notifOK && Notification.permission === 'granted' && !_userDisabled) {
       // Check if subscription actually exists in Supabase
       let _hasSub = false;
       try {
@@ -7688,6 +7691,9 @@ async function loadAccountDetails() {
         + (_isIOS ? 'Go to <strong style="color:#fff;">Settings &#8250; Safari &#8250; ' + window.location.hostname + '</strong> and set Notifications to Allow.'
                  : 'Click the lock icon in your browser address bar and set Notifications to Allow.')
         + '</div>';
+    } else if (_notifOK && _userDisabled) {
+      notifCardBody.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:14px;">Notifications are turned off. You\'ll miss goal assignments and reminders.</p>'
+        + '<button onclick="reEnableNotifications()" class="btn-o" style="margin:0;">Turn On Notifications</button>';
     } else if (_notifOK) {
       notifCardBody.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Get notified when a coach assigns you a new goal.</p>'
         + '<button onclick="requestNotificationPermission()" class="btn-o" style="margin:0;">Enable Notifications</button>';
