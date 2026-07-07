@@ -1533,9 +1533,6 @@ select:focus{border-color:var(--or);outline:none;}
     <div class="card" id="notificationsCard">
       <div class="ch"><span class="cht">Notifications</span></div>
       <div class="cb" id="notifCardBody">Loading...</div>
-      <div class="cb" style="padding-top:0;">
-        <button onclick="testBadge()" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.25);font-size:11px;padding:6px 14px;cursor:pointer;width:100%;">Test Badge</button>
-      </div>
     </div>
     
     <div class="card">
@@ -1714,8 +1711,7 @@ async function registerPushSubscription() {
     const { data: { session } } = await sb.auth.getSession();
     const token = session?.access_token;
     if (!token) { console.warn('No session token - cannot save subscription'); return; }
-    console.log('Saving subscription for user:', window._userId);
-    console.log('Session user id:', (await sb.auth.getUser()).data.user?.id);
+    console.log('Saving push subscription for user:', window._userId, 'role:', window._userRole);
     // Delete any existing subscription for this device endpoint (from previous logged-in user)
     const endpointUrl = subscription.endpoint;
     await sb.from('push_subscriptions').delete().eq('subscription->>endpoint', endpointUrl).neq('user_id', window._userId || '');
@@ -7636,8 +7632,8 @@ async function loadAccountDetails() {
         + '<div style="font-size:13px;color:#4ade80;font-weight:700;">&#10003; Notifications enabled</div>'
         + '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;">You\'ll be notified when a coach assigns a new goal.</div>'
         + '</div></div>'
-        + '<button onclick="disableNotifications()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.4);font-size:12px;padding:8px 14px;cursor:pointer;width:100%;margin-bottom:8px;">Disable Notifications</button>'
-        + '<button onclick="testBadge()" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:rgba(255,255,255,0.25);font-size:11px;padding:6px 14px;cursor:pointer;width:100%;">Test Badge (sets to 1)</button>';
+        + '<button onclick="disableNotifications()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.4);font-size:12px;padding:8px 14px;cursor:pointer;width:100%;">Disable Notifications</button>'
+;
     } else if (_notifOK && Notification.permission === 'denied') {
       notifCardBody.innerHTML = '<div style="font-size:13px;color:#f87171;margin-bottom:10px;">&#x26A0; Notifications blocked</div>'
         + '<div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.7;">'
