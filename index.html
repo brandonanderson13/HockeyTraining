@@ -1701,6 +1701,7 @@ async function registerPushSubscription() {
     if (!('PushManager' in window)) return;
     if (!('serviceWorker' in navigator)) return;
     if (typeof Notification === 'undefined') return;
+
     const reg = await navigator.serviceWorker.ready;
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') return;
@@ -1715,6 +1716,9 @@ async function registerPushSubscription() {
     if (!token) { console.warn('No session token - cannot save subscription'); return; }
     console.log('Saving subscription for user:', window._userId);
     console.log('Session user id:', (await sb.auth.getUser()).data.user?.id);
+    // Delete any existing subscription for this device endpoint (from previous logged-in user)
+    const endpointUrl = subscription.endpoint;
+    await sb.from('push_subscriptions').delete().eq('subscription->>endpoint', endpointUrl).neq('user_id', window._userId || '');
     const saveResp = await fetch('/api/save-push-subscription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
@@ -2157,7 +2161,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
           });
         }
       } catch(e) {}
-      // Re-register push subscription if already granted
+      // Re-register push subscription if already granted (players only)
       try {
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && typeof registerPushSubscription === 'function') {
           setTimeout(registerPushSubscription, 3000);
@@ -2200,6 +2204,18 @@ function addLogoutButton(supabase, user, isAdmin) {
   btn.textContent = 'Sign Out';
   btn.style.cssText = 'background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;padding:6px 12px;border-radius:6px;font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;';
   btn.onclick = async () => {
+    // Remove push subscription for this device
+    try {
+      if ('serviceWorker' in navigator && window._userId) {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          const sb2 = await getSupabaseClient();
+          await sb2.from('push_subscriptions').delete().eq('user_id', window._userId);
+          await sub.unsubscribe();
+        }
+      }
+    } catch(e) { console.warn('Push cleanup:', e.message); }
     await supabase.auth.signOut();
     window.location.href = 'login.html';
   };
