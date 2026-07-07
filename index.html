@@ -261,6 +261,12 @@ select:focus{border-color:var(--or);outline:none;}
 
 </style>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#E07820">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TRAINR">
 <link rel="icon" type="image/png" href="/apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="TRAINR">
@@ -1664,7 +1670,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   const script = document.createElement('script');
   script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
   script.onload = async () => {
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true }
+    });
     window._supabaseClient = supabase;
     
     try {
@@ -1828,6 +1836,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
       // Add a logout button to the header
       addLogoutButton(supabase, user, isAdmin);
+      // Signal app is ready (triggers install prompt)
+      setTimeout(() => window.dispatchEvent(new Event('trainrReady')), 2000);
       
     } catch (error) {
       console.error('Auth error:', error);
@@ -4641,7 +4651,8 @@ async function getSupabaseClient() {
   
   window._sbClient = window.supabase.createClient(
     'https://sfkdwprzwtegfkohqsdy.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY'
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY',
+    { auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true } }
   );
   return window._sbClient;
 }
@@ -9260,6 +9271,104 @@ window.addEventListener('load', async () => {
   }, 2000);
 });
 
+
+
+<script>
+// ── SERVICE WORKER REGISTRATION ──────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => { console.log('SW registered:', reg.scope); })
+      .catch(err => { console.warn('SW registration failed:', err); });
+  });
+}
+
+// ── PWA INSTALL PROMPT ────────────────────────────────────────────────────────
+let _deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  _deferredInstallPrompt = e;
+  // Will show our custom banner after login
+});
+
+function isRunningAsPWA() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+}
+
+function shouldShowInstallBanner() {
+  if (isRunningAsPWA()) return false;
+  if (localStorage.getItem('trainrInstallDismissed')) return false;
+  return true;
+}
+
+function showInstallBanner() {
+  if (!shouldShowInstallBanner()) return;
+  if (document.getElementById('pwaInstallBanner')) return;
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const isMobile = isIOS || isAndroid;
+
+  // Only show on mobile
+  if (!isMobile) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'pwaInstallBanner';
+  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:999999;background:#1a1a1a;border-top:2px solid #E07820;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 -8px 32px rgba(0,0,0,0.6);';
+
+  const header = '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
+    + '<div>'
+    + '<div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#E07820;">Add TRAINR to your Home Screen</div>'
+    + '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">Get goal notifications and faster access</div>'
+    + '</div>'
+    + '<button onclick="dismissInstallBanner()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;padding:0 0 0 12px;line-height:1;">&times;</button>'
+    + '</div>';
+
+  let instructions = '';
+  if (isIOS) {
+    instructions = '<div style="background:#111;border-radius:8px;padding:10px 12px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.8;">'
+      + '<div>1. Tap the <strong style="color:#fff;">Share button</strong> <span style="font-size:14px;">⎋</span> at the bottom of Safari</div>'
+      + '<div>2. Scroll down and tap <strong style="color:#fff;">"Add to Home Screen"</strong></div>'
+      + '<div>3. Tap <strong style="color:#fff;">"Add"</strong> in the top right</div>'
+      + '</div>';
+  } else if (_deferredInstallPrompt) {
+    instructions = '<button onclick="triggerAndroidInstall()" style="background:#E07820;border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:12px;border-radius:8px;cursor:pointer;width:100%;">Install App</button>';
+  } else {
+    instructions = '<div style="background:#111;border-radius:8px;padding:10px 12px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.8;">'
+      + '<div>Tap the <strong style="color:#fff;">menu button</strong> in your browser</div>'
+      + '<div>Then tap <strong style="color:#fff;">"Add to Home Screen"</strong></div>'
+      + '</div>';
+  }
+
+  banner.innerHTML = header + instructions;
+  document.body.appendChild(banner);
+}
+
+function dismissInstallBanner() {
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) banner.remove();
+  localStorage.setItem('trainrInstallDismissed', '1');
+}
+
+async function triggerAndroidInstall() {
+  if (!_deferredInstallPrompt) return;
+  _deferredInstallPrompt.prompt();
+  const { outcome } = await _deferredInstallPrompt.userChoice;
+  if (outcome === 'accepted') {
+    localStorage.setItem('trainrInstallDismissed', '1');
+  }
+  _deferredInstallPrompt = null;
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) banner.remove();
+}
+
+// Show banner 3 seconds after app loads (gives time for login to complete)
+window.addEventListener('trainrReady', () => {
+  setTimeout(showInstallBanner, 3000);
+});
+</script>
 
 </body>
 </html>

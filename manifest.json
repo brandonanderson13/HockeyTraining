@@ -1,0 +1,20 @@
+{
+  "name": "TRAINR Hockey Training",
+  "short_name": "TRAINR",
+  "description": "Hockey development platform for players, coaches, and associations",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#E07820",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["sports", "health", "fitness"]
+}
