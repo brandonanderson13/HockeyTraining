@@ -1695,6 +1695,11 @@ function urlBase64ToUint8Array(base64String) {
 
 async function registerPushSubscription() {
   try {
+    // Never register push for coaches or admins
+    if (window._userRole && window._userRole !== 'player') {
+      console.log('Push registration skipped for role:', window._userRole);
+      return;
+    }
     if (!('PushManager' in window)) return;
     if (!('serviceWorker' in navigator)) return;
     if (typeof Notification === 'undefined') return;
@@ -2163,7 +2168,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       } catch(e) {}
       // Re-register push subscription if already granted (players only)
       try {
-        if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && typeof registerPushSubscription === 'function') {
+        if (role === 'player' && typeof Notification !== 'undefined' && Notification.permission === 'granted' && typeof registerPushSubscription === 'function') {
           setTimeout(registerPushSubscription, 3000);
         }
       } catch(notifErr) { console.warn('Notification check failed:', notifErr); }
@@ -7622,14 +7627,17 @@ async function loadAccountDetails() {
   // Update notification button state
   // Render notification card based on device/PWA state
   const notifCardBody = document.getElementById('notifCardBody');
-  if (notifCardBody) {
+  // Hide notifications card for coaches/admins
+  const _notifCard = document.getElementById('notificationsCard');
+  if (_notifCard) _notifCard.style.display = (window._userRole === 'player' || !window._userRole) ? '' : 'none';
+  if (notifCardBody && window._userRole === 'player') {
     const _isPWA = isRunningAsPWA ? isRunningAsPWA() : (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
     const _isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const _notifOK = (function() { try { return 'Notification' in window && typeof Notification !== 'undefined' && 'PushManager' in window; } catch(e) { return false; } })();
 
     if (_notifOK && Notification.permission === 'granted') {
-      // Permission granted but subscription might be missing — re-register silently
-      if (typeof registerPushSubscription === 'function') registerPushSubscription();
+      // Permission granted but subscription might be missing — re-register silently (players only)
+      if (window._userRole === 'player' && typeof registerPushSubscription === 'function') registerPushSubscription();
       notifCardBody.innerHTML = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">'
         + '<span style="font-size:18px;">&#x1F514;</span>'
         + '<div>'
