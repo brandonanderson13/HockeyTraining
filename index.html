@@ -1702,6 +1702,8 @@ function urlBase64ToUint8Array(base64String) {
 async function registerPushSubscription() {
   try {
     if (!('PushManager' in window)) return;
+    if (!('serviceWorker' in navigator)) return;
+    if (typeof Notification === 'undefined') return;
     const reg = await navigator.serviceWorker.ready;
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') return;
@@ -1828,6 +1830,7 @@ function confirmInstalled() {
 
 async function requestNotificationPermission() {
   try {
+    if (typeof Notification === 'undefined') { alert('Notifications are not supported on this device.'); return; }
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
       await registerPushSubscription();
@@ -2045,11 +2048,12 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       if (typeof triggerInstallBannerAfterLogin === 'function') {
         triggerInstallBannerAfterLogin();
       }
-      // Push notifications enabled via Account page button
-      // Re-register if permission already granted (refreshes subscription)
-      if (Notification.permission === 'granted' && typeof registerPushSubscription === 'function') {
-        setTimeout(registerPushSubscription, 3000);
-      }
+      // Re-register push subscription if already granted
+      try {
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && typeof registerPushSubscription === 'function') {
+          setTimeout(registerPushSubscription, 3000);
+        }
+      } catch(notifErr) { console.warn('Notification check failed:', notifErr); }
       
     } catch (error) {
       console.error('Auth error:', error);
@@ -7472,14 +7476,15 @@ async function loadAccountDetails() {
   const notifStatus = document.getElementById('notifStatus');
   const enableNotifBtn = document.getElementById('enableNotifBtn');
   if (notifStatus && enableNotifBtn) {
-    if (!("Notification" in window)) {
+    const _notifOK = (function() { try { return 'Notification' in window && typeof Notification !== 'undefined'; } catch(e) { return false; } })();
+    if (!_notifOK) {
       notifStatus.textContent = "Push notifications not supported on this device.";
       enableNotifBtn.style.display = "none";
-    } else if (Notification.permission === "granted") {
+    } else if (_notifOK && Notification.permission === "granted") {
       notifStatus.textContent = "\u2713 Notifications enabled";
       notifStatus.style.color = "#4ade80";
       enableNotifBtn.style.display = "none";
-    } else if (Notification.permission === "denied") {
+    } else if (_notifOK && Notification.permission === "denied") {
       notifStatus.textContent = "Notifications blocked. Go to your browser settings to allow them.";
       enableNotifBtn.style.display = "none";
     } else {
