@@ -2090,6 +2090,15 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       if (typeof triggerInstallBannerAfterLogin === 'function') {
         triggerInstallBannerAfterLogin();
       }
+      // Clear app badge when user opens the app
+      try {
+        if ('clearAppBadge' in navigator) navigator.clearAppBadge();
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.ready.then(reg => {
+            if (reg.active) reg.active.postMessage('clearBadge');
+          });
+        }
+      } catch(e) {}
       // Re-register push subscription if already granted
       try {
         if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && typeof registerPushSubscription === 'function') {
@@ -5857,7 +5866,11 @@ function applyCustomization(){
   const conf = document.getElementById('cust-apply-confirm');
   if(conf){ conf.style.display='inline'; setTimeout(()=>conf.style.display='none', 2500); }
 
-  updatePhaseCard();}
+  updatePhaseCard();
+
+  // Save training days to Supabase for server-side reminders
+  saveTrainingDaysToSupabase(settings.days);
+}
 
 function resetCustomization(){
   if(!confirm('Reset all customization to defaults?')) return;
@@ -9695,6 +9708,21 @@ async function renewalSignOut() {
     await sb.auth.signOut();
   } catch(e) {}
   window.location.href = 'login.html';
+}
+
+
+async function saveTrainingDaysToSupabase(days) {
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    await sb.from('subscriptions')
+      .update({ training_days: days })
+      .eq('user_id', user.id);
+    console.log('Training days saved to Supabase:', days);
+  } catch(e) {
+    console.warn('Could not save training days:', e.message);
+  }
 }
 
 </script>
