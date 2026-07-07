@@ -9310,39 +9310,49 @@ function showInstallBanner() {
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isAndroid = /android/i.test(navigator.userAgent);
   const isMobile = isIOS || isAndroid;
-
-  // Only show on mobile
   if (!isMobile) return;
 
   const banner = document.createElement('div');
   banner.id = 'pwaInstallBanner';
-  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:999999;background:#1a1a1a;border-top:2px solid #E07820;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 -8px 32px rgba(0,0,0,0.6);';
+  banner.style.cssText = [
+    'position:fixed;bottom:0;left:0;right:0;z-index:999999',
+    'background:#111;border-top:3px solid #E07820',
+    'padding:14px 16px 20px;box-shadow:0 -12px 40px rgba(0,0,0,0.8)',
+    'font-family:system-ui,sans-serif'
+  ].join(';');
 
-  const header = '<div style="display:flex;justify-content:space-between;align-items:flex-start;">'
-    + '<div>'
-    + '<div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#E07820;">Add TRAINR to your Home Screen</div>'
-    + '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">Get goal notifications and faster access</div>'
-    + '</div>'
-    + '<button onclick="dismissInstallBanner()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;padding:0 0 0 12px;line-height:1;">&times;</button>'
+  // Top row: icon + text + dismiss
+  const topRow = ''
+    + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+    +   '<img src="/apple-touch-icon.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;">'
+    +   '<div style="flex:1;min-width:0;">'
+    +     '<div style="font-size:15px;font-weight:700;color:#fff;letter-spacing:-.01em;">Add TRAINR to your Home Screen</div>'
+    +     '<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:1px;">Get notifications &amp; faster access</div>'
+    +   '</div>'
+    +   '<button onclick="dismissInstallBanner()" style="background:rgba(255,255,255,0.08);border:none;color:rgba(255,255,255,0.5);width:28px;height:28px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">&times;</button>'
     + '</div>';
 
-  let instructions = '';
+  let action = '';
   if (isIOS) {
-    instructions = '<div style="background:#111;border-radius:8px;padding:10px 12px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.8;">'
-      + '<div>1. Tap the <strong style="color:#fff;">Share button</strong> <span style="font-size:14px;">⎋</span> at the bottom of Safari</div>'
-      + '<div>2. Scroll down and tap <strong style="color:#fff;">"Add to Home Screen"</strong></div>'
-      + '<div>3. Tap <strong style="color:#fff;">"Add"</strong> in the top right</div>'
+    action = ''
+      + '<div style="background:#1a1a1a;border-radius:10px;padding:11px 13px;">'
+      +   '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">How to install on iPhone</div>'
+      +   '<div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.9;">'
+      +     '<span style="color:#E07820;font-weight:700;">1</span> Tap the Share button <span style="font-size:16px;vertical-align:middle;">⎋</span> at the bottom of Safari<br>'
+      +     '<span style="color:#E07820;font-weight:700;">2</span> Tap <strong style="color:#fff;">&#8220;Add to Home Screen&#8221;</strong><br>'
+      +     '<span style="color:#E07820;font-weight:700;">3</span> Tap <strong style="color:#fff;">&#8220;Add&#8221;</strong> in the top right'
+      +   '</div>'
       + '</div>';
   } else if (_deferredInstallPrompt) {
-    instructions = '<button onclick="triggerAndroidInstall()" style="background:#E07820;border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:12px;border-radius:8px;cursor:pointer;width:100%;">Install App</button>';
+    action = '<button onclick="triggerAndroidInstall()" style="width:100%;padding:13px;background:#E07820;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;letter-spacing:.02em;cursor:pointer;">Add to Home Screen</button>';
   } else {
-    instructions = '<div style="background:#111;border-radius:8px;padding:10px 12px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.8;">'
-      + '<div>Tap the <strong style="color:#fff;">menu button</strong> in your browser</div>'
-      + '<div>Then tap <strong style="color:#fff;">"Add to Home Screen"</strong></div>'
+    action = ''
+      + '<div style="background:#1a1a1a;border-radius:10px;padding:11px 13px;font-size:13px;color:rgba(255,255,255,0.6);line-height:1.9;">'
+      +   'Tap the browser menu <strong style="color:#fff;">&#8942;</strong> then tap <strong style="color:#fff;">&#8220;Add to Home Screen&#8221;</strong>'
       + '</div>';
   }
 
-  banner.innerHTML = header + instructions;
+  banner.innerHTML = topRow + action;
   document.body.appendChild(banner);
 }
 
