@@ -1758,6 +1758,18 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.ready.then(reg => {
     if (reg.active) reg.active.postMessage('getBadgeCount');
   }).catch(() => {});
+
+  // Clear badge whenever app comes to foreground
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      try {
+        if ('clearAppBadge' in navigator) navigator.clearAppBadge();
+        navigator.serviceWorker.ready.then(reg => {
+          if (reg.active) reg.active.postMessage('clearBadge');
+        }).catch(() => {});
+      } catch(e) {}
+    }
+  });
 }
 
 // ── PWA INSTALL PROMPT ────────────────────────────────────────────────────────
