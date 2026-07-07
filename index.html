@@ -1668,7 +1668,9 @@ async function sendGoalPushNotifications(playerIds, title, due) {
     const token = session?.access_token;
     if (!token || !playerIds || !playerIds.length) return;
     const dueStr = due ? ' — due ' + new Date(due).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    console.log('Sending push to playerIds:', [...playerIds]);
     for (const pid of playerIds) {
+      console.log('Sending push to userId:', pid);
       fetch('/api/send-push', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
