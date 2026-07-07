@@ -1,9 +1,10 @@
 {
   "name": "delano-tigers-training",
   "version": "1.0.0",
-  "description": "Delano Tigers 12-Week Off-Ice Training Program",
+  "description": "TRAINR Hockey Training",
   "dependencies": {
     "stripe": "^14.0.0",
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "^2.39.0",
+    "web-push": "^3.6.7"
   }
 }
