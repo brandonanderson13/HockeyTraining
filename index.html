@@ -1745,7 +1745,19 @@ if ('serviceWorker' in navigator) {
         if ('clearAppBadge' in navigator) navigator.clearAppBadge();
       } catch(e) {}
     }
+    if (event.data?.type === 'badgeCount') {
+      // SW is reporting current count — sync it via navigator
+      try {
+        const c = event.data.count;
+        if (c > 0) { if ('setAppBadge' in navigator) navigator.setAppBadge(c); }
+        else { if ('clearAppBadge' in navigator) navigator.clearAppBadge(); }
+      } catch(e) {}
+    }
   });
+  // On page load, ask SW for current badge count and sync via navigator
+  navigator.serviceWorker.ready.then(reg => {
+    if (reg.active) reg.active.postMessage('getBadgeCount');
+  }).catch(() => {});
 }
 
 // ── PWA INSTALL PROMPT ────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
-// TRAINR Service Worker v6
-const SW_VERSION = 'v6';
-const CACHE_NAME = 'trainr-v6';
+// TRAINR Service Worker v7
+const SW_VERSION = 'v7';
+const CACHE_NAME = 'trainr-v7';
 const BADGE_CACHE = 'trainr-badge';
 const BADGE_KEY = 'badge-count';
 const STATIC_ASSETS = ['/', '/index.html', '/apple-touch-icon.png', '/manifest.json'];
@@ -29,9 +29,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        if (response.ok) {
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
-        }
+        if (response.ok) caches.open(CACHE_NAME).then(c => c.put(event.request, response.clone()));
         return response;
       })
       .catch(() => caches.match(event.request).then(c => c || caches.match('/index.html')))
@@ -54,28 +52,18 @@ async function saveBadgeCount(count) {
   } catch (e) {}
 }
 
-async function updateBadge(count) {
-  await saveBadgeCount(count);
-  console.log('[SW] Badge count:', count);
-
-  // Try self.setAppBadge (SW context)
-  try {
-    if (count === 0) {
-      if ('clearAppBadge' in self) await self.clearAppBadge();
-    } else {
-      if ('setAppBadge' in self) await self.setAppBadge(count);
-    }
-  } catch(e) { console.warn('[SW] self badge failed:', e.message); }
-
-  // Also message any open clients to set badge via navigator (page context)
+async function broadcastBadge(count) {
+  // Tell all open page clients to set badge via navigator (works on iOS)
   try {
     const allClients = await clients.matchAll({ includeUncontrolled: true });
     for (const client of allClients) {
-      client.postMessage(count === 0
-        ? { type: 'clearBadge' }
-        : { type: 'setBadge', count }
-      );
+      client.postMessage({ type: count > 0 ? 'setBadge' : 'clearBadge', count });
     }
+  } catch(e) {}
+  // Also try from SW context as fallback
+  try {
+    if (count > 0) { if ('setAppBadge' in self) self.setAppBadge(count); }
+    else { if ('clearAppBadge' in self) self.clearAppBadge(); }
   } catch(e) {}
 }
 
@@ -86,39 +74,48 @@ self.addEventListener('push', (event) => {
   try { data = event.data ? event.data.json() : {}; }
   catch (e) { data = { title: 'TRAINR', body: '' }; }
 
-  event.waitUntil(
-    getBadgeCount().then(async count => {
-      const newCount = count + 1;
-      await self.registration.showNotification(data.title || 'TRAINR', {
-        body: data.body || '',
-        icon: '/apple-touch-icon.png',
-        badge: '/apple-touch-icon.png',
-        tag: data.tag || 'trainr-notification',
-        data: { url: data.url || '/' }
-      });
-      await updateBadge(newCount);
-    })
-  );
+  event.waitUntil((async () => {
+    const count = await getBadgeCount();
+    const newCount = count + 1;
+    console.log('[SW] Badge:', count, '->', newCount);
+    await saveBadgeCount(newCount);
+    await self.registration.showNotification(data.title || 'TRAINR', {
+      body: data.body || '',
+      icon: '/apple-touch-icon.png',
+      badge: '/apple-touch-icon.png',
+      tag: data.tag || 'trainr-notification',
+      data: { url: data.url || '/' }
+    });
+    await broadcastBadge(newCount);
+  })());
 });
 
 // ── NOTIFICATION CLICK ────────────────────────────────────────────────────────
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = event.notification.data?.url || '/';
-  event.waitUntil(
-    Promise.all([
-      updateBadge(0),
-      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-        for (const c of list) {
-          if (c.url.includes(self.location.origin) && 'focus' in c) return c.focus();
-        }
-        if (clients.openWindow) return clients.openWindow(url);
-      })
-    ])
-  );
+  event.waitUntil((async () => {
+    await saveBadgeCount(0);
+    await broadcastBadge(0);
+    const list = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of list) {
+      if (c.url.includes(self.location.origin) && 'focus' in c) return c.focus();
+    }
+    if (clients.openWindow) return clients.openWindow(url);
+  })());
 });
 
 // ── MESSAGE ───────────────────────────────────────────────────────────────────
 self.addEventListener('message', (event) => {
-  if (event.data === 'clearBadge') updateBadge(0);
+  if (event.data === 'clearBadge') {
+    saveBadgeCount(0);
+    broadcastBadge(0);
+  }
+  if (event.data === 'getBadgeCount') {
+    // Page is asking for current count — report it back so page can sync badge
+    getBadgeCount().then(count => {
+      console.log('[SW] Reporting badge count to page:', count);
+      event.source?.postMessage({ type: 'badgeCount', count });
+    });
+  }
 });
