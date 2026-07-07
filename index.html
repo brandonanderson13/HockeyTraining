@@ -1655,6 +1655,28 @@ async function renewalSignOut() {
   } catch(e) {}
   window.location.href = 'login.html';
 }
+
+async function sendGoalPushNotifications(playerIds, title, due) {
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token;
+    if (!token || !playerIds || !playerIds.length) return;
+    const dueStr = due ? ' — due ' + new Date(due).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    for (const pid of playerIds) {
+      fetch('/api/send-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({
+          userId: pid,
+          title: 'New Goal Assigned',
+          body: (title || 'You have a new goal') + dueStr,
+          url: '/'
+        })
+      }).catch(e => console.warn('Push send failed:', e));
+    }
+  } catch(e) { console.warn('sendGoalPushNotifications error:', e); }
+}
 </script>
 
 <script>
@@ -9577,27 +9599,6 @@ async function renewalCheckStatus() {
   } catch(e) {
     if (msg) { msg.textContent = 'Error checking: ' + e.message; msg.style.color = '#f87171'; }
   }
-}
-async function sendGoalPushNotifications(playerIds, title, due) {
-  try {
-    const sb = await getSupabaseClient();
-    const { data: { session } } = await sb.auth.getSession();
-    const token = session?.access_token;
-    if (!token || !playerIds || !playerIds.length) return;
-    const dueStr = due ? ' — due ' + new Date(due).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-    for (const pid of playerIds) {
-      fetch('/api/send-push', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({
-          userId: pid,
-          title: 'New Goal Assigned',
-          body: (title || 'You have a new goal') + dueStr,
-          url: '/'
-        })
-      }).catch(e => console.warn('Push send failed:', e));
-    }
-  } catch(e) { console.warn('sendGoalPushNotifications error:', e); }
 }
 
 
