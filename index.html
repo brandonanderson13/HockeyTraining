@@ -1537,11 +1537,7 @@ select:focus{border-color:var(--or);outline:none;}
 
     <div class="card" id="notificationsCard">
       <div class="ch"><span class="cht">Notifications</span></div>
-      <div class="cb">
-        <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Get notified when a coach assigns you a new goal.</p>
-        <div id="notifStatus" style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:12px;"></div>
-        <button id="enableNotifBtn" onclick="requestNotificationPermission()" class="btn-o" style="margin:0;">Enable Notifications</button>
-      </div>
+      <div class="cb" id="notifCardBody">Loading...</div>
     </div>
     
     <div class="card">
@@ -2987,6 +2983,26 @@ function loadHomeSec() {
   const role = window._userRole;
   const isPlayer = role === 'player';
 
+  // Notification nudge for users who haven't enabled yet
+  const _isPWAHome = (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
+  const _notifEnabledHome = (function() { try { return 'Notification' in window && Notification.permission === 'granted'; } catch(e) { return false; } })();
+  const _notifDismissed = localStorage.getItem('trainrNotifNudgeDismissed');
+  let notifNudgeHtml = '';
+  if (!_notifEnabledHome && !_notifDismissed) {
+    if (_isPWAHome) {
+      notifNudgeHtml = '<div style="background:rgba(224,120,32,0.08);border:1px solid rgba(224,120,32,0.25);border-radius:8px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">'
+        + '<span style="font-size:20px;flex-shrink:0;">&#x1F514;</span>'
+        + '<div style="flex:1;">'
+        + '<div style="font-size:13px;font-weight:700;color:#E07820;">Enable Goal Notifications</div>'
+        + '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:1px;">Get notified when your coach assigns a goal</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:8px;flex-shrink:0;">'
+        + '<button onclick="showSec(\'account\')" style="background:#E07820;border:none;color:#fff;font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;cursor:pointer;">Turn On</button>'
+        + '<button onclick="localStorage.setItem(\'trainrNotifNudgeDismissed\',\'1\');this.closest(\'div[style*=margin-bottom\']\').remove()" style="background:rgba(255,255,255,0.06);border:none;color:rgba(255,255,255,0.4);font-size:11px;padding:6px 10px;border-radius:6px;cursor:pointer;">Later</button>'
+        + '</div></div>';
+    }
+  }
+
   // Quick log buttons for players
   const quickLog = isPlayer ? `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.2rem;">
@@ -3470,6 +3486,7 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
       </div>` : '';
 
   el.innerHTML = `
+    ${notifNudgeHtml || ''}
     ${statsHtml}
     <div class="card">
       <div class="ch">
@@ -7473,23 +7490,41 @@ async function loadAccountDetails() {
   }
 
   // Update notification button state
-  const notifStatus = document.getElementById('notifStatus');
-  const enableNotifBtn = document.getElementById('enableNotifBtn');
-  if (notifStatus && enableNotifBtn) {
-    const _notifOK = (function() { try { return 'Notification' in window && typeof Notification !== 'undefined'; } catch(e) { return false; } })();
-    if (!_notifOK) {
-      notifStatus.textContent = "Push notifications not supported on this device.";
-      enableNotifBtn.style.display = "none";
-    } else if (_notifOK && Notification.permission === "granted") {
-      notifStatus.textContent = "\u2713 Notifications enabled";
-      notifStatus.style.color = "#4ade80";
-      enableNotifBtn.style.display = "none";
-    } else if (_notifOK && Notification.permission === "denied") {
-      notifStatus.textContent = "Notifications blocked. Go to your browser settings to allow them.";
-      enableNotifBtn.style.display = "none";
+  // Render notification card based on device/PWA state
+  const notifCardBody = document.getElementById('notifCardBody');
+  if (notifCardBody) {
+    const _isPWA = isRunningAsPWA ? isRunningAsPWA() : (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
+    const _isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const _notifOK = (function() { try { return 'Notification' in window && typeof Notification !== 'undefined' && 'PushManager' in window; } catch(e) { return false; } })();
+
+    if (_notifOK && Notification.permission === 'granted') {
+      notifCardBody.innerHTML = '<div style="display:flex;align-items:center;gap:10px;">'
+        + '<span style="font-size:18px;">&#x1F514;</span>'
+        + '<div>'
+        + '<div style="font-size:13px;color:#4ade80;font-weight:700;">&#10003; Notifications enabled</div>'
+        + '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;">You\'ll be notified when a coach assigns a new goal.</div>'
+        + '</div></div>';
+    } else if (_notifOK && Notification.permission === 'denied') {
+      notifCardBody.innerHTML = '<div style="font-size:13px;color:#f87171;margin-bottom:10px;">&#x26A0; Notifications blocked</div>'
+        + '<div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.7;">'
+        + (_isIOS ? 'Go to <strong style="color:#fff;">Settings &#8250; Safari &#8250; ' + window.location.hostname + '</strong> and set Notifications to Allow.'
+                 : 'Click the lock icon in your browser address bar and set Notifications to Allow.')
+        + '</div>';
+    } else if (_notifOK) {
+      notifCardBody.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Get notified when a coach assigns you a new goal.</p>'
+        + '<button onclick="requestNotificationPermission()" class="btn-o" style="margin:0;">Enable Notifications</button>';
+    } else if (_isIOS && !_isPWA) {
+      notifCardBody.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.7;margin-bottom:14px;">'
+        + '&#x1F4F1; To enable push notifications on iPhone, TRAINR must be added to your home screen first.'
+        + '</div>'
+        + '<div style="background:#1a1a1a;border-radius:8px;padding:12px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.9;margin-bottom:12px;">'
+        + '<div><span style="color:#E07820;font-weight:700;">1</span> Tap the <strong style="color:#fff;">&#8226;&#8226;&#8226;</strong> menu in the bottom right of Safari</div>'
+        + '<div><span style="color:#E07820;font-weight:700;">2</span> Tap <strong style="color:#fff;">Share &#x23CE;</strong></div>'
+        + '<div><span style="color:#E07820;font-weight:700;">3</span> Tap <strong style="color:#fff;">&ldquo;Add to Home Screen&rdquo;</strong></div>'
+        + '<div><span style="color:#E07820;font-weight:700;">4</span> Open TRAINR from your home screen, then come back here</div>'
+        + '</div>';
     } else {
-      notifStatus.textContent = "Tap below to receive goal notifications.";
-      enableNotifBtn.style.display = "";
+      notifCardBody.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,0.5);">Push notifications are not supported on this browser.</div>';
     }
   }
 
