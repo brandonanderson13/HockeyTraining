@@ -1844,19 +1844,19 @@ function confirmInstalled() {
 
 async function testBadge() {
   try {
+    // First clear any existing badge and reset SW counter
+    if ('clearAppBadge' in navigator) await navigator.clearAppBadge();
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.ready;
+      if (reg.active) reg.active.postMessage('clearBadge');
+    }
+    // Wait a moment then set to 1
+    await new Promise(r => setTimeout(r, 200));
     if ('setAppBadge' in navigator) {
       await navigator.setAppBadge(1);
-      alert('Badge set via navigator.setAppBadge — check your home screen icon');
-    } else if ('serviceWorker' in navigator) {
-      const reg = await navigator.serviceWorker.ready;
-      if ('setAppBadge' in reg) {
-        await reg.setAppBadge(1);
-        alert('Badge set via registration.setAppBadge');
-      } else {
-        alert('setAppBadge not supported on this device/browser. Badges may not work here.');
-      }
+      alert('Badge set to 1 — close the app and check your home screen icon');
     } else {
-      alert('setAppBadge not supported on this device/browser.');
+      alert('setAppBadge not supported on this device.');
     }
   } catch(e) {
     alert('Badge error: ' + e.message);
