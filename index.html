@@ -5662,12 +5662,12 @@ function syncDaysToSeason() {
   updatePhaseCard();}
 
 const _PHASE_INFO = {
-  earlyoffseason: { label: 'Early Off-Season', title: 'Foundation & Strength', weeks: '14 weeks / 5 days/week', tags: ['Strength Build','Movement Quality','Progressive Load'], desc: 'Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season power work.' },
+  earlyoffseason: { label: 'Early Off-Season', title: 'Foundation & Strength', weeks: '15 weeks / 5 days/week', tags: ['Strength Build','Movement Quality','Progressive Load'], desc: 'Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season power work.' },
   lateoffseason:  { label: 'Late Off-Season',  title: 'Power & Development',   weeks: '8 weeks / 5 days/week',  tags: ['Explosive Power','Complex Training','Peak Development'], desc: 'Convert your strength into explosive hockey power. Heavier loads, plyometric complexes, and peak conditioning.' },
   preseason:      { label: 'Pre-Season',        title: 'Sharpen & Peak',        weeks: '4 weeks / 4 days/week',  tags: ['Game Speed','Hockey Specific','Peak Performance'], desc: 'Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.' },
   inseason_a:     { label: 'In-Season Block A', title: 'Early Season (Oct-Nov)', weeks: '8 weeks / 3 days/week',  tags: ['Strength Maintenance','Full Recovery','Game Focus'], desc: 'Early season — maintain the strength you built without adding fatigue on top of games and practices.' },
-  inseason_b:     { label: 'In-Season Block B', title: 'Mid/Late Season (Dec-Mar)', weeks: '8 weeks / 3 days/week', tags: ['Fatigue Management','Recovery First','Stay Sharp'], desc: 'Mid and late season — manage fatigue, prioritize recovery, and stay explosive for games and playoffs.' },
-  recovery:       { label: 'Active Recovery',   title: 'Rest & Rebuild',        weeks: '4 weeks / 3 days/week',  tags: ['Active Recovery','Variety','Reset'], desc: 'Bridge between seasons. Lower intensity, higher variety. Maintain fitness and mentally reset before the next training year.' }
+  inseason_b:     { label: 'In-Season Block B', title: 'Mid/Late Season (Dec-Mar)', weeks: '10 weeks / 3 days/week', tags: ['Fatigue Management','Recovery First','Stay Sharp'], desc: 'Mid and late season — manage fatigue, prioritize recovery, and stay explosive for games and playoffs.' },
+  recovery:       { label: 'Active Recovery',   title: 'Rest & Rebuild',        weeks: '7 weeks / 3 days/week',  tags: ['Active Recovery','Variety','Reset'], desc: 'Bridge between seasons. Lower intensity, higher variety. Maintain fitness and mentally reset before the next training year.' }
 };
 
 function updatePhaseCard() {
@@ -5692,7 +5692,7 @@ function updatePhaseCard() {
 function applyCustomization(){
   console.log('applyCustomization called');
   // Sync season to phaseSelect
-  const _seasonToPhase = {earlyoffseason:'1', lateoffseason:'2', preseason:'3', inseason_a:'4', inseason_b:'5'};
+  const _seasonToPhase = {earlyoffseason:'1', lateoffseason:'2', preseason:'3', inseason_a:'4', inseason_b:'5', recovery:'6'};
   const _syncSeason = document.getElementById('cust-season')?.value || 'earlyoffseason';
   const phaseEl = document.getElementById('phaseSelect');
   if (phaseEl) phaseEl.value = _seasonToPhase[_syncSeason] || '1';
