@@ -620,42 +620,45 @@ select:focus{border-color:var(--or);outline:none;}
 
       </div>
 
-      <!-- TRAINING DAYS -->
-      <div style="margin-bottom:16px;">
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Training Days</label>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          <label class="day-toggle"><input type="checkbox" value="Monday" checked><span>Mon</span></label>
-          <label class="day-toggle"><input type="checkbox" value="Tuesday" checked><span>Tue</span></label>
-          <label class="day-toggle"><input type="checkbox" value="Wednesday"><span>Wed</span></label>
-          <label class="day-toggle"><input type="checkbox" value="Thursday" checked><span>Thu</span></label>
-          <label class="day-toggle"><input type="checkbox" value="Friday" checked><span>Fri</span></label>
-          <label class="day-toggle"><input type="checkbox" value="Saturday" checked><span>Sat</span></label>
-          <label class="day-toggle"><input type="checkbox" value="Sunday"><span>Sun</span></label>
+      <!-- 2-COL: Training Days/Include + Phase Card -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+
+        <!-- LEFT: Training Days + Include + Apply -->
+        <div>
+          <div style="margin-bottom:14px;">
+            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Training Days</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <label class="day-toggle"><input type="checkbox" value="Monday" checked><span>Mon</span></label>
+              <label class="day-toggle"><input type="checkbox" value="Tuesday" checked><span>Tue</span></label>
+              <label class="day-toggle"><input type="checkbox" value="Wednesday"><span>Wed</span></label>
+              <label class="day-toggle"><input type="checkbox" value="Thursday" checked><span>Thu</span></label>
+              <label class="day-toggle"><input type="checkbox" value="Friday" checked><span>Fri</span></label>
+              <label class="day-toggle"><input type="checkbox" value="Saturday" checked><span>Sat</span></label>
+              <label class="day-toggle"><input type="checkbox" value="Sunday"><span>Sun</span></label>
+            </div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Include in Program</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <label class="cust-check"><input type="checkbox" id="cust-strength" checked><span>Strength</span></label>
+              <label class="cust-check"><input type="checkbox" id="cust-agility" checked><span>Agility</span></label>
+              <label class="cust-check"><input type="checkbox" id="cust-skills" checked><span>Skills</span></label>
+              <label class="cust-check"><input type="checkbox" id="cust-conditioning" checked><span>Conditioning</span></label>
+              <input type="hidden" name="focus" value="balanced">
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button onclick="applyCustomization()" class="btn-o" style="margin-top:0;">Apply Settings</button>
+            <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">✓ Settings applied!</div>
+          </div>
         </div>
-      </div>
 
-      <!-- INCLUDE -->
-      <div style="margin-bottom:16px;">
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Include in Program</label>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          <label class="cust-check"><input type="checkbox" id="cust-strength" checked><span>Strength</span></label>
-          <label class="cust-check"><input type="checkbox" id="cust-agility" checked><span>Agility</span></label>
-          <label class="cust-check"><input type="checkbox" id="cust-skills" checked><span>Skills</span></label>
-          <label class="cust-check"><input type="checkbox" id="cust-conditioning" checked><span>Conditioning</span></label>
-          <input type="hidden" name="focus" value="balanced">
+        <!-- RIGHT: Phase Card -->
+        <div>
+          <label style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">About This Phase</label>
+          <div id="selectedPhaseCard" style="background:#0d0d0d;border:1px solid #333;border-radius:8px;padding:14px;"></div>
         </div>
-      </div>
 
-      <!-- APPLY -->
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
-        <button onclick="applyCustomization()" class="btn-o" style="margin-top:0;">Apply Settings</button>
-        <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">✓ Settings applied!</div>
-      </div>
-
-      <!-- PHASE INFO CARD -->
-      <div style="border-top:1px solid #1a1a1a;padding-top:16px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">About This Phase</div>
-        <div id="selectedPhaseCard" style="background:#0d0d0d;border:1px solid #333;border-radius:8px;padding:14px;"></div>
       </div>
 
     </div>
@@ -3141,8 +3144,11 @@ async function loadDashboard(targetId) {
 function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments, goals, targetId) {
   const el = document.getElementById(targetId||'dashboardContent');
   // Use goals for Done/Open counts
-  const openGoalCount = (goals||[]).filter(g => !g.completed).length;
-  const doneGoalCount = (goals||[]).filter(g => g.completed).length;
+  const openGoalCount = (goals||[]).length - doneGoalCount;
+  const doneGoalCount = (goals||[]).filter(g => {
+    const isCb = !g.target_value;
+    return isCb ? !!g.completed : (g._progress !== undefined ? g._progress : (g.current_value||0)) >= g.target_value;
+  }).length;
 
   const statsHtml = `
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.2rem;">
@@ -3441,7 +3447,7 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
   let totShots=0, totMins=0, totWork=0;
   players.forEach(p => { const s=statsMap[p.user_id]||{}; totShots+=s.shots||0; totMins+=s.mins||0; totWork+=s.workouts||0; });
   const summaryHtml = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.2rem;">
-    ${[['Players','#4ade80',players.length],['Total Shots','#fb923c',totShots.toLocaleString()],['Stick Mins','#a78bfa',totMins.toLocaleString()],['Workouts','#fbbf24',totWork],['Open Goals','var(--primary-color)',goals.filter(g=>!g.completed).length]].map(([l,c,v])=>`
+    ${[['Players','#4ade80',players.length],['Total Shots','#fb923c',totShots.toLocaleString()],['Stick Mins','#a78bfa',totMins.toLocaleString()],['Workouts','#fbbf24',totWork],['Open Goals','var(--primary-color)',goals.filter(g=>{const isCb=!g.target_value;return isCb?!g.completed:(g._progress!==undefined?g._progress:(g.current_value||0))<g.target_value;}).length]].map(([l,c,v])=>`
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
       <div style="font-size:22px;font-weight:800;color:${c};font-family:'Barlow Condensed',sans-serif;">${v}</div>
       <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">${l}</div>
