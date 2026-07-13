@@ -691,8 +691,8 @@ select:focus{border-color:var(--or);outline:none;}
     <option value="1">Early Off-Season</option>
     <option value="2">Late Off-Season</option>
     <option value="3">Pre-Season</option>
-    <option value="4">In-Season Block A</option>
-    <option value="5">In-Season Block B</option>
+    <option value="4">In-Season Block A (Oct-Nov)</option>
+    <option value="5">In-Season Block B (Dec-Mar)</option>
     <option value="6">Active Recovery / Bridge</option>
   </select>
   <div style="font-size:11px;color:rgba(255,255,255,0.38);margin-bottom:8px;">Tap any exercise for description + YouTube. Skills sessions have quick-log buttons to log directly into Stickhandling Log or Shot Log.</div>
@@ -1925,349 +1925,288 @@ function addLogoutButton(supabase, user, isAdmin) {
 
 
 const phases={
-  1:{label:'Early Off-Season — Foundation & Strength (20 Weeks)',desc:'Build your base. The longest development window of the year. Start with movement quality and add load progressively across 12 weeks.',color:'#60a5fa',weeks:[
-    {num:1,focus:'Movement Quality & Base',days:[
-      {n:'Monday',t:'Lower Body + Mobility',items:[['Goblet Squat','4×12'],['Romanian Deadlift','4×10'],['Lateral Lunge','3×10 each'],['Calf Raises','3×20'],['Hip Hinge Pattern','3×10'],['Dead Bug','3×10 each']]},
-      {n:'Tuesday',t:'Upper Body + Core',items:[['Push-Up','4×12'],['Dumbbell Row','4×10 each'],['Shoulder Press','3×10'],['Plank','3×40s'],['Mountain Climbers','3×15'],['Band Pull-Apart','3×15']]},
-      {n:'Thursday',t:'Lower Body + Agility',items:[['Step-Up with Knee Drive','3×10 each'],['Lateral Lunge','3×10 each'],['Box Jump','3×5'],['Cone Shuffle','3×30s'],['Lateral Bound','3×6 each'],['Calf Raises','3×20']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Push-Up','4×12'],['Bent-Over Row','4×10'],['Bicep Curl','3×12'],['Tricep Dip','3×10'],['Burpees','3×10'],['Shuttle Runs','4 rounds']]},
-      {n:'Saturday',t:'Full Body Circuit',items:[['Goblet Squat','3×12'],['Push-Up','3×12'],['Dumbbell Row','3×10 each'],['Box Jump','3×5'],['Plank','3×40s'],['Burpees','3×8']]}
+  1:{label:'Early Off-Season — Foundation & Strength (14 Weeks)',desc:'Build your base. The longest development window before late off-season power work. Start with movement quality and add load progressively.',color:'#60a5fa',weeks:[
+    {num:1,focus:'Movement Quality & Base Strength',days:[
+      {n:'Monday',t:'Lower Body — Foundation',items:[['Goblet Squat','4×12'],['Romanian Deadlift','4×10'],['Lateral Lunge','4×10 each'],['Glute Bridge','4×15'],['Calf Raises','4×20'],['Dead Bug','4×10 each']]},
+      {n:'Tuesday',t:'Upper Body — Foundation',items:[['Push-Up','4×15'],['Dumbbell Row','4×12 each'],['Shoulder Press','4×10'],['Band Pull-Apart','4×15'],['Plank','4×45s'],['Mountain Climbers','4×15']]},
+      {n:'Thursday',t:'Lower Body + Agility',items:[['Step-Up with Knee Drive','4×10 each'],['Lateral Lunge','4×10 each'],['Box Jump','4×5'],['Cone Shuffle','4×30s'],['Lateral Bound','4×6 each'],['Calf Raises','4×20']]},
+      {n:'Friday',t:'Upper Body + Conditioning',items:[['Push-Up','4×15'],['Bent-Over Row','4×10'],['Bicep Curl','4×12'],['Tricep Dip','4×10'],['Burpees','4×10'],['Shuttle Runs','5 rounds']]},
+      {n:'Saturday',t:'Full Body Circuit',items:[['Goblet Squat','4×12'],['Push-Up','4×12'],['Dumbbell Row','4×10 each'],['Box Jump','4×5'],['Plank','4×45s'],['Shuttle Runs','5 rounds']]}
     ]},
-    {num:2,focus:'Adding Volume & Consistency',days:[
-      {n:'Monday',t:'Lower Body + Power',items:[['Goblet Squat','4×12'],['Romanian Deadlift','4×10'],['Step-Up with Knee Drive','3×10 each'],['Box Jump','3×6'],['Lateral Bound','3×8 each'],['Calf Raises','3×20']]},
-      {n:'Tuesday',t:'Upper Body + Core',items:[['Push-Up','4×15'],['Dumbbell Row','4×10 each'],['Shoulder Press','3×12'],['Plank','3×45s'],['Dead Bug','3×12 each'],['Russian Twists','3×20']]},
-      {n:'Thursday',t:'Lower Body + Agility',items:[['Bulgarian Split Squat','3×10 each'],['Romanian Deadlift','4×10'],['Box Jump','3×6'],['5-10-5 Shuttle','5 runs'],['Lateral Bound','3×8 each'],['Calf Raises','3×20']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Push-Up','4×15'],['Bent-Over Row','4×10'],['Renegade Row','3×8 each'],['Burpees','4×10'],['Shuttle Runs','5 rounds'],['Jump Rope','3×1 min']]},
-      {n:'Saturday',t:'Full Body Circuit',items:[['Bulgarian Split Squat','3×10 each'],['Push-Up','3×15'],['Dumbbell Row','3×10 each'],['Box Jump','3×6'],['Plank','3×45s'],['Burpees','3×10']]}
+    {num:2,focus:'Building Load — Technique First',days:[
+      {n:'Monday',t:'Lower Body Strength',items:[['Back Squat','4×10'],['Romanian Deadlift','4×10'],['Step-Up with Knee Drive','4×10 each'],['Calf Raises','4×20'],['Hip Hinge Pattern','4×10'],['Dead Bug','4×10 each']]},
+      {n:'Tuesday',t:'Upper Body Strength',items:[['Bench Press','4×10'],['Dumbbell Row','4×12 each'],['Shoulder Press','4×10'],['Tricep Dip','4×12'],['Band Pull-Apart','4×15'],['Plank','4×45s']]},
+      {n:'Thursday',t:'Agility + Power',items:[['Box Jump','4×6'],['Broad Jump','4×5'],['Lateral Bound','4×8 each'],['Cone Shuffle','4×30s'],['Shuttle Runs','5 rounds'],['Jump Rope','4×60s']]},
+      {n:'Friday',t:'Upper + Core',items:[['Push-Up','4×15'],['Bent-Over Row','4×12'],['Arnold Press','4×10'],['Plank Up-Down','4×10'],['Ab Wheel','4×10'],['Mountain Climbers','4×20']]},
+      {n:'Saturday',t:'Full Body Strength',items:[['Goblet Squat','4×12'],['Bench Press','4×10'],['Bent-Over Row','4×10'],['Burpees','4×12'],['Farmer Carry','4×30m'],['Jump Rope','4×60s']]}
     ]},
-    {num:3,focus:'Strength Introduction',days:[
-      {n:'Monday',t:'Lower Body + Power',items:[['Bulgarian Split Squat','4×10 each'],['Romanian Deadlift','4×12'],['Lateral Lunge','3×12 each'],['Box Jump','3×6'],['5-10-5 Shuttle','5 runs'],['Broad Jump','3×5']]},
-      {n:'Tuesday',t:'Upper Body + Core',items:[['Push-Up','4×15'],['Bent-Over Row','4×10'],['Shoulder Press','4×10'],['Ab Wheel','3×10'],['Plank','4×45s'],['Mountain Climbers','3×20']]},
-      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Goblet Squat','4×14'],['Nordic Curl (or Hamstring Curl)','3×6'],['Depth Jump','3×6'],['Broad Jump','4×5'],['5-10-5 Shuttle','5 runs'],['Lateral Bound','4×8 each']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Push-Up','4×15'],['Renegade Row','3×10 each'],['Tricep Dip','3×12'],['Burpees','4×12'],['Shuttle Runs','5 rounds'],['Jump Rope','3×90s']]},
-      {n:'Saturday',t:'Full Body Circuit',items:[['Bulgarian Split Squat','3×12 each'],['Push-Up','4×15'],['Bent-Over Row','4×10'],['Box Jump','3×6'],['Ab Wheel','3×10'],['Burpees','3×10']]}
+    {num:3,focus:'Progressive Overload — Add Weight',days:[
+      {n:'Monday',t:'Lower Body Heavy',items:[['Back Squat','4×8'],['Romanian Deadlift','4×8'],['Bulgarian Split Squat','4×8 each'],['Calf Raises','4×20'],['Nordic Curl','4×5'],['Dead Bug','4×10 each']]},
+      {n:'Tuesday',t:'Upper Body Heavy',items:[['Bench Press','4×8'],['Bent-Over Row','4×8'],['Shoulder Press','4×8'],['Tricep Dip','4×12'],['Band Pull-Apart','4×20'],['Plank','4×60s']]},
+      {n:'Thursday',t:'Power + Speed',items:[['Depth Jump','4×5'],['Broad Jump','4×6'],['Lateral Bound','4×8 each'],['5-10-5 Shuttle — max effort','4 rounds'],['Sprint Intervals — Short','4 rounds'],['Jump Rope','4×60s']]},
+      {n:'Friday',t:'Upper + Conditioning',items:[['Push-Up','4×20'],['Dumbbell Row','4×12 each'],['Arnold Press','4×10'],['Ab Wheel','4×12'],['Pallof Press','4×10 each'],['Shuttle Runs','5 rounds']]},
+      {n:'Saturday',t:'Full Body Volume',items:[['Back Squat','4×10'],['Bench Press','4×10'],['Bent-Over Row','4×10'],['Box Jump','4×6'],['Farmer Carry','4×30m'],['Plank','4×60s']]}
     ]},
-    {num:4,focus:'Foundation Peak',days:[
-      {n:'Monday',t:'Lower Body + Power',items:[['Bulgarian Split Squat','4×12 each'],['Romanian Deadlift','4×12'],['Box Jump','4×8'],['5-10-5 Shuttle','6 runs'],['Ladder Drills','5×full'],['Lateral Bound','4×8 each']]},
-      {n:'Tuesday',t:'Upper Body + Core',items:[['Push-Up','5×15'],['Bent-Over Row','5×10'],['Shoulder Press','4×10'],['Ab Wheel','4×10'],['Plank','4×55s'],['Mountain Climbers','4×20']]},
-      {n:'Thursday',t:'Lower Body + Power',items:[['Goblet Squat','5×12'],['Nordic Curl (or Hamstring Curl)','3×8'],['Depth Jump','4×8'],['Broad Jump','4×6'],['Box Drill','4×45s'],['Calf Raises','4×20']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Push-Up','5×15'],['Renegade Row','4×10 each'],['Tricep Dip','4×12'],['Burpees','4×12'],['Shuttle Runs','6 rounds'],['Jump Rope','4×90s']]},
-      {n:'Saturday',t:'Full Body Test',items:[['Bulgarian Split Squat','4×12 each'],['Push-Up — max reps','2 sets'],['Bent-Over Row','4×12'],['Box Jump — max height','3×6'],['Plank — max hold','2 sets'],['Burpees','4×10']]}
+    {num:4,focus:'Volume Push — More Reps',days:[
+      {n:'Monday',t:'Lower Body Volume',items:[['Goblet Squat','5×12'],['Romanian Deadlift','5×10'],['Lateral Lunge','4×12 each'],['Calf Raises','4×25'],['Glute Bridge','4×20'],['Dead Bug','4×12 each']]},
+      {n:'Tuesday',t:'Upper Body Volume',items:[['Push-Up','5×20'],['Dumbbell Row','5×15 each'],['Shoulder Press','4×12'],['Tricep Dip','4×15'],['Band Pull-Apart','4×20'],['Plank','4×60s']]},
+      {n:'Thursday',t:'Agility Volume',items:[['Box Jump','5×6'],['Broad Jump','5×5'],['Lateral Bound','4×10 each'],['Cone Shuffle','5×30s'],['Shuttle Runs','6 rounds'],['Jump Rope','5×60s']]},
+      {n:'Friday',t:'Upper + Core Volume',items:[['Bench Press','4×12'],['Bent-Over Row','4×12'],['Arnold Press','4×12'],['Ab Wheel','4×12'],['Pallof Press','4×12 each'],['Mountain Climbers','4×25']]},
+      {n:'Saturday',t:'Full Body Volume',items:[['Back Squat','4×15'],['Push-Up','4×20'],['Dumbbell Row','4×15 each'],['Box Jump','4×6'],['Plank Up-Down','4×12'],['Shuttle Runs','5 rounds']]}
     ]},
-    {num:5,focus:'Loading Phase Begins',days:[
-      {n:'Monday',t:'Lower Body — Load',items:[['Squat (Barbell or Dumbbell)','4×8'],['Romanian Deadlift','4×10'],['Walking Lunge','3×12 each'],['Box Jump','4×8'],['5-10-5 Shuttle','6 runs'],['Broad Jump','3×6']]},
-      {n:'Tuesday',t:'Upper Body — Load',items:[['Dumbbell Bench Press','4×10'],['Pull-Up or Lat Pulldown','4×8'],['Shoulder Press','4×10'],['Farmer Carry','3×40 yds'],['Plank','4×55s'],['Ab Wheel','4×12']]},
-      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Bulgarian Split Squat','4×10 each'],['Nordic Curl (or Hamstring Curl)','3×8'],['Depth Jump','4×8'],['Lateral Bound Intervals','8 rounds'],['5-10-5 Shuttle','6 runs'],['Broad Jump','4×6']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','4×10'],['Bent-Over Row','4×12'],['Explosive Push-Up','3×10'],['Farmer Carry','3×40 yds'],['Burpees','4×15'],['Jump Rope','4×90s']]},
-      {n:'Saturday',t:'Full Body Circuit',items:[['Squat (Barbell or Dumbbell)','4×10'],['Pull-Up or Lat Pulldown','4×8'],['Walking Lunge','3×12 each'],['Explosive Push-Up','3×10'],['Plank','4×55s'],['Burpees','4×12']]}
+    {num:5,focus:'Deload — Recovery Week',days:[
+      {n:'Monday',t:'Lower Body Light',items:[['Goblet Squat','3×10'],['Romanian Deadlift','3×10'],['Lateral Lunge','3×8 each'],['Calf Raises','3×15'],['Hip Mobility Circuit','10 min']]},
+      {n:'Tuesday',t:'Upper Body Light',items:[['Push-Up','3×12'],['Dumbbell Row','3×10 each'],['Shoulder Press','3×8'],['Band Pull-Apart','3×15'],['Foam Roll + Stretch','10 min']]},
+      {n:'Thursday',t:'Agility Easy',items:[['Box Jump','3×4'],['Lateral Bound','3×5 each'],['Cone Shuffle','3×20s'],['Jump Rope','3×45s']]},
+      {n:'Friday',t:'Full Body Easy + Core',items:[['Goblet Squat','3×10'],['Push-Up','3×12'],['Plank','3×45s'],['Dead Bug','3×8 each'],['Full body stretch','15 min']]}
     ]},
-    {num:6,focus:'Progressive Overload',days:[
-      {n:'Monday',t:'Lower Body — Heavy',items:[['Squat (Barbell or Dumbbell)','5×6'],['Romanian Deadlift','4×10'],['Single-Leg Press','3×10 each'],['Box Jump','4×8'],['Broad Jump','4×6'],['5-10-5 Shuttle','6 runs']]},
-      {n:'Tuesday',t:'Upper Body — Heavy',items:[['Dumbbell Bench Press','5×8'],['Pull-Up or Lat Pulldown','4×8'],['Arnold Press','3×12'],['Farmer Carry','3×50 yds'],['Ab Wheel','4×12'],['Mountain Climbers','4×25']]},
-      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Bulgarian Split Squat','4×12 each'],['Nordic Curl (or Hamstring Curl)','3×8'],['Depth Jump','4×8'],['Lateral Bound Intervals','10 rounds'],['Shuttle Runs','6 rounds'],['Broad Jump','4×6']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','4×10'],['Renegade Row','4×10 each'],['Explosive Push-Up','4×10'],['Farmer Carry','4×50 yds'],['Burpees','4×15'],['Jump Rope','5×90s']]},
-      {n:'Saturday',t:'Full Body Circuit',items:[['Squat (Barbell or Dumbbell)','4×10'],['Pull-Up or Lat Pulldown','4×8'],['Bulgarian Split Squat','3×10 each'],['Explosive Push-Up','4×10'],['Plank','5×55s'],['Burpees','4×15']]}
+    {num:6,focus:'Strength Block — Heavier Loads',days:[
+      {n:'Monday',t:'Lower Body Strength',items:[['Back Squat','5×6'],['Romanian Deadlift','4×8'],['Bulgarian Split Squat','4×8 each'],['Nordic Curl','4×5'],['Calf Raises','4×20'],['Dead Bug','4×10 each']]},
+      {n:'Tuesday',t:'Upper Body Strength',items:[['Bench Press','5×6'],['Bent-Over Row','4×8'],['Push Press','4×6'],['Tricep Dip','4×12'],['Band Pull-Apart','4×20'],['Plank','4×60s']]},
+      {n:'Thursday',t:'Power + Speed',items:[['Depth Jump','4×5'],['Broad Jump','5×5'],['Lateral Bound','4×8 each'],['Sprint Intervals — Short','5 rounds'],['5-10-5 Shuttle — max effort','4 rounds'],['Jump Rope','4×60s']]},
+      {n:'Friday',t:'Upper + Core Heavy',items:[['Push-Up','4×max'],['Dumbbell Row','4×10 each'],['Arnold Press','4×10'],['Ab Wheel','4×12'],['Pallof Press','4×12 each'],['Copenhagen Plank','4×20s each']]},
+      {n:'Saturday',t:'Full Body Strength',items:[['Back Squat','4×8'],['Bench Press','4×8'],['Bent-Over Row','4×8'],['Box Jump','4×6'],['Farmer Carry','4×40m'],['Plank','4×60s']]}
     ]},
-    {num:7,focus:'Strength Consolidation',days:[
-      {n:'Monday',t:'Lower Body — Heavy',items:[['Squat (Barbell or Dumbbell)','5×6'],['Bulgarian Split Squat','4×10 each'],['Nordic Curl (or Hamstring Curl)','3×8'],['Box Jump','5×8'],['Broad Jump','4×6'],['5-10-5 Shuttle','7 runs']]},
-      {n:'Tuesday',t:'Upper Body — Heavy',items:[['Dumbbell Bench Press','5×8'],['Pull-Up or Lat Pulldown','4×10'],['Shoulder Press','4×10'],['Farmer Carry','4×50 yds'],['Ab Wheel','5×12'],['Plank','5×60s']]},
-      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Squat (Barbell or Dumbbell)','4×8'],['Depth Jump','4×8'],['Lateral Bound Intervals','10 rounds'],['5-10-5 Shuttle','7 runs'],['Broad Jump','5×6'],['Calf Raises','4×25']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','5×8'],['Explosive Push-Up','4×12'],['Renegade Row','4×10 each'],['Farmer Carry','4×50 yds'],['Burpees','5×15'],['Jump Rope','5×2 min']]},
-      {n:'Saturday',t:'Full Body Circuit',items:[['Squat (Barbell or Dumbbell)','4×12'],['Pull-Up or Lat Pulldown','5×8'],['Walking Lunge','4×12 each'],['Explosive Push-Up','4×12'],['Ab Wheel','5×12'],['Burpees','5×12']]}
+    {num:7,focus:'Volume Surge',days:[
+      {n:'Monday',t:'Lower Body High Volume',items:[['Goblet Squat','5×15'],['Romanian Deadlift','5×12'],['Lateral Lunge','5×12 each'],['Calf Raises','5×25'],['Glute Bridge','4×20'],['Dead Bug','4×12 each']]},
+      {n:'Tuesday',t:'Upper Body High Volume',items:[['Push-Up','5×20'],['Dumbbell Row','5×15 each'],['Shoulder Press','4×15'],['Tricep Dip','5×15'],['Band Pull-Apart','5×20'],['Plank','4×60s']]},
+      {n:'Thursday',t:'Conditioning Max',items:[['Burpees','5×15'],['Box Jump','5×6'],['Shuttle Runs','6 rounds'],['Jump Rope','5×60s'],['Sprint Intervals — Short','5 rounds'],['Mountain Climbers','4×25']]},
+      {n:'Friday',t:'Full Body Volume',items:[['Back Squat','4×15'],['Bench Press','4×15'],['Bent-Over Row','4×15'],['Arnold Press','4×12'],['Plank Up-Down','4×12'],['Ab Wheel','4×12']]},
+      {n:'Saturday',t:'Power + Conditioning',items:[['Depth Jump','4×5'],['Broad Jump','4×5'],['Medicine Ball Slam','4×10'],['Shuttle Runs','6 rounds'],['Farmer Carry','4×40m'],['Jump Rope','5×60s']]}
     ]},
-    {num:8,focus:'Strength Peak',days:[
-      {n:'Monday',t:'Lower Body — Max',items:[['Squat (Barbell or Dumbbell)','5×5 — challenging weight'],['Bulgarian Split Squat','4×12 each'],['Nordic Curl (or Hamstring Curl)','3×10'],['Box Jump','5×8'],['Broad Jump','5×6'],['5-10-5 Shuttle','8 runs']]},
-      {n:'Tuesday',t:'Upper Body — Max',items:[['Dumbbell Bench Press','5×8'],['Pull-Up or Lat Pulldown','5×8'],['Arnold Press','4×10'],['Farmer Carry','4×50 yds'],['Ab Wheel','5×14'],['Plank','5×65s']]},
-      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Squat (Barbell or Dumbbell)','4×10'],['Depth Jump','5×8'],['Lateral Bound Intervals','12 rounds'],['5-10-5 Shuttle','8 runs'],['Broad Jump','5×8'],['Calf Raises','5×25']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','5×10'],['Explosive Push-Up','5×12'],['Renegade Row','4×10 each'],['Farmer Carry','5×50 yds'],['Burpees','5×15'],['Jump Rope','5×2 min']]},
-      {n:'Saturday',t:'Full Body Test',items:[['Squat — challenging weight','4×8'],['Pull-Up','4×max reps'],['Explosive Push-Up','4×15'],['Box Jump — max height','5×8'],['Plank — max hold','3 sets'],['Burpees','5×15']]}
+    {num:8,focus:'Deload + Retest',days:[
+      {n:'Monday',t:'Lower Body Light',items:[['Goblet Squat','3×10'],['Romanian Deadlift','3×8'],['Lateral Lunge','3×8 each'],['Hip Mobility Circuit','10 min']]},
+      {n:'Tuesday',t:'Upper Body Light',items:[['Push-Up','3×12'],['Dumbbell Row','3×10 each'],['Shoulder Press','3×8'],['Foam Roll + Stretch','10 min']]},
+      {n:'Thursday',t:'Speed Activation',items:[['Box Jump','3×4'],['Broad Jump','3×4'],['Sprint Intervals — Short','3 rounds (easy)'],['Jump Rope','3×45s']]},
+      {n:'Friday',t:'Core + Mobility',items:[['Plank','3×45s'],['Dead Bug','3×8 each'],['Ab Wheel','3×8'],['Full body stretch','15 min']]}
     ]},
-    {num:9,focus:'Volume Accumulation',days:[
-      {n:'Monday',t:'Lower Body — Volume',items:[['Squat (Barbell or Dumbbell)','5×8'],['Romanian Deadlift','4×12'],['Walking Lunge','4×12 each'],['Box Jump','4×8'],['5-10-5 Shuttle','8 runs'],['Broad Jump','4×6']]},
-      {n:'Tuesday',t:'Upper Body — Volume',items:[['Dumbbell Bench Press','5×10'],['Pull-Up or Lat Pulldown','5×8'],['Shoulder Press','4×12'],['Farmer Carry','4×50 yds'],['Ab Wheel','5×14'],['Plank','5×65s']]},
-      {n:'Thursday',t:'Lower Body + Power',items:[['Bulgarian Split Squat','5×10 each'],['Depth Jump','4×8'],['Lateral Bound Intervals','12 rounds'],['5-10-5 Shuttle','8 runs'],['Nordic Curl (or Hamstring Curl)','3×10'],['Broad Jump','5×8']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','5×10'],['Explosive Push-Up','4×15'],['Bent-Over Row','5×10'],['Farmer Carry','5×50 yds'],['Burpees','5×15'],['Jump Rope','5×2 min']]},
-      {n:'Saturday',t:'Full Body Circuit',items:[['Squat (Barbell or Dumbbell)','5×10'],['Pull-Up or Lat Pulldown','4×10'],['Bulgarian Split Squat','4×10 each'],['Explosive Push-Up','4×12'],['Ab Wheel','5×14'],['Burpees','4×15']]}
+    {num:9,focus:'Peak Strength — Max Effort',days:[
+      {n:'Monday',t:'Lower Body Max',items:[['Back Squat','6×4'],['Romanian Deadlift','4×6'],['Bulgarian Split Squat','4×8 each'],['Nordic Curl','4×6'],['Calf Raises','4×20'],['Dead Bug','4×10 each']]},
+      {n:'Tuesday',t:'Upper Body Max',items:[['Bench Press','6×4'],['Bent-Over Row','4×6'],['Push Press','4×5'],['Tricep Dip','4×12'],['Band Pull-Apart','4×20'],['Plank','4×75s']]},
+      {n:'Thursday',t:'Explosive Power',items:[['Depth Jump','5×5'],['Weighted Jump Squat','4×6'],['Broad Jump','5×5'],['Sprint Intervals — Short','5 rounds'],['5-10-5 Shuttle — max effort','5 rounds'],['Jump Rope','4×60s']]},
+      {n:'Friday',t:'Upper + Core Max',items:[['Push-Up','4×max'],['Dumbbell Row','4×10 each'],['Arnold Press','4×10'],['Ab Wheel','4×15'],['Copenhagen Plank','4×25s each'],['Pallof Press','4×12 each']]},
+      {n:'Saturday',t:'Full Body Peak',items:[['Back Squat','4×6'],['Bench Press','4×6'],['Bent-Over Row','4×6'],['Medicine Ball Slam','4×10'],['Farmer Carry','4×40m'],['Plank','4×75s']]}
     ]},
-    {num:10,focus:'Strength & Power Bridge',days:[
-      {n:'Monday',t:'Lower Body — Heavy',items:[['Squat (Barbell or Dumbbell)','5×5 — challenging weight'],['Romanian Deadlift','4×10'],['Box Jump','5×8'],['Broad Jump','5×6'],['5-10-5 Shuttle','8 runs'],['Nordic Curl (or Hamstring Curl)','3×10']]},
-      {n:'Tuesday',t:'Upper Body — Heavy',items:[['Dumbbell Bench Press','5×8'],['Weighted Pull-Up or Lat Pulldown','4×6'],['Explosive Push-Up','4×10'],['Farmer Carry','5×50 yds'],['Ab Wheel','5×15'],['Plank','5×70s']]},
-      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Bulgarian Split Squat','5×12 each'],['Depth Jump','5×8'],['Lateral Bound Intervals','14 rounds'],['5-10-5 Shuttle','10 runs'],['Broad Jump','5×8'],['Box Jump','4×8']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','5×10'],['Explosive Push-Up','5×12'],['Renegade Row','4×10 each'],['Farmer Carry','5×60 yds'],['Burpees','5×18'],['Jump Rope','6×2 min']]},
-      {n:'Saturday',t:'Full Body Power Circuit',items:[['Squat (Barbell or Dumbbell)','4×8'],['Explosive Push-Up','4×12'],['Weighted Pull-Up or Lat Pulldown','4×8'],['Depth Jump','4×6'],['Plank','5×65s'],['Burpees','4×15']]}
+    {num:10,focus:'Speed-Strength Conversion',days:[
+      {n:'Monday',t:'Lower Body Speed-Strength',items:[['Jump Squat','5×8'],['Box Jump','5×6'],['Weighted Jump Squat','4×6'],['Lateral Bound','5×8 each'],['Sprint Intervals — Short','5 rounds'],['Calf Jump','4×15']]},
+      {n:'Tuesday',t:'Upper Body Speed-Strength',items:[['Clap Push-Up','4×8'],['Dumbbell Row','4×10 each (explosive)'],['Medicine Ball Slam','5×8'],['Push Press','4×5'],['Band Pull-Apart','4×20'],['Plank','4×60s']]},
+      {n:'Thursday',t:'Pure Speed',items:[['Sprint Intervals — Short','6 rounds'],['5-10-5 Shuttle — max effort','5 rounds'],['Cone Drill','5 rounds'],['Ladder Drills — Max Foot Speed','5 rounds'],['Jump Rope','5×60s']]},
+      {n:'Friday',t:'Total Body Power Circuit',items:[['Box Jump','5×6'],['Broad Jump','5×5'],['Medicine Ball Slam','5×8'],['Burpees','4×15'],['Farmer Carry','4×40m'],['Plank Up-Down','4×12']]},
+      {n:'Saturday',t:'Conditioning Peak',items:[['Shuttle Runs','6 rounds'],['Burpees','5×15'],['Jump Rope','5×60s'],['Mountain Climbers','5×25'],['Sprint Intervals — Long','4 rounds']]}
     ]},
-    {num:11,focus:'Peak Strength Week',days:[
-      {n:'Monday',t:'Lower Body — Peak',items:[['Squat (Barbell or Dumbbell)','6×5 — challenging weight'],['Romanian Deadlift','4×10'],['Box Jump','5×8'],['Broad Jump','5×8'],['Nordic Curl (or Hamstring Curl)','4×8'],['5-10-5 Shuttle','10 runs']]},
-      {n:'Tuesday',t:'Upper Body — Peak',items:[['Dumbbell Bench Press','6×6'],['Weighted Pull-Up or Lat Pulldown','5×6'],['Explosive Push-Up','5×12'],['Farmer Carry','5×60 yds'],['Ab Wheel','6×15'],['Plank','6×75s']]},
-      {n:'Thursday',t:'Lower Body + Peak Conditioning',items:[['Bulgarian Split Squat','5×12 each'],['Depth Jump','5×8'],['Lateral Bound Intervals','16 rounds'],['5-10-5 Shuttle','10 runs'],['Box Jump','5×8'],['Broad Jump','5×8']]},
-      {n:'Friday',t:'Upper Body + Peak Conditioning',items:[['Dumbbell Bench Press','5×10'],['Explosive Push-Up','5×15'],['Renegade Row','5×10 each'],['Farmer Carry','6×60 yds'],['Burpees','5×20'],['Jump Rope','6×2 min']]},
-      {n:'Saturday',t:'Full Body Peak Circuit',items:[['Squat (Barbell or Dumbbell)','5×8'],['Explosive Push-Up','5×15'],['Weighted Pull-Up or Lat Pulldown','4×8'],['Depth Jump','5×8'],['Ab Wheel','6×15'],['Burpees','5×18']]}
+    {num:11,focus:'Max Volume Week',days:[
+      {n:'Monday',t:'Lower Body Volume Max',items:[['Back Squat','5×12'],['Romanian Deadlift','5×12'],['Bulgarian Split Squat','4×10 each'],['Nordic Curl','4×6'],['Calf Raises','5×25'],['Dead Bug','4×12 each']]},
+      {n:'Tuesday',t:'Upper Body Volume Max',items:[['Bench Press','5×12'],['Bent-Over Row','5×12'],['Shoulder Press','4×12'],['Tricep Dip','5×15'],['Push-Up','4×20'],['Band Pull-Apart','5×20']]},
+      {n:'Thursday',t:'Conditioning Max',items:[['Shuttle Runs','6 rounds'],['Burpees','5×15'],['Box Jump','5×8'],['Jump Rope','5×60s'],['Sprint Intervals — Long','4 rounds'],['Mountain Climbers','5×25']]},
+      {n:'Friday',t:'Full Body Volume Max',items:[['Back Squat','5×15'],['Push-Up','5×20'],['Dumbbell Row','5×15 each'],['Arnold Press','4×12'],['Ab Wheel','5×12'],['Plank','4×75s']]},
+      {n:'Saturday',t:'Power + Core Max',items:[['Depth Jump','5×5'],['Medicine Ball Slam','5×10'],['Broad Jump','5×5'],['Copenhagen Plank','4×30s each'],['Pallof Press','4×12 each'],['Farmer Carry','4×40m']]}
     ]},
-    {num:12,focus:'Early Off-Season Final Test',days:[
-      {n:'Monday',t:'Lower Body — Final Test',items:[['Squat — test your best weight','3×5'],['Box Jump — test max height','5 attempts'],['5-10-5 Shuttle','5 runs — beat your best'],['Broad Jump','5 attempts — beat your best']]},
-      {n:'Tuesday',t:'Upper Body — Final Test',items:[['Dumbbell Bench Press — test best weight','3×5'],['Pull-Up — max reps','3 sets'],['Explosive Push-Up — max reps','3 sets'],['Plank — max hold','2 sets']]},
-      {n:'Thursday',t:'Conditioning — Final Test',items:[['5-10-5 Shuttle — 5 runs','Beat Week 1 time'],['Broad Jump — 5 attempts','Beat Week 1 distance'],['Burpees — 1 min','Count and record'],['Jump Rope — 2 min','Beat Week 1 count']]},
-      {n:'Friday',t:'Full Body — Final Benchmark',items:[['Squat — challenging weight','4×8'],['Explosive Push-Up','4×15'],['Weighted Pull-Up or Lat Pulldown','4×8'],['Depth Jump','4×8'],['Plank','3×max hold'],['Burpees','4×15']]},
-      {n:'Saturday',t:'Review & Reset',items:[['Enter all results in Progress Tracker',''],['Compare to start of Early Off-Season',''],['Set goals for Late Off-Season',''],['Rest up — great work!','']]}
+    {num:12,focus:'Deload + Prepare',days:[
+      {n:'Monday',t:'Lower Body Light',items:[['Goblet Squat','3×10'],['Romanian Deadlift','3×8'],['Lateral Lunge','3×8 each'],['Hip Mobility Circuit','10 min']]},
+      {n:'Tuesday',t:'Upper Body Light',items:[['Push-Up','3×12'],['Dumbbell Row','3×10 each'],['Shoulder Press','3×8'],['Foam Roll + Stretch','10 min']]},
+      {n:'Thursday',t:'Speed Activation',items:[['Box Jump','3×4'],['Sprint Intervals — Short','3 rounds (easy)'],['Jump Rope','3×45s']]},
+      {n:'Friday',t:'Core + Mobility',items:[['Plank','3×45s'],['Dead Bug','3×8 each'],['Full body stretch','15 min']]}
     ]},
-    {num:13,focus:'Strength Consolidation + Volume Push',days:[
-      {n:'Monday',t:'Lower Body — Heavy',items:[['Back Squat','5×5'],['Romanian Deadlift','4×8'],['Bulgarian Split Squat','3×8 each'],['Calf Raises','3×20'],['Dead Bug','3×10 each']]},
-      {n:'Tuesday',t:'Upper Body — Heavy',items:[['Bench Press','5×5'],['Bent-Over Row','4×8'],['Arnold Press','3×10'],['Tricep Dip','3×10'],['Band Pull-Apart','3×15']]},
-      {n:'Thursday',t:'Lower Body Power',items:[['Box Jump','4×5'],['Step-Up with Knee Drive','4×10 each'],['Lateral Bound','4×6 each'],['Cone Shuffle','3×30s'],['Calf Raises','3×20']]},
-      {n:'Friday',t:'Upper Body + Core',items:[['Push-Up','4×15'],['Dumbbell Row','4×12 each'],['Shoulder Press','3×10'],['Plank','3×60s'],['Mountain Climbers','3×20'],['Farmer Carry','3×30m']]},
-      {n:'Saturday',t:'Full Body Conditioning',items:[['Goblet Squat','4×12'],['Burpees','3×12'],['Dumbbell Row','3×12 each'],['Box Jump','3×6'],['Shuttle Runs','5 rounds']]}
+    {num:13,focus:'Phase 1 Peak — Strength Test',days:[
+      {n:'Monday',t:'Strength Test',items:[['Back Squat','3 rep max test'],['Romanian Deadlift','3 rep max test'],['Bench Press','3 rep max test'],['Push-Up','max reps test'],['Enter results in Progress Tracker','']]},
+      {n:'Tuesday',t:'Power Test',items:[['Broad Jump','max distance — 3 attempts'],['Box Jump','max height — 3 attempts'],['Sprint Intervals — Short','timed best of 3'],['5-10-5 Shuttle — max effort','timed best of 3'],['Enter results in Progress Tracker','']]},
+      {n:'Thursday',t:'Conditioning Test',items:[['Burpee Test (30s)','max reps'],['Shuttle Runs','6 rounds timed'],['Enter results in Progress Tracker','']]},
+      {n:'Friday',t:'Review + Reset',items:[['Enter all results in Progress Tracker',''],['Compare to Week 1 baseline',''],['Set goals for Late Off-Season',''],['Rest up — Phase 1 complete!','']]}
     ]},
-    {num:14,focus:'Volume Surge — High Rep Week',days:[
-      {n:'Monday',t:'Lower Body High Volume',items:[['Goblet Squat','5×15'],['Romanian Deadlift','5×12'],['Lateral Lunge','4×12 each'],['Calf Raises','4×25'],['Glute Bridge','4×20']]},
-      {n:'Tuesday',t:'Upper Body High Volume',items:[['Push-Up','5×20'],['Dumbbell Row','5×15 each'],['Shoulder Press','4×12'],['Tricep Dip','4×12'],['Band Pull-Apart','4×20']]},
-      {n:'Thursday',t:'Agility + Power',items:[['Broad Jump','4×5'],['Cone Drill','4 rounds'],['Lateral Bound','4×8 each'],['Shuttle Runs','5 rounds'],['Jump Rope','3×60s']]},
-      {n:'Friday',t:'Full Body High Volume',items:[['Back Squat','4×12'],['Bench Press','4×12'],['Bent-Over Row','4×12'],['Arnold Press','3×12'],['Plank Up-Down','3×10'],['Ab Wheel','3×10']]},
-      {n:'Saturday',t:'Conditioning Circuit',items:[['Burpees','4×15'],['Box Jump','4×8'],['Mountain Climbers','4×20'],['Shuttle Runs','6 rounds'],['Jump Rope','3×60s']]}
-    ]},
-    {num:15,focus:'Deload — Recovery Week',days:[
-      {n:'Monday',t:'Lower Body Light',items:[['Goblet Squat','3×10 (60% effort)'],['Romanian Deadlift','3×10 (light)'],['Lateral Lunge','3×8 each'],['Calf Raises','2×15'],['Hip Mobility Circuit','10 min']]},
-      {n:'Tuesday',t:'Upper Body Light',items:[['Push-Up','3×10'],['Dumbbell Row','3×10 each (light)'],['Shoulder Press','3×8 (light)'],['Band Pull-Apart','3×15'],['Foam Roll + Stretch','10 min']]},
-      {n:'Thursday',t:'Agility Easy',items:[['Cone Shuffle','3×20s (easy)'],['Lateral Bound','3×5 each (easy)'],['Jump Rope','3×45s'],['Hip Mobility Circuit','10 min']]},
-      {n:'Friday',t:'Full Body Easy + Core',items:[['Goblet Squat','3×10 (light)'],['Push-Up','3×10'],['Plank','3×30s'],['Dead Bug','3×8 each'],['Full body stretch','15 min']]}
-    ]},
-    {num:16,focus:'Strength Peak — Max Effort',days:[
-      {n:'Monday',t:'Lower Body Max Effort',items:[['Back Squat','6×3 (heaviest possible)'],['Romanian Deadlift','4×6 (heavy)'],['Box Jump','4×5'],['Nordic Curl','3×5'],['Calf Raises','3×20']]},
-      {n:'Tuesday',t:'Upper Body Max Effort',items:[['Bench Press','6×3 (heaviest possible)'],['Bent-Over Row','4×6 (heavy)'],['Push Press','4×5'],['Tricep Dip','4×12'],['Band Pull-Apart','3×20']]},
-      {n:'Thursday',t:'Power + Speed',items:[['Depth Jump','4×5'],['Broad Jump','4×5'],['5-10-5 Shuttle — max effort','4 rounds'],['Lateral Bound','4×6 each'],['Sprint Intervals — Short','4 rounds']]},
-      {n:'Friday',t:'Upper + Core Heavy',items:[['Push-Up','4×max reps'],['Dumbbell Row','4×8 (heavy)'],['Arnold Press','4×8'],['Pallof Press','3×10 each'],['Ab Wheel','4×12'],['Plank','2×90s']]},
-      {n:'Saturday',t:'Full Body Strength',items:[['Back Squat','4×6'],['Bench Press','4×6'],['Bent-Over Row','4×6'],['Push Press','3×5'],['Farmer Carry','3×40m']]}
-    ]},
-    {num:17,focus:'Power Conversion — Speed-Strength',days:[
-      {n:'Monday',t:'Lower Body Speed-Strength',items:[['Jump Squat','4×8'],['Box Jump','5×5'],['Weighted Jump Squat','3×6'],['Lateral Bound','4×8 each'],['Calf Jump','3×15']]},
-      {n:'Tuesday',t:'Upper Body Speed-Strength',items:[['Clap Push-Up','4×6'],['Dumbbell Row','4×8 (explosive pull)'],['Medicine Ball Slam','4×8'],['Band Pull-Apart','3×20'],['Tricep Dip','3×12']]},
-      {n:'Thursday',t:'Pure Speed + Agility',items:[['Sprint Intervals — Short','5 rounds'],['Cone Drill','5 rounds'],['5-10-5 Shuttle — max effort','4 rounds'],['Ladder Drills — Max Foot Speed','4 rounds'],['Reactive Drop + Sprint','4 rounds']]},
-      {n:'Friday',t:'Total Body Power Circuit',items:[['Box Jump','4×5'],['Broad Jump','4×5'],['Medicine Ball Slam','4×8'],['Burpees','4×12'],['Shuttle Runs','5 rounds']]},
-      {n:'Saturday',t:'Conditioning + Core',items:[['Jump Rope','5×60s'],['Ab Wheel','4×12'],['Plank Up-Down','4×12'],['Mountain Climbers','4×25'],['Sprint Intervals — Long','4 rounds']]}
-    ]},
-    {num:18,focus:'Volume Overreach — Toughest Week',days:[
-      {n:'Monday',t:'Lower Body — Volume Max',items:[['Back Squat','6×10'],['Romanian Deadlift','5×10'],['Bulgarian Split Squat','4×10 each'],['Box Jump','4×6'],['Nordic Curl','3×6'],['Calf Raises','4×25']]},
-      {n:'Tuesday',t:'Upper Body — Volume Max',items:[['Bench Press','5×12'],['Bent-Over Row','5×12'],['Arnold Press','4×10'],['Tricep Dip','4×12'],['Push-Up','3×20'],['Band Pull-Apart','4×20']]},
-      {n:'Thursday',t:'Conditioning Max',items:[['Shuttle Runs','6 rounds'],['Burpees','5×15'],['Box Jump','4×8'],['Jump Rope','5×60s'],['Sprint Intervals — Short','5 rounds']]},
-      {n:'Friday',t:'Full Body Max Volume',items:[['Back Squat','4×15'],['Push-Up','4×20'],['Dumbbell Row','4×15 each'],['Shoulder Press','4×12'],['Farmer Carry','4×40m'],['Plank','3×90s']]},
-      {n:'Saturday',t:'Power + Core Max',items:[['Broad Jump','5×5'],['Medicine Ball Slam','5×10'],['Ab Wheel','5×12'],['Pallof Press','4×12 each'],['Mountain Climbers','4×30']]}
-    ]},
-    {num:19,focus:'Deload + Test Prep',days:[
-      {n:'Monday',t:'Lower Body Light',items:[['Goblet Squat','3×10 (easy)'],['Romanian Deadlift','3×8 (light)'],['Lateral Lunge','3×8 each'],['Hip Mobility Circuit','10 min']]},
-      {n:'Tuesday',t:'Upper Body Light',items:[['Push-Up','3×10'],['Dumbbell Row','3×8 each (light)'],['Shoulder Press','3×8'],['Band Pull-Apart','3×15'],['Foam Roll + Stretch','10 min']]},
-      {n:'Thursday',t:'Speed Activation',items:[['Sprint Intervals — Short','3 rounds (easy pace)'],['Box Jump','3×4 (easy)'],['Lateral Bound','3×5 each (easy)'],['Jump Rope','3×45s']]},
-      {n:'Friday',t:'Core + Mobility',items:[['Plank','3×45s'],['Dead Bug','3×8 each'],['Ab Wheel','3×8'],['Full body stretch','15 min'],['Hip Mobility Circuit','10 min']]}
-    ]},
-    {num:20,focus:'Phase 1 Final Assessment',days:[
-      {n:'Monday',t:'Strength Test',items:[['Back Squat','3 rep max test'],['Bench Press','3 rep max test'],['Bent-Over Row','3 rep max test'],['Push-Up','max reps test'],['Enter results in Progress Tracker','']]},
-      {n:'Tuesday',t:'Power + Speed Test',items:[['Broad Jump','max distance — 3 attempts'],['Box Jump','max height — 3 attempts'],['Sprint Intervals — Short','timed — best of 3'],['5-10-5 Shuttle — max effort','timed — best of 3'],['Enter results in Progress Tracker','']]},
-      {n:'Thursday',t:'Conditioning Test',items:[['Burpee Test (30s)','max reps'],['Jump Rope','max unbroken'],['Shuttle Runs','6 rounds — timed'],['Enter results in Progress Tracker','']]},
-      {n:'Friday',t:'Review + Reset',items:[['Enter all results in Progress Tracker',''],['Compare to Week 1 baseline',''],['Set goals for Late Off-Season Phase',''],['Rest up — phase 1 complete! Great work!','']]}
+    {num:14,focus:'Transition — Bridge to Phase 2',days:[
+      {n:'Monday',t:'Full Body Moderate',items:[['Back Squat','4×8'],['Bench Press','4×8'],['Bent-Over Row','4×8'],['Box Jump','4×5'],['Plank','4×60s']]},
+      {n:'Tuesday',t:'Power + Speed',items:[['Depth Jump','4×5'],['Broad Jump','4×5'],['Sprint Intervals — Short','4 rounds'],['Jump Rope','4×60s']]},
+      {n:'Thursday',t:'Upper + Core',items:[['Push-Up','4×15'],['Arnold Press','4×10'],['Ab Wheel','4×12'],['Farmer Carry','4×40m']]},
+      {n:'Friday',t:'Lower Body + Agility',items:[['Goblet Squat','4×10'],['Lateral Bound','4×8 each'],['Cone Drill','4 rounds'],['Shuttle Runs','4 rounds']]}
     ]}
   ]},
-  2:{label:'Late Off-Season — Power & Development (10 Weeks)',desc:'Convert your strength base into explosive hockey power. Heavier loading, Olympic-style movements, and peak development. The most important window before pre-season.',color:'#4ade80',weeks:[
+  2:{label:'Late Off-Season — Power & Development (8 Weeks)',desc:'Convert your strength into explosive hockey power. Heavier loads, plyometric complexes, and peak conditioning.',color:'#f59e0b',weeks:[
     {num:1,focus:'Power Introduction',days:[
-      {n:'Monday',t:'Lower Body — Explosive',items:[['Squat (Barbell or Dumbbell)','5×5 — challenging weight'],['Jump Squat','4×5'],['Nordic Curl (or Hamstring Curl)','4×8'],['Depth Jump','4×6'],['5-10-5 Shuttle','8 runs'],['Broad Jump','5×6']]},
-      {n:'Tuesday',t:'Upper Body — Power',items:[['Dumbbell Bench Press','5×8'],['Weighted Pull-Up or Lat Pulldown','4×6'],['Explosive Push-Up','4×10'],['Farmer Carry','5×50 yds'],['Ab Wheel','5×15'],['Plank','5×70s']]},
-      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Bulgarian Split Squat','5×10 each'],['Depth Jump','4×8'],['Lateral Bound Intervals','12 rounds'],['5-10-5 Shuttle','8 runs'],['Broad Jump','5×8'],['Box Jump','4×8']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','4×10'],['Explosive Push-Up','5×12'],['Renegade Row','4×10 each'],['Farmer Carry','4×60 yds'],['Burpees','5×15'],['Jump Rope','6×2 min']]},
-      {n:'Saturday',t:'Full Body Power Circuit',items:[['Squat (Barbell or Dumbbell)','4×8'],['Explosive Push-Up','4×12'],['Weighted Pull-Up or Lat Pulldown','4×8'],['Depth Jump','4×6'],['Plank','5×65s'],['Burpees','4×15']]}
+      {n:'Monday',t:'Lower Body Power',items:[['Back Squat','5×5'],['Jump Squat','4×8'],['Romanian Deadlift','4×8'],['Depth Jump','4×5'],['Nordic Curl','4×6'],['Calf Raises','4×20']]},
+      {n:'Tuesday',t:'Upper Body Power',items:[['Bench Press','5×5'],['Bent-Over Row','5×5'],['Push Press','4×6'],['Medicine Ball Slam','4×10'],['Band Pull-Apart','4×20'],['Plank','4×60s']]},
+      {n:'Wednesday',t:'Speed + Agility',items:[['Sprint Intervals — Short','5 rounds'],['Lateral Bound','5×8 each'],['5-10-5 Shuttle — max effort','5 rounds'],['Cone Drill','5 rounds'],['Jump Rope','5×60s']]},
+      {n:'Friday',t:'Power Complex',items:[['Back Squat','4×5 then Jump Squat 4×5'],['Bench Press','4×5 then Medicine Ball Slam 4×8'],['Broad Jump','4×5'],['Farmer Carry','4×40m'],['Ab Wheel','4×12']]},
+      {n:'Saturday',t:'Conditioning Block',items:[['Burpees','5×15'],['Box Jump','5×6'],['Shuttle Runs','6 rounds'],['Mountain Climbers','5×25'],['Sprint Intervals — Long','4 rounds']]}
     ]},
-    {num:2,focus:'Power Acceleration',days:[
-      {n:'Monday',t:'Lower Body — Max Power',items:[['Squat (Barbell or Dumbbell)','5×5 — challenging weight'],['Jump Squat','4×6'],['Nordic Curl (or Hamstring Curl)','4×8'],['Depth Jump','5×6'],['5-10-5 Shuttle','8 runs'],['Broad Jump','5×8']]},
-      {n:'Tuesday',t:'Upper Body — Max Strength',items:[['Dumbbell Bench Press','5×8'],['Weighted Pull-Up or Lat Pulldown','4×6'],['Explosive Push-Up','4×12'],['Farmer Carry','5×60 yds'],['Ab Wheel','5×15'],['Mountain Climbers','5×30']]},
-      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Bulgarian Split Squat','5×12 each'],['Jump Squat','4×6'],['Depth Jump','5×8'],['Lateral Bound Intervals','14 rounds'],['5-10-5 Shuttle','10 runs'],['Broad Jump','5×8']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','5×10'],['Explosive Push-Up','5×15'],['Farmer Carry','5×60 yds'],['Burpees','5×18'],['Jump Rope','6×2 min'],['Ab Wheel','5×15']]},
-      {n:'Saturday',t:'Full Body Power Circuit',items:[['Squat (Barbell or Dumbbell)','4×10'],['Explosive Push-Up','5×12'],['Weighted Pull-Up or Lat Pulldown','4×8'],['Depth Jump','4×8'],['Plank','5×75s'],['Burpees','5×15']]}
+    {num:2,focus:'Power Build',days:[
+      {n:'Monday',t:'Lower Body Heavy Power',items:[['Back Squat','5×4'],['Trap Bar Deadlift','4×6'],['Depth Jump','5×5'],['Bulgarian Split Squat','4×8 each'],['Nordic Curl','4×6'],['Calf Raises','4×25']]},
+      {n:'Tuesday',t:'Upper Body Heavy Power',items:[['Bench Press','5×4'],['Bent-Over Row','5×5'],['Push Press','4×5'],['Medicine Ball Slam','5×10'],['Band Pull-Apart','4×20'],['Plank','4×75s']]},
+      {n:'Wednesday',t:'Max Speed Day',items:[['Sprint Intervals — Short','6 rounds'],['Reactive Drop + Sprint','5 rounds'],['5-10-5 Shuttle — max effort','5 rounds'],['Ladder Drills — Max Foot Speed','5 rounds'],['Jump Rope','5×60s']]},
+      {n:'Friday',t:'Power Complex',items:[['Trap Bar Deadlift','4×5 then Box Jump 4×5'],['Bench Press','4×4 then Clap Push-Up 4×6'],['Broad Jump','5×5'],['Farmer Carry','4×40m'],['Ab Wheel','4×12']]},
+      {n:'Saturday',t:'Conditioning Max',items:[['Shuttle Runs','6 rounds'],['Burpees','5×15'],['Weighted Jump Squat','4×8'],['Jump Rope','5×60s'],['Sprint Intervals — Long','4 rounds']]}
     ]},
-    {num:3,focus:'Complex Training Introduction',days:[
-      {n:'Monday',t:'Lower Body — Complex',items:[['Squat (Barbell or Dumbbell)','4×5 heavy'],['Box Jump (immediately after squat)','4×5'],['Nordic Curl (or Hamstring Curl)','4×8'],['5-10-5 Shuttle','10 runs'],['Broad Jump','5×8'],['Lateral Bound','5×8 each']]},
-      {n:'Tuesday',t:'Upper Body — Complex',items:[['Dumbbell Bench Press','4×5 heavy'],['Explosive Push-Up (immediately after)','4×8'],['Weighted Pull-Up or Lat Pulldown','5×6'],['Farmer Carry','5×60 yds'],['Ab Wheel','6×15'],['Plank','5×75s']]},
-      {n:'Thursday',t:'Lower Body + Peak Conditioning',items:[['Bulgarian Split Squat','5×12 each'],['Jump Squat','5×6'],['Depth Jump','5×8'],['Lateral Bound Intervals','16 rounds'],['5-10-5 Shuttle','10 runs'],['Box Jump','5×8']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','5×10'],['Explosive Push-Up','5×15'],['Renegade Row','5×10 each'],['Farmer Carry','6×60 yds'],['Burpees','5×20'],['Jump Rope','6×2 min']]},
-      {n:'Saturday',t:'Full Body Complex Circuit',items:[['Squat (Barbell or Dumbbell)','4×5 heavy'],['Box Jump (complex)','4×5'],['Explosive Push-Up','5×15'],['Weighted Pull-Up or Lat Pulldown','4×8'],['Depth Jump','4×8'],['Burpees','5×18']]}
+    {num:3,focus:'Strength-Power Peak',days:[
+      {n:'Monday',t:'Lower Body Max Effort',items:[['Back Squat','6×3'],['Trap Bar Deadlift','4×4'],['Depth Jump','5×5'],['Nordic Curl','4×8'],['Calf Raises','5×25'],['Dead Bug','4×12 each']]},
+      {n:'Tuesday',t:'Upper Body Max Effort',items:[['Bench Press','6×3'],['Bent-Over Row','5×5'],['Push Press','5×4'],['Medicine Ball Slam','5×10'],['Band Pull-Apart','5×20'],['Plank','4×75s']]},
+      {n:'Wednesday',t:'Speed Peak',items:[['Sprint Intervals — Short','6 rounds'],['Band Resisted Sprint','4 rounds'],['5-10-5 Shuttle — max effort','5 rounds'],['Lateral Bound Intervals — max effort','8 rounds'],['Jump Rope','5×60s']]},
+      {n:'Friday',t:'Heavy Power Complex',items:[['Back Squat','5×3 then Jump Squat 4×8'],['Bench Press','5×3 then Clap Push-Up 4×8'],['Broad Jump','5×5'],['Sled Push','4×20m'],['Ab Wheel','4×15']]},
+      {n:'Saturday',t:'Full Conditioning Test',items:[['Burpees','5×15'],['Box Jump','5×8'],['Shuttle Runs','6 rounds timed'],['Sprint Intervals — Long','5 rounds'],['Jump Rope','5×60s']]}
     ]},
-    {num:4,focus:'Max Power Output',days:[
-      {n:'Monday',t:'Lower Body — Max Output',items:[['Squat (Barbell or Dumbbell)','6×5 — challenging weight'],['Jump Squat','5×5'],['Nordic Curl (or Hamstring Curl)','5×8'],['Depth Jump','5×8'],['5-10-5 Shuttle','10 runs'],['Broad Jump','5×8']]},
-      {n:'Tuesday',t:'Upper Body — Max Output',items:[['Dumbbell Bench Press','6×6'],['Weighted Pull-Up or Lat Pulldown','5×6'],['Explosive Push-Up','5×12'],['Farmer Carry','5×60 yds'],['Ab Wheel','6×15'],['Plank','6×75s']]},
-      {n:'Thursday',t:'Lower Body Complex',items:[['Squat (Barbell or Dumbbell)','5×5 heavy'],['Box Jump (complex)','5×5'],['Bulgarian Split Squat','4×10 each'],['Lateral Bound Intervals','16 rounds'],['5-10-5 Shuttle','10 runs'],['Broad Jump','5×8']]},
-      {n:'Friday',t:'Upper Body Complex',items:[['Dumbbell Bench Press','5×5 heavy'],['Explosive Push-Up (complex)','5×8'],['Renegade Row','5×10 each'],['Farmer Carry','6×60 yds'],['Burpees','5×20'],['Jump Rope','6×2 min']]},
-      {n:'Saturday',t:'Full Body Max Circuit',items:[['Squat (Barbell or Dumbbell)','5×5 heavy'],['Explosive Push-Up','5×15'],['Weighted Pull-Up or Lat Pulldown','5×8'],['Depth Jump','5×8'],['Ab Wheel','6×15'],['Burpees','5×20']]}
+    {num:4,focus:'Deload',days:[
+      {n:'Monday',t:'Lower Body Light',items:[['Goblet Squat','3×10'],['Romanian Deadlift','3×8'],['Box Jump','3×4'],['Hip Mobility Circuit','10 min']]},
+      {n:'Tuesday',t:'Upper Body Light',items:[['Push-Up','3×12'],['Dumbbell Row','3×10 each'],['Shoulder Press','3×8'],['Foam Roll + Stretch','10 min']]},
+      {n:'Thursday',t:'Speed Easy',items:[['Sprint Intervals — Short','3 rounds (easy)'],['Lateral Bound','3×5 each'],['Jump Rope','3×45s']]},
+      {n:'Friday',t:'Core + Mobility',items:[['Plank','3×45s'],['Dead Bug','3×8 each'],['Full body stretch','15 min']]}
     ]},
-    {num:5,focus:'Volume & Intensity Peak',days:[
-      {n:'Monday',t:'Lower Body — Volume Peak',items:[['Squat (Barbell or Dumbbell)','6×5 — challenging weight'],['Jump Squat','5×6'],['Nordic Curl (or Hamstring Curl)','5×8'],['Box Jump','5×8'],['5-10-5 Shuttle','10 runs'],['Broad Jump','6×8']]},
-      {n:'Tuesday',t:'Upper Body — Volume Peak',items:[['Dumbbell Bench Press','6×8'],['Weighted Pull-Up or Lat Pulldown','5×8'],['Explosive Push-Up','5×15'],['Farmer Carry','6×60 yds'],['Ab Wheel','6×15'],['Plank','6×80s']]},
-      {n:'Thursday',t:'Lower Body Complex + Conditioning',items:[['Squat (Barbell or Dumbbell)','5×5 heavy'],['Box Jump (complex)','5×5'],['Depth Jump','5×8'],['Lateral Bound Intervals','18 rounds'],['5-10-5 Shuttle','10 runs'],['Broad Jump','6×8']]},
-      {n:'Friday',t:'Upper Body + Max Conditioning',items:[['Dumbbell Bench Press','5×10'],['Explosive Push-Up','6×15'],['Renegade Row','5×10 each'],['Farmer Carry','6×60 yds'],['Burpees','6×20'],['Jump Rope','7×2 min']]},
-      {n:'Saturday',t:'Full Body Peak Circuit',items:[['Squat (Barbell or Dumbbell)','5×8 heavy'],['Explosive Push-Up','6×15'],['Weighted Pull-Up or Lat Pulldown','5×8'],['Depth Jump','5×8'],['Ab Wheel','6×15'],['Burpees','6×18']]}
+    {num:5,focus:'Explosive Volume',days:[
+      {n:'Monday',t:'Lower Body Explosive Volume',items:[['Jump Squat','5×10'],['Back Squat','4×8'],['Depth Jump','5×5'],['Lateral Bound','5×10 each'],['Nordic Curl','4×8'],['Calf Jump','4×20']]},
+      {n:'Tuesday',t:'Upper Body Explosive Volume',items:[['Clap Push-Up','4×8'],['Bench Press','4×8'],['Push Press','4×6'],['Medicine Ball Slam','5×10'],['Battle Ropes','4×20s'],['Band Pull-Apart','5×20']]},
+      {n:'Wednesday',t:'Speed Volume',items:[['Sprint Intervals — Short','6 rounds'],['5-10-5 Shuttle — max effort','5 rounds'],['Cone Drill','5 rounds'],['Lateral Bound Intervals — max effort','8 rounds'],['Jump Rope','5×60s']]},
+      {n:'Friday',t:'Power Circuit',items:[['Box Jump','5×6'],['Broad Jump','5×5'],['Medicine Ball Slam','5×10'],['Burpees','4×15'],['Farmer Carry','4×40m'],['Plank Up-Down','4×12']]},
+      {n:'Saturday',t:'Full Body Conditioning',items:[['Shuttle Runs','6 rounds'],['Jump Squat','4×10'],['Burpees','4×15'],['Jump Rope','5×60s'],['Sprint Intervals — Long','4 rounds']]}
     ]},
-    {num:6,focus:'Intensity Maintained',days:[
-      {n:'Monday',t:'Lower Body — Heavy',items:[['Squat (Barbell or Dumbbell)','5×5 — challenging weight'],['Jump Squat','5×5'],['Nordic Curl (or Hamstring Curl)','4×8'],['Box Jump','5×8'],['5-10-5 Shuttle','10 runs'],['Broad Jump','5×8']]},
-      {n:'Tuesday',t:'Upper Body — Heavy',items:[['Dumbbell Bench Press','5×8'],['Weighted Pull-Up or Lat Pulldown','5×6'],['Explosive Push-Up','5×12'],['Farmer Carry','5×60 yds'],['Ab Wheel','5×15'],['Plank','5×75s']]},
-      {n:'Thursday',t:'Lower Body Complex',items:[['Squat (Barbell or Dumbbell)','4×5 heavy'],['Box Jump (complex)','4×5'],['Bulgarian Split Squat','4×12 each'],['Lateral Bound Intervals','16 rounds'],['5-10-5 Shuttle','10 runs'],['Depth Jump','5×8']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','5×8'],['Explosive Push-Up','5×15'],['Farmer Carry','5×60 yds'],['Burpees','5×20'],['Jump Rope','6×2 min'],['Ab Wheel','5×15']]},
-      {n:'Saturday',t:'Full Body Circuit',items:[['Squat (Barbell or Dumbbell)','4×8 heavy'],['Explosive Push-Up','5×15'],['Weighted Pull-Up or Lat Pulldown','4×8'],['Depth Jump','4×8'],['Plank','5×75s'],['Burpees','5×15']]}
+    {num:6,focus:'Peak Power',days:[
+      {n:'Monday',t:'Lower Body Power Peak',items:[['Back Squat','5×3'],['Jump Squat','5×8'],['Depth Jump','5×5'],['Broad Jump','5×5'],['Nordic Curl','4×8'],['Sprint Intervals — Short','4 rounds']]},
+      {n:'Tuesday',t:'Upper Body Power Peak',items:[['Bench Press','5×3'],['Clap Push-Up','5×8'],['Push Press','5×4'],['Medicine Ball Slam','5×10'],['Band Pull-Apart','5×20'],['Plank','4×75s']]},
+      {n:'Wednesday',t:'Peak Speed',items:[['Sprint Intervals — Short','6 rounds'],['Band Resisted Sprint','5 rounds'],['5-10-5 Shuttle — max effort','6 rounds'],['Reactive Drop + Sprint','5 rounds'],['Jump Rope','5×60s']]},
+      {n:'Friday',t:'Power Complex Peak',items:[['Back Squat','5×3 then Jump Squat 5×6'],['Bench Press','5×3 then Clap Push-Up 5×6'],['Sled Push','4×20m'],['Farmer Carry','4×40m'],['Ab Wheel','4×15']]},
+      {n:'Saturday',t:'Conditioning Peak',items:[['Burpees','5×15'],['Box Jump','5×8'],['Shuttle Runs','6 rounds'],['Jump Rope','5×60s'],['Sprint Intervals — Long','5 rounds']]}
     ]},
-    {num:7,focus:'Taper Begins',days:[
-      {n:'Monday',t:'Lower Body — Taper',items:[['Squat (Barbell or Dumbbell)','4×5 — challenging weight'],['Jump Squat','4×5'],['Nordic Curl (or Hamstring Curl)','3×8'],['Box Jump','4×8'],['5-10-5 Shuttle','8 runs'],['Broad Jump','4×6']]},
-      {n:'Tuesday',t:'Upper Body — Taper',items:[['Dumbbell Bench Press','4×8'],['Weighted Pull-Up or Lat Pulldown','4×6'],['Explosive Push-Up','4×10'],['Farmer Carry','4×50 yds'],['Ab Wheel','4×12'],['Plank','4×65s']]},
-      {n:'Thursday',t:'Lower Body + Conditioning',items:[['Bulgarian Split Squat','4×10 each'],['Depth Jump','4×6'],['Lateral Bound Intervals','12 rounds'],['5-10-5 Shuttle','8 runs'],['Broad Jump','4×6'],['Box Jump','4×6']]},
-      {n:'Friday',t:'Upper Body + Conditioning',items:[['Dumbbell Bench Press','4×8'],['Explosive Push-Up','4×10'],['Farmer Carry','4×50 yds'],['Burpees','4×15'],['Jump Rope','5×2 min'],['Ab Wheel','4×12']]},
-      {n:'Saturday',t:'Full Body Light Circuit',items:[['Squat (Barbell or Dumbbell)','3×8'],['Explosive Push-Up','4×10'],['Pull-Up or Lat Pulldown','3×8'],['Box Jump','3×6'],['Plank','3×60s'],['Burpees','3×12']]}
+    {num:7,focus:'Taper — Stay Sharp',days:[
+      {n:'Monday',t:'Lower Body Taper',items:[['Back Squat','4×4 (heavy, low volume)'],['Jump Squat','4×6'],['Depth Jump','4×4'],['Nordic Curl','3×6'],['Calf Raises','3×20']]},
+      {n:'Tuesday',t:'Upper Body Taper',items:[['Bench Press','4×4'],['Push Press','4×4'],['Clap Push-Up','3×6'],['Band Pull-Apart','4×20'],['Plank','4×60s']]},
+      {n:'Thursday',t:'Speed Taper',items:[['Sprint Intervals — Short','4 rounds'],['5-10-5 Shuttle — max effort','4 rounds'],['Box Jump','4×5'],['Jump Rope','4×60s']]},
+      {n:'Friday',t:'Core + Mobility',items:[['Ab Wheel','4×12'],['Pallof Press','4×10 each'],['Copenhagen Plank','4×25s each'],['Full body stretch','15 min']]}
     ]},
-    {num:8,focus:'Active Recovery',days:[
-      {n:'Monday',t:'Lower Body — Light',items:[['Squat (Barbell or Dumbbell)','3×5 light weight'],['Box Jump','3×5'],['Nordic Curl (or Hamstring Curl)','2×8'],['5-10-5 Shuttle','5 runs — relaxed'],['Broad Jump','3×5'],['Calf Raises','3×20']]},
-      {n:'Tuesday',t:'Upper Body — Light',items:[['Dumbbell Bench Press','3×8 light weight'],['Pull-Up or Lat Pulldown','3×6'],['Explosive Push-Up','3×8'],['Farmer Carry','3×40 yds'],['Plank','3×45s'],['Ab Wheel','3×10']]},
-      {n:'Thursday',t:'Mobility + Light Conditioning',items:[['Hip Mobility Circuit','10 min'],['Shoulder Mobility Circuit','10 min'],['Light Lateral Bounds','3×6 each'],['Easy Shuttle Runs','4 rounds'],['Foam Roll + Stretch','15 min']]},
-      {n:'Friday',t:'Skills Focus Day',items:[['Light Movement — no heavy lifting',''],['Active recovery walk or bike','20 min'],['Core — Plank','3×45s'],['Core — Dead Bug','3×10 each'],['Stretch','15 min']]},
-      {n:'Saturday',t:'Late Off-Season Final Test',items:[['Squat — test your best weight','3×5'],['Box Jump — test max height','5 attempts'],['5-10-5 Shuttle','5 runs — best time'],['Pull-Up — max reps','2 sets'],['Plank — max hold','1 set'],['Enter results in Progress Tracker','']]}
-    ]},
-    {num:9,focus:'Transition to Pre-Season',days:[
-      {n:'Monday',t:'Lower Body — Speed Focus',items:[['Squat (Barbell or Dumbbell)','4×4 — explosive intent'],['Jump Squat','4×5'],['Box Jump','4×8'],['5-10-5 Shuttle','8 runs — max speed'],['Broad Jump','4×6'],['Lateral Bound','4×8 each']]},
-      {n:'Tuesday',t:'Upper Body — Speed Focus',items:[['Explosive Push-Up','5×8'],['Dumbbell Bench Press','4×6 — fast reps'],['Pull-Up or Lat Pulldown','4×8'],['Medicine Ball Slam (or Heavy Throw)','4×8'],['Plank','4×60s'],['Ab Wheel','4×12']]},
-      {n:'Thursday',t:'Conditioning Focus',items:[['5-10-5 Shuttle','10 runs — max speed'],['Lateral Bound Intervals','14 rounds'],['Box Jump','4×8'],['Broad Jump','4×8'],['Burpees','4×15'],['Jump Rope','5×90s']]},
-      {n:'Friday',t:'Upper Body + Core',items:[['Explosive Push-Up','5×10'],['Pull-Up or Lat Pulldown','4×8'],['Farmer Carry','4×50 yds'],['Ab Wheel','5×12'],['Plank','5×60s'],['Mountain Climbers','4×25']]},
-      {n:'Saturday',t:'Full Body Speed Circuit',items:[['Jump Squat','4×6'],['Explosive Push-Up','4×10'],['Box Jump','4×8'],['5-10-5 Shuttle','6 runs'],['Lateral Bound Intervals','10 rounds'],['Burpees','3×12']]}
-    ]},
-    {num:10,focus:'Pre-Season Bridge',days:[
-      {n:'Monday',t:'Lower Body — Game Speed',items:[['Squat (Barbell or Dumbbell)','3×5 — moderate weight, explosive'],['Jump Squat','5×5'],['Box Jump','5×8'],['5-10-5 Shuttle','10 runs — max speed'],['Broad Jump','5×6'],['Lateral Bound','5×8 each']]},
-      {n:'Tuesday',t:'Upper Body — Game Ready',items:[['Explosive Push-Up','5×10'],['Dumbbell Bench Press','4×6'],['Pull-Up or Lat Pulldown','4×8'],['Farmer Carry','4×50 yds'],['Ab Wheel','5×12'],['Plank','4×60s']]},
-      {n:'Thursday',t:'Conditioning — Game Speed',items:[['5-10-5 Shuttle','10 runs — max speed'],['Lateral Bound Intervals','14 rounds'],['Box Jump','5×8'],['Broad Jump','5×6'],['Burpees','5×12'],['Jump Rope','5×90s']]},
-      {n:'Friday',t:'Full Body — Speed & Power',items:[['Jump Squat','5×5'],['Explosive Push-Up','5×10'],['Pull-Up or Lat Pulldown','4×8'],['5-10-5 Shuttle','8 runs'],['Lateral Bound Intervals','12 rounds'],['Burpees','4×10']]},
-      {n:'Saturday',t:'Late Off-Season Complete',items:[['Light movement only — optional',''],['Foam roll + stretch','15 min'],['Review goals for Pre-Season',''],['Rest and prepare','']]}
+    {num:8,focus:'Final Assessment',days:[
+      {n:'Monday',t:'Strength Test',items:[['Back Squat','3 rep max test'],['Bench Press','3 rep max test'],['Push-Up','max reps test'],['Enter results in Progress Tracker','']]},
+      {n:'Tuesday',t:'Power + Speed Test',items:[['Broad Jump','max distance — 3 attempts'],['Sprint Intervals — Short','timed best of 3'],['5-10-5 Shuttle — max effort','timed best of 3'],['Enter results in Progress Tracker','']]},
+      {n:'Friday',t:'Review + Reset',items:[['Enter all results in Progress Tracker',''],['Compare to Phase 1 results',''],['Set goals for Pre-Season',''],['Rest up — Phase 2 complete! 🔥','']]}
     ]}
   ]},
-  3:{label:'Pre-Season — Sharpen & Peak (4 Weeks)',desc:'Get game-ready. Reduce volume, increase speed and sharpness. Everything is faster, more explosive, more hockey-specific. 4 days per week.',color:'#fb923c',weeks:[
-    {num:1,focus:'Speed & Sharpness Introduction',days:[
-      {n:'Monday',t:'Lower Body — Speed',items:[['Jump Squat','5×5'],['Box Jump','5×8'],['5-10-5 Shuttle','10 runs — max speed'],['Lateral Bound','5×8 each'],['Broad Jump','5×6'],['Depth Jump','4×6']]},
-      {n:'Tuesday',t:'Upper Body — Power',items:[['Explosive Push-Up','5×10'],['Dumbbell Bench Press','4×6 — fast, controlled'],['Pull-Up or Lat Pulldown','4×8'],['Medicine Ball Slam (or Substitute)','4×8'],['Plank','4×60s'],['Ab Wheel','4×12']]},
-      {n:'Thursday',t:'Full Body — Hockey Conditioning',items:[['5-10-5 Shuttle','12 runs — max effort'],['Lateral Bound Intervals','16 rounds'],['Box Jump','5×8'],['Burpees','5×12'],['Jump Rope','6×90s'],['Broad Jump','5×6']]},
-      {n:'Saturday',t:'Full Body — Speed Circuit',items:[['Jump Squat','4×5'],['Explosive Push-Up','4×10'],['Box Jump','4×8'],['5-10-5 Shuttle','8 runs'],['Lateral Bound Intervals','12 rounds'],['Burpees','3×10']]}
+  3:{label:'Pre-Season — Sharpen & Peak (4 Weeks)',desc:'Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.',color:'#f97316',weeks:[
+    {num:1,focus:'Speed-Strength — Game Prep',days:[
+      {n:'Monday',t:'Lower Body Game Speed',items:[['Back Squat','4×4 (heavy)'],['Jump Squat','4×8'],['Box Jump','4×6'],['Lateral Bound','4×8 each'],['Sprint Intervals — Short','4 rounds'],['Nordic Curl','3×6']]},
+      {n:'Tuesday',t:'Upper Body Game Speed',items:[['Bench Press','4×4'],['Push Press','4×5'],['Clap Push-Up','4×6'],['Medicine Ball Slam','4×10'],['Band Pull-Apart','4×20'],['Plank','4×60s']]},
+      {n:'Thursday',t:'Agility Max',items:[['5-10-5 Shuttle — max effort','5 rounds'],['Reactive Drop + Sprint','5 rounds'],['Cone Drill','5 rounds'],['Lateral Bound Intervals — max effort','8 rounds'],['Jump Rope','4×60s']]},
+      {n:'Friday',t:'Full Body Power',items:[['Trap Bar Deadlift','4×5'],['Push-Up','4×15'],['Medicine Ball Slam','4×10'],['Farmer Carry','4×40m'],['Shuttle Runs','5 rounds']]}
     ]},
-    {num:2,focus:'Intensity Ramp',days:[
-      {n:'Monday',t:'Lower Body — Max Speed',items:[['Jump Squat','5×6'],['Box Jump','5×8 — max height'],['5-10-5 Shuttle','12 runs — max speed'],['Lateral Bound','5×8 each — max distance'],['Broad Jump','5×8'],['Depth Jump','5×6']]},
-      {n:'Tuesday',t:'Upper Body — Explosive',items:[['Explosive Push-Up','6×10'],['Dumbbell Bench Press','4×5 — heavy, fast'],['Weighted Pull-Up or Lat Pulldown','4×6'],['Medicine Ball Slam','5×8'],['Plank','5×60s'],['Ab Wheel','5×12']]},
-      {n:'Thursday',t:'Full Body — Max Conditioning',items:[['5-10-5 Shuttle','14 runs — max effort'],['Lateral Bound Intervals','18 rounds'],['Box Jump','6×8'],['Burpees','6×12'],['Jump Rope','6×90s'],['Broad Jump','6×6']]},
-      {n:'Saturday',t:'Game-Speed Circuit',items:[['Jump Squat','5×5'],['Explosive Push-Up','5×10'],['Box Jump','5×8'],['5-10-5 Shuttle','10 runs'],['Lateral Bound Intervals','14 rounds'],['Burpees','4×10']]}
+    {num:2,focus:'Hockey-Specific Speed',days:[
+      {n:'Monday',t:'Lower Body Hockey Power',items:[['Back Squat','4×4'],['Jump Squat','4×8'],['Depth Jump','4×5'],['Lateral Bound','4×10 each'],['Sprint Intervals — Short','5 rounds'],['Calf Jump','4×20']]},
+      {n:'Tuesday',t:'Upper Body Hockey Strength',items:[['Bench Press','4×4'],['Bent-Over Row','4×5'],['Push Press','4×5'],['Medicine Ball Slam','4×10'],['Band Pull-Apart','4×20'],['Plank','4×60s']]},
+      {n:'Thursday',t:'Max Speed Day',items:[['Sprint Intervals — Short','6 rounds'],['5-10-5 Shuttle — max effort','5 rounds'],['Reactive Drop + Sprint','5 rounds'],['Ladder Drills — Max Foot Speed','5 rounds'],['Jump Rope','5×60s']]},
+      {n:'Friday',t:'Conditioning Circuit',items:[['Box Jump','4×6'],['Burpees','4×12'],['Broad Jump','4×5'],['Shuttle Runs','5 rounds'],['Farmer Carry','4×40m']]}
     ]},
-    {num:3,focus:'Game Ready',days:[
-      {n:'Monday',t:'Lower Body — Sharpness',items:[['Jump Squat','4×5'],['Box Jump','4×8'],['5-10-5 Shuttle','10 runs — max speed'],['Lateral Bound','4×8 each'],['Broad Jump','4×6'],['Depth Jump','3×6']]},
-      {n:'Tuesday',t:'Upper Body — Maintain',items:[['Explosive Push-Up','4×10'],['Dumbbell Bench Press','3×6'],['Pull-Up or Lat Pulldown','3×8'],['Farmer Carry','3×50 yds'],['Plank','3×60s'],['Ab Wheel','3×12']]},
-      {n:'Thursday',t:'Conditioning — Game Intensity',items:[['5-10-5 Shuttle','12 runs — max effort'],['Lateral Bound Intervals','14 rounds'],['Box Jump','4×8'],['Burpees','4×10'],['Jump Rope','5×90s'],['Broad Jump','4×6']]},
-      {n:'Saturday',t:'Final Prep Circuit',items:[['Jump Squat','3×5'],['Explosive Push-Up','3×8'],['Box Jump','3×8'],['5-10-5 Shuttle','8 runs'],['Lateral Bound Intervals','10 rounds'],['Burpees','3×8']]}
+    {num:3,focus:'Peak — Final Load',days:[
+      {n:'Monday',t:'Heavy Strength — Final',items:[['Back Squat','5×3 (heaviest of pre-season)'],['Trap Bar Deadlift','4×4'],['Jump Squat','4×8'],['Nordic Curl','4×6'],['Calf Raises','4×20']]},
+      {n:'Tuesday',t:'Upper Strength — Final',items:[['Bench Press','5×3'],['Bent-Over Row','5×4'],['Push Press','4×4'],['Medicine Ball Slam','4×10'],['Plank','4×75s']]},
+      {n:'Thursday',t:'Speed Peak',items:[['Sprint Intervals — Short','6 rounds'],['Band Resisted Sprint','4 rounds'],['5-10-5 Shuttle — max effort','5 rounds'],['Lateral Bound Intervals — max effort','8 rounds'],['Jump Rope','5×60s']]},
+      {n:'Friday',t:'Full Power Circuit',items:[['Box Jump','4×6'],['Broad Jump','4×6'],['Medicine Ball Slam','4×10'],['Shuttle Runs','5 rounds'],['Farmer Carry','4×40m']]}
     ]},
-    {num:4,focus:'Season Starts — Final Tune-Up',days:[
-      {n:'Monday',t:'Light Lower Body',items:[['Jump Squat','3×4 — light'],['Box Jump','3×5'],['5-10-5 Shuttle','6 runs — relaxed speed'],['Lateral Bound','3×6 each'],['Calf Raises','3×20'],['Foam Roll','10 min']]},
-      {n:'Tuesday',t:'Light Upper Body',items:[['Explosive Push-Up','3×8'],['Pull-Up or Lat Pulldown','3×6'],['Plank','3×45s'],['Dead Bug','3×10 each'],['Stretch','15 min']]},
-      {n:'Thursday',t:'Pre-Season Final Test',items:[['5-10-5 Shuttle','5 runs — beat your best'],['Box Jump','5 attempts — max height'],['Broad Jump','5 attempts — best distance'],['Burpees — 1 min','Count and record'],['Enter results in Progress Tracker','']]}
+    {num:4,focus:'Final Prep — Game Ready',days:[
+      {n:'Monday',t:'Activation — Lower',items:[['Back Squat','3×3 (moderate)'],['Jump Squat','3×6'],['Box Jump','3×4'],['Lateral Bound','3×6 each'],['Hip Mobility Circuit','10 min']]},
+      {n:'Tuesday',t:'Activation — Upper',items:[['Bench Press','3×3'],['Push Press','3×4'],['Band Pull-Apart','3×15'],['Plank','3×45s'],['Foam Roll + Stretch','10 min']]},
+      {n:'Thursday',t:'Speed Activation',items:[['Sprint Intervals — Short','3 rounds'],['5-10-5 Shuttle — max effort','3 rounds'],['Jump Rope','3×45s'],['Full body stretch','15 min']]},
+      {n:'Friday',t:'Game Ready Assessment',items:[['Broad Jump','max distance test'],['Push-Up','max reps test'],['Shuttle Runs','timed'],['Enter results in Progress Tracker',''],['Rest up — season starts soon! 🏒','']]}
     ]}
   ]},
-  4:{label:'In-Season Block A — Early Season (4 Weeks)',desc:'Maintain your strength and power early in the season. Moderate intensity, full recovery between sessions. 3 days per week — never train the day before or after a game if possible.',color:'#a78bfa',weeks:[
-    {num:1,focus:'Season Maintenance Start',days:[
-      {n:'Monday',t:'Lower Body + Power',items:[['Squat (Barbell or Dumbbell)','3×5 — moderate weight'],['Box Jump','3×6'],['Nordic Curl (or Hamstring Curl)','2×8'],['5-10-5 Shuttle','5 runs'],['Lateral Bound','3×6 each'],['Calf Raises','3×20']]},
-      {n:'Wednesday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','3×8'],['Pull-Up or Lat Pulldown','3×8'],['Explosive Push-Up','3×8'],['Farmer Carry','3×40 yds'],['Plank','3×50s'],['Ab Wheel','3×10']]},
-      {n:'Friday',t:'Full Body — Short & Sharp',items:[['Jump Squat','3×5'],['Explosive Push-Up','3×8'],['Box Jump','3×6'],['5-10-5 Shuttle','6 runs'],['Lateral Bound Intervals','8 rounds'],['Burpees','3×8']]}
+  4:{label:'In-Season Block A — Early Season (8 Weeks)',desc:'Early season — maintain the strength you built without adding fatigue on top of games and practices. Full effort, smart recovery.',color:'#4ade80',weeks:[
+    {num:1,focus:'In-Season Foundation — Establish Routine',days:[
+      {n:'Monday',t:'Lower Body Maintenance',items:[['Back Squat','4×5'],['Romanian Deadlift','4×6'],['Box Jump','4×5'],['Lateral Bound','4×6 each'],['Nordic Curl','3×5'],['Calf Raises','4×15']]},
+      {n:'Wednesday',t:'Upper Body Maintenance',items:[['Bench Press','4×5'],['Bent-Over Row','4×6'],['Push Press','3×5'],['Band Pull-Apart','4×15'],['Plank','4×45s'],['Ab Wheel','3×10']]},
+      {n:'Friday',t:'Full Body + Core',items:[['Jump Squat','4×6'],['Push-Up','4×15'],['Dumbbell Row','4×10 each'],['Medicine Ball Slam','3×8'],['Farmer Carry','3×30m'],['Pallof Press','3×10 each']]}
     ]},
-    {num:2,focus:'Game Rhythm',days:[
-      {n:'Monday',t:'Lower Body + Power',items:[['Squat (Barbell or Dumbbell)','3×5 — moderate weight'],['Box Jump','3×6'],['Nordic Curl (or Hamstring Curl)','2×8'],['5-10-5 Shuttle','5 runs'],['Broad Jump','3×5'],['Calf Raises','3×20']]},
-      {n:'Wednesday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','3×8'],['Pull-Up or Lat Pulldown','3×8'],['Explosive Push-Up','3×8'],['Farmer Carry','3×40 yds'],['Plank','3×50s'],['Russian Twists','3×20']]},
-      {n:'Friday',t:'Full Body — Short & Sharp',items:[['Jump Squat','3×5'],['Explosive Push-Up','3×8'],['Box Jump','3×6'],['5-10-5 Shuttle','6 runs'],['Lateral Bound Intervals','8 rounds'],['Ab Wheel','3×10']]}
+    {num:2,focus:'Strength Maintenance — Week 2',days:[
+      {n:'Monday',t:'Lower Body',items:[['Back Squat','4×5'],['Trap Bar Deadlift','4×5'],['Depth Jump','4×4'],['Lateral Bound','4×6 each'],['Nordic Curl','3×5'],['Calf Raises','4×15']]},
+      {n:'Wednesday',t:'Upper Body',items:[['Bench Press','4×5'],['Bent-Over Row','4×5'],['Push Press','4×4'],['Medicine Ball Slam','3×8'],['Band Pull-Apart','4×15'],['Plank','4×45s']]},
+      {n:'Friday',t:'Full Body Power',items:[['Jump Squat','4×6'],['Box Jump','4×5'],['Push-Up','4×15'],['Farmer Carry','3×30m'],['Ab Wheel','3×10'],['Shuttle Runs','3 rounds']]}
     ]},
-    {num:3,focus:'Staying Strong',days:[
-      {n:'Monday',t:'Lower Body + Power',items:[['Squat (Barbell or Dumbbell)','3×5 — moderate weight'],['Depth Jump','3×5'],['Nordic Curl (or Hamstring Curl)','2×8'],['5-10-5 Shuttle','5 runs'],['Lateral Bound','3×6 each'],['Calf Raises','3×20']]},
-      {n:'Wednesday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','3×8'],['Pull-Up or Lat Pulldown','3×8'],['Explosive Push-Up','3×8'],['Farmer Carry','3×40 yds'],['Plank','3×50s'],['Dead Bug','3×10 each']]},
-      {n:'Friday',t:'Full Body — Short & Sharp',items:[['Jump Squat','3×5'],['Explosive Push-Up','3×8'],['Depth Jump','3×5'],['5-10-5 Shuttle','6 runs'],['Lateral Bound Intervals','8 rounds'],['Burpees','3×8']]}
+    {num:3,focus:'Mid-Block Strength',days:[
+      {n:'Monday',t:'Lower Body Heavy',items:[['Back Squat','4×4 (heavy)'],['Romanian Deadlift','4×6'],['Box Jump','4×5'],['Nordic Curl','3×6'],['Calf Raises','4×15']]},
+      {n:'Wednesday',t:'Upper Body Heavy',items:[['Bench Press','4×4 (heavy)'],['Bent-Over Row','4×5'],['Push Press','4×4'],['Band Pull-Apart','4×15'],['Plank','4×45s']]},
+      {n:'Friday',t:'Power + Conditioning',items:[['Jump Squat','4×6'],['Depth Jump','3×5'],['Medicine Ball Slam','3×10'],['Shuttle Runs','4 rounds'],['Farmer Carry','3×30m']]}
     ]},
-    {num:4,focus:'Block A Complete',days:[
-      {n:'Monday',t:'Lower Body + Power',items:[['Squat (Barbell or Dumbbell)','3×5 — moderate weight'],['Box Jump','3×6'],['Nordic Curl (or Hamstring Curl)','2×8'],['5-10-5 Shuttle','5 runs'],['Broad Jump','3×5'],['Calf Raises','3×20']]},
-      {n:'Wednesday',t:'Upper Body + Core',items:[['Dumbbell Bench Press','3×8'],['Pull-Up or Lat Pulldown','3×8'],['Explosive Push-Up','3×8'],['Plank','3×55s'],['Ab Wheel','3×12'],['Russian Twists','3×20']]},
-      {n:'Friday',t:'Block A Check-In',items:[['Quick strength test — Squat weight','Note current weight'],['Box Jump — best height','5 attempts'],['5-10-5 Shuttle','3 runs — note time'],['Pull-Up — max reps','1 set'],['Energy level check — adjust Block B if needed','']]}
+    {num:4,focus:'Recovery Week — Active Rest',days:[
+      {n:'Monday',t:'Lower Body Light',items:[['Goblet Squat','3×10'],['Romanian Deadlift','3×8'],['Box Jump','3×4'],['Hip Mobility Circuit','10 min']]},
+      {n:'Wednesday',t:'Upper Body Light',items:[['Push-Up','3×12'],['Dumbbell Row','3×10 each'],['Band Pull-Apart','3×15'],['Foam Roll + Stretch','10 min']]},
+      {n:'Friday',t:'Core + Mobility',items:[['Plank','3×40s'],['Dead Bug','3×8 each'],['Full body stretch','15 min']]}
+    ]},
+    {num:5,focus:'Strength Push — Mid Season',days:[
+      {n:'Monday',t:'Lower Body',items:[['Back Squat','4×5'],['Bulgarian Split Squat','4×6 each'],['Box Jump','4×5'],['Nordic Curl','3×6'],['Calf Raises','4×15']]},
+      {n:'Wednesday',t:'Upper Body',items:[['Bench Press','4×5'],['Bent-Over Row','4×5'],['Push Press','4×5'],['Band Pull-Apart','4×15'],['Plank','4×50s']]},
+      {n:'Friday',t:'Full Body Circuit',items:[['Jump Squat','4×6'],['Push-Up','4×15'],['Medicine Ball Slam','3×10'],['Shuttle Runs','3 rounds'],['Farmer Carry','3×30m']]}
+    ]},
+    {num:6,focus:'Power Maintenance',days:[
+      {n:'Monday',t:'Lower Body Power',items:[['Back Squat','4×4'],['Jump Squat','4×6'],['Depth Jump','4×4'],['Lateral Bound','4×6 each'],['Nordic Curl','3×6']]},
+      {n:'Wednesday',t:'Upper Body Power',items:[['Bench Press','4×4'],['Push Press','4×5'],['Clap Push-Up','3×6'],['Medicine Ball Slam','3×8'],['Band Pull-Apart','4×15']]},
+      {n:'Friday',t:'Conditioning',items:[['Shuttle Runs','4 rounds'],['Box Jump','4×5'],['Burpees','3×12'],['Farmer Carry','3×30m'],['Plank','3×45s']]}
+    ]},
+    {num:7,focus:'Strength Peak In-Season',days:[
+      {n:'Monday',t:'Lower Body Heavy',items:[['Back Squat','5×3 (heaviest in-season)'],['Romanian Deadlift','4×5'],['Box Jump','4×5'],['Nordic Curl','3×6'],['Calf Raises','4×15']]},
+      {n:'Wednesday',t:'Upper Body Heavy',items:[['Bench Press','5×3'],['Bent-Over Row','4×5'],['Push Press','4×4'],['Band Pull-Apart','4×15'],['Plank','4×50s']]},
+      {n:'Friday',t:'Full Body Power',items:[['Jump Squat','4×8'],['Depth Jump','4×4'],['Medicine Ball Slam','3×10'],['Shuttle Runs','3 rounds'],['Farmer Carry','3×30m']]}
+    ]},
+    {num:8,focus:'Block A Assessment',days:[
+      {n:'Monday',t:'Strength Check',items:[['Back Squat','3 rep max check'],['Push-Up','max reps check'],['Enter results in Progress Tracker','']]},
+      {n:'Wednesday',t:'Power Check',items:[['Broad Jump','max distance test'],['Shuttle Runs','timed'],['Enter results in Progress Tracker','']]},
+      {n:'Friday',t:'Review',items:[['Review strength vs pre-season baseline',''],['Adjust Block B plan if needed',''],['Rest well — good work so far! 🏒','']]}
     ]}
   ]},
-  5:{label:'In-Season Block B — Mid/Late Season (4 Weeks)',desc:'Reduced volume to manage accumulated fatigue. Keep the strength you built. Focus on recovery and staying sharp for games. 3 days per week.',color:'#f472b6',weeks:[
-    {num:1,focus:'Volume Reduction',days:[
-      {n:'Monday',t:'Lower Body — Light',items:[['Squat (Barbell or Dumbbell)','2×5 — moderate weight'],['Box Jump','2×5'],['Nordic Curl (or Hamstring Curl)','2×6'],['5-10-5 Shuttle','4 runs'],['Lateral Bound','2×6 each'],['Calf Raises','2×20']]},
-      {n:'Wednesday',t:'Upper Body — Light',items:[['Dumbbell Bench Press','2×8'],['Pull-Up or Lat Pulldown','2×8'],['Explosive Push-Up','2×8'],['Plank','2×50s'],['Dead Bug','2×10 each'],['Stretch','10 min']]},
-      {n:'Friday',t:'Short Recovery Session',items:[['Jump Squat','2×4'],['Box Jump','2×5'],['5-10-5 Shuttle','4 runs'],['Lateral Bound Intervals','6 rounds'],['Foam Roll','10 min'],['Stretch','10 min']]}
+  5:{label:'In-Season Block B — Mid Season (8 Weeks)',desc:'Mid season — fatigue begins to accumulate. Maintain key strength numbers, prioritize recovery, and stay explosive for games.',color:'#a78bfa',weeks:[
+    {num:1,focus:'Fatigue Management — Smart Training',days:[
+      {n:'Monday',t:'Lower Body Maintenance',items:[['Back Squat','4×4'],['Romanian Deadlift','4×5'],['Box Jump','3×5'],['Lateral Bound','3×6 each'],['Nordic Curl','3×5'],['Calf Raises','3×15']]},
+      {n:'Wednesday',t:'Upper Body Maintenance',items:[['Bench Press','4×4'],['Bent-Over Row','4×5'],['Push Press','3×4'],['Band Pull-Apart','4×15'],['Plank','3×45s']]},
+      {n:'Friday',t:'Full Body + Core',items:[['Jump Squat','3×6'],['Push-Up','4×12'],['Medicine Ball Slam','3×8'],['Shuttle Runs','3 rounds'],['Farmer Carry','3×25m']]}
     ]},
-    {num:2,focus:'Recovery Maintenance',days:[
-      {n:'Monday',t:'Lower Body — Recovery',items:[['Squat (Barbell or Dumbbell)','2×5 — light weight'],['Box Jump','2×5'],['Nordic Curl (or Hamstring Curl)','2×6'],['Easy Shuttle Runs','4 runs'],['Calf Raises','2×20'],['Hip Mobility','10 min']]},
-      {n:'Wednesday',t:'Upper Body — Recovery',items:[['Dumbbell Bench Press','2×8 — light'],['Pull-Up or Lat Pulldown','2×8'],['Explosive Push-Up','2×6'],['Plank','2×45s'],['Shoulder Mobility Circuit','10 min'],['Stretch','10 min']]},
-      {n:'Friday',t:'Short Active Session',items:[['Jump Squat','2×4'],['Box Jump','2×4'],['5-10-5 Shuttle','3 runs'],['Lateral Bound','2×6 each'],['Foam Roll','10 min'],['Full body stretch','15 min']]}
+    {num:2,focus:'Mid-Season Strength',days:[
+      {n:'Monday',t:'Lower Body',items:[['Back Squat','4×4'],['Trap Bar Deadlift','4×4'],['Box Jump','3×5'],['Nordic Curl','3×5'],['Calf Raises','3×15']]},
+      {n:'Wednesday',t:'Upper Body',items:[['Bench Press','4×4'],['Bent-Over Row','4×4'],['Push Press','3×4'],['Band Pull-Apart','4×15'],['Plank','3×45s']]},
+      {n:'Friday',t:'Power',items:[['Jump Squat','3×6'],['Depth Jump','3×4'],['Shuttle Runs','3 rounds'],['Farmer Carry','3×25m'],['Ab Wheel','3×10']]}
     ]},
-    {num:3,focus:'Staying Sharp',days:[
-      {n:'Monday',t:'Lower Body — Sharp',items:[['Squat (Barbell or Dumbbell)','2×5 — moderate weight'],['Box Jump','2×5'],['5-10-5 Shuttle','4 runs — max speed'],['Lateral Bound','2×6 each'],['Nordic Curl (or Hamstring Curl)','2×6'],['Calf Raises','2×15']]},
-      {n:'Wednesday',t:'Upper Body — Sharp',items:[['Explosive Push-Up','3×8'],['Dumbbell Bench Press','2×6'],['Pull-Up or Lat Pulldown','2×8'],['Plank','3×50s'],['Ab Wheel','2×10'],['Stretch','10 min']]},
-      {n:'Friday',t:'Pre-Weekend Tune-Up',items:[['Jump Squat','2×4'],['Box Jump','2×5'],['5-10-5 Shuttle','4 runs'],['Lateral Bound Intervals','6 rounds'],['Foam Roll','10 min'],['Stretch','10 min']]}
+    {num:3,focus:'Recover + Maintain',days:[
+      {n:'Monday',t:'Lower Body Light-Moderate',items:[['Goblet Squat','4×8'],['Romanian Deadlift','3×8'],['Box Jump','3×4'],['Hip Mobility Circuit','10 min']]},
+      {n:'Wednesday',t:'Upper Body Light-Moderate',items:[['Push-Up','4×12'],['Dumbbell Row','3×10 each'],['Band Pull-Apart','4×15'],['Foam Roll + Stretch','10 min']]},
+      {n:'Friday',t:'Core + Activation',items:[['Plank','3×40s'],['Dead Bug','3×8 each'],['Lateral Bound','3×5 each'],['Full body stretch','15 min']]}
     ]},
-    {num:4,focus:'Season End — Transition',days:[
-      {n:'Monday',t:'Final In-Season Session',items:[['Squat (Barbell or Dumbbell)','2×5'],['Box Jump','2×5'],['5-10-5 Shuttle','4 runs'],['Pull-Up or Lat Pulldown','2×8'],['Plank','2×45s']]},
-      {n:'Wednesday',t:'Active Recovery',items:[['Easy bike or walk','20 min'],['Hip Mobility Circuit','10 min'],['Shoulder Mobility Circuit','10 min'],['Full body stretch','20 min'],['Foam Roll','10 min']]},
-      {n:'Friday',t:'Season Complete — Rest & Reflect',items:[['Season is over — take 1-2 weeks full rest',''],['Reflect on what improved this year',''],['Set goals for Early Off-Season',''],['Start Early Off-Season in 2-3 weeks',''],['Great season! 🏒','']]}
+    {num:4,focus:'Strength Refresh',days:[
+      {n:'Monday',t:'Lower Body',items:[['Back Squat','4×4'],['Jump Squat','3×6'],['Nordic Curl','3×5'],['Lateral Bound','3×6 each'],['Calf Raises','3×15']]},
+      {n:'Wednesday',t:'Upper Body',items:[['Bench Press','4×4'],['Push Press','3×4'],['Clap Push-Up','3×5'],['Band Pull-Apart','4×15'],['Plank','3×45s']]},
+      {n:'Friday',t:'Full Body',items:[['Depth Jump','3×4'],['Medicine Ball Slam','3×8'],['Shuttle Runs','3 rounds'],['Farmer Carry','3×25m']]}
+    ]},
+    {num:5,focus:'Playoff Prep — Stay Strong',days:[
+      {n:'Monday',t:'Lower Body Strength',items:[['Back Squat','4×4'],['Romanian Deadlift','4×5'],['Box Jump','4×5'],['Nordic Curl','3×6'],['Calf Raises','4×15']]},
+      {n:'Wednesday',t:'Upper Body Strength',items:[['Bench Press','4×4'],['Bent-Over Row','4×4'],['Push Press','3×4'],['Band Pull-Apart','4×15'],['Plank','4×45s']]},
+      {n:'Friday',t:'Power + Speed',items:[['Jump Squat','4×6'],['Depth Jump','3×5'],['Shuttle Runs','3 rounds'],['Medicine Ball Slam','3×8'],['Farmer Carry','3×25m']]}
+    ]},
+    {num:6,focus:'High-Demand Week — Push Through',days:[
+      {n:'Monday',t:'Lower Body',items:[['Back Squat','4×3 (heavy)'],['Jump Squat','4×6'],['Box Jump','4×5'],['Nordic Curl','3×6'],['Calf Raises','4×15']]},
+      {n:'Wednesday',t:'Upper Body',items:[['Bench Press','4×3 (heavy)'],['Push Press','4×4'],['Clap Push-Up','3×6'],['Band Pull-Apart','4×15'],['Plank','4×45s']]},
+      {n:'Friday',t:'Conditioning',items:[['Shuttle Runs','4 rounds'],['Burpees','3×12'],['Medicine Ball Slam','3×8'],['Farmer Carry','3×25m']]}
+    ]},
+    {num:7,focus:'Late Season Recovery',days:[
+      {n:'Monday',t:'Lower Body Light',items:[['Goblet Squat','3×8'],['Romanian Deadlift','3×6'],['Box Jump','3×4'],['Hip Mobility Circuit','10 min']]},
+      {n:'Wednesday',t:'Upper Body Light',items:[['Push-Up','3×10'],['Dumbbell Row','3×8 each'],['Band Pull-Apart','3×15'],['Foam Roll + Stretch','10 min']]},
+      {n:'Friday',t:'Core + Mobility',items:[['Plank','3×40s'],['Dead Bug','3×8 each'],['Full body stretch','15 min']]}
+    ]},
+    {num:8,focus:'Block B + Season Review',days:[
+      {n:'Monday',t:'Strength Check',items:[['Back Squat','3 rep check'],['Push-Up','max reps check'],['Enter results in Progress Tracker','']]},
+      {n:'Wednesday',t:'Power Check',items:[['Broad Jump','max distance test'],['Shuttle Runs','timed'],['Enter results in Progress Tracker','']]},
+      {n:'Friday',t:'End of Season Review',items:[['Enter all results in Progress Tracker',''],['Compare to pre-season baseline',''],['Set goals for off-season',''],["Great season! Rest up — you've earned it! 🏒",'']]}
     ]}
-  ]}
-,
-  6:{label:'Active Recovery & Bridge (10 Weeks)',desc:'Transition phase between In-Season and the next Early Off-Season. Lower intensity, higher variety. Maintain fitness, address weak points, and mentally reset before the next training year.',color:'#34d399',weeks:[
+  ]},
+  6:{label:'Active Recovery & Bridge (4 Weeks)',desc:'Transition between seasons. Lower intensity, higher variety. Maintain fitness, address weak points, and mentally reset before the next training year.',color:'#34d399',weeks:[
     {num:1,focus:'Active Recovery — Move and Restore',days:[
-      {n:'Monday',t:'Full Body Easy',items:[['Goblet Squat','3×10 (easy)'],['Push-Up','3×10'],['Dumbbell Row','3×10 each'],['Plank','3×30s'],['Full body stretch','15 min']]},
-      {n:'Tuesday',t:'Cardio + Mobility',items:[['Easy bike or walk','20 min'],['Hip Mobility Circuit','10 min'],['Foam Roll + Stretch','10 min']]},
-      {n:'Thursday',t:'Light Movement',items:[['Jump Rope','3×45s'],['Lateral Bound','3×5 each (easy)'],['Hip Circle','2×10 each'],['Full body stretch','15 min']]},
-      {n:'Friday',t:'Core + Stretch',items:[['Plank','3×30s'],['Dead Bug','3×8 each'],['Bird Dog','3×8 each'],['Full body stretch','15 min']]}
+      {n:'Monday',t:'Full Body Easy',items:[['Goblet Squat','3×10'],['Push-Up','3×12'],['Dumbbell Row','3×10 each'],['Plank','3×40s'],['Full body stretch','15 min']]},
+      {n:'Wednesday',t:'Cardio + Mobility',items:[['Easy bike or walk','20 min'],['Hip Mobility Circuit','10 min'],['Foam Roll + Stretch','10 min']]},
+      {n:'Friday',t:'Core + Light Movement',items:[['Dead Bug','3×8 each'],['Bird Dog','3×8 each'],['Lateral Bound','3×5 each (easy)'],['Full body stretch','15 min']]}
     ]},
     {num:2,focus:'Rebuild Movement Quality',days:[
-      {n:'Monday',t:'Lower Body Movement',items:[['Hip Hinge Pattern','3×10'],['Goblet Squat','3×12'],['Lateral Lunge','3×8 each'],['Calf Raises','3×15'],['Hip Mobility Circuit','10 min']]},
-      {n:'Tuesday',t:'Upper Body Movement',items:[['Push-Up','3×12'],['Dumbbell Row','3×10 each'],['Band Pull-Apart','3×15'],['Shoulder Press','3×10'],['Foam Roll + Stretch','10 min']]},
-      {n:'Thursday',t:'Agility Easy',items:[['Cone Shuffle','3×20s'],['Lateral Bound','3×5 each'],['Jump Rope','3×45s'],['Hip Mobility Circuit','10 min']]},
-      {n:'Friday',t:'Full Body + Core',items:[['Goblet Squat','3×10'],['Push-Up','3×10'],['Plank','3×45s'],['Dead Bug','3×10 each'],['Full body stretch','15 min']]}
+      {n:'Monday',t:'Lower Body Movement',items:[['Hip Hinge Pattern','4×10'],['Goblet Squat','4×12'],['Lateral Lunge','4×8 each'],['Calf Raises','3×15'],['Hip Mobility Circuit','10 min']]},
+      {n:'Wednesday',t:'Upper Body Movement',items:[['Push-Up','4×12'],['Dumbbell Row','4×10 each'],['Band Pull-Apart','4×15'],['Shoulder Press','4×10'],['Foam Roll + Stretch','10 min']]},
+      {n:'Friday',t:'Full Body + Core',items:[['Goblet Squat','4×10'],['Push-Up','4×12'],['Plank','4×40s'],['Dead Bug','4×10 each'],['Full body stretch','15 min']]}
     ]},
     {num:3,focus:'Strength Reintroduction',days:[
-      {n:'Monday',t:'Lower Body Light Strength',items:[['Goblet Squat','4×10'],['Romanian Deadlift','3×10'],['Step-Up with Knee Drive','3×8 each'],['Calf Raises','3×20'],['Hip Mobility Circuit','10 min']]},
-      {n:'Tuesday',t:'Upper Body Light Strength',items:[['Push-Up','4×12'],['Dumbbell Row','4×10 each'],['Shoulder Press','3×10'],['Tricep Dip','3×10'],['Band Pull-Apart','3×15']]},
-      {n:'Thursday',t:'Speed Reintroduction',items:[['Broad Jump','3×4'],['Box Jump','3×4'],['Cone Drill','3 rounds'],['Jump Rope','4×45s'],['Shuttle Runs','3 rounds']]},
-      {n:'Friday',t:'Full Body + Core',items:[['Goblet Squat','3×12'],['Bench Press','3×10'],['Bent-Over Row','3×10'],['Plank','3×45s'],['Ab Wheel','3×8']]}
+      {n:'Monday',t:'Lower Body Light Strength',items:[['Back Squat','4×8 (moderate)'],['Romanian Deadlift','4×8'],['Box Jump','3×4'],['Nordic Curl','3×5'],['Calf Raises','4×15']]},
+      {n:'Wednesday',t:'Upper Body Light Strength',items:[['Bench Press','4×8'],['Bent-Over Row','4×8'],['Push Press','3×6'],['Band Pull-Apart','4×15'],['Plank','4×40s']]},
+      {n:'Friday',t:'Full Body + Conditioning',items:[['Jump Squat','3×6'],['Push-Up','4×12'],['Medicine Ball Slam','3×8'],['Shuttle Runs','3 rounds'],['Farmer Carry','3×30m']]}
     ]},
-    {num:4,focus:'Weak Point Focus — Self Assessment',days:[
-      {n:'Monday',t:'Lower Body Focus',items:[['Bulgarian Split Squat','4×10 each'],['Nordic Curl','3×5'],['Calf Raises','4×20'],['Hip Mobility Circuit','10 min'],['Lateral Lunge','3×10 each']]},
-      {n:'Tuesday',t:'Upper Body Focus',items:[['Push-Up','4×15'],['Dumbbell Row','4×12 each'],['Arnold Press','3×10'],['Tricep Dip','4×12'],['Band Pull-Apart','4×20']]},
-      {n:'Thursday',t:'Agility + Conditioning',items:[['Ladder Drills — Max Foot Speed','4 rounds'],['Cone Drill','4 rounds'],['Jump Rope','5×60s'],['Shuttle Runs','4 rounds']]},
-      {n:'Friday',t:'Core + Mobility',items:[['Plank','4×60s'],['Ab Wheel','4×10'],['Pallof Press','3×10 each'],['Copenhagen Plank','3×20s each'],['Full body stretch','15 min']]}
-    ]},
-    {num:5,focus:'Fitness Maintenance',days:[
-      {n:'Monday',t:'Lower Body Strength',items:[['Back Squat','4×8'],['Romanian Deadlift','4×8'],['Box Jump','3×5'],['Lateral Bound','3×6 each'],['Calf Raises','3×20']]},
-      {n:'Tuesday',t:'Upper Body Strength',items:[['Bench Press','4×8'],['Bent-Over Row','4×8'],['Push Press','3×8'],['Tricep Dip','3×12'],['Band Pull-Apart','3×15']]},
-      {n:'Thursday',t:'Speed + Agility',items:[['Sprint Intervals — Short','4 rounds'],['5-10-5 Shuttle — max effort','4 rounds'],['Box Jump','4×5'],['Jump Rope','4×60s']]},
-      {n:'Friday',t:'Full Body + Core',items:[['Goblet Squat','3×12'],['Push-Up','3×max reps'],['Dumbbell Row','3×12 each'],['Farmer Carry','3×30m'],['Plank','3×60s']]}
-    ]},
-    {num:6,focus:'Variety — Try New Movements',days:[
-      {n:'Monday',t:'Lower Body Variety',items:[['Trap Bar Deadlift','4×8'],['Cossack Squat','3×8 each'],['Single Leg Deadlift','3×8 each'],['Kettlebell Swing','4×12'],['Calf Raises','3×20']]},
-      {n:'Tuesday',t:'Upper Body Variety',items:[['Push-Up','4×15'],['Suitcase Carry','3×30m each'],['Arnold Press','3×10'],['Battle Ropes','3×20s'],['Band Pull-Apart','3×20']]},
-      {n:'Thursday',t:'Agility Variety',items:[['Cone Drill','4 rounds'],['Lateral Bound','4×8 each'],['Bear Crawl','3×20m'],['Jump Rope','4×60s'],['Sprint Intervals — Short','3 rounds']]},
-      {n:'Friday',t:'Core Variety',items:[['Ab Wheel','4×10'],['Copenhagen Plank','3×25s each'],['Pallof Press','3×12 each'],['Inchworm','3×8'],['Full body stretch','15 min']]}
-    ]},
-    {num:7,focus:'Conditioning Block',days:[
-      {n:'Monday',t:'Lower Body Power',items:[['Box Jump','5×5'],['Broad Jump','4×5'],['Weighted Jump Squat','4×6'],['Lateral Bound','4×8 each'],['Sprint Intervals — Short','4 rounds']]},
-      {n:'Tuesday',t:'Upper Body Power',items:[['Medicine Ball Slam','5×8'],['Clap Push-Up','4×6'],['Bent-Over Row','4×8 (explosive)'],['Battle Ropes','4×20s'],['Band Pull-Apart','3×20']]},
-      {n:'Thursday',t:'Conditioning Max',items:[['Shuttle Runs','6 rounds'],['Burpees','4×15'],['Jump Rope','5×60s'],['Mountain Climbers','4×25'],['Sprint Intervals — Long','3 rounds']]},
-      {n:'Friday',t:'Full Body Circuit',items:[['Goblet Squat','4×12'],['Push-Up','4×15'],['Dumbbell Row','4×12 each'],['Box Jump','3×5'],['Plank','3×60s']]}
-    ]},
-    {num:8,focus:'Skill + Conditioning',days:[
-      {n:'Monday',t:'Lower Body Skill',items:[['Single Leg Deadlift','4×8 each'],['Split Squat','4×10 each'],['Cossack Squat','3×8 each'],['Lateral Bound','4×6 each'],['Calf Raises','3×20']]},
-      {n:'Tuesday',t:'Upper Body Skill',items:[['Push-Up','4×max reps'],['Dumbbell Row','4×10 each (controlled)'],['Arnold Press','3×10'],['Tricep Dip','4×12'],['Band Pull-Apart','4×20']]},
-      {n:'Thursday',t:'Speed Skill',items:[['Ladder Drills — Max Foot Speed','5 rounds'],['Reactive Drop + Sprint','4 rounds'],['Cone Drill','4 rounds'],['5-10-5 Shuttle — max effort','4 rounds']]},
-      {n:'Friday',t:'Core Skill',items:[['Pallof Press','4×10 each'],['Copenhagen Plank','4×20s each'],['Ab Wheel','4×12'],['Dead Bug','3×10 each'],['Full body stretch','15 min']]}
-    ]},
-    {num:9,focus:'Final Fitness Push',days:[
-      {n:'Monday',t:'Lower Body Strength',items:[['Back Squat','5×5 (heavy)'],['Romanian Deadlift','4×8'],['Box Jump','4×5'],['Nordic Curl','3×6'],['Calf Raises','4×20']]},
-      {n:'Tuesday',t:'Upper Body Strength',items:[['Bench Press','5×5 (heavy)'],['Bent-Over Row','4×8'],['Push Press','4×6'],['Tricep Dip','4×12'],['Band Pull-Apart','4×20']]},
-      {n:'Thursday',t:'Speed + Power Max',items:[['Sprint Intervals — Short','5 rounds'],['Depth Jump','4×5'],['Broad Jump','4×max'],['Cone Drill','5 rounds'],['Jump Rope','5×60s']]},
-      {n:'Friday',t:'Full Body + Core',items:[['Goblet Squat','4×12'],['Push-Up','4×max reps'],['Farmer Carry','4×40m'],['Plank','4×60s'],['Ab Wheel','4×12']]}
-    ]},
-    {num:10,focus:'Bridge Week — Transition to Next Training Year',days:[
-      {n:'Monday',t:'Baseline Retest',items:[['Back Squat','3 rep max test'],['Push-Up','max reps test'],['Broad Jump','max distance — 3 attempts'],['Enter results in Progress Tracker','']]},
-      {n:'Tuesday',t:'Conditioning Retest',items:[['Shuttle Runs','6 rounds — timed'],['Burpee Test (30s)','max reps'],['Sprint Intervals — Short','timed — best of 3'],['Enter results in Progress Tracker','']]},
-      {n:'Thursday',t:'Light Movement + Reflect',items:[['Easy bike or walk','20 min'],['Hip Mobility Circuit','10 min'],['Full body stretch','15 min']]},
-      {n:'Friday',t:'Program Reset',items:[['Review progress vs start of year',''],['Set goals for next training year',''],['Rest up — full year complete! Outstanding work! 🏒','']]}
+    {num:4,focus:'Bridge — Ready for Off-Season',days:[
+      {n:'Monday',t:'Full Year Assessment',items:[['Back Squat','3 rep max test'],['Push-Up','max reps test'],['Broad Jump','max distance test'],['Enter results in Progress Tracker','']]},
+      {n:'Wednesday',t:'Speed + Conditioning Check',items:[['Shuttle Runs','timed — best of 3'],['Sprint Intervals — Short','timed'],['Enter results in Progress Tracker','']]},
+      {n:'Friday',t:'Year Review + Reset',items:[['Enter all results in Progress Tracker',''],['Compare to last year — see how far you have come',''],['Set goals for the new training year',''],['Rest up — full year complete! Outstanding work! 🏒','']]}
     ]}
-  ]}};
+  ]}
+};;
 
 const testRows=[
   {name:'30m Sprint',unit:'sec',lib:true},
@@ -5675,12 +5614,12 @@ function syncDaysToSeason() {
   updatePhaseCard();}
 
 const _PHASE_INFO = {
-  earlyoffseason: { label: 'Early Off-Season', title: 'Foundation & Strength', weeks: '20 weeks / 5 days/week', tags: ['Strength Build','Movement Quality','High Volume'], desc: 'Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season.' },
-  lateoffseason:  { label: 'Late Off-Season',  title: 'Power & Development',   weeks: '10 weeks / 5 days/week', tags: ['Explosive Power','Complex Training','Peak Development'], desc: 'Convert your strength into explosive hockey power. Heavier loads, jump-and-lift complexes, and peak conditioning.' },
-  preseason:      { label: 'Pre-Season',        title: 'Sharpen & Peak',        weeks: '4 weeks / 4 days/week',  tags: ['Game Speed','Reduce Volume','Stay Sharp'], desc: 'Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.' },
-  inseason_a:     { label: 'In-Season Block A', title: 'Early Season Maintenance', weeks: '4 weeks / 3 days/week', tags: ['Maintain Strength','Full Recovery','Game Focus'], desc: 'Early season - moderate intensity, full recovery. Keep your strength without adding fatigue on top of games.' },
-  inseason_b:     { label: 'In-Season Block B', title: 'Mid/Late Season',       weeks: '4 weeks / 3 days/week', tags: ['Low Volume','Recovery First','Stay Sharp'], desc: 'Fatigue is real late in the season. Reduce volume, prioritize recovery, stay sharp for games. Repeat as needed.' },
-  recovery:       { label: 'Active Recovery',   title: 'Rest & Rebuild',        weeks: '10 weeks / 3 days/week', tags: ['Active Recovery','Variety','Reset'], desc: 'Bridge between seasons. Lower intensity, higher variety. Maintain fitness and mentally reset before the next training year.' }
+  earlyoffseason: { label: 'Early Off-Season', title: 'Foundation & Strength', weeks: '14 weeks / 5 days/week', tags: ['Strength Build','Movement Quality','Progressive Load'], desc: 'Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season power work.' },
+  lateoffseason:  { label: 'Late Off-Season',  title: 'Power & Development',   weeks: '8 weeks / 5 days/week',  tags: ['Explosive Power','Complex Training','Peak Development'], desc: 'Convert your strength into explosive hockey power. Heavier loads, plyometric complexes, and peak conditioning.' },
+  preseason:      { label: 'Pre-Season',        title: 'Sharpen & Peak',        weeks: '4 weeks / 4 days/week',  tags: ['Game Speed','Hockey Specific','Peak Performance'], desc: 'Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.' },
+  inseason_a:     { label: 'In-Season Block A', title: 'Early Season (Oct-Nov)', weeks: '8 weeks / 3 days/week',  tags: ['Strength Maintenance','Full Recovery','Game Focus'], desc: 'Early season — maintain the strength you built without adding fatigue on top of games and practices.' },
+  inseason_b:     { label: 'In-Season Block B', title: 'Mid/Late Season (Dec-Mar)', weeks: '8 weeks / 3 days/week', tags: ['Fatigue Management','Recovery First','Stay Sharp'], desc: 'Mid and late season — manage fatigue, prioritize recovery, and stay explosive for games and playoffs.' },
+  recovery:       { label: 'Active Recovery',   title: 'Rest & Rebuild',        weeks: '4 weeks / 3 days/week',  tags: ['Active Recovery','Variety','Reset'], desc: 'Bridge between seasons. Lower intensity, higher variety. Maintain fitness and mentally reset before the next training year.' }
 };
 
 function updatePhaseCard() {
@@ -6131,7 +6070,7 @@ function renderWeeks(){
     if (stored) {
       const start = new Date(stored);
       const now = new Date();
-      const weekNum = Math.min(20, Math.max(1, Math.floor((now - start) / (7*24*60*60*1000)) + 1));
+      const weekNum = Math.min(14, Math.max(1, Math.floor((now - start) / (7*24*60*60*1000)) + 1));
       window._currentWeekNum = weekNum;
     } else {
       window._currentWeekNum = 1;
