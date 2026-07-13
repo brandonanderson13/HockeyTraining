@@ -1,33 +1,6 @@
 <!DOCTYPE html>
-<html 
+<html lang="en">
 
-const _PHASE_INFO = {
-  earlyoffseason: { label: 'Early Off-Season', title: 'Foundation & Strength', weeks: '20 weeks / 5 days/week', tags: ['Strength Build','Movement Quality','High Volume'], desc: 'Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season.' },
-  lateoffseason:  { label: 'Late Off-Season',  title: 'Power & Development',   weeks: '10 weeks / 5 days/week', tags: ['Explosive Power','Complex Training','Peak Development'], desc: 'Convert your strength into explosive hockey power. Heavier loads, jump-and-lift complexes, and peak conditioning.' },
-  preseason:      { label: 'Pre-Season',        title: 'Sharpen & Peak',        weeks: '4 weeks / 4 days/week',  tags: ['Game Speed','Reduce Volume','Stay Sharp'], desc: 'Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.' },
-  inseason_a:     { label: 'In-Season Block A', title: 'Early Season Maintenance', weeks: '4 weeks / 3 days/week', tags: ['Maintain Strength','Full Recovery','Game Focus'], desc: 'Early season - moderate intensity, full recovery. Keep your strength without adding fatigue on top of games.' },
-  inseason_b:     { label: 'In-Season Block B', title: 'Mid/Late Season',       weeks: '4 weeks / 3 days/week', tags: ['Low Volume','Recovery First','Stay Sharp'], desc: 'Fatigue is real late in the season. Reduce volume, prioritize recovery, stay sharp for games. Repeat as needed.' },
-  recovery:       { label: 'Active Recovery',   title: 'Rest & Rebuild',        weeks: '10 weeks / 3 days/week', tags: ['Active Recovery','Variety','Reset'], desc: 'Bridge between seasons. Lower intensity, higher variety. Maintain fitness and mentally reset before the next training year.' }
-};
-
-function updatePhaseCard() {
-  var sel = document.getElementById('cust-season');
-  if (!sel) return;
-  var p = _PHASE_INFO[sel.value];
-  if (!p) return;
-  var card = document.getElementById('selectedPhaseCard');
-  if (!card) return;
-  var th = '';
-  for (var i = 0; i < p.tags.length; i++) {
-    th += '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(var(--primary-rgb),0.15);color:var(--primary-color);border:1px solid rgba(var(--primary-rgb),0.3);">' + p.tags[i] + '</span> ';
-  }
-  var h = '<div style="font-size:10px;color:var(--primary-color);font-family:sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">' + p.label + '</div>';
-  h += '<div style="font-size:18px;font-weight:900;text-transform:uppercase;color:#fff;margin-bottom:3px;">' + p.title + '</div>';
-  h += '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;">' + p.weeks + '</div>';
-  h += '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">' + th + '</div>';
-  h += '<div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;">' + p.desc + '</div>';
-  card.innerHTML = h;
-}lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -307,11 +280,6 @@ select:focus{border-color:var(--or);outline:none;}
 </head>
 <body>
 
-<div id="debugPanel" style="position:fixed;top:10px;right:10px;background:#1a1a1a;border:2px solid #60a5fa;padding:16px;border-radius:8px;z-index:9999;max-width:400px;font-size:11px;color:#fff;display:none;">
-  <div style="font-weight:700;margin-bottom:8px;color:#60a5fa;">🔍 DEBUG INFO</div>
-  <div id="debugContent">Checking...</div>
-  <button onclick="this.parentElement.style.display='none'" style="margin-top:8px;background:#f87171;color:#fff;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:10px;">Close</button>
-</div>
 
 
 <div class="wrap" id="mainWrap">
@@ -5724,6 +5692,34 @@ function syncDaysToSeason() {
   });
 
   updatePhaseCard();}
+
+const _PHASE_INFO = {
+  earlyoffseason: { label: 'Early Off-Season', title: 'Foundation & Strength', weeks: '20 weeks / 5 days/week', tags: ['Strength Build','Movement Quality','High Volume'], desc: 'Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season.' },
+  lateoffseason:  { label: 'Late Off-Season',  title: 'Power & Development',   weeks: '10 weeks / 5 days/week', tags: ['Explosive Power','Complex Training','Peak Development'], desc: 'Convert your strength into explosive hockey power. Heavier loads, jump-and-lift complexes, and peak conditioning.' },
+  preseason:      { label: 'Pre-Season',        title: 'Sharpen & Peak',        weeks: '4 weeks / 4 days/week',  tags: ['Game Speed','Reduce Volume','Stay Sharp'], desc: 'Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.' },
+  inseason_a:     { label: 'In-Season Block A', title: 'Early Season Maintenance', weeks: '4 weeks / 3 days/week', tags: ['Maintain Strength','Full Recovery','Game Focus'], desc: 'Early season - moderate intensity, full recovery. Keep your strength without adding fatigue on top of games.' },
+  inseason_b:     { label: 'In-Season Block B', title: 'Mid/Late Season',       weeks: '4 weeks / 3 days/week', tags: ['Low Volume','Recovery First','Stay Sharp'], desc: 'Fatigue is real late in the season. Reduce volume, prioritize recovery, stay sharp for games. Repeat as needed.' },
+  recovery:       { label: 'Active Recovery',   title: 'Rest & Rebuild',        weeks: '10 weeks / 3 days/week', tags: ['Active Recovery','Variety','Reset'], desc: 'Bridge between seasons. Lower intensity, higher variety. Maintain fitness and mentally reset before the next training year.' }
+};
+
+function updatePhaseCard() {
+  var sel = document.getElementById('cust-season');
+  if (!sel) return;
+  var p = _PHASE_INFO[sel.value];
+  if (!p) return;
+  var card = document.getElementById('selectedPhaseCard');
+  if (!card) return;
+  var th = '';
+  for (var i = 0; i < p.tags.length; i++) {
+    th += '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(var(--primary-rgb),0.15);color:var(--primary-color);border:1px solid rgba(var(--primary-rgb),0.3);">' + p.tags[i] + '</span> ';
+  }
+  var h = '<div style="font-size:10px;color:var(--primary-color);font-family:sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">' + p.label + '</div>';
+  h += '<div style="font-size:18px;font-weight:900;text-transform:uppercase;color:#fff;margin-bottom:3px;">' + p.title + '</div>';
+  h += '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;">' + p.weeks + '</div>';
+  h += '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">' + th + '</div>';
+  h += '<div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;">' + p.desc + '</div>';
+  card.innerHTML = h;
+}
 
 function applyCustomization(){
   console.log('applyCustomization called');
