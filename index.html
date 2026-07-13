@@ -27,8 +27,7 @@ function updatePhaseCard() {
   h += '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">' + th + '</div>';
   h += '<div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;">' + p.desc + '</div>';
   card.innerHTML = h;
-}
-lang="en">
+}lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -653,39 +652,67 @@ select:focus{border-color:var(--or);outline:none;}
 
       </div>
 
-      <!-- TRAINING DAYS + PHASE CARD (2-col) -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-        <div>
-          <div style="margin-bottom:14px;">
-            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Training Days</label>
-            <div style="display:flex;flex-wrap:wrap;gap:6px;">
-              <label class="day-toggle"><input type="checkbox" value="Monday" checked><span>Mon</span></label>
-              <label class="day-toggle"><input type="checkbox" value="Tuesday" checked><span>Tue</span></label>
-              <label class="day-toggle"><input type="checkbox" value="Wednesday"><span>Wed</span></label>
-              <label class="day-toggle"><input type="checkbox" value="Thursday" checked><span>Thu</span></label>
-              <label class="day-toggle"><input type="checkbox" value="Friday" checked><span>Fri</span></label>
-              <label class="day-toggle"><input type="checkbox" value="Saturday" checked><span>Sat</span></label>
-              <label class="day-toggle"><input type="checkbox" value="Sunday"><span>Sun</span></label>
-            </div>
-          </div>
-          <div style="margin-bottom:14px;">
-            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Include in Program</label>
-            <div style="display:flex;flex-wrap:wrap;gap:8px;">
-              <label class="cust-check"><input type="checkbox" id="cust-strength" checked><span>Strength</span></label>
-              <label class="cust-check"><input type="checkbox" id="cust-agility" checked><span>Agility</span></label>
-              <label class="cust-check"><input type="checkbox" id="cust-skills" checked><span>Skills</span></label>
-              <label class="cust-check"><input type="checkbox" id="cust-conditioning" checked><span>Conditioning</span></label>
-              <input type="hidden" name="focus" value="balanced">
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;">
-            <button onclick="applyCustomization()" class="btn-o" style="margin-top:0;">Apply Settings</button>
-            <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">Settings applied!</div>
-          </div>
+      <!-- TRAINING DAYS -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Training Days</label>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <label class="day-toggle"><input type="checkbox" value="Monday" checked><span>Mon</span></label>
+          <label class="day-toggle"><input type="checkbox" value="Tuesday" checked><span>Tue</span></label>
+          <label class="day-toggle"><input type="checkbox" value="Wednesday"><span>Wed</span></label>
+          <label class="day-toggle"><input type="checkbox" value="Thursday" checked><span>Thu</span></label>
+          <label class="day-toggle"><input type="checkbox" value="Friday" checked><span>Fri</span></label>
+          <label class="day-toggle"><input type="checkbox" value="Saturday" checked><span>Sat</span></label>
+          <label class="day-toggle"><input type="checkbox" value="Sunday"><span>Sun</span></label>
         </div>
-        <div>
-          <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Selected Phase</label>
-          <div id="selectedPhaseCard" style="background:#0d0d0d;border:1px solid #333;border-radius:8px;padding:14px;"></div>
+      </div>
+
+      <!-- INCLUDE -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Include in Program</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <label class="cust-check"><input type="checkbox" id="cust-strength" checked><span>Strength</span></label>
+          <label class="cust-check"><input type="checkbox" id="cust-agility" checked><span>Agility</span></label>
+          <label class="cust-check"><input type="checkbox" id="cust-skills" checked><span>Skills</span></label>
+          <label class="cust-check"><input type="checkbox" id="cust-conditioning" checked><span>Conditioning</span></label>
+          <input type="hidden" name="focus" value="balanced">
+        </div>
+      </div>
+
+      <!-- APPLY -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+        <button onclick="applyCustomization()" class="btn-o" style="margin-top:0;">Apply Settings</button>
+        <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">✓ Settings applied!</div>
+      </div>
+
+      <!-- PROGRAM CARDS -->
+      <div style="border-top:1px solid #1a1a1a;padding-top:16px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">About the Phases</div>
+        <div class="g3">
+          <div class="pc">
+            <div class="pct"><div class="pn">Early Off-Season</div><div class="pt">Foundation & Strength</div><div class="pw">12 weeks · 5 days/week</div></div>
+            <div class="pcb"><span class="ptag ptago">Strength Build</span><span class="ptag">Movement Quality</span><span class="ptag ptago">High Volume</span></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season.</div>
+          </div>
+          <div class="pc">
+            <div class="pct"><div class="pn">Late Off-Season</div><div class="pt">Power & Development</div><div class="pw">10 weeks · 5 days/week</div></div>
+            <div class="pcb"><span class="ptag ptago">Explosive Power</span><span class="ptag">Complex Training</span><span class="ptag ptago">Peak Development</span></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Convert your strength into explosive hockey power. Heavier loads, jump-and-lift complexes, and peak conditioning.</div>
+          </div>
+          <div class="pc">
+            <div class="pct"><div class="pn">Pre-Season</div><div class="pt">Sharpen & Peak</div><div class="pw">4 weeks · 4 days/week</div></div>
+            <div class="pcb"><span class="ptag ptago">Game Speed</span><span class="ptag">Reduce Volume</span><span class="ptag ptago">Stay Sharp</span></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.</div>
+          </div>
+          <div class="pc">
+            <div class="pct"><div class="pn">In-Season Block A</div><div class="pt">Early Season Maintenance</div><div class="pw">4 weeks · 3 days/week</div></div>
+            <div class="pcb"><span class="ptag ptago">Maintain Strength</span><span class="ptag">Full Recovery</span><span class="ptag ptago">Game Focus</span></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Early season — moderate intensity, full recovery. Keep your strength without adding fatigue on top of games.</div>
+          </div>
+          <div class="pc">
+            <div class="pct"><div class="pn">In-Season Block B</div><div class="pt">Mid/Late Season</div><div class="pw">4 weeks · 3 days/week</div></div>
+            <div class="pcb"><span class="ptag ptago">Low Volume</span><span class="ptag">Recovery First</span><span class="ptag ptago">Stay Sharp</span></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Fatigue is real late in the season. Reduce volume, prioritize recovery, stay sharp for games. Repeat as needed.</div>
+          </div>
         </div>
       </div>
 
@@ -1564,7 +1591,7 @@ select:focus{border-color:var(--or);outline:none;}
         <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">
           Update your payment method, view invoices, or cancel your subscription through the Stripe Customer Portal.
         </p>
-        <a href="https://billing.stripe.com/p/login/14AcN4fnrf2y4DBdiadjO00" target="_blank" class="btn-o" style="display:inline-block;text-decoration:none;text-align:center;margin:0;">Open Customer Portal</a>
+        <a href="https://billing.stripe.com/p/login/14AcN4fnRef2y4DBdiadjO00" target="_blank" class="btn-o" style="display:inline-block;text-decoration:none;text-align:center;margin:0;">Open Customer Portal</a>
       </div>
     </div>
     
@@ -1870,33 +1897,31 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       // Add a logout button to the header
       addLogoutButton(supabase, user, isAdmin);
 
-      // Clear app badge when user opens the app
-      try {
-        if ('clearAppBadge' in navigator) navigator.clearAppBadge();
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.ready.then(reg => {
-            if (reg.active) reg.active.postMessage('clearBadge');
-          });
-        }
-      } catch(e) {}
+      // Clear badge on open
+      try { if ('clearAppBadge' in navigator) navigator.clearAppBadge(); } catch(e) {}
+      try { if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(reg => { if (reg.active) reg.active.postMessage('clearBadge'); }).catch(()=>{}); } catch(e) {}
 
       // Re-register push subscription if already granted (players only)
       try {
         if (role === 'player' && typeof Notification !== 'undefined' && Notification.permission === 'granted' && typeof registerPushSubscription === 'function' && !localStorage.getItem('trainrNotifDisabled')) {
           setTimeout(registerPushSubscription, 3000);
         }
-      } catch(notifErr) { console.warn('Notification check failed:', notifErr); }
+      } catch(notifErr) {}
 
-      // Show notification enable prompt for players
+      // Install banner
+      if (typeof triggerInstallBannerAfterLogin === 'function') setTimeout(triggerInstallBannerAfterLogin, 500);
+
+      // Notification prompt for players
       if (role === 'player') {
         setTimeout(() => {
           try {
-            const _notifDone = localStorage.getItem('trainrNotifPromptDone');
-            const _notifOK = typeof Notification !== 'undefined';
-            const _granted = _notifOK && Notification.permission === 'granted';
-            const _notifDisabled = localStorage.getItem('trainrNotifDisabled');
-            const _shouldPrompt = (!_granted || _notifDisabled) && !_notifDone && _notifOK && Notification.permission !== 'denied';
-            if (_shouldPrompt && typeof showNotificationPrompt === 'function') showNotificationPrompt();
+            const _nd = localStorage.getItem('trainrNotifPromptDone');
+            const _nOK = typeof Notification !== 'undefined';
+            const _ng = _nOK && Notification.permission === 'granted';
+            const _ndis = localStorage.getItem('trainrNotifDisabled');
+            if ((!_ng || _ndis) && !_nd && _nOK && Notification.permission !== 'denied') {
+              if (typeof showNotificationPrompt === 'function') showNotificationPrompt();
+            }
           } catch(e) {}
         }, 5000);
       }
@@ -1934,15 +1959,15 @@ function addLogoutButton(supabase, user, isAdmin) {
   btn.onclick = async () => {
     try {
       if ('serviceWorker' in navigator && window._userId) {
-        const reg = await navigator.serviceWorker.ready;
-        const sub = await reg.pushManager.getSubscription();
-        if (sub) {
-          const sb2 = await getSupabaseClient();
-          await sb2.from('push_subscriptions').delete().eq('user_id', window._userId);
-          await sub.unsubscribe();
+        const _r = await navigator.serviceWorker.ready;
+        const _s = await _r.pushManager.getSubscription();
+        if (_s) {
+          const _sb2 = await getSupabaseClient();
+          await _sb2.from('push_subscriptions').delete().eq('user_id', window._userId);
+          await _s.unsubscribe();
         }
       }
-    } catch(e) { console.warn('Push cleanup:', e.message); }
+    } catch(e) {}
     await supabase.auth.signOut();
     window.location.href = 'login.html';
   };
@@ -2983,7 +3008,7 @@ function loadHomeSec() {
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);">Program Not Set Up</div>
             <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">Complete setup to get your training plan</div>
           </div>
-          <button onclick="showSec('schedule')" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">Set Up Now</button>
+          <button onclick="showSetupWizard()" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">Set Up Now</button>
         </div>`;
   }
 
@@ -4017,6 +4042,7 @@ async function saveCombinedGoal() {
       metric: title,
       notes: (desc || '') + (link ? '\n\nLink: ' + link : ''),
       link_url: link || null,
+      type: type,
       tracked_metric: trackedMetric,
       target_value: targetValue,
       current_value: 0,
@@ -4029,7 +4055,6 @@ async function saveCombinedGoal() {
     if (error) throw error;
 
     if (typeof sendGoalPushNotifications === 'function') sendGoalPushNotifications(playerIds, title, due);
-
     document.getElementById('dashModal')?.remove();
     loadDashboard();
   } catch(e) {
@@ -4831,8 +4856,7 @@ async function getSupabaseClient() {
   
   window._sbClient = window.supabase.createClient(
     'https://sfkdwprzwtegfkohqsdy.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY',
-    { auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true } }
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY'
   );
   return window._sbClient;
 }
@@ -5160,7 +5184,7 @@ const exDB={
   'Suicides': {desc:'Mark lines at 10, 20, and 30 yards from start (use chalk, cones, or any markers). Sprint to the 10-yard line, touch, sprint back. Sprint to the 20, touch, sprint back. Sprint to the 30, touch, sprint back. That\'s 1 round. Walk 30 seconds, repeat.',cue:'Touch every line — no half-effort',yt:'https://www.youtube.com/results?search_query=suicides%20sprint%20conditioning'},
   'Jump Rope': {desc:'Standard jump rope. Aim for a steady rhythm — single bounces, both feet at once or alternating. The goal is uninterrupted minutes of rhythm. If you trip up, restart the clock for the round.',cue:'Smooth rhythm — feet barely leaving the ground',yt:'https://www.youtube.com/results?search_query=jump%20rope%20boxing%20conditioning'},
   'Lateral Bound Intervals': {desc:'Stand on one leg. Bound sideways onto the other foot, landing softly and balanced — pause for 1 second to stick the landing. Bound back. Each set = 30 seconds of bounds, 30 seconds rest. Builds the single-leg power and balance of skating crossovers and direction changes.',cue:'Stick the landing — balanced for 1 sec before bounding back',yt:'https://www.youtube.com/results?search_query=lateral%20bounds%20plyometric%20hockey'},
-  'Burpees': {desc:'From standing, place hands on floor and jump feet back to a plank. Perform a push-up (optional), then jump feet forward and explode upward reaching overhead. Modification for beginners: Step feet back and forward instead of jumping. Full burpees are intense — pace yourself.',cue:'Control the landing — soft knees every time',alt:'Step-Back Burpee (no jump) or Squat Thrust',yt:'https://www.youtube.com/results?search_query=burpee+tutorial+proper+form+modification'},
+  'Burpees': {desc:'Squat down, place hands on floor, jump feet back to plank, perform push-up, jump feet forward, explosively jump up with arms overhead. Full-body conditioning.',cue:'Full push-up each rep — no chest-drop cheat',yt:'https://www.youtube.com/results?search_query=burpee%20technique%20tutorial'},
   'Squat Thrust': {desc:'Like a burpee without the jump. Squat, kick feet back to plank, pull feet back in, stand. Lower impact but still builds conditioning.',cue:'Keep core tight in the plank position',yt:'https://www.youtube.com/results?search_query=squat%20thrust%20tutorial'},
   'Figure-8 Stickhandling': {desc:'Two objects 18 inches apart on shooting pad. Move puck in figure-8 around them using forehand and backhand. Head up throughout. Forces constant wrist rolling and direction changes.',cue:'Cup puck — don\'t slap it'},
   'Stickhandling': {desc:'Forehand/backhand puck touches on a shooting pad. Keep head up, hands away from body, soft wrists. Core stickhandling skill.',cue:'Eyes up — feel the puck'},
@@ -5245,7 +5269,47 @@ const exDB={
   'Wrist Shot — 40-shot session': {desc:'Mix shot types. 40 pucks. Log in Shot Log. CHALLENGE PROGRESSION: Complete in 20 min → 15 min → add target zones → 50% hit rate.',cue:''},
   'Wrist Shot — 30-shot session': {desc:'Mix shot types. 30 pucks. Build the daily shooting habit. Log in Shot Log. CHALLENGE PROGRESSION: 15 min → with targets → mix backhand and forehand → 50% accuracy.',cue:''}
 ,
-  'Push-Up': {desc:'Hands shoulder-width on floor, body in a straight line from head to heels. Lower chest to floor and press back up keeping core tight. Easier alternative: Knee Push-Up — same movement with knees on the floor. Harder: Feet elevated or weighted vest.',cue:'Chest touches floor — do not let hips sag',alt:'Knee Push-Up (easier) or Decline Push-Up (harder)',yt:'https://www.youtube.com/results?search_query=push+up+tutorial+proper+form'},
+  'Push-Up': {desc:'Hands shoulder-width on floor, body in a straight line from head to heels. Lower chest to floor and press back up keeping core tight. Easier: Knee Push-Up — same movement with knees on floor. Harder: Decline Push-Up or weighted vest.',cue:'Chest touches floor — do not let hips sag',alt:'Knee Push-Up (easier) or Decline Push-Up (harder)',yt:'https://www.youtube.com/results?search_query=push+up+proper+form+tutorial'},
+  'Light jog': {desc:'Easy-pace jog at conversational effort — should be able to talk while running. 20-30 min. Recovery work that promotes blood flow without taxing the nervous system. Skip if soreness is high.',cue:'Easy pace — should feel like you could go much longer'},
+  'Light walk or bike': {desc:'Easy-pace walk or stationary/outdoor bike at conversational effort. 20-25 min. Promotes blood flow and recovery without adding training stress.',cue:'Easy effort — recovery is the goal'},
+  'Recovery walk or bike': {desc:'Easy walk or bike ride for 25 min at conversational effort. Active recovery between hard training days. Promotes blood flow and helps soreness clear faster than complete rest.',cue:'Talk test — if you can\'t speak in sentences, slow down'},
+  'Light movement': {desc:'Any easy aerobic activity — walk, bike, swim, light skate. 25 min at low intensity. The goal is blood flow and movement, not training adaptation.',cue:'Should feel refreshing, not draining'},
+  'Foam roll — legs and hips': {desc:'Roll major muscle groups: quads, hamstrings, glutes, IT bands, calves, lower back. 30-60 sec per muscle group. Spend extra time on tight spots — but don\'t roll directly over bone or joint. Improves tissue quality and recovery.',cue:'Slow rolls — pause on tender spots and breathe'},
+  'Hip mobility drills': {desc:'10 min of hip mobility work: 90/90 stretches, hip circles, world\'s greatest stretch, deep squat holds, lateral lunges. Critical for skating stride length and injury prevention.',cue:'Hold each position 20-30 sec — breathe through tension'},
+  'Ladder — fastest foot speed': {desc:'Run through the agility ladder at maximum foot speed across 5-6 patterns. Each pattern done once. Track your time on icky shuffle or in-out hops — your time should improve weekly.',cue:'Fastest foot speed possible without messing up'},
+  'Power circuit — all explosive moves': {desc:'4 rounds of explosive movements back-to-back: Jump Squats, Box Jumps, Broad Jumps, Push-Up to Star (explode up clapping or reaching). Rest 90 sec between rounds. Maximum power output every rep.',cue:'Quality over quantity — full effort or rest more'},
+  'Full body circuit — all muscle groups': {desc:'Circuit hitting all major movements: squat, hinge, push, pull, lunge, core. 3 rounds of 10-12 reps each with 60-90 sec rest between rounds. Touches every major muscle group in one session.',cue:'Move with purpose — control every rep'},
+  'Full body — highest Phase 2 loads': {desc:'Peak strength session using the heaviest loads you\'ve used this phase. Goblet Squat, Romanian Deadlift, Bench Press, Bent-Over Row, Shoulder Press. 4 rounds of 6-8 reps. Test your maximum.',cue:'Heavy but with good form — never sacrifice technique'},
+  'Core max effort — 4 exercises': {desc:'Pick 4 core exercises and do them at max effort: Plank (1 min), Hollow Body Hold (45 sec), Russian Twists (30 reps), Ab Wheel (10 reps). 4 rounds. Builds the trunk strength that powers shooting and skating.',cue:'Brace — exhale through every rep'},
+  'Shooting Accuracy — 5-spot (10 shots)': {desc:'5 targets: top-left, top-right, bottom-left, bottom-right, 5-hole. Shoot 2 wrist shots at each target in order. 10 shots total. Log hits in the Final Test. CHALLENGE PROGRESSION: Baseline 4/10 → 6/10 → 7/10 → 8/10.',cue:'Aim small — pick a specific corner, not the whole net'},
+  'Speed: 30m Sprint, Burpee Test (30s)': {desc:'FINAL TEST DAY — Speed assessment. 30m sprint timed best of 3 runs. Burpee Test: max burpees in 30 seconds. Record both in Progress Tracker.',cue:'Warm up fully — this is a max effort test'},
+  'Strength: Push-Up Max, Squat 60s': {desc:'FINAL TEST DAY — Strength assessment. Push-Up Max: as many proper-form push-ups as possible without rest. Squat 60s: bodyweight squats in 60 seconds. Record both in Progress Tracker.',cue:'Form must stay clean — count only legal reps'},
+  'Wall Sit, Dead Hang': {desc:'FINAL TEST DAY — Endurance assessment. Wall Sit: hold thighs parallel to floor as long as possible. Dead Hang: hang from a pull-up bar as long as possible. Record both in Progress Tracker.',cue:'Push to failure — break previous baseline'}
+,
+  'Cone Shuffle — Sprint Exit': {desc:'Set up 5 cones in a line, 3 feet apart. Side-shuffle through all 5 staying low, then on the last cone explode into a 10-yard sprint. Walk back, repeat. Trains the transition from defensive position to acceleration — exactly what backchecking demands.',cue:'Smooth shuffle → explosive sprint at the end'},
+  'Crossover Run — Max Speed': {desc:'Same crossover pattern but at max speed. 20 yards facing one direction, walk back, 20 yards facing the other. 4 reps each direction. Focus on quick foot turnover and powerful pushes off each foot — mimics game-speed crossovers.',cue:'Quick feet — push hard off each plant'},
+  'Crossover Run — Resisted (band optional)': {desc:'Same crossover footwork but with a resistance band around your hips or holding light dumbbells. The added resistance forces stronger push-off. 20 yards each direction. If no band/weights, do it at max speed with quick feet.',cue:'Drive against the resistance — power through each step'},
+  'Shuttle Runs — Max Effort': {desc:'Same setup — 10 yards out, 10 yards back, touch lines. But sprint at MAX effort for 30 sec, then full 60 sec rest. Each round is all-out. Count touches in 30 seconds — track and beat it.',cue:'All-out for 30 sec — full recovery between'},
+  'Suicides — Max Effort': {desc:'Same suicide pattern (10/20/30 yard lines), but each round at MAX effort. 60 sec full rest between rounds — you should be breathing hard and recovered. If you can do another round at the same intensity, you didn\'t go hard enough.',cue:'Max speed each round — long recovery'},
+  'Box Drill — Sprint Out': {desc:'Same 10×10 square pattern (sprint, shuffle, backpedal, shuffle), but on completing the box, explode into a 15-yard sprint out the side. Walk back, repeat opposite direction. Trains every defensive movement plus the breakaway sprint that follows.',cue:'Finish the box, immediately accelerate out'},
+  'Box Drill — sprint exits': {desc:'Set up the 10×10 yard square. After completing the box pattern, explode out one side into a 15-yard sprint. Each rep = 60 sec of box drill + sprint out. Walk back. 5 rounds total.',cue:'Finish strong — sprint hard out of every box'},
+  'Ladder Drills — Max Foot Speed': {desc:'Same agility ladder patterns (one-foot, two-foot, lateral, in-out, icky shuffle) — but executed at maximum foot speed. Quality over quantity — if your feet are messy, slow down. Goal is the fastest CLEAN run through each pattern.',cue:'Fast AND clean — both matter'},
+  '5-10-5 Shuttle — Max Effort': {desc:'Same 5-10-5 setup (middle, 5 yards one way, 10 yards the other, 5 back to middle). MAX effort each run. Full 60-90 sec rest between runs. Aim for personal best time. 5 runs total — pick the best as your time.',cue:'All-out every run — rest fully between'},
+  '5-10-5 Shuttle — max effort': {desc:'5-10-5 shuttle at max effort. 5 yards, 10 yards, 5 yards with direction changes at each cone. Full rest between runs. Record your fastest time.',cue:'Max acceleration out of each direction change'},
+  'Reactive Drop Step + Sprint Exit': {desc:'Drop step to one side and immediately sprint 10 yards out. Walk back, drop step the other direction. 10 reps each side. Add a stick handle drill on the sprint if practicing with a puck and stick.',cue:'Drop and explode — no hesitation between'},
+  'Reactive Drop + Sprint': {desc:'Drop step plus immediate 10-yard sprint. Builds the exact mechanics of reading a play and accelerating to open space.',cue:'React, drop, sprint — all in one motion'},
+  'Lateral Bound Intervals — Tabata': {desc:'Tabata format: 20 seconds of lateral bounds (max effort), 10 seconds rest, repeat 8 times = 4 minutes total. Land softly and balanced on each bound. The 20-second sets should feel ALL-OUT.',cue:'20 sec all-out, 10 sec rest × 8 rounds'},
+  'Lateral Bounds — Game Pace': {desc:'Lateral single-leg bounds at game pace — bound, stick the landing, bound back. 30 sec sets, 30 sec rest. Game speed means controlled and fast, not reckless. Focus on quiet, balanced landings.',cue:'Land quietly — balance before exploding back'},
+  'Lateral Bound Intervals — max effort': {desc:'Max-effort single-leg lateral bounds — explode side to side, sticking the landing each time. 30 sec all-out, 30 sec rest. 8 rounds.',cue:'Max effort — full power on every bound'},
+  'Lateral Bounds — Game Pace + Stick': {desc:'Lateral bounds while holding a stick in your hands. Adds a coordination challenge that mimics skating with the puck. 30 sec sets. Maintain stick position throughout (top hand on knob, bottom hand mid-stick).',cue:'Stick stays in proper position — don\'t drop your hands'},
+  'Sprint Intervals — Short': {desc:'Mark out 30-40 yards. Sprint the full distance at max effort, walk back to recover. That\'s 1 rep. Each round = 4-6 sprints. The walk back is your active rest — don\'t stand still, but don\'t jog either. Mimics shift-length efforts on the ice (15-20 seconds all-out followed by recovery).',cue:'Max effort sprint — walk back, don\'t jog'},
+  'Sprint Intervals — Long': {desc:'Mark out 60-80 yards (a full football field width works). Sprint at max effort, walk back. That\'s 1 rep. Each round = 4-6 sprints. The longer distance pushes lactate tolerance — exactly what a long shift demands. Last 2 sprints should be the hardest mentally.',cue:'Push through when it burns — that\'s where the gains are'},
+  'Box Jump — Reactive': {desc:'Use a moderate box (18-24 inches — same one all sets). Focus on EXPLOSIVE jumps with the shortest possible ground contact. Land softly on the box, step down (never jump down), reset and go again immediately. The training stimulus is jump SPEED, not height.',cue:'Explode fast — soft landing, no slap'},
+  'Box Jump — Repeated Reactive': {desc:'Same moderate box (20-24 inches). Perform jumps in clusters: 3-5 explosive box jumps in a row with minimal rest between reps. Step down between each. The repeated efforts train explosive power output and short ground contacts, which is what hockey actually demands — no need for risky max-height attempts.',cue:'Cluster the jumps — fast off the ground, soft landing'},
+  'Broad Jump — Max Distance': {desc:'Broad jump for maximum forward distance. Use full arm swing, drive both feet hard into the ground. Mark each landing. Track your best distance — beat it weekly.',cue:'Full arm swing — drive horizontal not vertical'},
+  'Broad Jump — Max Distance Sets': {desc:'Multiple sets of max-distance broad jumps. Reset to the landing spot of the previous jump and broad jump again from there. 5 jumps in sequence — track total distance covered. Tests both single-effort and consecutive jumping power.',cue:'Reset to your last landing — total distance counts'},
+  'Weighted Jump Squat': {desc:'Same jump squat mechanics holding a light dumbbell at chest (8-15 lb). Don\'t go too heavy — speed of the jump matters more than the load. Full depth, explosive jump.',cue:'Light enough to still jump fast — heavy enough to feel'},
+'Tricep Dip': {desc:'Use a sturdy box or bench behind you — hands on the edge, fingers forward, feet flat on floor with knees bent. Lower your body by bending your elbows to 90°, then push back up. Box dips are recommended over straight bar dips for most players. Alternative: Tricep Pushdown with a band.',cue:'Elbows point straight back — not flared out',alt:'Tricep Band Pushdown or Skull Crusher',yt:'https://www.youtube.com/results?search_query=box+dip+tricep+bench+dip+tutorial'},
   'Arnold Press': {desc:'Sit or stand holding dumbbells in front of your face, palms facing you. As you press overhead, rotate palms outward so they face forward at the top. Builds full shoulder development. Alternative: Standard Dumbbell Shoulder Press.',cue:'Rotate and press in one smooth motion',alt:'Dumbbell Shoulder Press',yt:'https://www.youtube.com/results?search_query=arnold+press+dumbbell+tutorial'},
   'Band Pull-Apart': {desc:'Hold a resistance band at shoulder width with both hands, arms straight in front. Pull the band apart until your hands are at your sides, squeezing shoulder blades together. Critical for shoulder health. Alternative: Face Pull with band.',cue:'Keep arms straight — squeeze shoulder blades',alt:'Face Pull or Rear Delt Fly',yt:'https://www.youtube.com/results?search_query=band+pull+apart+shoulder+tutorial'},
   'Depth Jump': {desc:'Stand on a box 12-18 inches high. Step off (do not jump off) and land softly on both feet. Immediately explode into a maximum jump. Focus on minimizing ground contact time. Advanced — reduce height or skip if joints are sore. Alternative: Box Jump.',cue:'Land softly, jump immediately — minimize ground time',alt:'Box Jump or Broad Jump',yt:'https://www.youtube.com/results?search_query=depth+jump+plyometric+tutorial'},
@@ -5285,8 +5349,7 @@ const exDB={
   'Jump Rope': {desc:'Standard jump rope skipping — both feet or alternating. Start with 30-second intervals if new to it. Builds foot speed, coordination, and conditioning — directly transfers to skating footwork. Alternative: High Knees or Line Jumps.',cue:'Small jumps — stay on balls of feet',alt:'High Knees or Line Hops',yt:'https://www.youtube.com/results?search_query=jump+rope+beginner+tutorial+technique'},
   'Ab Wheel': {desc:'Kneel on a mat holding an ab wheel with both hands in front of you. Roll the wheel forward as far as you can while keeping your back flat, then pull back. Extremely challenging — beginners can limit range of motion. Alternative: Plank Rollout or Barbell Rollout.',cue:'Keep hips down — do not let your back cave',alt:'Plank or Dead Bug',yt:'https://www.youtube.com/results?search_query=ab+wheel+rollout+tutorial+form'},
   'Plank Up-Down': {desc:'Start in a forearm plank. Push up to one hand, then the other to reach a full plank. Return to forearms one arm at a time. Keep hips level throughout — do not rock side to side. Alternative: Plank or Push-Up.',cue:'Hips stay level — brace core the entire time',alt:'Plank or Slow Push-Up',yt:'https://www.youtube.com/results?search_query=plank+up+down+exercise+tutorial'},
-  'Band Resisted Sprint': {desc:'Attach a resistance band around your waist anchored behind you. Sprint forward against the resistance for 10-15 meters. Builds explosive acceleration. Requires a partner or anchor point. Alternative: Hill Sprint or Sled Push.',cue:'Drive knees up and pump arms — fight through the resistance',alt:'Hill Sprint or Unresisted Sprint',yt:'https://www.youtube.com/results?search_query=band+resisted+sprint+speed+training'},
-};
+  'Band Resisted Sprint': {desc:'Attach a resistance band around your waist anchored behind you. Sprint forward against the resistance for 10-15 meters. Builds explosive acceleration. Requires a partner or anchor point. Alternative: Hill Sprint or Sled Push.',cue:'Drive knees up and pump arms — fight through the resistance',alt:'Hill Sprint or Unresisted Sprint',yt:'https://www.youtube.com/results?search_query=band+resisted+sprint+speed+training'},};
 
 // ─── AGE TIER LOGIC ─────────────────────────────────────────────────────────
 // Adjusts exercise names and volumes based on player age group.
@@ -5782,8 +5845,7 @@ function loadCustomSettings(){
     updateHeader(s.name || '');
     updateOverview(s);
   }catch(e){}
-
-  updatePhaseCard();}
+}
 
 function updateHeader(name){
   // Header is now managed by applyBranding() — do nothing here
@@ -8828,20 +8890,19 @@ async function assignCoachToTeam(teamId, teamName) {
 async function saveCoachAssignment(teamId) {
   const select = window._tempCoachSelect;
   const coachId = select.value || null;
+  
   try {
     const sb = await getSupabaseClient();
-    const { error: e1 } = await sb.from('teams').update({ coach_id: coachId }).eq('id', teamId);
-    if (e1) throw e1;
-    await sb.from('subscriptions').update({ team_id: null }).eq('team_id', teamId).eq('role', 'coach');
-    if (coachId) {
-      const { error: e2 } = await sb.from('subscriptions').update({ team_id: teamId }).eq('user_id', coachId);
-      if (e2) throw e2;
-    }
+    const { error } = await sb.from('teams')
+      .update({ coach_id: coachId })
+      .eq('id', teamId);
+    
+    if (error) throw error;
+    
     document.querySelector('div[style*=fixed]').remove();
     loadTeams();
-    loadCoaches();
-    populateTeamDropdown();
-    populateAdminTeamDropdown();
+  populateTeamDropdown();
+  populateAdminTeamDropdown();
   } catch (error) {
     alert('Error: ' + error.message);
   }
@@ -9346,52 +9407,151 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-</script>
 
-<script>
-window.addEventListener('load', async () => {
-  setTimeout(async () => {
-    const panel = document.getElementById('debugPanel');
-    const content = document.getElementById('debugContent');
-    if (!panel || !content) return;
-    
-    panel.style.display = 'block';
-    
-    try {
-      const sb = await getSupabaseClient();
-      const { data: { user }, error: userError } = await sb.auth.getUser();
-      
-      let html = '';
-      if (userError) {
-        html = '<span style="color:#f87171;">Auth error: ' + userError.message + '</span>';
-      } else if (!user) {
-        html = '<span style="color:#fbbf24;">Not logged in</span>';
-      } else {
-        html = '<strong>User:</strong><br>Email: ' + user.email + '<br>ID: ' + user.id.substring(0,20) + '...<br><br>';
-        
-        // Try to get subscription
-        const { data: subs, error: subError } = await sb.from('subscriptions').select('*').eq('email', user.email);
-        
-        html += '<strong>Subscription:</strong><br>';
-        if (subError) {
-          html += '<span style="color:#f87171;">Error: ' + subError.message + '</span>';
-        } else if (!subs || subs.length === 0) {
-          html += '<span style="color:#fbbf24;">NOT FOUND</span><br>';
-          html += '<br>Tried query: email = ' + user.email;
-        } else {
-          html += '<span style="color:#4ade80;">FOUND</span><br>';
-          html += 'Role: ' + subs[0].role + '<br>';
-          html += 'Org: ' + subs[0].organization_id + '<br>';
-          html += 'Status: ' + subs[0].status;
-        }
-      }
-      
-      content.innerHTML = html;
-    } catch (e) {
-      content.innerHTML = '<span style="color:#f87171;">' + e.message + '</span>';
+
+// ── SETUP WIZARD ─────────────────────────────────────────────────────────
+let _wizAge = 'bantam';
+let _wizSeason = 'earlyoffseason';
+
+function showSetupWizard() {
+  const w = document.getElementById('setupWizard');
+  if (w) { w.style.setProperty('display','flex','important'); }
+}
+
+function dismissWizard() {
+  const w = document.getElementById('setupWizard');
+  if (w) w.style.setProperty('display','none','important');
+  localStorage.setItem('trainrWizardDone', '1');
+}
+
+function wizSetAge(age) {
+  _wizAge = age;
+  // Highlight selected
+  document.querySelectorAll('#wizStep1 .wiz-opt').forEach(b => {
+    b.style.borderColor = b.onclick.toString().includes(age) ? 'var(--primary-color)' : '#333';
+    b.style.background = b.onclick.toString().includes(age) ? 'rgba(var(--primary-rgb),0.1)' : '#0d0d0d';
+  });
+  setTimeout(() => {
+    document.getElementById('wizStep1').style.display = 'none';
+    document.getElementById('wizStep2').style.display = 'block';
+  }, 300);
+}
+
+function wizSetSeason(season) {
+  _wizSeason = season;
+  const dayMap = {
+    earlyoffseason: ['Mon','Tue','Thu','Fri','Sat'],
+    lateoffseason:  ['Mon','Tue','Thu','Fri','Sat'],
+    preseason:      ['Mon','Tue','Thu','Sat'],
+    inseason_a:     ['Mon','Wed','Fri'],
+    inseason_b:     ['Mon','Wed','Fri']
+  };
+  const days = dayMap[season] || dayMap.earlyoffseason;
+  const dayEl = document.getElementById('wizDayDisplay');
+  if (dayEl) {
+    dayEl.innerHTML = days.map(d =>
+      `<span style="background:var(--primary-color);color:var(--secondary-color);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;padding:6px 14px;border-radius:6px;text-transform:uppercase;">${d}</span>`
+    ).join('');
+  }
+  document.getElementById('wizStep2').style.display = 'none';
+  document.getElementById('wizStep3').style.display = 'block';
+}
+
+function wizFinish() {
+  // Apply settings from wizard to customize panel
+  const seasonEl = document.getElementById('cust-season');
+  const ageEl = document.getElementById('cust-age');
+  if (seasonEl) seasonEl.value = _wizSeason;
+  if (ageEl) ageEl.value = _wizAge;
+  syncDaysToSeason();
+  applyCustomization();
+  dismissWizard();
+  // Navigate to Program tab
+  showSec('schedule');
+}
+
+function checkShowWizard() {
+  // Show wizard for new players who haven't set up yet
+  const role = window._userRole;
+  const done = localStorage.getItem('trainrWizardDone');
+  const hasSettings = localStorage.getItem('tigersCustomSettings');
+  if (role === 'player' && !done && !hasSettings) {
+    setTimeout(showSetupWizard, 800);
+  }
+}
+
+
+// ── RENEWAL WALL ──────────────────────────────────────────────────────────
+function showRenewalWall(email, reason) {
+  const wall = document.getElementById('renewalWall');
+  if (!wall) return;
+
+  const role = window._userRole || 'player';
+  const orgId = window._userOrgId || 'individual';
+  const isIndividualOrAdmin = role === 'admin' || role === 'super_admin' || orgId === 'individual';
+
+  const title = document.getElementById('renewalTitle');
+  const msg = document.getElementById('renewalMsg');
+  const newBtn = document.getElementById('renewalNewBtn');
+  const portalBtn = document.getElementById('renewalPortalBtn');
+  const renewBtn = document.querySelector('[onclick="renewalCheckStatus()"]');
+
+  if (isIndividualOrAdmin) {
+    // Admin or individual — show full renewal options
+    if (reason === 'expired') {
+      if (title) title.textContent = 'Subscription Expired';
+      if (msg) msg.textContent = 'Your subscription has expired. Your data is safe — renew to pick up right where you left off.';
+    } else if (reason === 'cancelled') {
+      if (title) title.textContent = 'Subscription Cancelled';
+      if (msg) msg.textContent = 'Your subscription has been cancelled. Renew anytime to restore full access — your data is preserved.';
+    } else {
+      if (title) title.textContent = 'Subscription Inactive';
+      if (msg) msg.textContent = 'Your subscription is no longer active. Renew to restore access.';
     }
-  }, 2000);
-});
+    if (newBtn) newBtn.href = `subscribe.html?email=${encodeURIComponent(email||'')}`;
+    if (portalBtn) portalBtn.style.display = 'block';
+    if (newBtn) newBtn.style.display = 'block';
+    if (renewBtn) renewBtn.style.display = 'inline-block';
+  } else {
+    // Player or coach at an association — contact admin wall
+    if (title) title.textContent = 'Access Unavailable';
+    if (msg) msg.innerHTML = 'Your association' + "'" + 's subscription is currently inactive.<br><br>Please contact your association admin to restore access.<br><br><span style="font-size:11px;color:rgba(255,255,255,0.35);">Your training data and progress are safe.</span>';
+    if (portalBtn) portalBtn.style.display = 'none';
+    if (newBtn) newBtn.style.display = 'none';
+    if (renewBtn) renewBtn.style.display = 'none';
+  }
+
+  wall.style.setProperty('display', 'flex', 'important');
+}
+
+async function renewalCheckStatus() {
+  const msg = document.getElementById('renewalCheckMsg');
+  if (msg) { msg.textContent = 'Checking...'; msg.style.display = 'block'; msg.style.color = '#60a5fa'; }
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) { if (msg) { msg.textContent = 'Not signed in.'; msg.style.color = '#f87171'; } return; }
+    const { data: sub } = await sb.from('subscriptions').select('status, expires_at').eq('user_id', user.id).single();
+    if (sub && sub.status === 'active' && (!sub.expires_at || new Date(sub.expires_at) > new Date())) {
+      if (msg) { msg.textContent = '✓ Active! Reloading...'; msg.style.color = '#4ade80'; }
+      setTimeout(() => window.location.reload(), 1000);
+    } else {
+      if (msg) { msg.textContent = 'Subscription not yet active. Please complete payment first, then check again.'; msg.style.color = '#f87171'; }
+    }
+  } catch(e) {
+    if (msg) { msg.textContent = 'Error checking: ' + e.message; msg.style.color = '#f87171'; }
+  }
+}
+
+async function renewalSignOut() {
+  try {
+    const sb = await getSupabaseClient();
+    await sb.auth.signOut();
+  } catch(e) {}
+  window.location.href = 'login.html';
+}
+
+</script>
 
 
 <script>
@@ -9708,151 +9868,51 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+<script>
+window.addEventListener('load', async () => {
+  setTimeout(async () => {
+    const panel = document.getElementById('debugPanel');
+    const content = document.getElementById('debugContent');
+    if (!panel || !content) return;
+    
+    panel.style.display = 'block';
+    
+    try {
+      const sb = await getSupabaseClient();
+      const { data: { user }, error: userError } = await sb.auth.getUser();
+      
+      let html = '';
+      if (userError) {
+        html = '<span style="color:#f87171;">Auth error: ' + userError.message + '</span>';
+      } else if (!user) {
+        html = '<span style="color:#fbbf24;">Not logged in</span>';
+      } else {
+        html = '<strong>User:</strong><br>Email: ' + user.email + '<br>ID: ' + user.id.substring(0,20) + '...<br><br>';
+        
+        // Try to get subscription
+        const { data: subs, error: subError } = await sb.from('subscriptions').select('*').eq('email', user.email);
+        
+        html += '<strong>Subscription:</strong><br>';
+        if (subError) {
+          html += '<span style="color:#f87171;">Error: ' + subError.message + '</span>';
+        } else if (!subs || subs.length === 0) {
+          html += '<span style="color:#fbbf24;">NOT FOUND</span><br>';
+          html += '<br>Tried query: email = ' + user.email;
+        } else {
+          html += '<span style="color:#4ade80;">FOUND</span><br>';
+          html += 'Role: ' + subs[0].role + '<br>';
+          html += 'Org: ' + subs[0].organization_id + '<br>';
+          html += 'Status: ' + subs[0].status;
+        }
+      }
+      
+      content.innerHTML = html;
+    } catch (e) {
+      content.innerHTML = '<span style="color:#f87171;">' + e.message + '</span>';
+    }
+  }, 2000);
+});
+</script>
 
 </body>
 </html>
-// ── SETUP WIZARD ─────────────────────────────────────────────────────────
-let _wizAge = 'bantam';
-let _wizSeason = 'earlyoffseason';
-
-function showSetupWizard() {
-  const w = document.getElementById('setupWizard');
-  if (w) { w.style.setProperty('display','flex','important'); }
-}
-
-function dismissWizard() {
-  const w = document.getElementById('setupWizard');
-  if (w) w.style.setProperty('display','none','important');
-  localStorage.setItem('trainrWizardDone', '1');
-}
-
-function wizSetAge(age) {
-  _wizAge = age;
-  // Highlight selected
-  document.querySelectorAll('#wizStep1 .wiz-opt').forEach(b => {
-    b.style.borderColor = b.onclick.toString().includes(age) ? 'var(--primary-color)' : '#333';
-    b.style.background = b.onclick.toString().includes(age) ? 'rgba(var(--primary-rgb),0.1)' : '#0d0d0d';
-  });
-  setTimeout(() => {
-    document.getElementById('wizStep1').style.display = 'none';
-    document.getElementById('wizStep2').style.display = 'block';
-  }, 300);
-}
-
-function wizSetSeason(season) {
-  _wizSeason = season;
-  const dayMap = {
-    earlyoffseason: ['Mon','Tue','Thu','Fri','Sat'],
-    lateoffseason:  ['Mon','Tue','Thu','Fri','Sat'],
-    preseason:      ['Mon','Tue','Thu','Sat'],
-    inseason_a:     ['Mon','Wed','Fri'],
-    inseason_b:     ['Mon','Wed','Fri']
-  };
-  const days = dayMap[season] || dayMap.earlyoffseason;
-  const dayEl = document.getElementById('wizDayDisplay');
-  if (dayEl) {
-    dayEl.innerHTML = days.map(d =>
-      `<span style="background:var(--primary-color);color:var(--secondary-color);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;padding:6px 14px;border-radius:6px;text-transform:uppercase;">${d}</span>`
-    ).join('');
-  }
-  document.getElementById('wizStep2').style.display = 'none';
-  document.getElementById('wizStep3').style.display = 'block';
-}
-
-function wizFinish() {
-  // Apply settings from wizard to customize panel
-  const seasonEl = document.getElementById('cust-season');
-  const ageEl = document.getElementById('cust-age');
-  if (seasonEl) seasonEl.value = _wizSeason;
-  if (ageEl) ageEl.value = _wizAge;
-  syncDaysToSeason();
-  applyCustomization();
-  dismissWizard();
-  // Navigate to Program tab
-  showSec('schedule');
-}
-
-function checkShowWizard() {
-  // Show wizard for new players who haven't set up yet
-  const role = window._userRole;
-  const done = localStorage.getItem('trainrWizardDone');
-  const hasSettings = localStorage.getItem('tigersCustomSettings');
-  if (role === 'player' && !done && !hasSettings) {
-    setTimeout(showSetupWizard, 800);
-  }
-}
-
-
-// ── RENEWAL WALL ──────────────────────────────────────────────────────────
-function showRenewalWall(email, reason) {
-  const wall = document.getElementById('renewalWall');
-  if (!wall) return;
-
-  const role = window._userRole || 'player';
-  const orgId = window._userOrgId || 'individual';
-  const isIndividualOrAdmin = role === 'admin' || role === 'super_admin' || orgId === 'individual';
-
-  const title = document.getElementById('renewalTitle');
-  const msg = document.getElementById('renewalMsg');
-  const newBtn = document.getElementById('renewalNewBtn');
-  const portalBtn = document.getElementById('renewalPortalBtn');
-  const renewBtn = document.querySelector('[onclick="renewalCheckStatus()"]');
-
-  if (isIndividualOrAdmin) {
-    // Admin or individual — show full renewal options
-    if (reason === 'expired') {
-      if (title) title.textContent = 'Subscription Expired';
-      if (msg) msg.textContent = 'Your subscription has expired. Your data is safe — renew to pick up right where you left off.';
-    } else if (reason === 'cancelled') {
-      if (title) title.textContent = 'Subscription Cancelled';
-      if (msg) msg.textContent = 'Your subscription has been cancelled. Renew anytime to restore full access — your data is preserved.';
-    } else {
-      if (title) title.textContent = 'Subscription Inactive';
-      if (msg) msg.textContent = 'Your subscription is no longer active. Renew to restore access.';
-    }
-    if (newBtn) newBtn.href = `subscribe.html?email=${encodeURIComponent(email||'')}`;
-    if (portalBtn) portalBtn.style.display = 'block';
-    if (newBtn) newBtn.style.display = 'block';
-    if (renewBtn) renewBtn.style.display = 'inline-block';
-  } else {
-    // Player or coach at an association — contact admin wall
-    if (title) title.textContent = 'Access Unavailable';
-    if (msg) msg.innerHTML = 'Your association's subscription is currently inactive.<br><br>Please contact your association admin to restore access.<br><br><span style="font-size:11px;color:rgba(255,255,255,0.35);">Your training data and progress are safe.</span>';
-    if (portalBtn) portalBtn.style.display = 'none';
-    if (newBtn) newBtn.style.display = 'none';
-    if (renewBtn) renewBtn.style.display = 'none';
-  }
-
-  wall.style.setProperty('display', 'flex', 'important');
-}
-
-async function renewalCheckStatus() {
-  const msg = document.getElementById('renewalCheckMsg');
-  if (msg) { msg.textContent = 'Checking...'; msg.style.display = 'block'; msg.style.color = '#60a5fa'; }
-  try {
-    const sb = await getSupabaseClient();
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) { if (msg) { msg.textContent = 'Not signed in.'; msg.style.color = '#f87171'; } return; }
-    const { data: sub } = await sb.from('subscriptions').select('status, expires_at').eq('user_id', user.id).single();
-    if (sub && sub.status === 'active' && (!sub.expires_at || new Date(sub.expires_at) > new Date())) {
-      if (msg) { msg.textContent = '✓ Active! Reloading...'; msg.style.color = '#4ade80'; }
-      setTimeout(() => window.location.reload(), 1000);
-    } else {
-      if (msg) { msg.textContent = 'Subscription not yet active. Please complete payment first, then check again.'; msg.style.color = '#f87171'; }
-    }
-  } catch(e) {
-    if (msg) { msg.textContent = 'Error checking: ' + e.message; msg.style.color = '#f87171'; }
-  }
-}
-
-async function renewalSignOut() {
-  try {
-    const sb = await getSupabaseClient();
-    await sb.auth.signOut();
-  } catch(e) {}
-  window.location.href = 'login.html';
-}
-
-
-,
-  recovery:       { label: 'Active Recovery / Bridge', title: 'Rest & Rebuild',  weeks: '10 weeks / 3 days/week', tags: ['Active Recovery','Variety','Reset'], desc: 'Bridge between seasons. Lower intensity, higher variety. Maintain fitness, address weak points, and mentally reset.' }
