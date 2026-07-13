@@ -1925,7 +1925,7 @@ function addLogoutButton(supabase, user, isAdmin) {
 
 
 const phases={
-  1:{label:'Early Off-Season — Foundation & Strength (14 Weeks)',desc:'Build your base. The longest development window before late off-season power work. Start with movement quality and add load progressively.',color:'#60a5fa',weeks:[
+  1:{label:'Early Off-Season — Foundation & Strength (15 Weeks)',desc:'Build your base. The longest development window before late off-season power work. Start with movement quality and add load progressively.',color:'#60a5fa',weeks:[
     {num:1,focus:'Movement Quality & Base Strength',days:[
       {n:'Monday',t:'Lower Body — Foundation',items:[['Goblet Squat','4×12'],['Romanian Deadlift','4×10'],['Lateral Lunge','4×10 each'],['Glute Bridge','4×15'],['Calf Raises','4×20'],['Dead Bug','4×10 each']]},
       {n:'Tuesday',t:'Upper Body — Foundation',items:[['Push-Up','4×15'],['Dumbbell Row','4×12 each'],['Shoulder Press','4×10'],['Band Pull-Apart','4×15'],['Plank','4×45s'],['Mountain Climbers','4×15']]},
@@ -2018,6 +2018,12 @@ const phases={
       {n:'Tuesday',t:'Power + Speed',items:[['Depth Jump','4×5'],['Broad Jump','4×5'],['Sprint Intervals — Short','4 rounds'],['Jump Rope','4×60s']]},
       {n:'Thursday',t:'Upper + Core',items:[['Push-Up','4×15'],['Arnold Press','4×10'],['Ab Wheel','4×12'],['Farmer Carry','4×40m']]},
       {n:'Friday',t:'Lower Body + Agility',items:[['Goblet Squat','4×10'],['Lateral Bound','4×8 each'],['Cone Drill','4 rounds'],['Shuttle Runs','4 rounds']]}
+    ]},
+    {num:15,focus:'Final Prep — Ready for Late Off-Season',days:[
+      {n:'Monday',t:'Full Body Strength',items:[['Back Squat','4×6'],['Bench Press','4×6'],['Bent-Over Row','4×6'],['Box Jump','4×5'],['Nordic Curl','3×6']]},
+      {n:'Tuesday',t:'Power + Speed',items:[['Jump Squat','4×8'],['Depth Jump','4×5'],['Sprint Intervals — Short','4 rounds'],['5-10-5 Shuttle — max effort','4 rounds'],['Jump Rope','4×60s']]},
+      {n:'Thursday',t:'Upper + Core',items:[['Push-Up','4×max'],['Arnold Press','4×10'],['Medicine Ball Slam','4×10'],['Ab Wheel','4×12'],['Farmer Carry','4×40m']]},
+      {n:'Friday',t:'Phase 1 Complete',items:[['Back Squat','3 rep max final test'],['Bench Press','3 rep max final test'],['Broad Jump','max distance final test'],['Enter results in Progress Tracker',''],['Rest up — Phase 1 complete! Ready to go! 🔥','']]}
     ]}
   ]},
   2:{label:'Late Off-Season — Power & Development (8 Weeks)',desc:'Convert your strength into explosive hockey power. Heavier loads, plyometric complexes, and peak conditioning.',color:'#f59e0b',weeks:[
@@ -2142,7 +2148,7 @@ const phases={
       {n:'Friday',t:'Review',items:[['Review strength vs pre-season baseline',''],['Adjust Block B plan if needed',''],['Rest well — good work so far! 🏒','']]}
     ]}
   ]},
-  5:{label:'In-Season Block B — Mid Season (8 Weeks)',desc:'Mid season — fatigue begins to accumulate. Maintain key strength numbers, prioritize recovery, and stay explosive for games.',color:'#a78bfa',weeks:[
+  5:{label:'In-Season Block B — Mid Season (10 Weeks)',desc:'Mid season — fatigue begins to accumulate. Maintain key strength numbers, prioritize recovery, and stay explosive for games.',color:'#a78bfa',weeks:[
     {num:1,focus:'Fatigue Management — Smart Training',days:[
       {n:'Monday',t:'Lower Body Maintenance',items:[['Back Squat','4×4'],['Romanian Deadlift','4×5'],['Box Jump','3×5'],['Lateral Bound','3×6 each'],['Nordic Curl','3×5'],['Calf Raises','3×15']]},
       {n:'Wednesday',t:'Upper Body Maintenance',items:[['Bench Press','4×4'],['Bent-Over Row','4×5'],['Push Press','3×4'],['Band Pull-Apart','4×15'],['Plank','3×45s']]},
@@ -2182,9 +2188,20 @@ const phases={
       {n:'Monday',t:'Strength Check',items:[['Back Squat','3 rep check'],['Push-Up','max reps check'],['Enter results in Progress Tracker','']]},
       {n:'Wednesday',t:'Power Check',items:[['Broad Jump','max distance test'],['Shuttle Runs','timed'],['Enter results in Progress Tracker','']]},
       {n:'Friday',t:'End of Season Review',items:[['Enter all results in Progress Tracker',''],['Compare to pre-season baseline',''],['Set goals for off-season',''],["Great season! Rest up — you've earned it! 🏒",'']]}
+
+    ]},
+    {num:9,focus:'Playoff Push — Final Strength',days:[
+      {n:'Monday',t:'Lower Body Strength',items:[['Back Squat','4×4'],['Romanian Deadlift','4×5'],['Box Jump','4×5'],['Nordic Curl','3×6'],['Calf Raises','4×15']]},
+      {n:'Wednesday',t:'Upper Body Strength',items:[['Bench Press','4×4'],['Bent-Over Row','4×4'],['Push Press','3×4'],['Band Pull-Apart','4×15'],['Plank','4×45s']]},
+      {n:'Friday',t:'Power + Speed',items:[['Jump Squat','4×6'],['Depth Jump','3×5'],['Shuttle Runs','3 rounds'],['Medicine Ball Slam','3×8'],['Farmer Carry','3×25m']]}
+    ]},
+    {num:10,focus:'End of Season — Final Assessment',days:[
+      {n:'Monday',t:'Strength Test',items:[['Back Squat','3 rep check'],['Push-Up','max reps check'],['Enter results in Progress Tracker','']]},
+      {n:'Wednesday',t:'Power Test',items:[['Broad Jump','max distance test'],['Shuttle Runs','timed'],['Enter results in Progress Tracker','']]},
+      {n:'Friday',t:'End of Season Review',items:[['Enter all results in Progress Tracker',''],['Compare to pre-season baseline',''],['Set goals for off-season',''],['Great season! Rest up — you\'ve earned it! 🏒','']]}
     ]}
   ]},
-  6:{label:'Active Recovery & Bridge (4 Weeks)',desc:'Transition between seasons. Lower intensity, higher variety. Maintain fitness, address weak points, and mentally reset before the next training year.',color:'#34d399',weeks:[
+  6:{label:'Active Recovery & Bridge (7 Weeks)',desc:'Transition between seasons. Lower intensity, higher variety. Maintain fitness, address weak points, and mentally reset before the next training year.',color:'#34d399',weeks:[
     {num:1,focus:'Active Recovery — Move and Restore',days:[
       {n:'Monday',t:'Full Body Easy',items:[['Goblet Squat','3×10'],['Push-Up','3×12'],['Dumbbell Row','3×10 each'],['Plank','3×40s'],['Full body stretch','15 min']]},
       {n:'Wednesday',t:'Cardio + Mobility',items:[['Easy bike or walk','20 min'],['Hip Mobility Circuit','10 min'],['Foam Roll + Stretch','10 min']]},
@@ -2204,9 +2221,24 @@ const phases={
       {n:'Monday',t:'Full Year Assessment',items:[['Back Squat','3 rep max test'],['Push-Up','max reps test'],['Broad Jump','max distance test'],['Enter results in Progress Tracker','']]},
       {n:'Wednesday',t:'Speed + Conditioning Check',items:[['Shuttle Runs','timed — best of 3'],['Sprint Intervals — Short','timed'],['Enter results in Progress Tracker','']]},
       {n:'Friday',t:'Year Review + Reset',items:[['Enter all results in Progress Tracker',''],['Compare to last year — see how far you have come',''],['Set goals for the new training year',''],['Rest up — full year complete! Outstanding work! 🏒','']]}
+    ]},
+    {num:5,focus:'Fitness Refresh',days:[
+      {n:'Monday',t:'Lower Body Strength',items:[['Back Squat','4×8'],['Romanian Deadlift','4×8'],['Box Jump','4×5'],['Nordic Curl','3×5'],['Calf Raises','4×15']]},
+      {n:'Wednesday',t:'Upper Body Strength',items:[['Bench Press','4×8'],['Bent-Over Row','4×8'],['Push Press','3×6'],['Band Pull-Apart','4×15'],['Plank','4×45s']]},
+      {n:'Friday',t:'Conditioning + Core',items:[['Jump Squat','4×8'],['Medicine Ball Slam','4×8'],['Shuttle Runs','4 rounds'],['Farmer Carry','4×30m'],['Ab Wheel','4×10']]}
+    ]},
+    {num:6,focus:'Final Bridge — Ready for Year',days:[
+      {n:'Monday',t:'Full Body Power',items:[['Back Squat','4×6'],['Jump Squat','4×6'],['Bench Press','4×6'],['Box Jump','4×5'],['Plank','4×45s']]},
+      {n:'Wednesday',t:'Speed + Agility',items:[['Sprint Intervals — Short','4 rounds'],['5-10-5 Shuttle — max effort','4 rounds'],['Lateral Bound','4×6 each'],['Jump Rope','4×60s']]},
+      {n:'Friday',t:'Bridge Complete',items:[['Goblet Squat','4×10'],['Push-Up','4×12'],['Dumbbell Row','4×10 each'],['Full body stretch','15 min']]}
+    ]},
+    {num:7,focus:'Final Year Reset',days:[
+      {n:'Monday',t:'Full Body Easy',items:[['Goblet Squat','3×10'],['Push-Up','3×12'],['Plank','3×40s'],['Hip Mobility Circuit','10 min']]},
+      {n:'Wednesday',t:'Cardio + Mobility',items:[['Easy bike or walk','20 min'],['Foam Roll + Stretch','10 min'],['Full body stretch','15 min']]},
+      {n:'Friday',t:'Year Complete',items:[['Enter final year results in Progress Tracker',''],['Set goals for new training year',''],['Rest up — full year complete! Outstanding work! 🏒','']]}
     ]}
   ]}
-};;
+};
 
 const testRows=[
   {name:'30m Sprint',unit:'sec',lib:true},
@@ -5658,13 +5690,17 @@ function applyCustomization(){
     'lateoffseason': 5,
     'preseason': 4,
     'inseason_a': 3,
-    'inseason_b': 3
+    'inseason_b': 3,
+    'recovery': 3
   };
   
   const required = requiredDays[season];
-  if (selectedDays.length !== required) {
-    alert(`${season === 'offseason' ? 'Off-Season' : season === 'preseason' ? 'Pre-Season' : 'In-Season'} requires exactly ${required} training days. You have ${selectedDays.length} selected. Please select ${required} days.`);
-    return;
+  // Soft validation — warn but don't block
+  if (required && selectedDays.length !== required) {
+    const phaseNames = { earlyoffseason:'Early Off-Season', lateoffseason:'Late Off-Season', preseason:'Pre-Season', inseason_a:'In-Season Block A', inseason_b:'In-Season Block B', recovery:'Active Recovery' };
+    const phaseName = phaseNames[season] || season;
+    const ok = confirm(`${phaseName} is designed for ${required} training days. You have ${selectedDays.length} selected.\n\nContinue anyway?`);
+    if (!ok) return;
   }
   
   const settings = {
