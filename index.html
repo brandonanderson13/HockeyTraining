@@ -652,36 +652,10 @@ select:focus{border-color:var(--or);outline:none;}
         <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">✓ Settings applied!</div>
       </div>
 
-      <!-- PROGRAM CARDS -->
+      <!-- PHASE INFO CARD -->
       <div style="border-top:1px solid #1a1a1a;padding-top:16px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">About the Phases</div>
-        <div class="g3">
-          <div class="pc">
-            <div class="pct"><div class="pn">Early Off-Season</div><div class="pt">Foundation & Strength</div><div class="pw">12 weeks · 5 days/week</div></div>
-            <div class="pcb"><span class="ptag ptago">Strength Build</span><span class="ptag">Movement Quality</span><span class="ptag ptago">High Volume</span></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season.</div>
-          </div>
-          <div class="pc">
-            <div class="pct"><div class="pn">Late Off-Season</div><div class="pt">Power & Development</div><div class="pw">10 weeks · 5 days/week</div></div>
-            <div class="pcb"><span class="ptag ptago">Explosive Power</span><span class="ptag">Complex Training</span><span class="ptag ptago">Peak Development</span></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Convert your strength into explosive hockey power. Heavier loads, jump-and-lift complexes, and peak conditioning.</div>
-          </div>
-          <div class="pc">
-            <div class="pct"><div class="pn">Pre-Season</div><div class="pt">Sharpen & Peak</div><div class="pw">4 weeks · 4 days/week</div></div>
-            <div class="pcb"><span class="ptag ptago">Game Speed</span><span class="ptag">Reduce Volume</span><span class="ptag ptago">Stay Sharp</span></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.</div>
-          </div>
-          <div class="pc">
-            <div class="pct"><div class="pn">In-Season Block A</div><div class="pt">Early Season Maintenance</div><div class="pw">4 weeks · 3 days/week</div></div>
-            <div class="pcb"><span class="ptag ptago">Maintain Strength</span><span class="ptag">Full Recovery</span><span class="ptag ptago">Game Focus</span></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Early season — moderate intensity, full recovery. Keep your strength without adding fatigue on top of games.</div>
-          </div>
-          <div class="pc">
-            <div class="pct"><div class="pn">In-Season Block B</div><div class="pt">Mid/Late Season</div><div class="pw">4 weeks · 3 days/week</div></div>
-            <div class="pcb"><span class="ptag ptago">Low Volume</span><span class="ptag">Recovery First</span><span class="ptag ptago">Stay Sharp</span></div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.5;padding:10px 12px 0;">Fatigue is real late in the season. Reduce volume, prioritize recovery, stay sharp for games. Repeat as needed.</div>
-          </div>
-        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">About This Phase</div>
+        <div id="selectedPhaseCard" style="background:#0d0d0d;border:1px solid #333;border-radius:8px;padding:14px;"></div>
       </div>
 
     </div>
@@ -4756,7 +4730,8 @@ function showSec(id){
   if (id === 'schedule') {
     setTimeout(updateProgramStatus, 100);
     loadCustomSettings();
-    loadCustomWorkoutOptions(); // show selector if custom workouts exist
+    loadCustomWorkoutOptions();
+    if (typeof updatePhaseCard === 'function') setTimeout(updatePhaseCard, 100);
   }
   
   // Load leaderboard with org parameter and date filters if set
