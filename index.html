@@ -1,5 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html 
+
+const _PHASE_INFO = {
+  earlyoffseason: { label: 'Early Off-Season', title: 'Foundation & Strength', weeks: '20 weeks / 5 days/week', tags: ['Strength Build','Movement Quality','High Volume'], desc: 'Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season.' },
+  lateoffseason:  { label: 'Late Off-Season',  title: 'Power & Development',   weeks: '10 weeks / 5 days/week', tags: ['Explosive Power','Complex Training','Peak Development'], desc: 'Convert your strength into explosive hockey power. Heavier loads, jump-and-lift complexes, and peak conditioning.' },
+  preseason:      { label: 'Pre-Season',        title: 'Sharpen & Peak',        weeks: '4 weeks / 4 days/week',  tags: ['Game Speed','Reduce Volume','Stay Sharp'], desc: 'Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.' },
+  inseason_a:     { label: 'In-Season Block A', title: 'Early Season Maintenance', weeks: '4 weeks / 3 days/week', tags: ['Maintain Strength','Full Recovery','Game Focus'], desc: 'Early season - moderate intensity, full recovery. Keep your strength without adding fatigue on top of games.' },
+  inseason_b:     { label: 'In-Season Block B', title: 'Mid/Late Season',       weeks: '4 weeks / 3 days/week', tags: ['Low Volume','Recovery First','Stay Sharp'], desc: 'Fatigue is real late in the season. Reduce volume, prioritize recovery, stay sharp for games. Repeat as needed.' },
+  recovery:       { label: 'Active Recovery',   title: 'Rest & Rebuild',        weeks: '10 weeks / 3 days/week', tags: ['Active Recovery','Variety','Reset'], desc: 'Bridge between seasons. Lower intensity, higher variety. Maintain fitness and mentally reset before the next training year.' }
+};
+
+function updatePhaseCard() {
+  var sel = document.getElementById('cust-season');
+  if (!sel) return;
+  var p = _PHASE_INFO[sel.value];
+  if (!p) return;
+  var card = document.getElementById('selectedPhaseCard');
+  if (!card) return;
+  var th = '';
+  for (var i = 0; i < p.tags.length; i++) {
+    th += '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(var(--primary-rgb),0.15);color:var(--primary-color);border:1px solid rgba(var(--primary-rgb),0.3);">' + p.tags[i] + '</span> ';
+  }
+  var h = '<div style="font-size:10px;color:var(--primary-color);font-family:sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">' + p.label + '</div>';
+  h += '<div style="font-size:18px;font-weight:900;text-transform:uppercase;color:#fff;margin-bottom:3px;">' + p.title + '</div>';
+  h += '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;">' + p.weeks + '</div>';
+  h += '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">' + th + '</div>';
+  h += '<div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;">' + p.desc + '</div>';
+  card.innerHTML = h;
+}
+lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -279,6 +308,11 @@ select:focus{border-color:var(--or);outline:none;}
 </head>
 <body>
 
+<div id="debugPanel" style="position:fixed;top:10px;right:10px;background:#1a1a1a;border:2px solid #60a5fa;padding:16px;border-radius:8px;z-index:9999;max-width:400px;font-size:11px;color:#fff;display:none;">
+  <div style="font-weight:700;margin-bottom:8px;color:#60a5fa;">🔍 DEBUG INFO</div>
+  <div id="debugContent">Checking...</div>
+  <button onclick="this.parentElement.style.display='none'" style="margin-top:8px;background:#f87171;color:#fff;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:10px;">Close</button>
+</div>
 
 
 <div class="wrap" id="mainWrap">
@@ -613,6 +647,7 @@ select:focus{border-color:var(--or);outline:none;}
             <option value="preseason">Pre-Season — Sharpen (4 days/wk)</option>
             <option value="inseason_a">In-Season Block A — Early (3 days/wk)</option>
             <option value="inseason_b">In-Season Block B — Late (3 days/wk)</option>
+          <option value="recovery">Active Recovery / Bridge (3 days/wk)</option>
           </select>
         </div>
 
@@ -620,7 +655,6 @@ select:focus{border-color:var(--or);outline:none;}
 
       <!-- TRAINING DAYS + PHASE CARD (2-col) -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-
         <div>
           <div style="margin-bottom:14px;">
             <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Training Days</label>
@@ -649,12 +683,10 @@ select:focus{border-color:var(--or);outline:none;}
             <div id="cust-apply-confirm" style="font-size:12px;color:#4ade80;display:none;">Settings applied!</div>
           </div>
         </div>
-
         <div>
           <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;display:block;">Selected Phase</label>
           <div id="selectedPhaseCard" style="background:#0d0d0d;border:1px solid #333;border-radius:8px;padding:14px;"></div>
         </div>
-
       </div>
 
     </div>
@@ -689,6 +721,7 @@ select:focus{border-color:var(--or);outline:none;}
     <option value="3">Pre-Season</option>
     <option value="4">In-Season Block A</option>
     <option value="5">In-Season Block B</option>
+    <option value="6">Active Recovery / Bridge</option>
   </select>
   <div style="font-size:11px;color:rgba(255,255,255,0.38);margin-bottom:8px;">Tap any exercise for description + YouTube. Skills sessions have quick-log buttons to log directly into Stickhandling Log or Shot Log.</div>
   <div id="phaseInfo"></div>
@@ -972,7 +1005,7 @@ select:focus{border-color:var(--or);outline:none;}
     </div>
     <div style="overflow-x:auto;">
       <table class="trtable">
-        <thead><tr><th>Mins</th><th>Touches (30s)</th><th>Drills</th><th>Notes</th><th></th></tr></thead>
+        <thead><tr><th>Date</th><th>Mins</th><th>Touches (30s)</th><th>Drills</th><th>Notes</th><th></th></tr></thead>
         <tbody id="sh-tbody"><tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.25);padding:1.5rem;">No sessions logged yet.</td></tr></tbody>
       </table>
     </div>
@@ -1520,6 +1553,11 @@ select:focus{border-color:var(--or);outline:none;}
       <div class="cb" id="accountSubDetails">Loading...</div>
     </div>
     
+    <div class="card" id="notificationsCard">
+      <div class="ch"><span class="cht">Notifications</span></div>
+      <div class="cb" id="notifCardBody">Loading...</div>
+    </div>
+
     <div class="card" id="manageSubCard">
       <div class="ch"><span class="cht">Manage Subscription</span></div>
       <div class="cb">
@@ -1528,11 +1566,6 @@ select:focus{border-color:var(--or);outline:none;}
         </p>
         <a href="https://billing.stripe.com/p/login/14AcN4fnrf2y4DBdiadjO00" target="_blank" class="btn-o" style="display:inline-block;text-decoration:none;text-align:center;margin:0;">Open Customer Portal</a>
       </div>
-    </div>
-
-    <div class="card" id="notificationsCard">
-      <div class="ch"><span class="cht">Notifications</span></div>
-      <div class="cb" id="notifCardBody">Loading...</div>
     </div>
     
     <div class="card">
@@ -1654,327 +1687,6 @@ async function renewalSignOut() {
     if (sb) await sb.auth.signOut();
   } catch(e) {}
   window.location.href = 'login.html';
-}
-
-async function sendGoalPushNotifications(playerIds, title, due) {
-  try {
-    const sb = await getSupabaseClient();
-    const { data: { session } } = await sb.auth.getSession();
-    const token = session?.access_token;
-    if (!token || !playerIds || !playerIds.length) return;
-    const dueStr = due ? ' — due ' + new Date(due).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-    console.log('Sending push to playerIds:', JSON.stringify([...playerIds]));
-    console.log('Current user (coach) _userId:', window._userId);
-    for (const pid of playerIds) {
-      console.log('Sending push to userId:', pid);
-      fetch('/api/send-push', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({
-          userId: pid,
-          title: 'New Goal Assigned',
-          body: (title || 'You have a new goal') + dueStr,
-          url: '/'
-        })
-      }).then(r => r.json()).then(d => console.log('Push send result:', d)).catch(e => console.warn('Push send failed:', e));
-    }
-  } catch(e) { console.warn('sendGoalPushNotifications error:', e); }
-}
-</script>
-
-<script>
-// ── SERVICE WORKER REGISTRATION ──────────────────────────────────────────────
-const VAPID_PUBLIC_KEY = 'BI6YztwVujEwDgVYIg9rVigNRI1gL9HZa8FYaJCQU2M59DVljIhIw08PhkAwrVnJLWfeap7NuTkUPDYQqq7N5ro';
-
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = atob(base64);
-  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
-}
-
-async function registerPushSubscription() {
-  try {
-    // Never register push for coaches or admins
-    if (window._userRole && window._userRole !== 'player') {
-      console.log('Push registration skipped for role:', window._userRole);
-      return;
-    }
-    if (!('PushManager' in window)) return;
-    if (!('serviceWorker' in navigator)) return;
-    if (typeof Notification === 'undefined') return;
-
-    const reg = await navigator.serviceWorker.ready;
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') return;
-    const subscription = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-    });
-    console.log('Push subscription obtained:', subscription.endpoint.slice(-20));
-    const sb = await getSupabaseClient();
-    const { data: { session } } = await sb.auth.getSession();
-    const token = session?.access_token;
-    if (!token) { console.warn('No session token - cannot save subscription'); return; }
-    // Confirm the actual logged-in user from the token
-    const { data: { user: currentUser } } = await sb.auth.getUser();
-    const actualUserId = currentUser?.id;
-    if (!actualUserId) { console.warn('Cannot determine current user'); return; }
-    console.log('Saving push subscription — actual user:', actualUserId, 'window._userId:', window._userId, 'role:', window._userRole);
-    // Delete any existing subscription for this device endpoint under any other user
-    const endpointUrl = subscription.endpoint;
-    await sb.from('push_subscriptions').delete().eq('subscription->>endpoint', endpointUrl).neq('user_id', actualUserId);
-    const saveResp = await fetch('/api/save-push-subscription', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ subscription })
-    });
-    const saveData = await saveResp.json();
-    console.log('Push subscription save response:', saveResp.status, saveData);
-  } catch (err) {
-    console.warn('Push subscription failed:', err);
-  }
-}
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(reg => { console.log('SW registered:', reg.scope); })
-      .catch(err => { console.warn('SW registration failed:', err); });
-  });
-  // Listen for badge update messages from service worker
-  navigator.serviceWorker.addEventListener('message', (event) => {
-    if (event.data?.type === 'setBadge') {
-      try {
-        if ('setAppBadge' in navigator) navigator.setAppBadge(event.data.count);
-      } catch(e) {}
-    }
-    if (event.data?.type === 'clearBadge') {
-      try {
-        if ('clearAppBadge' in navigator) navigator.clearAppBadge();
-      } catch(e) {}
-    }
-    if (event.data?.type === 'badgeCount') {
-      // SW is reporting current count — sync it via navigator
-      try {
-        const c = event.data.count;
-        if (c > 0) { if ('setAppBadge' in navigator) navigator.setAppBadge(c); }
-        else { if ('clearAppBadge' in navigator) navigator.clearAppBadge(); }
-      } catch(e) {}
-    }
-  });
-  // On page load, ask SW for current badge count and sync via navigator
-  navigator.serviceWorker.ready.then(reg => {
-    if (reg.active) reg.active.postMessage('getBadgeCount');
-  }).catch(() => {});
-
-  // Clear badge whenever app comes to foreground
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-      try { if ('clearAppBadge' in navigator) navigator.clearAppBadge(); } catch(e) {}
-      try {
-        if (navigator.serviceWorker.controller) {
-          navigator.serviceWorker.controller.postMessage('clearBadge');
-        }
-      } catch(e) {}
-    }
-  });
-  // Also clear immediately on script load
-  try { if ('clearAppBadge' in navigator) navigator.clearAppBadge(); } catch(e) {}
-}
-
-// ── PWA INSTALL PROMPT ────────────────────────────────────────────────────────
-let _deferredInstallPrompt = null;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  _deferredInstallPrompt = e;
-  // Will show our custom banner after login
-});
-
-function isRunningAsPWA() {
-  return window.matchMedia('(display-mode: standalone)').matches
-    || window.navigator.standalone === true;
-}
-// If currently running as PWA (opened from home screen), no need to show banner
-// Don't permanently dismiss — they may use browser too
-
-function shouldShowInstallBanner() {
-  if (isRunningAsPWA()) return false;
-  if (localStorage.getItem('trainrInstallDismissed') === 'permanent') return false;
-  return true;
-}
-
-function showInstallBanner() {
-  if (!shouldShowInstallBanner()) return;
-  if (document.getElementById('pwaInstallBanner')) return;
-
-  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isAndroid = /android/i.test(navigator.userAgent);
-  const isMobile = isIOS || isAndroid;
-  if (!isMobile) return;
-
-  const banner = document.createElement('div');
-  banner.id = 'pwaInstallBanner';
-  banner.style.cssText = [
-    'position:fixed;bottom:0;left:0;right:0;z-index:999999',
-    'background:#111;border-top:3px solid #E07820',
-    'padding:14px 16px 20px;box-shadow:0 -12px 40px rgba(0,0,0,0.8)',
-    'font-family:system-ui,sans-serif'
-  ].join(';');
-
-  // Top row: icon + text + dismiss
-  const topRow = ''
-    + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
-    +   '<img src="/apple-touch-icon.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;">'
-    +   '<div style="flex:1;min-width:0;">'
-    +     '<div style="font-size:15px;font-weight:700;color:#fff;letter-spacing:-.01em;">Add TRAINR to your Home Screen</div>'
-    +     '<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:1px;">Get notifications &amp; faster access</div>'
-    +   '</div>'
-    +   '<button onclick="dismissInstallBanner()" style="background:rgba(255,255,255,0.08);border:none;color:rgba(255,255,255,0.5);width:28px;height:28px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">&times;</button>'
-    + '</div>';
-
-  let action = '';
-  if (isIOS) {
-    action = ''
-      + '<div style="background:#1a1a1a;border-radius:10px;padding:11px 13px;margin-bottom:10px;">'
-      +   '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">How to install on iPhone</div>'
-      +   '<div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.9;">'
-      +     '<span style="color:#E07820;font-weight:700;">1</span> Tap the <strong style="color:#fff;">&#8226;&#8226;&#8226;</strong> menu in the bottom right of Safari<br>'
-      +     '<span style="color:#E07820;font-weight:700;">2</span> Tap <strong style="color:#fff;">Share ⎋</strong><br>'
-      +     '<span style="color:#E07820;font-weight:700;">3</span> Tap <strong style="color:#fff;">&#8220;Add to Home Screen&#8221;</strong><br>'
-      +     '<span style="color:#E07820;font-weight:700;">4</span> Tap <strong style="color:#fff;">&#8220;Add&#8221;</strong> in the top right'
-      +   '</div>'
-      + '</div>'
-      + '<button onclick="confirmInstalled()" style="width:100%;padding:12px;background:#E07820;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;">I&#8217;ve added it &#10003;</button>'
-      + '<button onclick="permanentlyDismissBanner()" style="width:100%;padding:10px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;">Don&#8217;t show this again</button>';
-  } else if (_deferredInstallPrompt) {
-    action = '<button onclick="triggerAndroidInstall()" style="width:100%;padding:13px;background:#E07820;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;letter-spacing:.02em;cursor:pointer;">Add to Home Screen</button>';
-  } else {
-    action = ''
-      + '<div style="background:#1a1a1a;border-radius:10px;padding:11px 13px;font-size:13px;color:rgba(255,255,255,0.6);line-height:1.9;margin-bottom:10px;">'
-      +   'Tap the browser menu <strong style="color:#fff;">&#8942;</strong> then tap <strong style="color:#fff;">&#8220;Add to Home Screen&#8221;</strong>'
-      + '</div>'
-      + '<button onclick="permanentlyDismissBanner()" style="width:100%;padding:10px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;">Don&#8217;t show this again</button>';
-  }
-
-  banner.innerHTML = topRow + action;
-  document.body.appendChild(banner);
-}
-
-function dismissInstallBanner() {
-  // × button — hide for this session only
-  const banner = document.getElementById('pwaInstallBanner');
-  if (banner) banner.remove();
-}
-function permanentlyDismissBanner() {
-  // 'Don't show again' — permanent
-  const banner = document.getElementById('pwaInstallBanner');
-  if (banner) banner.remove();
-  localStorage.setItem('trainrInstallDismissed', 'permanent');
-}
-function confirmInstalled() {
-  permanentlyDismissBanner();
-}
-
-async function testBadge() {
-  try {
-    // First clear any existing badge and reset SW counter
-    if ('clearAppBadge' in navigator) await navigator.clearAppBadge();
-    if ('serviceWorker' in navigator) {
-      const reg = await navigator.serviceWorker.ready;
-      if (reg.active) reg.active.postMessage('clearBadge');
-    }
-    // Wait a moment then set to 1
-    await new Promise(r => setTimeout(r, 200));
-    if ('setAppBadge' in navigator) {
-      await navigator.setAppBadge(1);
-      alert('Badge set to 1 — close the app and check your home screen icon');
-    } else {
-      alert('setAppBadge not supported on this device.');
-    }
-  } catch(e) {
-    alert('Badge error: ' + e.message);
-  }
-}
-
-async function disableNotifications() {
-  try {
-    // Mark as intentionally disabled so auto-register doesn't re-enable it
-    localStorage.setItem('trainrNotifDisabled', '1');
-    if (!('serviceWorker' in navigator)) return;
-    const reg = await navigator.serviceWorker.ready;
-    const sub = await reg.pushManager.getSubscription();
-    if (sub) {
-      await sub.unsubscribe();
-      // Remove from Supabase
-      const sb = await getSupabaseClient();
-      const { data: { session } } = await sb.auth.getSession();
-      if (session?.access_token) {
-        await sb.from('push_subscriptions').delete().eq('user_id', window._userId);
-      }
-    }
-    // Reload the notifications card — show re-enable button
-    const notifCardBody2 = document.getElementById('notifCardBody');
-    if (notifCardBody2) {
-      notifCardBody2.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Notifications have been disabled.</p>'
-        + '<button onclick="reEnableNotifications()" class="btn-o" style="margin:0;">Re-enable Notifications</button>';
-    }
-    // Remove nudge if showing
-    const nudge = document.getElementById('notifNudge');
-    if (nudge) nudge.remove();
-  } catch(e) {
-    console.warn('disableNotifications error:', e);
-    alert('Could not disable notifications: ' + e.message);
-  }
-}
-
-async function reEnableNotifications() {
-  try {
-    localStorage.removeItem('trainrNotifDisabled');
-    if (typeof registerPushSubscription !== 'function') return;
-    await registerPushSubscription();
-    if (typeof loadAccountDetails === 'function') loadAccountDetails();
-  } catch(e) {
-    alert('Could not re-enable notifications: ' + e.message);
-  }
-}
-
-async function requestNotificationPermission() {
-  try {
-    localStorage.removeItem('trainrNotifDisabled');
-    if (typeof Notification === 'undefined') { alert('Notifications are not supported on this device.'); return; }
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      await registerPushSubscription();
-      const notifStatus = document.getElementById('notifStatus');
-      const enableNotifBtn = document.getElementById('enableNotifBtn');
-      if (notifStatus) { notifStatus.textContent = '\u2713 Notifications enabled'; notifStatus.style.color = '#4ade80'; }
-      if (enableNotifBtn) enableNotifBtn.style.display = 'none';
-    } else {
-      alert('Notifications were not allowed. You can enable them in your browser settings.');
-    }
-  } catch(e) {
-    console.warn('requestNotificationPermission error:', e);
-  }
-}
-
-async function triggerAndroidInstall() {
-  if (!_deferredInstallPrompt) return;
-  _deferredInstallPrompt.prompt();
-  const { outcome } = await _deferredInstallPrompt.userChoice;
-  if (outcome === 'accepted') {
-    localStorage.setItem('trainrInstallDismissed', 'permanent');
-  }
-  _deferredInstallPrompt = null;
-  const banner = document.getElementById('pwaInstallBanner');
-  if (banner) banner.remove();
-}
-
-// Banner is triggered directly by auth success — see checkAuth()
-// This function is called after login completes
-function triggerInstallBannerAfterLogin() {
-  setTimeout(showInstallBanner, 4000);
 }
 </script>
 
@@ -2157,26 +1869,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
       // Add a logout button to the header
       addLogoutButton(supabase, user, isAdmin);
-      // Trigger install banner after login
-      if (typeof triggerInstallBannerAfterLogin === 'function') {
-        triggerInstallBannerAfterLogin();
-      }
-      // Show notification enable prompt for players who haven't enabled yet
-      if (role === 'player') {
-        setTimeout(() => {
-          try {
-            const _notifDone = localStorage.getItem('trainrNotifPromptDone');
-            const _notifOK = typeof Notification !== 'undefined';
-            const _granted = _notifOK && Notification.permission === 'granted';
-            const _notifDisabled = localStorage.getItem('trainrNotifDisabled');
-            // Show prompt if: never enabled, OR intentionally disabled (but not browser-blocked)
-            const _shouldPrompt = (!_granted || _notifDisabled) && !_notifDone && _notifOK && Notification.permission !== 'denied';
-            if (_shouldPrompt) {
-              showNotificationPrompt();
-            }
-          } catch(e) {}
-        }, 5000);
-      }
+
       // Clear app badge when user opens the app
       try {
         if ('clearAppBadge' in navigator) navigator.clearAppBadge();
@@ -2186,21 +1879,31 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
           });
         }
       } catch(e) {}
+
       // Re-register push subscription if already granted (players only)
       try {
         if (role === 'player' && typeof Notification !== 'undefined' && Notification.permission === 'granted' && typeof registerPushSubscription === 'function' && !localStorage.getItem('trainrNotifDisabled')) {
           setTimeout(registerPushSubscription, 3000);
         }
       } catch(notifErr) { console.warn('Notification check failed:', notifErr); }
-      
+
+      // Show notification enable prompt for players
+      if (role === 'player') {
+        setTimeout(() => {
+          try {
+            const _notifDone = localStorage.getItem('trainrNotifPromptDone');
+            const _notifOK = typeof Notification !== 'undefined';
+            const _granted = _notifOK && Notification.permission === 'granted';
+            const _notifDisabled = localStorage.getItem('trainrNotifDisabled');
+            const _shouldPrompt = (!_granted || _notifDisabled) && !_notifDone && _notifOK && Notification.permission !== 'denied';
+            if (_shouldPrompt && typeof showNotificationPrompt === 'function') showNotificationPrompt();
+          } catch(e) {}
+        }, 5000);
+      }
+
     } catch (error) {
       console.error('Auth error:', error);
-      // Show error briefly before redirecting so we can debug
-      const loader = document.getElementById('appLoader');
-      if (loader) {
-        loader.innerHTML = '<div style="color:#f87171;font-family:monospace;font-size:12px;padding:20px;text-align:center;">Auth error: ' + (error?.message || String(error)) + '<br><br>Redirecting to login...</div>';
-      }
-      setTimeout(() => { window.location.href = 'login.html'; }, 3000);
+      window.location.href = 'login.html';
     }
   };
   document.head.appendChild(script);
@@ -2229,7 +1932,6 @@ function addLogoutButton(supabase, user, isAdmin) {
   btn.textContent = 'Sign Out';
   btn.style.cssText = 'background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;padding:6px 12px;border-radius:6px;font-family:"Barlow Condensed",sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;';
   btn.onclick = async () => {
-    // Remove push subscription for this device
     try {
       if ('serviceWorker' in navigator && window._userId) {
         const reg = await navigator.serviceWorker.ready;
@@ -2253,7 +1955,7 @@ function addLogoutButton(supabase, user, isAdmin) {
 
 
 const phases={
-  1:{label:'Early Off-Season — Foundation & Strength (12 Weeks)',desc:'Build your base. The longest development window of the year. Start with movement quality and add load progressively across 12 weeks.',color:'#60a5fa',weeks:[
+  1:{label:'Early Off-Season — Foundation & Strength (20 Weeks)',desc:'Build your base. The longest development window of the year. Start with movement quality and add load progressively across 12 weeks.',color:'#60a5fa',weeks:[
     {num:1,focus:'Movement Quality & Base',days:[
       {n:'Monday',t:'Lower Body + Mobility',items:[['Goblet Squat','4×12'],['Romanian Deadlift','4×10'],['Lateral Lunge','3×10 each'],['Calf Raises','3×20'],['Hip Hinge Pattern','3×10'],['Dead Bug','3×10 each']]},
       {n:'Tuesday',t:'Upper Body + Core',items:[['Push-Up','4×12'],['Dumbbell Row','4×10 each'],['Shoulder Press','3×10'],['Plank','3×40s'],['Mountain Climbers','3×15'],['Band Pull-Apart','3×15']]},
@@ -2337,6 +2039,59 @@ const phases={
       {n:'Thursday',t:'Conditioning — Final Test',items:[['5-10-5 Shuttle — 5 runs','Beat Week 1 time'],['Broad Jump — 5 attempts','Beat Week 1 distance'],['Burpees — 1 min','Count and record'],['Jump Rope — 2 min','Beat Week 1 count']]},
       {n:'Friday',t:'Full Body — Final Benchmark',items:[['Squat — challenging weight','4×8'],['Explosive Push-Up','4×15'],['Weighted Pull-Up or Lat Pulldown','4×8'],['Depth Jump','4×8'],['Plank','3×max hold'],['Burpees','4×15']]},
       {n:'Saturday',t:'Review & Reset',items:[['Enter all results in Progress Tracker',''],['Compare to start of Early Off-Season',''],['Set goals for Late Off-Season',''],['Rest up — great work!','']]}
+    ]},
+    {num:13,focus:'Strength Consolidation + Volume Push',days:[
+      {n:'Monday',t:'Lower Body — Heavy',items:[['Back Squat','5×5'],['Romanian Deadlift','4×8'],['Bulgarian Split Squat','3×8 each'],['Calf Raises','3×20'],['Dead Bug','3×10 each']]},
+      {n:'Tuesday',t:'Upper Body — Heavy',items:[['Bench Press','5×5'],['Bent-Over Row','4×8'],['Arnold Press','3×10'],['Tricep Dip','3×10'],['Band Pull-Apart','3×15']]},
+      {n:'Thursday',t:'Lower Body Power',items:[['Box Jump','4×5'],['Step-Up with Knee Drive','4×10 each'],['Lateral Bound','4×6 each'],['Cone Shuffle','3×30s'],['Calf Raises','3×20']]},
+      {n:'Friday',t:'Upper Body + Core',items:[['Push-Up','4×15'],['Dumbbell Row','4×12 each'],['Shoulder Press','3×10'],['Plank','3×60s'],['Mountain Climbers','3×20'],['Farmer Carry','3×30m']]},
+      {n:'Saturday',t:'Full Body Conditioning',items:[['Goblet Squat','4×12'],['Burpees','3×12'],['Dumbbell Row','3×12 each'],['Box Jump','3×6'],['Shuttle Runs','5 rounds']]}
+    ]},
+    {num:14,focus:'Volume Surge — High Rep Week',days:[
+      {n:'Monday',t:'Lower Body High Volume',items:[['Goblet Squat','5×15'],['Romanian Deadlift','5×12'],['Lateral Lunge','4×12 each'],['Calf Raises','4×25'],['Glute Bridge','4×20']]},
+      {n:'Tuesday',t:'Upper Body High Volume',items:[['Push-Up','5×20'],['Dumbbell Row','5×15 each'],['Shoulder Press','4×12'],['Tricep Dip','4×12'],['Band Pull-Apart','4×20']]},
+      {n:'Thursday',t:'Agility + Power',items:[['Broad Jump','4×5'],['Cone Drill','4 rounds'],['Lateral Bound','4×8 each'],['Shuttle Runs','5 rounds'],['Jump Rope','3×60s']]},
+      {n:'Friday',t:'Full Body High Volume',items:[['Back Squat','4×12'],['Bench Press','4×12'],['Bent-Over Row','4×12'],['Arnold Press','3×12'],['Plank Up-Down','3×10'],['Ab Wheel','3×10']]},
+      {n:'Saturday',t:'Conditioning Circuit',items:[['Burpees','4×15'],['Box Jump','4×8'],['Mountain Climbers','4×20'],['Shuttle Runs','6 rounds'],['Jump Rope','3×60s']]}
+    ]},
+    {num:15,focus:'Deload — Recovery Week',days:[
+      {n:'Monday',t:'Lower Body Light',items:[['Goblet Squat','3×10 (60% effort)'],['Romanian Deadlift','3×10 (light)'],['Lateral Lunge','3×8 each'],['Calf Raises','2×15'],['Hip Mobility Circuit','10 min']]},
+      {n:'Tuesday',t:'Upper Body Light',items:[['Push-Up','3×10'],['Dumbbell Row','3×10 each (light)'],['Shoulder Press','3×8 (light)'],['Band Pull-Apart','3×15'],['Foam Roll + Stretch','10 min']]},
+      {n:'Thursday',t:'Agility Easy',items:[['Cone Shuffle','3×20s (easy)'],['Lateral Bound','3×5 each (easy)'],['Jump Rope','3×45s'],['Hip Mobility Circuit','10 min']]},
+      {n:'Friday',t:'Full Body Easy + Core',items:[['Goblet Squat','3×10 (light)'],['Push-Up','3×10'],['Plank','3×30s'],['Dead Bug','3×8 each'],['Full body stretch','15 min']]}
+    ]},
+    {num:16,focus:'Strength Peak — Max Effort',days:[
+      {n:'Monday',t:'Lower Body Max Effort',items:[['Back Squat','6×3 (heaviest possible)'],['Romanian Deadlift','4×6 (heavy)'],['Box Jump','4×5'],['Nordic Curl','3×5'],['Calf Raises','3×20']]},
+      {n:'Tuesday',t:'Upper Body Max Effort',items:[['Bench Press','6×3 (heaviest possible)'],['Bent-Over Row','4×6 (heavy)'],['Push Press','4×5'],['Tricep Dip','4×12'],['Band Pull-Apart','3×20']]},
+      {n:'Thursday',t:'Power + Speed',items:[['Depth Jump','4×5'],['Broad Jump','4×5'],['5-10-5 Shuttle — max effort','4 rounds'],['Lateral Bound','4×6 each'],['Sprint Intervals — Short','4 rounds']]},
+      {n:'Friday',t:'Upper + Core Heavy',items:[['Push-Up','4×max reps'],['Dumbbell Row','4×8 (heavy)'],['Arnold Press','4×8'],['Pallof Press','3×10 each'],['Ab Wheel','4×12'],['Plank','2×90s']]},
+      {n:'Saturday',t:'Full Body Strength',items:[['Back Squat','4×6'],['Bench Press','4×6'],['Bent-Over Row','4×6'],['Push Press','3×5'],['Farmer Carry','3×40m']]}
+    ]},
+    {num:17,focus:'Power Conversion — Speed-Strength',days:[
+      {n:'Monday',t:'Lower Body Speed-Strength',items:[['Jump Squat','4×8'],['Box Jump','5×5'],['Weighted Jump Squat','3×6'],['Lateral Bound','4×8 each'],['Calf Jump','3×15']]},
+      {n:'Tuesday',t:'Upper Body Speed-Strength',items:[['Clap Push-Up','4×6'],['Dumbbell Row','4×8 (explosive pull)'],['Medicine Ball Slam','4×8'],['Band Pull-Apart','3×20'],['Tricep Dip','3×12']]},
+      {n:'Thursday',t:'Pure Speed + Agility',items:[['Sprint Intervals — Short','5 rounds'],['Cone Drill','5 rounds'],['5-10-5 Shuttle — max effort','4 rounds'],['Ladder Drills — Max Foot Speed','4 rounds'],['Reactive Drop + Sprint','4 rounds']]},
+      {n:'Friday',t:'Total Body Power Circuit',items:[['Box Jump','4×5'],['Broad Jump','4×5'],['Medicine Ball Slam','4×8'],['Burpees','4×12'],['Shuttle Runs','5 rounds']]},
+      {n:'Saturday',t:'Conditioning + Core',items:[['Jump Rope','5×60s'],['Ab Wheel','4×12'],['Plank Up-Down','4×12'],['Mountain Climbers','4×25'],['Sprint Intervals — Long','4 rounds']]}
+    ]},
+    {num:18,focus:'Volume Overreach — Toughest Week',days:[
+      {n:'Monday',t:'Lower Body — Volume Max',items:[['Back Squat','6×10'],['Romanian Deadlift','5×10'],['Bulgarian Split Squat','4×10 each'],['Box Jump','4×6'],['Nordic Curl','3×6'],['Calf Raises','4×25']]},
+      {n:'Tuesday',t:'Upper Body — Volume Max',items:[['Bench Press','5×12'],['Bent-Over Row','5×12'],['Arnold Press','4×10'],['Tricep Dip','4×12'],['Push-Up','3×20'],['Band Pull-Apart','4×20']]},
+      {n:'Thursday',t:'Conditioning Max',items:[['Shuttle Runs','6 rounds'],['Burpees','5×15'],['Box Jump','4×8'],['Jump Rope','5×60s'],['Sprint Intervals — Short','5 rounds']]},
+      {n:'Friday',t:'Full Body Max Volume',items:[['Back Squat','4×15'],['Push-Up','4×20'],['Dumbbell Row','4×15 each'],['Shoulder Press','4×12'],['Farmer Carry','4×40m'],['Plank','3×90s']]},
+      {n:'Saturday',t:'Power + Core Max',items:[['Broad Jump','5×5'],['Medicine Ball Slam','5×10'],['Ab Wheel','5×12'],['Pallof Press','4×12 each'],['Mountain Climbers','4×30']]}
+    ]},
+    {num:19,focus:'Deload + Test Prep',days:[
+      {n:'Monday',t:'Lower Body Light',items:[['Goblet Squat','3×10 (easy)'],['Romanian Deadlift','3×8 (light)'],['Lateral Lunge','3×8 each'],['Hip Mobility Circuit','10 min']]},
+      {n:'Tuesday',t:'Upper Body Light',items:[['Push-Up','3×10'],['Dumbbell Row','3×8 each (light)'],['Shoulder Press','3×8'],['Band Pull-Apart','3×15'],['Foam Roll + Stretch','10 min']]},
+      {n:'Thursday',t:'Speed Activation',items:[['Sprint Intervals — Short','3 rounds (easy pace)'],['Box Jump','3×4 (easy)'],['Lateral Bound','3×5 each (easy)'],['Jump Rope','3×45s']]},
+      {n:'Friday',t:'Core + Mobility',items:[['Plank','3×45s'],['Dead Bug','3×8 each'],['Ab Wheel','3×8'],['Full body stretch','15 min'],['Hip Mobility Circuit','10 min']]}
+    ]},
+    {num:20,focus:'Phase 1 Final Assessment',days:[
+      {n:'Monday',t:'Strength Test',items:[['Back Squat','3 rep max test'],['Bench Press','3 rep max test'],['Bent-Over Row','3 rep max test'],['Push-Up','max reps test'],['Enter results in Progress Tracker','']]},
+      {n:'Tuesday',t:'Power + Speed Test',items:[['Broad Jump','max distance — 3 attempts'],['Box Jump','max height — 3 attempts'],['Sprint Intervals — Short','timed — best of 3'],['5-10-5 Shuttle — max effort','timed — best of 3'],['Enter results in Progress Tracker','']]},
+      {n:'Thursday',t:'Conditioning Test',items:[['Burpee Test (30s)','max reps'],['Jump Rope','max unbroken'],['Shuttle Runs','6 rounds — timed'],['Enter results in Progress Tracker','']]},
+      {n:'Friday',t:'Review + Reset',items:[['Enter all results in Progress Tracker',''],['Compare to Week 1 baseline',''],['Set goals for Late Off-Season Phase',''],['Rest up — phase 1 complete! Great work!','']]}
     ]}
   ]},
   2:{label:'Late Off-Season — Power & Development (10 Weeks)',desc:'Convert your strength base into explosive hockey power. Heavier loading, Olympic-style movements, and peak development. The most important window before pre-season.',color:'#4ade80',weeks:[
@@ -2480,7 +2235,69 @@ const phases={
       {n:'Friday',t:'Season Complete — Rest & Reflect',items:[['Season is over — take 1-2 weeks full rest',''],['Reflect on what improved this year',''],['Set goals for Early Off-Season',''],['Start Early Off-Season in 2-3 weeks',''],['Great season! 🏒','']]}
     ]}
   ]}
-};
+,
+  6:{label:'Active Recovery & Bridge (10 Weeks)',desc:'Transition phase between In-Season and the next Early Off-Season. Lower intensity, higher variety. Maintain fitness, address weak points, and mentally reset before the next training year.',color:'#34d399',weeks:[
+    {num:1,focus:'Active Recovery — Move and Restore',days:[
+      {n:'Monday',t:'Full Body Easy',items:[['Goblet Squat','3×10 (easy)'],['Push-Up','3×10'],['Dumbbell Row','3×10 each'],['Plank','3×30s'],['Full body stretch','15 min']]},
+      {n:'Tuesday',t:'Cardio + Mobility',items:[['Easy bike or walk','20 min'],['Hip Mobility Circuit','10 min'],['Foam Roll + Stretch','10 min']]},
+      {n:'Thursday',t:'Light Movement',items:[['Jump Rope','3×45s'],['Lateral Bound','3×5 each (easy)'],['Hip Circle','2×10 each'],['Full body stretch','15 min']]},
+      {n:'Friday',t:'Core + Stretch',items:[['Plank','3×30s'],['Dead Bug','3×8 each'],['Bird Dog','3×8 each'],['Full body stretch','15 min']]}
+    ]},
+    {num:2,focus:'Rebuild Movement Quality',days:[
+      {n:'Monday',t:'Lower Body Movement',items:[['Hip Hinge Pattern','3×10'],['Goblet Squat','3×12'],['Lateral Lunge','3×8 each'],['Calf Raises','3×15'],['Hip Mobility Circuit','10 min']]},
+      {n:'Tuesday',t:'Upper Body Movement',items:[['Push-Up','3×12'],['Dumbbell Row','3×10 each'],['Band Pull-Apart','3×15'],['Shoulder Press','3×10'],['Foam Roll + Stretch','10 min']]},
+      {n:'Thursday',t:'Agility Easy',items:[['Cone Shuffle','3×20s'],['Lateral Bound','3×5 each'],['Jump Rope','3×45s'],['Hip Mobility Circuit','10 min']]},
+      {n:'Friday',t:'Full Body + Core',items:[['Goblet Squat','3×10'],['Push-Up','3×10'],['Plank','3×45s'],['Dead Bug','3×10 each'],['Full body stretch','15 min']]}
+    ]},
+    {num:3,focus:'Strength Reintroduction',days:[
+      {n:'Monday',t:'Lower Body Light Strength',items:[['Goblet Squat','4×10'],['Romanian Deadlift','3×10'],['Step-Up with Knee Drive','3×8 each'],['Calf Raises','3×20'],['Hip Mobility Circuit','10 min']]},
+      {n:'Tuesday',t:'Upper Body Light Strength',items:[['Push-Up','4×12'],['Dumbbell Row','4×10 each'],['Shoulder Press','3×10'],['Tricep Dip','3×10'],['Band Pull-Apart','3×15']]},
+      {n:'Thursday',t:'Speed Reintroduction',items:[['Broad Jump','3×4'],['Box Jump','3×4'],['Cone Drill','3 rounds'],['Jump Rope','4×45s'],['Shuttle Runs','3 rounds']]},
+      {n:'Friday',t:'Full Body + Core',items:[['Goblet Squat','3×12'],['Bench Press','3×10'],['Bent-Over Row','3×10'],['Plank','3×45s'],['Ab Wheel','3×8']]}
+    ]},
+    {num:4,focus:'Weak Point Focus — Self Assessment',days:[
+      {n:'Monday',t:'Lower Body Focus',items:[['Bulgarian Split Squat','4×10 each'],['Nordic Curl','3×5'],['Calf Raises','4×20'],['Hip Mobility Circuit','10 min'],['Lateral Lunge','3×10 each']]},
+      {n:'Tuesday',t:'Upper Body Focus',items:[['Push-Up','4×15'],['Dumbbell Row','4×12 each'],['Arnold Press','3×10'],['Tricep Dip','4×12'],['Band Pull-Apart','4×20']]},
+      {n:'Thursday',t:'Agility + Conditioning',items:[['Ladder Drills — Max Foot Speed','4 rounds'],['Cone Drill','4 rounds'],['Jump Rope','5×60s'],['Shuttle Runs','4 rounds']]},
+      {n:'Friday',t:'Core + Mobility',items:[['Plank','4×60s'],['Ab Wheel','4×10'],['Pallof Press','3×10 each'],['Copenhagen Plank','3×20s each'],['Full body stretch','15 min']]}
+    ]},
+    {num:5,focus:'Fitness Maintenance',days:[
+      {n:'Monday',t:'Lower Body Strength',items:[['Back Squat','4×8'],['Romanian Deadlift','4×8'],['Box Jump','3×5'],['Lateral Bound','3×6 each'],['Calf Raises','3×20']]},
+      {n:'Tuesday',t:'Upper Body Strength',items:[['Bench Press','4×8'],['Bent-Over Row','4×8'],['Push Press','3×8'],['Tricep Dip','3×12'],['Band Pull-Apart','3×15']]},
+      {n:'Thursday',t:'Speed + Agility',items:[['Sprint Intervals — Short','4 rounds'],['5-10-5 Shuttle — max effort','4 rounds'],['Box Jump','4×5'],['Jump Rope','4×60s']]},
+      {n:'Friday',t:'Full Body + Core',items:[['Goblet Squat','3×12'],['Push-Up','3×max reps'],['Dumbbell Row','3×12 each'],['Farmer Carry','3×30m'],['Plank','3×60s']]}
+    ]},
+    {num:6,focus:'Variety — Try New Movements',days:[
+      {n:'Monday',t:'Lower Body Variety',items:[['Trap Bar Deadlift','4×8'],['Cossack Squat','3×8 each'],['Single Leg Deadlift','3×8 each'],['Kettlebell Swing','4×12'],['Calf Raises','3×20']]},
+      {n:'Tuesday',t:'Upper Body Variety',items:[['Push-Up','4×15'],['Suitcase Carry','3×30m each'],['Arnold Press','3×10'],['Battle Ropes','3×20s'],['Band Pull-Apart','3×20']]},
+      {n:'Thursday',t:'Agility Variety',items:[['Cone Drill','4 rounds'],['Lateral Bound','4×8 each'],['Bear Crawl','3×20m'],['Jump Rope','4×60s'],['Sprint Intervals — Short','3 rounds']]},
+      {n:'Friday',t:'Core Variety',items:[['Ab Wheel','4×10'],['Copenhagen Plank','3×25s each'],['Pallof Press','3×12 each'],['Inchworm','3×8'],['Full body stretch','15 min']]}
+    ]},
+    {num:7,focus:'Conditioning Block',days:[
+      {n:'Monday',t:'Lower Body Power',items:[['Box Jump','5×5'],['Broad Jump','4×5'],['Weighted Jump Squat','4×6'],['Lateral Bound','4×8 each'],['Sprint Intervals — Short','4 rounds']]},
+      {n:'Tuesday',t:'Upper Body Power',items:[['Medicine Ball Slam','5×8'],['Clap Push-Up','4×6'],['Bent-Over Row','4×8 (explosive)'],['Battle Ropes','4×20s'],['Band Pull-Apart','3×20']]},
+      {n:'Thursday',t:'Conditioning Max',items:[['Shuttle Runs','6 rounds'],['Burpees','4×15'],['Jump Rope','5×60s'],['Mountain Climbers','4×25'],['Sprint Intervals — Long','3 rounds']]},
+      {n:'Friday',t:'Full Body Circuit',items:[['Goblet Squat','4×12'],['Push-Up','4×15'],['Dumbbell Row','4×12 each'],['Box Jump','3×5'],['Plank','3×60s']]}
+    ]},
+    {num:8,focus:'Skill + Conditioning',days:[
+      {n:'Monday',t:'Lower Body Skill',items:[['Single Leg Deadlift','4×8 each'],['Split Squat','4×10 each'],['Cossack Squat','3×8 each'],['Lateral Bound','4×6 each'],['Calf Raises','3×20']]},
+      {n:'Tuesday',t:'Upper Body Skill',items:[['Push-Up','4×max reps'],['Dumbbell Row','4×10 each (controlled)'],['Arnold Press','3×10'],['Tricep Dip','4×12'],['Band Pull-Apart','4×20']]},
+      {n:'Thursday',t:'Speed Skill',items:[['Ladder Drills — Max Foot Speed','5 rounds'],['Reactive Drop + Sprint','4 rounds'],['Cone Drill','4 rounds'],['5-10-5 Shuttle — max effort','4 rounds']]},
+      {n:'Friday',t:'Core Skill',items:[['Pallof Press','4×10 each'],['Copenhagen Plank','4×20s each'],['Ab Wheel','4×12'],['Dead Bug','3×10 each'],['Full body stretch','15 min']]}
+    ]},
+    {num:9,focus:'Final Fitness Push',days:[
+      {n:'Monday',t:'Lower Body Strength',items:[['Back Squat','5×5 (heavy)'],['Romanian Deadlift','4×8'],['Box Jump','4×5'],['Nordic Curl','3×6'],['Calf Raises','4×20']]},
+      {n:'Tuesday',t:'Upper Body Strength',items:[['Bench Press','5×5 (heavy)'],['Bent-Over Row','4×8'],['Push Press','4×6'],['Tricep Dip','4×12'],['Band Pull-Apart','4×20']]},
+      {n:'Thursday',t:'Speed + Power Max',items:[['Sprint Intervals — Short','5 rounds'],['Depth Jump','4×5'],['Broad Jump','4×max'],['Cone Drill','5 rounds'],['Jump Rope','5×60s']]},
+      {n:'Friday',t:'Full Body + Core',items:[['Goblet Squat','4×12'],['Push-Up','4×max reps'],['Farmer Carry','4×40m'],['Plank','4×60s'],['Ab Wheel','4×12']]}
+    ]},
+    {num:10,focus:'Bridge Week — Transition to Next Training Year',days:[
+      {n:'Monday',t:'Baseline Retest',items:[['Back Squat','3 rep max test'],['Push-Up','max reps test'],['Broad Jump','max distance — 3 attempts'],['Enter results in Progress Tracker','']]},
+      {n:'Tuesday',t:'Conditioning Retest',items:[['Shuttle Runs','6 rounds — timed'],['Burpee Test (30s)','max reps'],['Sprint Intervals — Short','timed — best of 3'],['Enter results in Progress Tracker','']]},
+      {n:'Thursday',t:'Light Movement + Reflect',items:[['Easy bike or walk','20 min'],['Hip Mobility Circuit','10 min'],['Full body stretch','15 min']]},
+      {n:'Friday',t:'Program Reset',items:[['Review progress vs start of year',''],['Set goals for next training year',''],['Rest up — full year complete! Outstanding work! 🏒','']]}
+    ]}
+  ]}};
 
 const testRows=[
   {name:'30m Sprint',unit:'sec',lib:true},
@@ -3141,11 +2958,11 @@ function loadHomeSec() {
   const quickLog = isPlayer ? `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.2rem;">
       <button onclick="showSec('shotlog')" style="background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:14px;cursor:pointer;text-align:center;">
-        <div style="font-size:22px;margin-bottom:4px;">🥅</div>
+        <div style="font-size:22px;margin-bottom:4px;">🏒</div>
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#fff;">Log Shots</div>
       </button>
       <button onclick="showSec('sticklog')" style="background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:14px;cursor:pointer;text-align:center;">
-        <div style="font-size:22px;margin-bottom:4px;">🏒</div>
+        <div style="font-size:22px;margin-bottom:4px;">🎯</div>
         <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#fff;">Log Stickhandling</div>
       </button>
     </div>` : '';
@@ -3154,24 +2971,20 @@ function loadHomeSec() {
   const quickLogEl = document.getElementById('homeQuickLog');
   if (quickLogEl) quickLogEl.innerHTML = isPlayer ? quickLog : '';
 
-  // Show setup banner for players who haven't configured their program
+  // Show setup guide button for players
   const guideEl = document.getElementById('homeSetupGuide');
-  if (guideEl) {
-    const playerRole = window._userRole === 'player' || (!window._userRole && role === 'player');
+  if (guideEl && isPlayer) {
     const hasSettings = localStorage.getItem('tigersCustomSettings');
-    if (playerRole && !hasSettings) {
-      guideEl.style.display = 'block';
-      guideEl.innerHTML = `<div style="background:rgba(var(--primary-rgb),0.08);border:1px solid rgba(var(--primary-rgb),0.25);border-radius:8px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+    guideEl.style.display = 'block';
+    guideEl.innerHTML = hasSettings
+      ? ``
+      : `<div style="background:rgba(var(--primary-rgb),0.08);border:1px solid rgba(var(--primary-rgb),0.2);border-radius:8px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
           <div>
             <div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--primary-color);">Program Not Set Up</div>
             <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;">Complete setup to get your training plan</div>
           </div>
-          <button onclick="showSec('schedule')" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;flex-shrink:0;">Set Up Now</button>
+          <button onclick="showSec('schedule')" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:12px;font-weight:700;padding:8px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">Set Up Now</button>
         </div>`;
-    } else {
-      guideEl.style.display = 'none';
-      guideEl.innerHTML = '';
-    }
   }
 
   // Load dashboard into player-specific content div
@@ -3360,16 +3173,13 @@ async function loadDashboard(targetId) {
 // ── PLAYER DASHBOARD ──────────────────────────────────────────────────────
 function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments, goals, targetId) {
   const el = document.getElementById(targetId||'dashboardContent');
-  // Use goals for Done/Open counts — exact same logic as goal list renderer
-  const doneGoalCount = (goals||[]).filter(g => {
-    const isCheckbox = !g.target_value;
-    return isCheckbox ? !!g.completed : (g._progress !== undefined ? g._progress : (g.current_value||0)) >= g.target_value;
-  }).length;
-  const openGoalCount = (goals||[]).length - doneGoalCount;
+  // Use goals for Done/Open counts
+  const openGoalCount = (goals||[]).filter(g => !g.completed).length;
+  const doneGoalCount = (goals||[]).filter(g => g.completed).length;
 
   const statsHtml = `
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.2rem;">
-      ${[['Total Shots','#fb923c',totalShots.toLocaleString()],['Stick Mins','#a78bfa',totalMins.toLocaleString()],['Workouts','#fbbf24',totalWorkouts],['Open Goals','var(--primary-color)',openGoalCount],['Goals Done','#4ade80',doneGoalCount]].map(([label,color,val])=>`
+      ${[['Total Shots','#fb923c',totalShots.toLocaleString()],['Stick Mins','#a78bfa',totalMins.toLocaleString()],['Workouts','#fbbf24',totalWorkouts],['Done','#4ade80',doneGoalCount],['Open Goals','var(--primary-color)',openGoalCount]].map(([label,color,val])=>`
       <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
         <div style="font-size:22px;font-weight:800;color:${color};font-family:'Barlow Condensed',sans-serif;">${val}</div>
         <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">${label}</div>
@@ -3619,25 +3429,7 @@ function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments
         ${doneItems.map(itemRow).join('')}
       </div>` : '';
 
-  // Notification nudge
-  const _isPWA = (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
-  const _notifEnabled = (function() { try { return 'Notification' in window && Notification.permission === 'granted'; } catch(e) { return false; } })();
-  const _nudgeDismissed = localStorage.getItem('trainrNotifNudgeDismissed');
-  let notifNudgeHtml = '';
-  if (_isPWA && !_notifEnabled && !_nudgeDismissed) {
-    notifNudgeHtml = '<div style="background:rgba(224,120,32,0.08);border:1px solid rgba(224,120,32,0.25);border-radius:8px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:12px;">'
-      + '<span style="font-size:20px;flex-shrink:0;">&#x1F514;</span>'
-      + '<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#E07820;">Enable Goal Notifications</div>'
-      + '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:1px;">Get notified when your coach assigns a goal</div></div>'
-      + '<div style="display:flex;gap:8px;flex-shrink:0;">'
-      + '<button onclick="showSec(\'account\')" style="background:#E07820;border:none;color:#fff;font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;cursor:pointer;">Turn On</button>'
-      + '<button onclick="localStorage.setItem(\'trainrNotifNudgeDismissed\',\'1\');document.getElementById(\'notifNudge\').remove()" style="background:rgba(255,255,255,0.06);border:none;color:rgba(255,255,255,0.4);font-size:11px;padding:6px 10px;border-radius:6px;cursor:pointer;">Later</button>'
-      + '</div></div>';
-    notifNudgeHtml = '<div id="notifNudge">' + notifNudgeHtml + '</div>';
-  }
-
   el.innerHTML = `
-    ${notifNudgeHtml}
     ${statsHtml}
     <div class="card">
       <div class="ch">
@@ -3682,7 +3474,7 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
   let totShots=0, totMins=0, totWork=0;
   players.forEach(p => { const s=statsMap[p.user_id]||{}; totShots+=s.shots||0; totMins+=s.mins||0; totWork+=s.workouts||0; });
   const summaryHtml = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.2rem;">
-    ${[['Players','#4ade80',players.length],['Total Shots','#fb923c',totShots.toLocaleString()],['Stick Mins','#a78bfa',totMins.toLocaleString()],['Workouts','#fbbf24',totWork],['Open Goals','var(--primary-color)',goals.filter(g=>{const isCb=!g.target_value;return isCb?!g.completed:(g._progress!==undefined?g._progress:(g.current_value||0))<g.target_value;}).length]].map(([l,c,v])=>`
+    ${[['Players','#4ade80',players.length],['Total Shots','#fb923c',totShots.toLocaleString()],['Stick Mins','#a78bfa',totMins.toLocaleString()],['Workouts','#fbbf24',totWork],['Open Goals','var(--primary-color)',goals.filter(g=>!g.completed).length]].map(([l,c,v])=>`
     <div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px;text-align:center;">
       <div style="font-size:22px;font-weight:800;color:${c};font-family:'Barlow Condensed',sans-serif;">${v}</div>
       <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-top:3px;">${l}</div>
@@ -3756,9 +3548,8 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
     const isBulk = players.length > 1;
     const pLabel = isAllP ? 'All Players' : isBulk ? `${players.length} Players` : (playerMap[players[0]]||'Unknown');
 
-    const isTrackedGoal = isGoal && !!item.tracked_metric;
     const onCheck = isGoal
-      ? (isTrackedGoal ? '' : `toggleGoalComplete('${item.id}',${isDone})`)
+      ? `toggleGoalComplete('${item.id}',${isDone})`
       : `toggleBulkAssignment(${JSON.stringify(ids)},${isDone})`;
 
     const openFn = isGoal
@@ -3767,10 +3558,10 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
 
     return `<div style="padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="${openFn}">
       <div style="display:flex;align-items:center;gap:10px;">
-        ${!isTrackedGoal ? `<div onclick="event.stopPropagation();${onCheck}"
+        <div onclick="event.stopPropagation();${onCheck}"
           style="width:20px;height:20px;border-radius:5px;border:2px solid ${checkBorder};background:${checkBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s;">
           ${isDone?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
-        </div>` : ''}
+        </div>
         <div style="flex:1;min-width:0;">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
             <span style="font-size:11px;font-weight:700;color:${typeColor};background:${isGoal?'rgba(96,165,250,0.1)':'rgba(var(--primary-rgb),0.1)'};padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">${typeLabel}</span>
@@ -4237,8 +4028,7 @@ async function saveCombinedGoal() {
     const { error } = await sb.from('goals').insert(inserts);
     if (error) throw error;
 
-    // Send push notification to assigned players
-    sendGoalPushNotifications(playerIds, title, due);
+    if (typeof sendGoalPushNotifications === 'function') sendGoalPushNotifications(playerIds, title, due);
 
     document.getElementById('dashModal')?.remove();
     loadDashboard();
@@ -4467,8 +4257,7 @@ async function saveGoal() {
     const { error } = await sb.from('goals').insert(rows);
     if (error) throw error;
     showMsg(`✓ Goal${playerIds.length>1?' created for '+playerIds.length+' players':'created'}!`, 'green');
-    // Send push notification to assigned players
-    sendGoalPushNotifications(playerIds, title, due);
+    if (typeof sendGoalPushNotifications === 'function') sendGoalPushNotifications(playerIds, title, due);
     setTimeout(() => { document.getElementById('dashModal')?.remove(); loadDashboard(); }, 700);
   } catch(e) {
     showMsg('Error: ' + e.message, 'red');
@@ -4673,14 +4462,11 @@ function openItemDetail(type, id) {
           <button onclick="updateGoalFromDetail('${item.id}')"
             style="background:${bc};border:none;color:#fff;font-size:12px;font-weight:700;padding:9px 16px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Save</button>
         </div>` : '<div style="text-align:center;padding:10px 0 16px;font-size:14px;color:#4ade80;font-weight:700;">🎯 Goal Complete!</div>'
-      ) : (item.tracked_metric ? '' : (() => {
-        const _btnBorder = isDone ? '#4ade80' : '#333';
-        const _btnBg = isDone ? 'rgba(74,222,128,0.1)' : '#0d0d0d';
-        const _btnColor = isDone ? '#4ade80' : 'rgba(255,255,255,0.6)';
-        const _btnLabel = isDone ? '&#10003; Mark as Incomplete' : '&#9711; Mark as Complete';
-        return `<button onclick="toggleGoalComplete('${item.id}',${item.completed});document.getElementById('itemDetailModal').remove();"
-          style="width:100%;padding:11px;border-radius:6px;border:1px solid ${_btnBorder};background:${_btnBg};color:${_btnColor};font-size:13px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px;">${_btnLabel}</button>`;
-      })())
+      ) : `
+        <button onclick="toggleGoalComplete('${item.id}',${item.completed});document.getElementById('itemDetailModal').remove();"
+          style="width:100%;padding:11px;border-radius:6px;border:1px solid ${isDone?'#4ade80':'#333'};background:${isDone?'rgba(74,222,128,0.1)':'#0d0d0d'};color:${isDone?'#4ade80':'rgba(255,255,255,0.6)'};font-size:13px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;margin-bottom:16px;">
+          ${isDone ? '✓ Mark as Incomplete' : '○ Mark as Complete'}
+        </button>`
       }
       <button onclick="deleteGoal('${item.id}');document.getElementById('itemDetailModal').remove();"
         style="width:100%;margin-bottom:16px;padding:8px;border-radius:6px;border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.08);color:#f87171;font-size:11px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">
@@ -5374,7 +5160,7 @@ const exDB={
   'Suicides': {desc:'Mark lines at 10, 20, and 30 yards from start (use chalk, cones, or any markers). Sprint to the 10-yard line, touch, sprint back. Sprint to the 20, touch, sprint back. Sprint to the 30, touch, sprint back. That\'s 1 round. Walk 30 seconds, repeat.',cue:'Touch every line — no half-effort',yt:'https://www.youtube.com/results?search_query=suicides%20sprint%20conditioning'},
   'Jump Rope': {desc:'Standard jump rope. Aim for a steady rhythm — single bounces, both feet at once or alternating. The goal is uninterrupted minutes of rhythm. If you trip up, restart the clock for the round.',cue:'Smooth rhythm — feet barely leaving the ground',yt:'https://www.youtube.com/results?search_query=jump%20rope%20boxing%20conditioning'},
   'Lateral Bound Intervals': {desc:'Stand on one leg. Bound sideways onto the other foot, landing softly and balanced — pause for 1 second to stick the landing. Bound back. Each set = 30 seconds of bounds, 30 seconds rest. Builds the single-leg power and balance of skating crossovers and direction changes.',cue:'Stick the landing — balanced for 1 sec before bounding back',yt:'https://www.youtube.com/results?search_query=lateral%20bounds%20plyometric%20hockey'},
-  'Burpees': {desc:'Squat down, place hands on floor, jump feet back to plank, perform push-up, jump feet forward, explosively jump up with arms overhead. Full-body conditioning.',cue:'Full push-up each rep — no chest-drop cheat',yt:'https://www.youtube.com/results?search_query=burpee%20technique%20tutorial'},
+  'Burpees': {desc:'From standing, place hands on floor and jump feet back to a plank. Perform a push-up (optional), then jump feet forward and explode upward reaching overhead. Modification for beginners: Step feet back and forward instead of jumping. Full burpees are intense — pace yourself.',cue:'Control the landing — soft knees every time',alt:'Step-Back Burpee (no jump) or Squat Thrust',yt:'https://www.youtube.com/results?search_query=burpee+tutorial+proper+form+modification'},
   'Squat Thrust': {desc:'Like a burpee without the jump. Squat, kick feet back to plank, pull feet back in, stand. Lower impact but still builds conditioning.',cue:'Keep core tight in the plank position',yt:'https://www.youtube.com/results?search_query=squat%20thrust%20tutorial'},
   'Figure-8 Stickhandling': {desc:'Two objects 18 inches apart on shooting pad. Move puck in figure-8 around them using forehand and backhand. Head up throughout. Forces constant wrist rolling and direction changes.',cue:'Cup puck — don\'t slap it'},
   'Stickhandling': {desc:'Forehand/backhand puck touches on a shooting pad. Keep head up, hands away from body, soft wrists. Core stickhandling skill.',cue:'Eyes up — feel the puck'},
@@ -5459,46 +5245,48 @@ const exDB={
   'Wrist Shot — 40-shot session': {desc:'Mix shot types. 40 pucks. Log in Shot Log. CHALLENGE PROGRESSION: Complete in 20 min → 15 min → add target zones → 50% hit rate.',cue:''},
   'Wrist Shot — 30-shot session': {desc:'Mix shot types. 30 pucks. Build the daily shooting habit. Log in Shot Log. CHALLENGE PROGRESSION: 15 min → with targets → mix backhand and forehand → 50% accuracy.',cue:''}
 ,
-  'Push-Up': {desc:'Standard push-up. Hands shoulder-width on floor, body in straight line from head to heels. Lower until chest nearly touches floor, push back to start. Builds chest, shoulders, triceps, and core stability for body contact and stick battles.',cue:'Body in one straight line — no sagging hips'},
-  'Light jog': {desc:'Easy-pace jog at conversational effort — should be able to talk while running. 20-30 min. Recovery work that promotes blood flow without taxing the nervous system. Skip if soreness is high.',cue:'Easy pace — should feel like you could go much longer'},
-  'Light walk or bike': {desc:'Easy-pace walk or stationary/outdoor bike at conversational effort. 20-25 min. Promotes blood flow and recovery without adding training stress.',cue:'Easy effort — recovery is the goal'},
-  'Recovery walk or bike': {desc:'Easy walk or bike ride for 25 min at conversational effort. Active recovery between hard training days. Promotes blood flow and helps soreness clear faster than complete rest.',cue:'Talk test — if you can\'t speak in sentences, slow down'},
-  'Light movement': {desc:'Any easy aerobic activity — walk, bike, swim, light skate. 25 min at low intensity. The goal is blood flow and movement, not training adaptation.',cue:'Should feel refreshing, not draining'},
-  'Foam roll — legs and hips': {desc:'Roll major muscle groups: quads, hamstrings, glutes, IT bands, calves, lower back. 30-60 sec per muscle group. Spend extra time on tight spots — but don\'t roll directly over bone or joint. Improves tissue quality and recovery.',cue:'Slow rolls — pause on tender spots and breathe'},
-  'Hip mobility drills': {desc:'10 min of hip mobility work: 90/90 stretches, hip circles, world\'s greatest stretch, deep squat holds, lateral lunges. Critical for skating stride length and injury prevention.',cue:'Hold each position 20-30 sec — breathe through tension'},
-  'Ladder — fastest foot speed': {desc:'Run through the agility ladder at maximum foot speed across 5-6 patterns. Each pattern done once. Track your time on icky shuffle or in-out hops — your time should improve weekly.',cue:'Fastest foot speed possible without messing up'},
-  'Power circuit — all explosive moves': {desc:'4 rounds of explosive movements back-to-back: Jump Squats, Box Jumps, Broad Jumps, Push-Up to Star (explode up clapping or reaching). Rest 90 sec between rounds. Maximum power output every rep.',cue:'Quality over quantity — full effort or rest more'},
-  'Full body circuit — all muscle groups': {desc:'Circuit hitting all major movements: squat, hinge, push, pull, lunge, core. 3 rounds of 10-12 reps each with 60-90 sec rest between rounds. Touches every major muscle group in one session.',cue:'Move with purpose — control every rep'},
-  'Full body — highest Phase 2 loads': {desc:'Peak strength session using the heaviest loads you\'ve used this phase. Goblet Squat, Romanian Deadlift, Bench Press, Bent-Over Row, Shoulder Press. 4 rounds of 6-8 reps. Test your maximum.',cue:'Heavy but with good form — never sacrifice technique'},
-  'Core max effort — 4 exercises': {desc:'Pick 4 core exercises and do them at max effort: Plank (1 min), Hollow Body Hold (45 sec), Russian Twists (30 reps), Ab Wheel (10 reps). 4 rounds. Builds the trunk strength that powers shooting and skating.',cue:'Brace — exhale through every rep'},
-  'Shooting Accuracy — 5-spot (10 shots)': {desc:'5 targets: top-left, top-right, bottom-left, bottom-right, 5-hole. Shoot 2 wrist shots at each target in order. 10 shots total. Log hits in the Final Test. CHALLENGE PROGRESSION: Baseline 4/10 → 6/10 → 7/10 → 8/10.',cue:'Aim small — pick a specific corner, not the whole net'},
-  'Speed: 30m Sprint, Burpee Test (30s)': {desc:'FINAL TEST DAY — Speed assessment. 30m sprint timed best of 3 runs. Burpee Test: max burpees in 30 seconds. Record both in Progress Tracker.',cue:'Warm up fully — this is a max effort test'},
-  'Strength: Push-Up Max, Squat 60s': {desc:'FINAL TEST DAY — Strength assessment. Push-Up Max: as many proper-form push-ups as possible without rest. Squat 60s: bodyweight squats in 60 seconds. Record both in Progress Tracker.',cue:'Form must stay clean — count only legal reps'},
-  'Wall Sit, Dead Hang': {desc:'FINAL TEST DAY — Endurance assessment. Wall Sit: hold thighs parallel to floor as long as possible. Dead Hang: hang from a pull-up bar as long as possible. Record both in Progress Tracker.',cue:'Push to failure — break previous baseline'}
-,
-  'Cone Shuffle — Sprint Exit': {desc:'Set up 5 cones in a line, 3 feet apart. Side-shuffle through all 5 staying low, then on the last cone explode into a 10-yard sprint. Walk back, repeat. Trains the transition from defensive position to acceleration — exactly what backchecking demands.',cue:'Smooth shuffle → explosive sprint at the end'},
-  'Crossover Run — Max Speed': {desc:'Same crossover pattern but at max speed. 20 yards facing one direction, walk back, 20 yards facing the other. 4 reps each direction. Focus on quick foot turnover and powerful pushes off each foot — mimics game-speed crossovers.',cue:'Quick feet — push hard off each plant'},
-  'Crossover Run — Resisted (band optional)': {desc:'Same crossover footwork but with a resistance band around your hips or holding light dumbbells. The added resistance forces stronger push-off. 20 yards each direction. If no band/weights, do it at max speed with quick feet.',cue:'Drive against the resistance — power through each step'},
-  'Shuttle Runs — Max Effort': {desc:'Same setup — 10 yards out, 10 yards back, touch lines. But sprint at MAX effort for 30 sec, then full 60 sec rest. Each round is all-out. Count touches in 30 seconds — track and beat it.',cue:'All-out for 30 sec — full recovery between'},
-  'Suicides — Max Effort': {desc:'Same suicide pattern (10/20/30 yard lines), but each round at MAX effort. 60 sec full rest between rounds — you should be breathing hard and recovered. If you can do another round at the same intensity, you didn\'t go hard enough.',cue:'Max speed each round — long recovery'},
-  'Box Drill — Sprint Out': {desc:'Same 10×10 square pattern (sprint, shuffle, backpedal, shuffle), but on completing the box, explode into a 15-yard sprint out the side. Walk back, repeat opposite direction. Trains every defensive movement plus the breakaway sprint that follows.',cue:'Finish the box, immediately accelerate out'},
-  'Box Drill — sprint exits': {desc:'Set up the 10×10 yard square. After completing the box pattern, explode out one side into a 15-yard sprint. Each rep = 60 sec of box drill + sprint out. Walk back. 5 rounds total.',cue:'Finish strong — sprint hard out of every box'},
-  'Ladder Drills — Max Foot Speed': {desc:'Same agility ladder patterns (one-foot, two-foot, lateral, in-out, icky shuffle) — but executed at maximum foot speed. Quality over quantity — if your feet are messy, slow down. Goal is the fastest CLEAN run through each pattern.',cue:'Fast AND clean — both matter'},
-  '5-10-5 Shuttle — Max Effort': {desc:'Same 5-10-5 setup (middle, 5 yards one way, 10 yards the other, 5 back to middle). MAX effort each run. Full 60-90 sec rest between runs. Aim for personal best time. 5 runs total — pick the best as your time.',cue:'All-out every run — rest fully between'},
-  '5-10-5 Shuttle — max effort': {desc:'5-10-5 shuttle at max effort. 5 yards, 10 yards, 5 yards with direction changes at each cone. Full rest between runs. Record your fastest time.',cue:'Max acceleration out of each direction change'},
-  'Reactive Drop Step + Sprint Exit': {desc:'Drop step to one side and immediately sprint 10 yards out. Walk back, drop step the other direction. 10 reps each side. Add a stick handle drill on the sprint if practicing with a puck and stick.',cue:'Drop and explode — no hesitation between'},
-  'Reactive Drop + Sprint': {desc:'Drop step plus immediate 10-yard sprint. Builds the exact mechanics of reading a play and accelerating to open space.',cue:'React, drop, sprint — all in one motion'},
-  'Lateral Bound Intervals — Tabata': {desc:'Tabata format: 20 seconds of lateral bounds (max effort), 10 seconds rest, repeat 8 times = 4 minutes total. Land softly and balanced on each bound. The 20-second sets should feel ALL-OUT.',cue:'20 sec all-out, 10 sec rest × 8 rounds'},
-  'Lateral Bounds — Game Pace': {desc:'Lateral single-leg bounds at game pace — bound, stick the landing, bound back. 30 sec sets, 30 sec rest. Game speed means controlled and fast, not reckless. Focus on quiet, balanced landings.',cue:'Land quietly — balance before exploding back'},
-  'Lateral Bound Intervals — max effort': {desc:'Max-effort single-leg lateral bounds — explode side to side, sticking the landing each time. 30 sec all-out, 30 sec rest. 8 rounds.',cue:'Max effort — full power on every bound'},
-  'Lateral Bounds — Game Pace + Stick': {desc:'Lateral bounds while holding a stick in your hands. Adds a coordination challenge that mimics skating with the puck. 30 sec sets. Maintain stick position throughout (top hand on knob, bottom hand mid-stick).',cue:'Stick stays in proper position — don\'t drop your hands'},
-  'Sprint Intervals — Short': {desc:'Mark out 30-40 yards. Sprint the full distance at max effort, walk back to recover. That\'s 1 rep. Each round = 4-6 sprints. The walk back is your active rest — don\'t stand still, but don\'t jog either. Mimics shift-length efforts on the ice (15-20 seconds all-out followed by recovery).',cue:'Max effort sprint — walk back, don\'t jog'},
-  'Sprint Intervals — Long': {desc:'Mark out 60-80 yards (a full football field width works). Sprint at max effort, walk back. That\'s 1 rep. Each round = 4-6 sprints. The longer distance pushes lactate tolerance — exactly what a long shift demands. Last 2 sprints should be the hardest mentally.',cue:'Push through when it burns — that\'s where the gains are'},
-  'Box Jump — Reactive': {desc:'Use a moderate box (18-24 inches — same one all sets). Focus on EXPLOSIVE jumps with the shortest possible ground contact. Land softly on the box, step down (never jump down), reset and go again immediately. The training stimulus is jump SPEED, not height.',cue:'Explode fast — soft landing, no slap'},
-  'Box Jump — Repeated Reactive': {desc:'Same moderate box (20-24 inches). Perform jumps in clusters: 3-5 explosive box jumps in a row with minimal rest between reps. Step down between each. The repeated efforts train explosive power output and short ground contacts, which is what hockey actually demands — no need for risky max-height attempts.',cue:'Cluster the jumps — fast off the ground, soft landing'},
-  'Broad Jump — Max Distance': {desc:'Broad jump for maximum forward distance. Use full arm swing, drive both feet hard into the ground. Mark each landing. Track your best distance — beat it weekly.',cue:'Full arm swing — drive horizontal not vertical'},
-  'Broad Jump — Max Distance Sets': {desc:'Multiple sets of max-distance broad jumps. Reset to the landing spot of the previous jump and broad jump again from there. 5 jumps in sequence — track total distance covered. Tests both single-effort and consecutive jumping power.',cue:'Reset to your last landing — total distance counts'},
-  'Weighted Jump Squat': {desc:'Same jump squat mechanics holding a light dumbbell at chest (8-15 lb). Don\'t go too heavy — speed of the jump matters more than the load. Full depth, explosive jump.',cue:'Light enough to still jump fast — heavy enough to feel'}};
+  'Push-Up': {desc:'Hands shoulder-width on floor, body in a straight line from head to heels. Lower chest to floor and press back up keeping core tight. Easier alternative: Knee Push-Up — same movement with knees on the floor. Harder: Feet elevated or weighted vest.',cue:'Chest touches floor — do not let hips sag',alt:'Knee Push-Up (easier) or Decline Push-Up (harder)',yt:'https://www.youtube.com/results?search_query=push+up+tutorial+proper+form'},
+  'Arnold Press': {desc:'Sit or stand holding dumbbells in front of your face, palms facing you. As you press overhead, rotate palms outward so they face forward at the top. Builds full shoulder development. Alternative: Standard Dumbbell Shoulder Press.',cue:'Rotate and press in one smooth motion',alt:'Dumbbell Shoulder Press',yt:'https://www.youtube.com/results?search_query=arnold+press+dumbbell+tutorial'},
+  'Band Pull-Apart': {desc:'Hold a resistance band at shoulder width with both hands, arms straight in front. Pull the band apart until your hands are at your sides, squeezing shoulder blades together. Critical for shoulder health. Alternative: Face Pull with band.',cue:'Keep arms straight — squeeze shoulder blades',alt:'Face Pull or Rear Delt Fly',yt:'https://www.youtube.com/results?search_query=band+pull+apart+shoulder+tutorial'},
+  'Depth Jump': {desc:'Stand on a box 12-18 inches high. Step off (do not jump off) and land softly on both feet. Immediately explode into a maximum jump. Focus on minimizing ground contact time. Advanced — reduce height or skip if joints are sore. Alternative: Box Jump.',cue:'Land softly, jump immediately — minimize ground time',alt:'Box Jump or Broad Jump',yt:'https://www.youtube.com/results?search_query=depth+jump+plyometric+tutorial'},
+  'Dumbbell Row': {desc:'Place one hand and knee on a bench for support. Hold a dumbbell in the other hand, let it hang. Pull the dumbbell up toward your hip, squeezing your back. Lower under control. Builds the back muscles critical for powerful stick work. Alternative: Resistance Band Row.',cue:'Elbow drives back — not out to the side',alt:'Resistance Band Row or TRX Row',yt:'https://www.youtube.com/results?search_query=single+arm+dumbbell+row+tutorial'},
+  'Farmer Carry': {desc:'Hold a heavy dumbbell in each hand and walk a set distance or for time. Keep shoulders packed back, core tight, and walk with purpose. Builds grip strength, core stability, and conditioning. Alternative: Single Arm Suitcase Carry.',cue:'Shoulders back, stand tall — do not lean',alt:'Suitcase Carry (single arm) or Trap Bar Carry',yt:'https://www.youtube.com/results?search_query=farmer+carry+dumbbell+tutorial'},
+  'Hip Hinge Pattern': {desc:'Stand with feet hip-width. Push hips backward while keeping your back flat and a soft bend in knees. Feel the hamstrings load, then drive hips forward to return. This is the foundation for deadlifts and skating stride. Alternative: Romanian Deadlift with light weight.',cue:'Push hips back — do not squat down',alt:'Bodyweight RDL or Dowel Hip Hinge',yt:'https://www.youtube.com/results?search_query=hip+hinge+pattern+tutorial+beginner'},
+  'Hip Mobility Circuit': {desc:'A series of movements to open the hips: 90/90 stretches, pigeon pose, leg swings, and hip circles — 30-45 seconds each. Perform slowly and breathe through each position. Critical for skating range of motion.',cue:'Breathe and relax into each stretch — do not force',alt:'Dynamic Hip Circles or Lying Hip Rotations',yt:'https://www.youtube.com/results?search_query=hip+mobility+circuit+hockey+players'},
+  'Medicine Ball Slam': {desc:'Hold a medicine ball overhead with both hands, rise onto toes. Slam the ball into the ground as hard as possible. Catch the rebound and repeat. Builds explosive power and conditioning. Alternative: Heavy Battle Rope Slam or Dumbbell Deadlift with fast concentric.',cue:'Use your whole body — not just arms',alt:'Overhead Dumbbell Slam or Battle Ropes',yt:'https://www.youtube.com/results?search_query=medicine+ball+slam+tutorial'},
+  'Light Lateral Bounds': {desc:'Small lateral jumps side to side, landing softly on one foot. Focus on landing control and balance. Used for warm-up or recovery days. Keep jumps small and controlled. Alternative: Side Shuffle.',cue:'Land softly — stick the landing for 1 second',alt:'Side Shuffle or Lateral Step Touch',yt:'https://www.youtube.com/results?search_query=lateral+bound+hockey+skating+tutorial'},
+  'Foam Roll + Stretch': {desc:'Spend 30-60 seconds rolling quads, IT band, hamstrings, calves, and upper back. Pause on tight spots. Follow with static stretches for major muscle groups. A proper cooldown improves recovery significantly.',cue:'Pause and breathe on tight spots — do not rush',alt:'Static Stretching or Yoga Flow',yt:'https://www.youtube.com/results?search_query=foam+rolling+recovery+routine+hockey'},
+  'Foam Roll': {desc:'Spend 30-60 seconds on each major muscle group — quads, IT band, hamstrings, calves, glutes, upper back. Use slow rolls and pause on tender spots for 20-30 seconds. Essential for recovery.',cue:'Slow and controlled — pause on tight areas',alt:'Tennis Ball Roll or Static Stretch',yt:'https://www.youtube.com/results?search_query=foam+rolling+full+body+tutorial'},
+  'Easy bike or walk': {desc:'10-20 minutes of very light cycling or walking to flush out lactic acid and aid recovery. Heart rate should stay low — this is not conditioning work. Alternative: Light swimming or easy rowing.',cue:'Easy effort — you should be able to hold a conversation',alt:'Light Swimming or Easy Row',yt:'https://www.youtube.com/results?search_query=active+recovery+light+cardio+tutorial'},
+  'Full body stretch': {desc:'Hold each stretch for 30-45 seconds: hip flexors, hamstrings, quads, chest, shoulders, upper back, and calves. Breathe slowly throughout. Best done after training while muscles are warm.',cue:'Hold and breathe — never bounce or force a stretch',alt:'Yoga Flow or Mobility Routine',yt:'https://www.youtube.com/results?search_query=full+body+stretch+routine+post+workout'},
+  'Broad Jump': {desc:'Stand with feet shoulder-width. Swing arms back and bend knees, then explode forward as far as possible, landing on both feet with soft knees. Measures horizontal power — key for skating acceleration. Alternative: Box Jump.',cue:'Land like a spring — absorb with hips and knees',alt:'Box Jump or Long Jump Step',yt:'https://www.youtube.com/results?search_query=broad+jump+horizontal+power+tutorial'},
+  'Hang Clean': {desc:'Start standing with bar at hips, slight knee bend. Explosively extend hips, shrug, and pull the bar up. Drop under the bar catching it in a front squat position at shoulder height. Advanced movement — practice with light weight first. Alternative: Dumbbell Power Clean.',cue:'Hips first — then pull, then catch',alt:'Dumbbell Power Clean or Jump Shrug',yt:'https://www.youtube.com/results?search_query=hang+clean+tutorial+beginners'},
+  'Power Clean': {desc:'Full Olympic lift from the floor. Bar starts over mid-foot, explode through hips, shrug, pull and catch in front rack. Requires coaching or video review to learn properly. Alternative: Hang Clean or Dumbbell Hang Clean.',cue:'Bar stays close to body throughout the pull',alt:'Hang Clean or Dumbbell High Pull',yt:'https://www.youtube.com/results?search_query=power+clean+tutorial+form'},
+  'Push Press': {desc:'Feet shoulder-width, bar at shoulders. Dip slightly at the knees then drive through legs to help press the bar overhead. Lower under control. Builds explosive pressing power. Alternative: Strict Press or Dumbbell Push Press.',cue:'Leg drive initiates the press — arms finish it',alt:'Strict Press or Dumbbell Push Press',yt:'https://www.youtube.com/results?search_query=push+press+barbell+tutorial'},
+  'Trap Bar Deadlift': {desc:'Stand inside a hex/trap bar, hinge down and grip the handles at your sides. Drive through your heels and extend hips and knees simultaneously to stand. Easier on lower back than conventional deadlift. Alternative: Goblet Squat or Dumbbell Deadlift.',cue:'Chest up, drive the floor away — not pull the bar up',alt:'Dumbbell Deadlift or Romanian Deadlift',yt:'https://www.youtube.com/results?search_query=trap+bar+deadlift+tutorial+form'},
+  'Sled Push': {desc:'Load a sled with appropriate weight. Drive forward with a low angle, pushing from your legs not your back. Powerful hip extension and leg drive. Great conditioning. Alternative: Prowler Sprint or Weighted Carries.',cue:'Low hips, drive with legs — not arms',alt:'Prowler Sprint or Heavy Farmer Carry',yt:'https://www.youtube.com/results?search_query=sled+push+conditioning+tutorial'},
+  'Battle Ropes': {desc:'Hold one end of a heavy rope in each hand. Create alternating waves from shoulders — one arm up as the other goes down. 20-30 second bursts. Builds shoulder endurance and conditioning. Alternative: Medicine Ball Slams or Band Face Pulls.',cue:'Full range of motion — waves reach the anchor',alt:'Medicine Ball Slams or Kettlebell Swings',yt:'https://www.youtube.com/results?search_query=battle+ropes+workout+tutorial'},
+  'Pallof Press': {desc:'Attach a band to a rack or post at chest height. Stand sideways, hold band at chest with both hands. Press straight out and hold for 2 seconds, then return. Resists rotation — core anti-rotation for stick handling power. Alternative: Dead Bug or Bird Dog.',cue:'Do not rotate — resist the band pulling you',alt:'Dead Bug or Bird Dog',yt:'https://www.youtube.com/results?search_query=pallof+press+core+anti+rotation+tutorial'},
+  'Copenhagen Plank': {desc:'Side plank position with your top foot resting on a bench and bottom leg hanging. Hold a side plank. Builds hip adductor strength critical for injury prevention and skating edge work. Alternative: Side Plank with Hip Abduction.',cue:'Keep hips stacked — do not sag',alt:'Side Plank or Hip Adduction with Band',yt:'https://www.youtube.com/results?search_query=copenhagen+plank+hip+adductor+tutorial'},
+  'Nordic Curl': {desc:'Kneel with ankles secured under a bar or have a partner hold them. Keeping body straight from knee to shoulder, slowly lower yourself toward the floor using hamstrings to resist gravity. One of the most effective hamstring exercises — start with 3-5 reps. Alternative: Leg Curl or Swiss Ball Leg Curl.',cue:'Lower as slow as possible — use hands to catch yourself',alt:'Swiss Ball Leg Curl or Band Leg Curl',yt:'https://www.youtube.com/results?search_query=nordic+hamstring+curl+tutorial'},
+  'Single Leg Deadlift': {desc:'Stand on one leg, slight bend in knee. Hinge at hip, reaching the other leg back as the torso lowers toward parallel. Return to standing. Builds single-leg hamstring strength and balance. Alternative: Single Leg RDL with dumbbell.',cue:'Keep hips square — do not let them rotate open',alt:'Single Leg RDL with dumbbell or Step Up',yt:'https://www.youtube.com/results?search_query=single+leg+deadlift+tutorial+balance'},
+  'Cossack Squat': {desc:'Stand wide. Shift weight to one side, bending that knee as you squat down while the other leg straightens. Return and repeat other side. Builds lateral hip strength and flexibility for skating edges. Alternative: Lateral Lunge.',cue:'Keep heel down on the squatting side',alt:'Lateral Lunge or Sumo Squat',yt:'https://www.youtube.com/results?search_query=cossack+squat+tutorial+mobility'},
+  'Split Squat': {desc:'Step one foot forward, one back. Lower your back knee toward the floor, keeping front shin vertical. Drive through front heel to return. Builds single-leg strength. Alternative: Reverse Lunge.',cue:'Back knee drops straight down — do not drive forward',alt:'Reverse Lunge or Bulgarian Split Squat',yt:'https://www.youtube.com/results?search_query=split+squat+tutorial+form'},
+  'Bulgarian Split Squat': {desc:'Rear foot elevated on a bench behind you, front foot forward. Lower until rear knee nearly touches floor, drive through front heel to stand. Very demanding on quads and glutes. Alternative: Split Squat or Reverse Lunge.',cue:'Front shin stays vertical — weight stays in front heel',alt:'Split Squat or Elevated Lunge',yt:'https://www.youtube.com/results?search_query=bulgarian+split+squat+tutorial+form'},
+  'Hip Circle': {desc:'Standing with hands on hips or holding a support, draw large circles with your hips — 10 in each direction. Warms up the hip joint and builds mobility. Great for skating hip range of motion.',cue:'Full range — make the circles as big as possible',alt:'Hip Hinge Pattern or 90/90 Hip Stretch',yt:'https://www.youtube.com/results?search_query=hip+circles+mobility+warmup+tutorial'},
+  'Inchworm': {desc:'Stand tall, hinge forward and walk hands out to a plank position. Pause, then walk feet up to hands and stand. Excellent total body warm-up — stretches hamstrings and activates shoulders and core. Alternative: Walkout Push-Up.',cue:'Keep legs as straight as possible walking out and back',alt:'Walkout Push-Up or Cat-Cow',yt:'https://www.youtube.com/results?search_query=inchworm+exercise+warmup+tutorial'},
+  'Bear Crawl': {desc:'On hands and feet with knees just off the ground. Move forward by advancing opposite hand and foot simultaneously. Builds shoulder stability, core, and total body coordination. Alternative: Plank Walk or Crab Walk.',cue:'Hips level — do not bounce with each step',alt:'Plank Walk or Crab Walk',yt:'https://www.youtube.com/results?search_query=bear+crawl+exercise+tutorial+form'},
+  'Suitcase Carry': {desc:'Hold a heavy dumbbell in one hand by your side. Walk for 20-30 meters resisting the urge to lean toward the weight. Switch hands. Builds obliques and anti-lateral flexion core stability. Alternative: Farmer Carry.',cue:'Stand tall — do not lean toward the weight',alt:'Farmer Carry or Plank with Shoulder Tap',yt:'https://www.youtube.com/results?search_query=suitcase+carry+core+stability+tutorial'},
+  'Resistance Band Row': {desc:'Anchor a band at waist height. Grip the band with both hands and row by driving elbows back until hands reach your sides. Builds back and biceps. Great alternative when no equipment is available.',cue:'Squeeze shoulder blades at the finish',alt:'Dumbbell Row or TRX Row',yt:'https://www.youtube.com/results?search_query=resistance+band+row+tutorial+back'},
+  'Cone Drill': {desc:'Set up cones in a pattern (T-drill, 5-10-5, or star pattern). Sprint to each cone and change direction sharply. Focus on low center of gravity and explosive cuts. Directly translates to on-ice agility. Alternative: Ladder Drill or Shuttle Run.',cue:'Stay low — bend knees in every change of direction',alt:'Ladder Drill or Shuttle Run',yt:'https://www.youtube.com/results?search_query=cone+drill+agility+hockey+tutorial'},
+  'Sled Pull': {desc:'Attach a harness or rope to a sled. Walk or run forward pulling the sled behind you. Builds posterior chain, glutes, and hamstrings for skating push. Alternative: Resistance Band Walking or Weighted Step-Ups.',cue:'Drive through heels with each step — stay low',alt:'Resistance Band Walk or Weighted Carry',yt:'https://www.youtube.com/results?search_query=sled+pull+conditioning+tutorial'},
+  'Kettlebell Swing': {desc:'Feet shoulder-width, kettlebell between feet. Hinge at hips, grab the kettlebell, and hike it back between legs. Drive hips forward explosively to swing it to chest height. The power comes from the hips — not the arms. Alternative: Dumbbell Swing or Romanian Deadlift.',cue:'Hips drive the swing — arms just guide it',alt:'Dumbbell Swing or Hip Hinge with Band',yt:'https://www.youtube.com/results?search_query=kettlebell+swing+tutorial+beginner+form'},
+  'Wall Sit': {desc:'Back flat against a wall, slide down until thighs are parallel to the floor. Hold for the prescribed time. Builds quad endurance. Alternative: Goblet Squat Hold or Sissy Squat Hold.',cue:'Knees directly over ankles — thighs parallel to floor',alt:'Goblet Squat Hold or Split Squat Hold',yt:'https://www.youtube.com/results?search_query=wall+sit+exercise+tutorial'},
+  'Jump Rope': {desc:'Standard jump rope skipping — both feet or alternating. Start with 30-second intervals if new to it. Builds foot speed, coordination, and conditioning — directly transfers to skating footwork. Alternative: High Knees or Line Jumps.',cue:'Small jumps — stay on balls of feet',alt:'High Knees or Line Hops',yt:'https://www.youtube.com/results?search_query=jump+rope+beginner+tutorial+technique'},
+  'Ab Wheel': {desc:'Kneel on a mat holding an ab wheel with both hands in front of you. Roll the wheel forward as far as you can while keeping your back flat, then pull back. Extremely challenging — beginners can limit range of motion. Alternative: Plank Rollout or Barbell Rollout.',cue:'Keep hips down — do not let your back cave',alt:'Plank or Dead Bug',yt:'https://www.youtube.com/results?search_query=ab+wheel+rollout+tutorial+form'},
+  'Plank Up-Down': {desc:'Start in a forearm plank. Push up to one hand, then the other to reach a full plank. Return to forearms one arm at a time. Keep hips level throughout — do not rock side to side. Alternative: Plank or Push-Up.',cue:'Hips stay level — brace core the entire time',alt:'Plank or Slow Push-Up',yt:'https://www.youtube.com/results?search_query=plank+up+down+exercise+tutorial'},
+  'Band Resisted Sprint': {desc:'Attach a resistance band around your waist anchored behind you. Sprint forward against the resistance for 10-15 meters. Builds explosive acceleration. Requires a partner or anchor point. Alternative: Hill Sprint or Sled Push.',cue:'Drive knees up and pump arms — fight through the resistance',alt:'Hill Sprint or Unresisted Sprint',yt:'https://www.youtube.com/results?search_query=band+resisted+sprint+speed+training'},
+};
 
 // ─── AGE TIER LOGIC ─────────────────────────────────────────────────────────
 // Adjusts exercise names and volumes based on player age group.
@@ -5864,7 +5652,8 @@ function syncDaysToSeason() {
     lateoffseason:  ['Monday','Tuesday','Thursday','Friday','Saturday'],
     preseason:      ['Monday','Tuesday','Thursday','Saturday'],
     inseason_a:     ['Monday','Wednesday','Friday'],
-    inseason_b:     ['Monday','Wednesday','Friday']
+    inseason_b:     ['Monday','Wednesday','Friday'],
+    recovery:       ['Monday','Wednesday','Friday']
   };
   const activeDays = dayMap[season] || dayMap.earlyoffseason;
   document.querySelectorAll('.day-toggle input[type=checkbox]').forEach(cb => {
@@ -5872,34 +5661,6 @@ function syncDaysToSeason() {
   });
 
   updatePhaseCard();}
-
-// Phase card updater
-var _PHASE_INFO = {
-  earlyoffseason: { label: 'Early Off-Season', title: 'Foundation & Strength', weeks: '12 weeks / 5 days/week', tags: ['Strength Build','Movement Quality','High Volume'], desc: 'Your biggest development window. Build your base, add load progressively, and peak your strength before late off-season.' },
-  lateoffseason:  { label: 'Late Off-Season',  title: 'Power & Development',   weeks: '10 weeks / 5 days/week', tags: ['Explosive Power','Complex Training','Peak Development'], desc: 'Convert your strength into explosive hockey power. Heavier loads, jump-and-lift complexes, and peak conditioning.' },
-  preseason:      { label: 'Pre-Season',        title: 'Sharpen & Peak',        weeks: '4 weeks / 4 days/week',  tags: ['Game Speed','Reduce Volume','Stay Sharp'], desc: 'Get game-ready. Reduce volume, increase speed and intensity. Everything is faster and more hockey-specific.' },
-  inseason_a:     { label: 'In-Season Block A', title: 'Early Season Maintenance', weeks: '4 weeks / 3 days/week', tags: ['Maintain Strength','Full Recovery','Game Focus'], desc: 'Early season - moderate intensity, full recovery. Keep your strength without adding fatigue on top of games.' },
-  inseason_b:     { label: 'In-Season Block B', title: 'Mid/Late Season',       weeks: '4 weeks / 3 days/week', tags: ['Low Volume','Recovery First','Stay Sharp'], desc: 'Fatigue is real late in the season. Reduce volume, prioritize recovery, stay sharp for games. Repeat as needed.' }
-};
-function updatePhaseCard() {
-  var sel = document.getElementById('cust-season');
-  if (!sel) return;
-  var p = _PHASE_INFO[sel.value];
-  if (!p) return;
-  var card = document.getElementById('selectedPhaseCard');
-  if (!card) return;
-  var th = '';
-  for (var i = 0; i < p.tags.length; i++) {
-    th += '<span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;background:rgba(var(--primary-rgb),0.15);color:var(--primary-color);border:1px solid rgba(var(--primary-rgb),0.3);">' + p.tags[i] + '</span> ';
-  }
-  var h = '<div style="font-size:10px;color:var(--primary-color);font-family:sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">' + p.label + '</div>';
-  h += '<div style="font-size:18px;font-weight:900;text-transform:uppercase;color:#fff;margin-bottom:3px;">' + p.title + '</div>';
-  h += '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:10px;">' + p.weeks + '</div>';
-  h += '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">' + th + '</div>';
-  h += '<div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;">' + p.desc + '</div>';
-  card.innerHTML = h;
-}
-
 
 function applyCustomization(){
   console.log('applyCustomization called');
@@ -5965,11 +5726,7 @@ function applyCustomization(){
   const conf = document.getElementById('cust-apply-confirm');
   if(conf){ conf.style.display='inline'; setTimeout(()=>conf.style.display='none', 2500); }
 
-  updatePhaseCard();
-
-  // Save training days to Supabase for server-side reminders
-  saveTrainingDaysToSupabase(settings.days);
-}
+  updatePhaseCard();}
 
 function resetCustomization(){
   if(!confirm('Reset all customization to defaults?')) return;
@@ -6335,7 +6092,7 @@ function renderWeeks(){
     if (stored) {
       const start = new Date(stored);
       const now = new Date();
-      const weekNum = Math.min(12, Math.max(1, Math.floor((now - start) / (7*24*60*60*1000)) + 1));
+      const weekNum = Math.min(20, Math.max(1, Math.floor((now - start) / (7*24*60*60*1000)) + 1));
       window._currentWeekNum = weekNum;
     } else {
       window._currentWeekNum = 1;
@@ -7050,7 +6807,7 @@ async function loadAdminPanel(user) {
             </div>
             <div>
               <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Role</label>
-              <select id="adminRole" onchange="toggleAdminTeamField(this.value)" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+              <select id="adminRole" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
                 <option value="player">Player</option>
                 <option value="coach">Coach</option>
                 <option value="admin">Admin</option>
@@ -7058,7 +6815,7 @@ async function loadAdminPanel(user) {
             </div>
           </div>
           <div id="teamSelectWrapper">
-            <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Team</label>
+            <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Team <span id="teamRequiredMark" style="color:#f87171;">*</span></label>
             <select id="adminTeam" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;margin-bottom:10px;">
               <option value="">— Select a team —</option>
             </select>
@@ -7336,19 +7093,6 @@ async function handleAddPlayer(e) {
   }
 }
 
-function toggleAdminTeamField(role) {
-  var wrapper = document.getElementById('teamSelectWrapper');
-  var teamSel = document.getElementById('adminTeam');
-  if (!wrapper) return;
-  if (role === 'admin') {
-    wrapper.style.display = 'none';
-    if (teamSel) teamSel.value = '';
-  } else {
-    wrapper.style.display = 'block';
-  }
-}
-
-
 async function loadPlayerList(isSuperAdmin = false) {
   const container = document.getElementById('playerListContainer');
   if (!container) return;
@@ -7512,14 +7256,26 @@ async function loadPlayerList(isSuperAdmin = false) {
         <td style="padding:10px 8px;color:rgba(255,255,255,0.55);font-size:11px;">${teamName}</td>
         <td style="padding:10px 8px;color:rgba(255,255,255,0.5);font-size:11px;">${sub.email}</td>
         <td style="padding:10px 8px;color:${roleColor};font-weight:600;">${sub.role || 'player'}</td>
+        <td style="padding:10px 8px;color:${statusColor};font-weight:600;">${statusText}</td>
         <td style="padding:10px 8px;text-align:right;color:#4ade80;font-weight:600;">${stats.shots.toLocaleString()}</td>
         <td style="padding:10px 8px;text-align:right;color:#60a5fa;font-weight:600;">${stats.mins}</td>
         <td style="padding:10px 8px;text-align:right;color:#fb923c;font-weight:600;">${stats.workouts}</td>
+        <td style="padding:10px 8px;text-align:center;font-size:10px;">
+          ${sub.expires_at ? 
+            `<span style="color:rgba(255,255,255,0.5);">${new Date(sub.expires_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'})}</span>` 
+            : '<span style="color:rgba(255,255,255,0.25);">—</span>'}
+        </td>
         <td style="padding:10px 8px;white-space:nowrap;">
           ${sub.stripe_subscription_id ? '<button onclick="adminCancelStripe(\''+sub.id+'\',\''+sub.email+'\',\''+sub.stripe_subscription_id+'\')" style="background:#fb923c;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Cancel</button>' : ''}
           ${(isSuperAdmin && (!sub.organization_id || sub.organization_id === 'individual')) ? '<button onclick="editExpiration(\''+sub.id+'\',\''+sub.email+'\',\''+(sub.expires_at||'')+'\')" style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;color:#3b82f6;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Set Expires</button>' : ''}
           ${sub.email === 'brandonanderson1393@gmail.com' ? '<button onclick="editOrgLimit()" style="background:#60a5fa;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Edit Org Limit</button>' : ''}
           <button onclick="editPlayerTeam('${sub.id}','${sub.team_id||''}')" style="background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.3);color:#60a5fa;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Team</button>
+          ${(sub.role === 'player' || sub.role === 'coach') ? (sub.status === 'active' ? 
+              '<button onclick="deactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
+              '<button onclick="reactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
+          ${sub.role === 'admin' && isSuperAdmin ? (sub.status === 'active' ? 
+              '<button onclick="deactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
+              '<button onclick="reactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
           ${isSuperAdmin && sub.email !== 'brandonanderson1393@gmail.com' ? '<button onclick="deleteUserFully(\''+sub.id+'\',\''+sub.user_id+'\',\''+sub.email+'\')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-left:2px;">Delete</button>' : ''}
         </td>
       </tr>`;
@@ -7635,83 +7391,7 @@ async function editPlayers(subId, email, currentLimit) {
 async function loadAccountDetails() {
   const container = document.getElementById('accountSubDetails');
   if (!container) return;
-
-  // Only show Manage Subscription card for admins
-  const manageSubCard = document.getElementById('manageSubCard');
-  if (manageSubCard) {
-    const role = window._userRole;
-    const isAdmin = role === 'admin' || role === 'super_admin' || window._isSuperAdmin;
-    manageSubCard.style.display = isAdmin ? '' : 'none';
-  }
-
-  // Update notification button state
-  // Render notification card based on device/PWA state
-  const notifCardBody = document.getElementById('notifCardBody');
-  // Hide notifications card for coaches/admins
-  const _notifCard = document.getElementById('notificationsCard');
-  if (_notifCard) _notifCard.style.display = (window._userRole === 'player' || !window._userRole) ? '' : 'none';
-  if (notifCardBody && window._userRole === 'player') {
-    const _isPWA = isRunningAsPWA ? isRunningAsPWA() : (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
-    const _isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const _notifOK = (function() { try { return 'Notification' in window && typeof Notification !== 'undefined' && 'PushManager' in window; } catch(e) { return false; } })();
-
-    const _userDisabled = !!localStorage.getItem('trainrNotifDisabled');
-    if (_notifOK && Notification.permission === 'granted' && !_userDisabled) {
-      // Check if subscription actually exists in Supabase
-      let _hasSub = false;
-      try {
-        if ('serviceWorker' in navigator) {
-          const _reg = await navigator.serviceWorker.ready;
-          const _sub = await _reg.pushManager.getSubscription();
-          _hasSub = !!_sub;
-        }
-      } catch(e) {}
-      if (!_hasSub && window._userRole === 'player' && typeof registerPushSubscription === 'function' && !localStorage.getItem('trainrNotifDisabled')) {
-        // Permission granted but no subscription — re-register
-        await registerPushSubscription();
-        _hasSub = true;
-      }
-      if (!_hasSub) {
-        // Permission granted but no subscription and not a player
-        notifCardBody.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:14px;">Notifications are not active on this device.</p>'
-          + (window._userRole === 'player' ? '<button onclick="requestNotificationPermission()" class="btn-o" style="margin:0;">Enable Notifications</button>' : '');
-      } else {
-      notifCardBody.innerHTML = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">'
-        + '<span style="font-size:18px;">&#x1F514;</span>'
-        + '<div>'
-        + '<div style="font-size:13px;color:#4ade80;font-weight:700;">&#10003; Notifications enabled</div>'
-        + '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;">You\'ll be notified when a coach assigns a new goal.</div>'
-        + '</div></div>'
-        + '<button onclick="disableNotifications()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.4);font-size:12px;padding:8px 14px;cursor:pointer;width:100%;">Disable Notifications</button>'
-;
-      }
-    } else if (_notifOK && Notification.permission === 'denied') {
-      notifCardBody.innerHTML = '<div style="font-size:13px;color:#f87171;margin-bottom:10px;">&#x26A0; Notifications blocked</div>'
-        + '<div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.7;">'
-        + (_isIOS ? 'Go to <strong style="color:#fff;">Settings &#8250; Safari &#8250; ' + window.location.hostname + '</strong> and set Notifications to Allow.'
-                 : 'Click the lock icon in your browser address bar and set Notifications to Allow.')
-        + '</div>';
-    } else if (_notifOK && _userDisabled) {
-      notifCardBody.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:14px;">Notifications are turned off. You\'ll miss goal assignments and reminders.</p>'
-        + '<button onclick="reEnableNotifications()" class="btn-o" style="margin:0;">Turn On Notifications</button>';
-    } else if (_notifOK) {
-      notifCardBody.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Get notified when a coach assigns you a new goal.</p>'
-        + '<button onclick="requestNotificationPermission()" class="btn-o" style="margin:0;">Enable Notifications</button>';
-    } else if (_isIOS && !_isPWA) {
-      notifCardBody.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.7;margin-bottom:14px;">'
-        + '&#x1F4F1; To enable push notifications on iPhone, TRAINR must be added to your home screen first.'
-        + '</div>'
-        + '<div style="background:#1a1a1a;border-radius:8px;padding:12px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.9;margin-bottom:12px;">'
-        + '<div><span style="color:#E07820;font-weight:700;">1</span> Tap the <strong style="color:#fff;">&#8226;&#8226;&#8226;</strong> menu in the bottom right of Safari</div>'
-        + '<div><span style="color:#E07820;font-weight:700;">2</span> Tap <strong style="color:#fff;">Share &#x23CE;</strong></div>'
-        + '<div><span style="color:#E07820;font-weight:700;">3</span> Tap <strong style="color:#fff;">&ldquo;Add to Home Screen&rdquo;</strong></div>'
-        + '<div><span style="color:#E07820;font-weight:700;">4</span> Open TRAINR from your home screen, then come back here</div>'
-        + '</div>';
-    } else {
-      notifCardBody.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,0.5);">Push notifications are not supported on this browser.</div>';
-    }
-  }
-
+  
   try {
     const sb = await getSupabaseClient();
     const { data: { user } } = await sb.auth.getUser();
@@ -7843,7 +7523,7 @@ function renderPlayerTable(players) {
     return;
   }
   
-  let html = '<div class="player-table-wrapper"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1400px;"><thead><tr style="border-bottom:1px solid #222;"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'name\')">Name ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'team\')">Team ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'email\')">Email ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'role\')">Role ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'status\')"><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'shots\')">Shots ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'mins\')">Stick Min ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'workouts\')">Workouts ↕</th></tr></thead><tbody>';
+  let html = '<div class="player-table-wrapper"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1400px;"><thead><tr style="border-bottom:1px solid #222;"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'name\')">Name ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'team\')">Team ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'email\')">Email ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'role\')">Role ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'status\')">Status ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'shots\')">Shots ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'mins\')">Stick Min ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'workouts\')">Workouts ↕</th></tr></thead><tbody>';
   
   players.forEach(p => {
     html += p.html;
@@ -8493,37 +8173,20 @@ async function deactivatePlayer(subId, email) {
 
 async function deleteUserFully(subId, userId, email) {
   if (email === 'brandonanderson1393@gmail.com') { alert('Cannot delete super admin'); return; }
-  if (!confirm(`Delete ${email}?\n\nThis will permanently remove their subscription, assignments, and goals.\n\nThis CANNOT be undone.`)) return;
+  if (!confirm(`⚠️ Permanently delete ${email}?\n\nThis will:\n• Remove them from Supabase Auth\n• Delete their subscription\n• Remove their assignments and goals\n\nThis CANNOT be undone.`)) return;
   try {
     const sb = await getSupabaseClient();
-
-    // Delete all related data using admin client (RLS allows admin to delete)
-    const { error: subErr } = await sb.from('subscriptions').delete().eq('user_id', userId);
-    if (subErr) throw new Error('Failed to delete subscription: ' + subErr.message);
-
-    await sb.from('assignments').delete().eq('player_id', userId);
-    await sb.from('goals').delete().eq('player_id', userId);
-    await sb.from('shooting_sessions').delete().eq('user_id', userId);
-    await sb.from('stickhandling_sessions').delete().eq('user_id', userId);
-    await sb.from('exercise_completions').delete().eq('user_id', userId);
-
-    // Try the API endpoint — if it fails, data is already cleaned up
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      const token = session?.access_token;
-      if (token) {
-        const res = await fetch('/api/delete-user', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ userId, orgId: window._userOrgId })
-        });
-        // If API works, great. If not, data is already deleted above so we continue.
-      }
-    } catch(apiErr) {
-      console.warn('API delete-user failed (auth user may remain):', apiErr.message);
-    }
-
-    alert(`${email} has been removed from the system.`);
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token;
+    if (!token) throw new Error('Not authenticated');
+    const res = await fetch('/api/delete-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ userId, orgId: window._userOrgId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Delete failed');
+    alert(`✓ ${email} permanently deleted`);
     loadPlayerList(window._isSuperAdmin);
   } catch(e) { alert('Error: ' + e.message); }
 }
@@ -9167,12 +8830,9 @@ async function saveCoachAssignment(teamId) {
   const coachId = select.value || null;
   try {
     const sb = await getSupabaseClient();
-    // Update teams.coach_id
     const { error: e1 } = await sb.from('teams').update({ coach_id: coachId }).eq('id', teamId);
     if (e1) throw e1;
-    // Clear team_id from any coach previously on this team
     await sb.from('subscriptions').update({ team_id: null }).eq('team_id', teamId).eq('role', 'coach');
-    // Set team_id on the newly assigned coach
     if (coachId) {
       const { error: e2 } = await sb.from('subscriptions').update({ team_id: teamId }).eq('user_id', coachId);
       if (e2) throw e2;
@@ -9398,22 +9058,18 @@ async function loadTeams() {
     // Get coaches for assignment
     const { data: coaches } = await sb
       .from('subscriptions')
-      .select('user_id, first_name, last_name, email, team_id')
+      .select('user_id, first_name, last_name, email')
       .eq('organization_id', window._userOrgId)
       .eq('role', 'coach');
     
     const coachMap = {};
     (coaches || []).forEach(c => coachMap[c.user_id] = c);
-    // Also build a map of coach by team_id (for cases where teams.coach_id is null)
-    const coachByTeamId = {};
-    (coaches || []).forEach(c => { if (c.team_id) coachByTeamId[c.team_id] = c; });
     const { data: allPlayersT } = await sb.from('subscriptions').select('user_id, team_id, first_name, last_name, email').eq('role', 'player').eq('organization_id', window._userOrgId || 'individual');
     const playersByTeam = {};
     (allPlayersT || []).forEach(p => { if (p.team_id) { if (!playersByTeam[p.team_id]) playersByTeam[p.team_id] = []; playersByTeam[p.team_id].push(p); } });
     let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
     for (const team of teams) {
-      // Look up coach via teams.coach_id first, fall back to subscriptions.team_id
-      const coach = coachMap[team.coach_id] || coachByTeamId[team.id];
+      const coach = coachMap[team.coach_id];
       const coachName = coach ? ([coach.first_name, coach.last_name].filter(Boolean).join(' ') || coach.email) : 'No coach assigned';
       const players = playersByTeam[team.id] || [];
       let rosterHtml = players.length ? players.map(p => { const n = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email; return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1a1a1a;font-size:12px;"><span style="color:rgba(255,255,255,0.75);">${n}</span><span style="color:#60a5fa;font-size:10px;font-weight:700;text-transform:uppercase;">Player</span></div>`; }).join('') : '<div style="font-size:11px;color:rgba(255,255,255,0.3);padding:4px 0;">No players assigned</div>';
@@ -9690,8 +9346,371 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+</script>
+
+<script>
+window.addEventListener('load', async () => {
+  setTimeout(async () => {
+    const panel = document.getElementById('debugPanel');
+    const content = document.getElementById('debugContent');
+    if (!panel || !content) return;
+    
+    panel.style.display = 'block';
+    
+    try {
+      const sb = await getSupabaseClient();
+      const { data: { user }, error: userError } = await sb.auth.getUser();
+      
+      let html = '';
+      if (userError) {
+        html = '<span style="color:#f87171;">Auth error: ' + userError.message + '</span>';
+      } else if (!user) {
+        html = '<span style="color:#fbbf24;">Not logged in</span>';
+      } else {
+        html = '<strong>User:</strong><br>Email: ' + user.email + '<br>ID: ' + user.id.substring(0,20) + '...<br><br>';
+        
+        // Try to get subscription
+        const { data: subs, error: subError } = await sb.from('subscriptions').select('*').eq('email', user.email);
+        
+        html += '<strong>Subscription:</strong><br>';
+        if (subError) {
+          html += '<span style="color:#f87171;">Error: ' + subError.message + '</span>';
+        } else if (!subs || subs.length === 0) {
+          html += '<span style="color:#fbbf24;">NOT FOUND</span><br>';
+          html += '<br>Tried query: email = ' + user.email;
+        } else {
+          html += '<span style="color:#4ade80;">FOUND</span><br>';
+          html += 'Role: ' + subs[0].role + '<br>';
+          html += 'Org: ' + subs[0].organization_id + '<br>';
+          html += 'Status: ' + subs[0].status;
+        }
+      }
+      
+      content.innerHTML = html;
+    } catch (e) {
+      content.innerHTML = '<span style="color:#f87171;">' + e.message + '</span>';
+    }
+  }, 2000);
+});
 
 
+<script>
+const VAPID_PUBLIC_KEY = 'BI6YztwVujEwDgVYIg9rVigNRI1gL9HZa8FYaJCQU2M59DVljIhIw08PhkAwrVnJLWfeap7NuTkUPDYQqq7N5ro';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+async function registerPushSubscription() {
+  try {
+    if (window._userRole && window._userRole !== 'player') return;
+    if (!('PushManager' in window)) return;
+    if (!('serviceWorker' in navigator)) return;
+    if (typeof Notification === 'undefined') return;
+    const reg = await navigator.serviceWorker.ready;
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+    const subscription = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    console.log('Push subscription obtained:', subscription.endpoint.slice(-20));
+    const sb = await getSupabaseClient();
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token;
+    if (!token) { console.warn('No session token'); return; }
+    const { data: { user: currentUser } } = await sb.auth.getUser();
+    const actualUserId = currentUser?.id;
+    if (!actualUserId) return;
+    console.log('Saving push subscription for user:', actualUserId, 'role:', window._userRole);
+    const endpointUrl = subscription.endpoint;
+    await sb.from('push_subscriptions').delete().eq('subscription->>endpoint', endpointUrl).neq('user_id', actualUserId);
+    const saveResp = await fetch('/api/save-push-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ subscription })
+    });
+    const saveData = await saveResp.json();
+    console.log('Push subscription save response:', saveResp.status, saveData);
+  } catch (err) {
+    console.warn('Push subscription failed:', err);
+  }
+}
+
+async function sendGoalPushNotifications(playerIds, title, due) {
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token;
+    if (!token || !playerIds || !playerIds.length) return;
+    const dueStr = due ? ' \u2014 due ' + new Date(due).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    console.log('Sending push to playerIds:', JSON.stringify([...playerIds]));
+    for (const pid of playerIds) {
+      console.log('Sending push to userId:', pid);
+      fetch('/api/send-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({
+          userId: pid,
+          title: 'New Goal Assigned',
+          body: (title || 'You have a new goal') + dueStr,
+          url: '/'
+        })
+      }).then(r => r.json()).then(d => console.log('Push send result:', d)).catch(e => console.warn('Push send failed:', e));
+    }
+  } catch(e) { console.warn('sendGoalPushNotifications error:', e); }
+}
+
+async function saveTrainingDaysToSupabase(days) {
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    await sb.from('subscriptions').update({ training_days: days }).eq('user_id', user.id);
+    console.log('Training days saved:', days);
+  } catch(e) { console.warn('Could not save training days:', e.message); }
+}
+
+// ── SERVICE WORKER + INSTALL BANNER ─────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => { console.log('SW registered:', reg.scope); })
+      .catch(err => { console.warn('SW registration failed:', err); });
+  });
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data?.type === 'setBadge') {
+      try { if ('setAppBadge' in navigator) navigator.setAppBadge(event.data.count); } catch(e) {}
+    }
+    if (event.data?.type === 'clearBadge') {
+      try { if ('clearAppBadge' in navigator) navigator.clearAppBadge(); } catch(e) {}
+    }
+    if (event.data?.type === 'badgeCount') {
+      try {
+        const c = event.data.count;
+        if (c > 0) { if ('setAppBadge' in navigator) navigator.setAppBadge(c); }
+        else { if ('clearAppBadge' in navigator) navigator.clearAppBadge(); }
+      } catch(e) {}
+    }
+  });
+  navigator.serviceWorker.ready.then(reg => {
+    if (reg.active) reg.active.postMessage('getBadgeCount');
+  }).catch(() => {});
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      try { if ('clearAppBadge' in navigator) navigator.clearAppBadge(); } catch(e) {}
+      try {
+        if (navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage('clearBadge');
+      } catch(e) {}
+    }
+  });
+  try { if ('clearAppBadge' in navigator) navigator.clearAppBadge(); } catch(e) {}
+}
+
+let _deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  _deferredInstallPrompt = e;
+});
+
+function isRunningAsPWA() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+if (isRunningAsPWA()) localStorage.setItem('trainrInstallDismissed', 'permanent');
+
+function shouldShowInstallBanner() {
+  if (isRunningAsPWA()) return false;
+  if (localStorage.getItem('trainrInstallDismissed') === 'permanent') return false;
+  return true;
+}
+
+function showInstallBanner() {
+  if (!shouldShowInstallBanner()) return;
+  if (document.getElementById('pwaInstallBanner')) return;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const isMobile = isIOS || isAndroid;
+  if (!isMobile) return;
+  const banner = document.createElement('div');
+  banner.id = 'pwaInstallBanner';
+  banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:999999;background:#111;border-top:3px solid #E07820;padding:14px 16px 20px;box-shadow:0 -12px 40px rgba(0,0,0,0.8);font-family:system-ui,sans-serif;';
+  const topRow = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+    + '<img src="/apple-touch-icon.png" style="width:44px;height:44px;border-radius:10px;flex-shrink:0;">'
+    + '<div style="flex:1;min-width:0;"><div style="font-size:15px;font-weight:700;color:#fff;letter-spacing:-.01em;">Add TRAINR to your Home Screen</div>'
+    + '<div style="font-size:12px;color:rgba(255,255,255,.45);margin-top:1px;">Get notifications &amp; faster access</div></div>'
+    + '<button onclick="dismissInstallBanner()" style="background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);width:28px;height:28px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">&times;</button>'
+    + '</div>';
+  let action = '';
+  if (isIOS) {
+    action = '<div style="background:#1a1a1a;border-radius:10px;padding:11px 13px;margin-bottom:10px;">'
+      + '<div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:7px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;">How to install on iPhone</div>'
+      + '<div style="font-size:13px;color:rgba(255,255,255,.75);line-height:1.9;">'
+      + '<span style="color:#E07820;font-weight:700;">1</span> Tap the <strong style="color:#fff;">&#8226;&#8226;&#8226;</strong> menu in the bottom right of Safari<br>'
+      + '<span style="color:#E07820;font-weight:700;">2</span> Tap <strong style="color:#fff;">Share &#x23CE;</strong><br>'
+      + '<span style="color:#E07820;font-weight:700;">3</span> Tap <strong style="color:#fff;">&#8220;Add to Home Screen&#8221;</strong><br>'
+      + '<span style="color:#E07820;font-weight:700;">4</span> Tap <strong style="color:#fff;">&#8220;Add&#8221;</strong> in the top right'
+      + '</div></div>'
+      + '<button onclick="confirmInstalled()" style="width:100%;padding:12px;background:#E07820;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;">I\'ve added it &#10003;</button>'
+      + '<button onclick="permanentlyDismissBanner()" style="width:100%;padding:10px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;">Don\'t show this again</button>';
+  } else if (_deferredInstallPrompt) {
+    action = '<button onclick="triggerAndroidInstall()" style="width:100%;padding:13px;background:#E07820;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;text-align:center;cursor:pointer;letter-spacing:.02em;">Add to Home Screen</button>'
+      + '<button onclick="permanentlyDismissBanner()" style="width:100%;padding:10px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;margin-top:4px;">Don\'t show this again</button>';
+  } else {
+    action = '<div style="background:#1a1a1a;border-radius:10px;padding:11px 13px;font-size:13px;color:rgba(255,255,255,0.6);line-height:1.9;margin-bottom:10px;">'
+      + 'Tap the browser menu <strong style="color:#fff;">&#8942;</strong> then tap <strong style="color:#fff;">&#8220;Add to Home Screen&#8221;</strong>'
+      + '</div>'
+      + '<button onclick="permanentlyDismissBanner()" style="width:100%;padding:10px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;">Don\'t show this again</button>';
+  }
+  banner.innerHTML = topRow + action;
+  document.body.appendChild(banner);
+}
+
+function dismissInstallBanner() {
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) banner.remove();
+}
+function permanentlyDismissBanner() {
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) banner.remove();
+  localStorage.setItem('trainrInstallDismissed', 'permanent');
+}
+function confirmInstalled() { permanentlyDismissBanner(); }
+
+async function triggerAndroidInstall() {
+  if (!_deferredInstallPrompt) return;
+  _deferredInstallPrompt.prompt();
+  const { outcome } = await _deferredInstallPrompt.userChoice;
+  if (outcome === 'accepted') localStorage.setItem('trainrInstallDismissed', 'permanent');
+  _deferredInstallPrompt = null;
+  const banner = document.getElementById('pwaInstallBanner');
+  if (banner) banner.remove();
+}
+
+function triggerInstallBannerAfterLogin() {
+  setTimeout(showInstallBanner, 4000);
+}
+
+// ── NOTIFICATION FUNCTIONS ────────────────────────────────────────────────────
+async function requestNotificationPermission() {
+  try {
+    localStorage.removeItem('trainrNotifDisabled');
+    if (typeof Notification === 'undefined') { alert('Notifications are not supported on this device.'); return; }
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      await registerPushSubscription();
+      if (typeof loadAccountDetails === 'function') loadAccountDetails();
+    } else {
+      alert('Notifications were not allowed. You can enable them in your browser settings.');
+    }
+  } catch(e) { console.warn('requestNotificationPermission error:', e); }
+}
+
+async function reEnableNotifications() {
+  try {
+    localStorage.removeItem('trainrNotifDisabled');
+    if (typeof registerPushSubscription !== 'function') return;
+    await registerPushSubscription();
+    if (typeof loadAccountDetails === 'function') loadAccountDetails();
+  } catch(e) { alert('Could not re-enable notifications: ' + e.message); }
+}
+
+async function disableNotifications() {
+  try {
+    localStorage.setItem('trainrNotifDisabled', '1');
+    if (!('serviceWorker' in navigator)) return;
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) {
+      await sub.unsubscribe();
+      const sb = await getSupabaseClient();
+      const { data: { session } } = await sb.auth.getSession();
+      if (session?.access_token) await sb.from('push_subscriptions').delete().eq('user_id', window._userId);
+    }
+    const notifCardBody2 = document.getElementById('notifCardBody');
+    if (notifCardBody2) {
+      notifCardBody2.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Notifications have been disabled.</p>'
+        + '<button onclick="reEnableNotifications()" class="btn-o" style="margin:0;">Re-enable Notifications</button>';
+    }
+    const nudge = document.getElementById('notifNudge');
+    if (nudge) nudge.remove();
+  } catch(e) { console.warn('disableNotifications error:', e); alert('Error: ' + e.message); }
+}
+
+async function testBadge() {
+  try {
+    if ('clearAppBadge' in navigator) await navigator.clearAppBadge();
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.ready;
+      if (reg.active) reg.active.postMessage('clearBadge');
+    }
+    await new Promise(r => setTimeout(r, 200));
+    if ('setAppBadge' in navigator) {
+      await navigator.setAppBadge(1);
+      alert('Badge set to 1 — close the app and check your home screen icon');
+    } else {
+      alert('setAppBadge not supported on this device.');
+    }
+  } catch(e) { alert('Badge error: ' + e.message); }
+}
+
+function showNotificationPrompt() {
+  if (document.getElementById('notifPromptModal')) return;
+  const modal = document.createElement('div');
+  modal.id = 'notifPromptModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = '<div style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:24px;max-width:340px;width:100%;text-align:center;">'
+    + '<div style="font-size:36px;margin-bottom:12px;">&#x1F514;</div>'
+    + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin-bottom:8px;">Enable Notifications</div>'
+    + '<div style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:20px;">Get notified when your coach assigns a new goal or a deadline is coming up.</div>'
+    + '<button onclick="enableNotifFromPrompt()" class="btn-o" style="width:100%;margin-bottom:10px;">Enable Notifications</button>'
+    + '<button onclick="dismissNotifPrompt()" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;width:100%;">Not now</button>'
+    + '</div>';
+  document.body.appendChild(modal);
+}
+
+async function enableNotifFromPrompt() {
+  document.getElementById('notifPromptModal')?.remove();
+  localStorage.setItem('trainrNotifPromptDone', '1');
+  localStorage.removeItem('trainrNotifDisabled');
+  await requestNotificationPermission();
+}
+
+function dismissNotifPrompt() {
+  document.getElementById('notifPromptModal')?.remove();
+}
+
+// Handle role select toggle for admin team field
+function toggleAdminTeamField(role) {
+  var wrapper = document.getElementById('teamSelectWrapper');
+  var teamSel = document.getElementById('adminTeam');
+  if (!wrapper) return;
+  if (role === 'admin') { wrapper.style.display = 'none'; if (teamSel) teamSel.value = ''; }
+  else { wrapper.style.display = 'block'; }
+}
+
+function handleRoleChange() {
+  const roleSelect = document.getElementById('adminRole');
+  const teamWrapper = document.getElementById('teamSelectWrapper');
+  if (roleSelect && teamWrapper) {
+    const role = roleSelect.value;
+    teamWrapper.style.display = (role === 'player' || role === 'coach') ? 'block' : 'none';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const roleSelect = document.getElementById('adminRole');
+  if (roleSelect) {
+    roleSelect.addEventListener('change', handleRoleChange);
+    handleRoleChange();
+  }
+});
+</script>
+
+</body>
+</html>
 // ── SETUP WIZARD ─────────────────────────────────────────────────────────
 let _wizAge = 'bantam';
 let _wizSeason = 'earlyoffseason';
@@ -9798,7 +9817,7 @@ function showRenewalWall(email, reason) {
   } else {
     // Player or coach at an association — contact admin wall
     if (title) title.textContent = 'Access Unavailable';
-    if (msg) msg.innerHTML = "Your association's subscription is currently inactive.<br><br>Please contact your association admin to restore access.<br><br><span style='font-size:11px;color:rgba(255,255,255,0.35);'>Your training data and progress are safe.</span>";
+    if (msg) msg.innerHTML = 'Your association's subscription is currently inactive.<br><br>Please contact your association admin to restore access.<br><br><span style="font-size:11px;color:rgba(255,255,255,0.35);">Your training data and progress are safe.</span>';
     if (portalBtn) portalBtn.style.display = 'none';
     if (newBtn) newBtn.style.display = 'none';
     if (renewBtn) renewBtn.style.display = 'none';
@@ -9826,7 +9845,6 @@ async function renewalCheckStatus() {
   }
 }
 
-
 async function renewalSignOut() {
   try {
     const sb = await getSupabaseClient();
@@ -9836,49 +9854,5 @@ async function renewalSignOut() {
 }
 
 
-async function saveTrainingDaysToSupabase(days) {
-  try {
-    const sb = await getSupabaseClient();
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return;
-    await sb.from('subscriptions')
-      .update({ training_days: days })
-      .eq('user_id', user.id);
-    console.log('Training days saved to Supabase:', days);
-  } catch(e) {
-    console.warn('Could not save training days:', e.message);
-  }
-}
-
-function showNotificationPrompt() {
-  if (document.getElementById('notifPromptModal')) return;
-  const modal = document.createElement('div');
-  modal.id = 'notifPromptModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;';
-  modal.innerHTML = '<div style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:24px;max-width:340px;width:100%;text-align:center;">'
-    + '<div style="font-size:36px;margin-bottom:12px;">&#x1F514;</div>'
-    + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;margin-bottom:8px;">Enable Notifications</div>'
-    + '<div style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:20px;">Get notified when your coach assigns a new goal or a deadline is coming up.</div>'
-    + '<button onclick="enableNotifFromPrompt()" class="btn-o" style="width:100%;margin-bottom:10px;">Enable Notifications</button>'
-    + '<button onclick="dismissNotifPrompt()" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:12px;cursor:pointer;width:100%;">Not now</button>'
-    + '</div>';
-  document.body.appendChild(modal);
-}
-
-async function enableNotifFromPrompt() {
-  document.getElementById('notifPromptModal')?.remove();
-  localStorage.setItem('trainrNotifPromptDone', '1');
-  localStorage.removeItem('trainrNotifDisabled');
-  await requestNotificationPermission();
-}
-
-function dismissNotifPrompt() {
-  document.getElementById('notifPromptModal')?.remove();
-}
-
-
-</script>
-
-
-</body>
-</html>
+,
+  recovery:       { label: 'Active Recovery / Bridge', title: 'Rest & Rebuild',  weeks: '10 weeks / 3 days/week', tags: ['Active Recovery','Variety','Reset'], desc: 'Bridge between seasons. Lower intensity, higher variety. Maintain fitness, address weak points, and mentally reset.' }
