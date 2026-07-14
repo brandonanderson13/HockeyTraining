@@ -4315,7 +4315,7 @@ async function deleteGoal(id) {
     const { error } = await sb.from('goals').delete().eq('id', id);
     if (error) throw error;
     window._dashGoals = (window._dashGoals||[]).filter(g => g.id !== id);
-    loadDashboard();
+    loadDashboard('playerDashContent');
   } catch(e) { alert('Error: ' + e.message); }
 }
 
