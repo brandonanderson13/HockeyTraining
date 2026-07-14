@@ -2528,16 +2528,14 @@ async function handleBulkFile(file) {
       const fn = (row.first_name||'').trim();
       const ln = (row.last_name||'').trim();
       const em = (row.email||'').trim().toLowerCase();
-      const role = (row.role||document.getElementById('bulkRoleSelect')?.value||'player').trim().toLowerCase();
 
       if (!fn) { errors.push(`Row ${rowNum}: missing first_name`); return; }
       if (!ln) { errors.push(`Row ${rowNum}: missing last_name`); return; }
       if (!em) { errors.push(`Row ${rowNum}: missing email`); return; }
       if (!emailRegex.test(em)) { errors.push(`Row ${rowNum}: invalid email "${em}"`); return; }
       if (emailSeen.has(em)) { errors.push(`Row ${rowNum}: duplicate email "${em}"`); return; }
-      if (!['player','coach','admin'].includes(role)) { errors.push(`Row ${rowNum}: role must be player, coach, or admin`); return; }
       emailSeen.add(em);
-      valid.push({ first_name: fn, last_name: ln, email: em, role });
+      valid.push({ first_name: fn, last_name: ln, email: em, role: 'player' });
     });
 
     if (!valid.length) {
@@ -6842,6 +6840,7 @@ async function loadAdminPanel(user) {
         <div style="display:flex;gap:8px;align-items:center;">
           <button onclick="confirmBulkUpload()" id="bulkUploadBtn" style="display:none;background:var(--primary-color);border:none;color:var(--secondary-color);font-size:13px;font-weight:700;padding:9px 20px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Upload Users</button>
           <button onclick="downloadBulkTemplate()" style="font-size:11px;color:rgba(255,255,255,0.4);background:none;text-decoration:none;border:1px solid #333;padding:8px 12px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">⬇ Download Template</button>
+          <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:10px;">Bulk upload is for players only. Coaches and admins must be added manually using the Add User form.</div>
         </div>
       </div>
     </div>
