@@ -2596,17 +2596,19 @@ async function confirmBulkUpload() {
     const orgId = window._userOrgId || 'individual';
     const SUPABASE_URL = 'https://sfkdwprzwtegfkohqsdy.supabase.co';
 
-    const resp = await fetch(`${SUPABASE_URL}/functions/v1/create-users`, {
+    const sb2 = await getSupabaseClient();
+    const { data: { session: bulkSession } } = await sb2.auth.getSession();
+    const resp = await fetch('/api/bulk-create-users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNma2R3cHJ6d3RlZ2Zrb2hxc2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MjczNjgsImV4cCI6MjA5NTUwMzM2OH0.Sy1O-2OgIjy1qDJgK3Gw0obA59LKVKxryVjuCEjiDzY`
+        'Authorization': `Bearer ${bulkSession?.access_token}`
       },
       body: JSON.stringify({
         users: _bulkUsers,
         teamId,
-        orgId,
-              })
+        orgId
+      })
     });
 
     const result = await resp.json();
