@@ -1825,7 +1825,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       console.log('Access granted for:', user.email);
 
       // Check forced password reset BEFORE showing anything
-      if (userSub?.force_password_reset) {
+      // Also detect invite/signup links from URL hash (type=invite or type=signup)
+      const _hashParams = new URLSearchParams(window.location.hash.replace('#', '?').slice(1));
+      const _urlType = _hashParams.get('type');
+      const _isInviteLink = _urlType === 'invite' || _urlType === 'signup';
+      if (userSub?.force_password_reset || _isInviteLink) {
         showPasswordResetScreen();
         return;
       }
