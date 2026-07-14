@@ -6841,7 +6841,7 @@ async function loadAdminPanel(user) {
 
         <div style="display:flex;gap:8px;align-items:center;">
           <button onclick="confirmBulkUpload()" id="bulkUploadBtn" style="display:none;background:var(--primary-color);border:none;color:var(--secondary-color);font-size:13px;font-weight:700;padding:9px 20px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Upload Users</button>
-          <a href="/trainr_user_upload_template.xlsx" download style="font-size:11px;color:rgba(255,255,255,0.4);text-decoration:none;border:1px solid #333;padding:8px 12px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">⬇ Download Template</a>
+          <button onclick="downloadBulkTemplate()" style="font-size:11px;color:rgba(255,255,255,0.4);background:none;text-decoration:none;border:1px solid #333;padding:8px 12px;border-radius:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;">⬇ Download Template</button>
         </div>
       </div>
     </div>
@@ -9422,6 +9422,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
+function downloadBulkTemplate() {
+  const headers = ['first_name','last_name','email','role','team_id'];
+  const example = ['Jane','Smith','jane.smith@email.com','player',''];
+  const rows = [headers, example];
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'trainr_user_upload_template.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 // ── SETUP WIZARD ─────────────────────────────────────────────────────────
 let _wizAge = 'bantam';
