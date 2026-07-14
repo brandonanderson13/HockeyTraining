@@ -7549,6 +7549,13 @@ async function loadAccountDetails() {
     
     html += '</div>';
     container.innerHTML = html;
+
+    // Hide Manage Subscription card for players and coaches — admins only
+    const manageSubCard = document.getElementById('manageSubCard');
+    if (manageSubCard) {
+      const role = sub.role || 'player';
+      manageSubCard.style.display = (role === 'admin' || role === 'super_admin') ? '' : 'none';
+    }
     
   } catch (error) {
     container.innerHTML = '<p style="color:#f87171;">Error loading details: ' + error.message + '</p>';
