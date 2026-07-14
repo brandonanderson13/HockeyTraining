@@ -362,6 +362,14 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="sec">
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <input type="date" id="dashStart" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:12px;padding:7px 10px;border-radius:6px;font-family:monospace;">
+      <span style="color:rgba(255,255,255,0.3);font-size:12px;">to</span>
+      <input type="date" id="dashEnd" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:12px;padding:7px 10px;border-radius:6px;font-family:monospace;">
+      <button onclick="setDashCurrentMonth()" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;padding:7px 10px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">This Month</button>
+      <button onclick="setDashAllTime()" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;padding:7px 10px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">All Time</button>
+      <button onclick="applyDashFilter()" style="background:var(--primary-color);border:none;color:#fff;font-size:11px;font-weight:700;padding:7px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Apply</button>
+  </div>
   <div id="dashboardContent"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Loading...</div></div>
 </div>
 
@@ -370,15 +378,6 @@ select:focus{border-color:var(--or);outline:none;}
   <div id="homeContent">
     <div id="homeQuickLog"></div>
     <div id="homeSetupGuide" style="display:none;"></div>
-    <!-- Dashboard Date Filter -->
-    <div id="dashDateFilter" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-      <input type="date" id="dashStart" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:12px;padding:7px 10px;border-radius:6px;font-family:monospace;">
-      <span style="color:rgba(255,255,255,0.3);font-size:12px;">to</span>
-      <input type="date" id="dashEnd" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:12px;padding:7px 10px;border-radius:6px;font-family:monospace;">
-      <button onclick="setDashCurrentMonth()" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;padding:7px 10px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">This Month</button>
-      <button onclick="setDashAllTime()" style="background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.6);font-size:11px;font-weight:700;padding:7px 10px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">All Time</button>
-      <button onclick="applyDashFilter()" style="background:var(--primary-color);border:none;color:#fff;font-size:11px;font-weight:700;padding:7px 14px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Apply</button>
-    </div>
     <div id="playerDashContent"><div style="text-align:center;padding:40px;color:rgba(255,255,255,0.4);">Loading...</div></div>
   </div>
 </div>
@@ -4733,9 +4732,9 @@ function showSec(id){
   
   // Load dashboard when dashboard tab shown
   if (id === 'dashboard') {
-    window._dashGoals = null; // force fresh fetch
+    window._dashGoals = null;
     window._dashAssignments = null;
-    loadDashboard();
+    loadDashboard('dashboardContent');
   }
 
   // Load account details when Account tab is shown
@@ -9483,7 +9482,7 @@ function setDashAllTime() {
 }
 function applyDashFilter() {
   window._dashGoals = null;
-  loadDashboard('playerDashContent');
+  loadDashboard('dashboardContent');
 }
 
 // ── SETUP WIZARD ─────────────────────────────────────────────────────────
