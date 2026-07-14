@@ -5801,13 +5801,6 @@ function resetCustomization(){
 }
 
 function loadCustomSettings(){
-  // Sync phaseSelect from saved season on load
-  setTimeout(() => {
-    const seasonToPhase = {earlyoffseason:'1', lateoffseason:'2', preseason:'3', inseason_a:'4', inseason_b:'5', recovery:'6'};
-    const season = document.getElementById('cust-season')?.value || 'earlyoffseason';
-    const phaseEl = document.getElementById('phaseSelect');
-    if (phaseEl) phaseEl.value = seasonToPhase[season] || '1';
-  }, 100);
   try{
     const raw = localStorage.getItem('tigersCustomSettings');
     if(!raw) return;
@@ -5831,6 +5824,10 @@ function loadCustomSettings(){
     if(s.season) {
       const seasonSel = document.getElementById('cust-season');
       if(seasonSel) seasonSel.value = s.season;
+      // Sync phaseSelect now that season is restored
+      const _s2p = {earlyoffseason:'1', lateoffseason:'2', preseason:'3', inseason_a:'4', inseason_b:'5', recovery:'6'};
+      const phaseEl = document.getElementById('phaseSelect');
+      if (phaseEl) phaseEl.value = _s2p[s.season] || '1';
     }
     updateAgeDescription();
     updateHeader(s.name || '');
@@ -7325,8 +7322,6 @@ async function loadPlayerList(isSuperAdmin = false) {
           ${(isSuperAdmin && (!sub.organization_id || sub.organization_id === 'individual')) ? '<button onclick="editExpiration(\''+sub.id+'\',\''+sub.email+'\',\''+(sub.expires_at||'')+'\')" style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;color:#3b82f6;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Set Expires</button>' : ''}
           ${sub.email === 'brandonanderson1393@gmail.com' ? '<button onclick="editOrgLimit()" style="background:#60a5fa;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Edit Org Limit</button>' : ''}
           <button onclick="editPlayerTeam('${sub.id}','${sub.team_id||''}')" style="background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.3);color:#60a5fa;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Team</button>
-          ''
-          ''
           ${sub.email !== 'brandonanderson1393@gmail.com' ? '<button onclick="deleteUserFully(\''+sub.id+'\',\''+sub.user_id+'\',\''+sub.email+'\')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-left:2px;">Delete</button>' : ''}
         </td>
       </tr>`;
