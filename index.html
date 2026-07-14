@@ -7099,10 +7099,11 @@ async function handleAddPlayer(e) {
   
   try {
     // Create auth user
+    // Step 1: Create auth user WITHOUT sending invite yet
     const authResp = await fetch('/api/admin-create-user', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ email, skipInvite: true })
     });
     const authData = await authResp.json();
     if (authData.error) throw new Error(authData.error);
@@ -7125,12 +7126,23 @@ async function handleAddPlayer(e) {
     });
     
     if (subError) {
+      // Subscription failed — delete the auth user to avoid orphan
+      await fetch('/api/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (await sb.auth.getSession()).data.session?.access_token },
+        body: JSON.stringify({ userId: authData.userId, orgId: window._userOrgId })
+      }).catch(() => {});
       console.error('Subscription insert error:', subError);
       throw new Error('Failed to create subscription: ' + subError.message);
     }
     
-    // Send password reset email so player can set their own password
-    await sb.auth.resetPasswordForEmail(email);
+    // Send invite email now that subscription is confirmed
+    const sb2session = await sb.auth.getSession();
+    await fetch('/api/admin-create-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
     
     msg.style.color = '#4ade80';
     msg.textContent = `✓ Player added! Password reset email sent to ${email}`;
@@ -9854,8 +9866,8 @@ function handleRoleChange() {
   const teamWrapper = document.getElementById('teamSelectWrapper');
   if (roleSelect && teamWrapper) {
     const role = roleSelect.value;
-    // Only players need a team — coaches and admins don't
-    teamWrapper.style.display = (role === 'player') ? 'block' : 'none';
+    // Players and coaches need a team — admins don't
+    teamWrapper.style.display = (role === 'player' || role === 'coach') ? 'block' : 'none';
   }
 }
 
