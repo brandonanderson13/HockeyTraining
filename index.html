@@ -3794,7 +3794,9 @@ async function saveAssignment() {
     if (error) throw error;
 
     if(msg){msg.style.background='rgba(74,222,128,0.1)';msg.style.color='#4ade80';msg.textContent=`✓ Created for ${playerIds.length} player${playerIds.length!==1?'s':''}!`;msg.style.display='block';}
-    setTimeout(() => { document.getElementById('dashModal')?.remove(); loadDashboard(); }, 800);
+    document.getElementById('dashModal')?.remove();
+    window._dashGoals = null;
+    setTimeout(() => loadDashboard(), 500);
   } catch(e) {
     if(msg){msg.style.background='rgba(248,113,113,0.1)';msg.style.color='#f87171';msg.textContent='Error: '+e.message;msg.style.display='block';}
     console.error('Save assignment error:', e);
@@ -3984,13 +3986,13 @@ async function saveCombinedGoal() {
 
     if (typeof sendGoalPushNotifications === 'function') sendGoalPushNotifications(playerIds, title, due);
     document.getElementById('dashModal')?.remove();
-    loadDashboard();
-    // Show success feedback
+    window._dashGoals = null;
     const _toast = document.createElement('div');
     _toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a3a1a;border:1px solid #4ade80;color:#4ade80;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;z-index:99999;';
     _toast.textContent = '✓ Goal created!';
     document.body.appendChild(_toast);
     setTimeout(() => _toast.remove(), 2500);
+    setTimeout(() => loadDashboard(), 500);
   } catch(e) {
     if(msg){msg.style.cssText='display:block;background:rgba(248,113,113,0.1);color:#f87171;';msg.textContent='Error: '+e.message;}
   }
@@ -4217,12 +4219,14 @@ async function saveGoal() {
     if (error) throw error;
     showMsg(`✓ Goal${playerIds.length>1?' created for '+playerIds.length+' players':'created'}!`, 'green');
     if (typeof sendGoalPushNotifications === 'function') sendGoalPushNotifications(playerIds, title, due);
-    setTimeout(() => {
-      document.getElementById('dashModal')?.remove();
-      loadDashboard();
-      if (typeof renderPlayerDashboard === 'function' && window._userRole === 'player') renderPlayerDashboard();
-      if (typeof renderCoachDashboard === 'function' && window._userRole !== 'player') renderCoachDashboard();
-    }, 300);
+    document.getElementById('dashModal')?.remove();
+    window._dashGoals = null;
+    const _t2 = document.createElement('div');
+    _t2.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a3a1a;border:1px solid #4ade80;color:#4ade80;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;z-index:99999;';
+    _t2.textContent = '✓ Goal created!';
+    document.body.appendChild(_t2);
+    setTimeout(() => _t2.remove(), 2500);
+    setTimeout(() => loadDashboard(), 500);
   } catch(e) {
     showMsg('Error: ' + e.message, 'red');
     console.error(e);
