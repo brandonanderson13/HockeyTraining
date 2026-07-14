@@ -3074,10 +3074,17 @@ async function loadDashboard(targetId) {
     let statsMap = {};
 
     if (pIds.length > 0) {
+      const _dS = document.getElementById('dashStart')?.value || '';
+      const _dE = document.getElementById('dashEnd')?.value || '';
+      let _shotQ1 = sb.from('shooting_sessions').select('user_id, total_shots').in('user_id', pIds);
+      let _stkQ1 = sb.from('stickhandling_sessions').select('user_id, minutes').in('user_id', pIds);
+      let _wrkQ1 = sb.from('exercise_completions').select('user_id, created_at').eq('exercise_name', 'FULL_DAY_COMPLETED').in('user_id', pIds);
+      if (_dS) { _shotQ1=_shotQ1.gte('created_at',_dS); _stkQ1=_stkQ1.gte('created_at',_dS); _wrkQ1=_wrkQ1.gte('created_at',_dS); }
+      if (_dE) { _shotQ1=_shotQ1.lte('created_at',_dE+'T23:59:59'); _stkQ1=_stkQ1.lte('created_at',_dE+'T23:59:59'); _wrkQ1=_wrkQ1.lte('created_at',_dE+'T23:59:59'); }
       const [shots, sticks, comps, logins] = await Promise.all([
-        sb.from('shooting_sessions').select('user_id, total_shots').in('user_id', pIds),
-        sb.from('stickhandling_sessions').select('user_id, minutes').in('user_id', pIds),
-        sb.from('exercise_completions').select('user_id, created_at').eq('exercise_name', 'FULL_DAY_COMPLETED').in('user_id', pIds),
+        _shotQ1,
+        _stkQ1,
+        _wrkQ1,
         sb.from('user_last_login').select('user_id, last_sign_in_at').in('user_id', pIds)
       ]);
       (shots.data||[]).forEach(s => { if (!statsMap[s.user_id]) statsMap[s.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[s.user_id].shots+=s.total_shots||0; });
@@ -3086,11 +3093,17 @@ async function loadDashboard(targetId) {
       (logins.data||[]).forEach(l => { if (!statsMap[l.user_id]) statsMap[l.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[l.user_id].lastActive = l.last_sign_in_at ? new Date(l.last_sign_in_at) : null; });
     }
 
+    const _dS2 = document.getElementById('dashStart')?.value || '';
+    const _dE2 = document.getElementById('dashEnd')?.value || '';
+    let _sQ2 = pIds.length ? sb.from('shooting_sessions').select('user_id, total_shots, created_at').in('user_id', pIds) : null;
+    let _stQ2 = pIds.length ? sb.from('stickhandling_sessions').select('user_id, minutes, created_at').in('user_id', pIds) : null;
+    if (_sQ2 && _dS2) { _sQ2=_sQ2.gte('created_at',_dS2); _stQ2=_stQ2.gte('created_at',_dS2); }
+    if (_sQ2 && _dE2) { _sQ2=_sQ2.lte('created_at',_dE2+'T23:59:59'); _stQ2=_stQ2.lte('created_at',_dE2+'T23:59:59'); }
     const [assignRes, goalRes, shotAllRes, stickAllRes, workAllRes] = await Promise.all([
       sb.from('assignments').select('*').eq('organization_id', orgId).order('created_at', {ascending: false}),
       sb.from('goals').select('*').eq('organization_id', orgId).order('created_at', {ascending: false}),
-      pIds.length ? sb.from('shooting_sessions').select('user_id, total_shots, created_at').in('user_id', pIds) : Promise.resolve({data:[]}),
-      pIds.length ? sb.from('stickhandling_sessions').select('user_id, minutes, created_at').in('user_id', pIds) : Promise.resolve({data:[]}),
+      _sQ2 ? _sQ2 : Promise.resolve({data:[]}),
+      _stQ2 ? _stQ2 : Promise.resolve({data:[]}),
       pIds.length ? sb.from('exercise_completions').select('user_id, created_at').eq('exercise_name','FULL_DAY_COMPLETED').in('user_id', pIds) : Promise.resolve({data:[]})
     ]);
 
