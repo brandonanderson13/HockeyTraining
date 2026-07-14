@@ -6860,14 +6860,14 @@ async function loadAdminPanel(user) {
             </div>
             <div>
               <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Role</label>
-              <select id="adminRole" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
+              <select id="adminRole" onchange="handleRoleChange()" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
                 <option value="player">Player</option>
                 <option value="coach">Coach</option>
                 <option value="admin">Admin</option>
               </select>
             </div>
           </div>
-          <div id="teamSelectWrapper">
+          <div id="teamSelectWrapper" style="display:block;">
             <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Team</label>
             <select id="adminTeam" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;margin-bottom:10px;">
               <option value="">— Select a team —</option>
@@ -9392,7 +9392,7 @@ function handleRoleChange() {
   
   if (roleSelect && teamWrapper) {
     const role = roleSelect.value;
-    teamWrapper.style.display = (role === 'player' || role === 'coach') ? 'block' : 'none';
+    teamWrapper.style.display = (role === 'player') ? 'block' : 'none';
   }
 }
 
