@@ -9423,8 +9423,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 function downloadBulkTemplate() {
-  const headers = ['first_name','last_name','email','role','team_id'];
-  const example = ['Jane','Smith','jane.smith@email.com','player',''];
+  const headers = ['first_name','last_name','email'];
+  const example = ['Jane','Smith','jane.smith@email.com'];
   const rows = [headers, example];
   const csv = rows.map(r => r.join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
