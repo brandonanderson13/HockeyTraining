@@ -7102,7 +7102,7 @@ async function handleAddPlayer(e) {
     const authResp = await fetch('/api/admin-create-user', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email })
     });
     const authData = await authResp.json();
     if (authData.error) throw new Error(authData.error);
