@@ -14,16 +14,25 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { email } = req.body;
+    const { email, skipInvite } = req.body;
     if (!email) return res.status(400).json({ error: 'email required' });
 
-    // Use inviteUserByEmail so the user gets the Invite template
-    // and sets their own password via the invite link
-    const { data, error } = await supabase.auth.admin.inviteUserByEmail(email);
-    if (error) throw error;
-
-    console.log('User invited:', email, data.user.id);
-    return res.status(200).json({ success: true, userId: data.user.id });
+    if (skipInvite) {
+      // Step 1: Create user without sending email — subscription gets created first
+      const { data, error } = await supabase.auth.admin.createUser({
+        email,
+        email_confirm: true
+      });
+      if (error) throw error;
+      console.log('User created (no invite yet):', email, data.user.id);
+      return res.status(200).json({ success: true, userId: data.user.id });
+    } else {
+      // Step 2: Send invite email after subscription is confirmed
+      const { data, error } = await supabase.auth.admin.inviteUserByEmail(email);
+      if (error) throw error;
+      console.log('Invite sent:', email);
+      return res.status(200).json({ success: true, userId: data.user.id });
+    }
 
   } catch (err) {
     console.error('admin-create-user error:', err);
