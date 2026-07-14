@@ -8968,8 +8968,17 @@ async function addCoach() {
       throw new Error('This email is already registered in your organization');
     }
     
-    // Invite user — sends branded invite email
-    const { data: authData, error: authError } = await sb.auth.admin.inviteUserByEmail(email);
+    // Invite user via API (requires service role key)
+    const { data: { session } } = await sb.auth.getSession();
+    const inviteRes = await fetch('/api/invite-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session?.access_token },
+      body: JSON.stringify({ email })
+    });
+    const inviteData = await inviteRes.json();
+    if (!inviteRes.ok) throw new Error(inviteData.error || 'Invite failed');
+    const authData = { user: { id: inviteData.userId } };
+    const authError = null;
     
     if (authError) throw authError;
     
@@ -9198,8 +9207,17 @@ async function addCoach() {
       return;
     }
     
-    // Invite user — sends branded invite email
-    const { data: authData, error: authError } = await sb.auth.admin.inviteUserByEmail(email);
+    // Invite user via API (requires service role key)
+    const { data: { session } } = await sb.auth.getSession();
+    const inviteRes = await fetch('/api/invite-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session?.access_token },
+      body: JSON.stringify({ email })
+    });
+    const inviteData = await inviteRes.json();
+    if (!inviteRes.ok) throw new Error(inviteData.error || 'Invite failed');
+    const authData = { user: { id: inviteData.userId } };
+    const authError = null;
     
     if (authError) throw authError;
     
