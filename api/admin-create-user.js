@@ -1,40 +1,32 @@
-// Vercel Serverless Function - Admin Create User
-
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
+  process.env.SUPABASE_SERVICE_KEY,
+  { auth: { persistSession: false } }
 );
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password required' });
-  }
+module.exports = async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    // Create user in Supabase Auth
-    const { data, error } = await supabase.auth.admin.createUser({
-      email: email,
-      password: password,
-      email_confirm: true
-    });
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'email required' });
 
+    // Use inviteUserByEmail so the user gets the Invite template
+    // and sets their own password via the invite link
+    const { data, error } = await supabase.auth.admin.inviteUserByEmail(email);
     if (error) throw error;
 
-    res.status(200).json({ 
-      success: true,
-      userId: data.user.id,
-      email: data.user.email
-    });
-  } catch (error) {
-    console.error('Error creating user:', error);
-    res.status(500).json({ error: error.message });
+    console.log('User invited:', email, data.user.id);
+    return res.status(200).json({ success: true, userId: data.user.id });
+
+  } catch (err) {
+    console.error('admin-create-user error:', err);
+    return res.status(500).json({ error: err.message });
   }
 }
