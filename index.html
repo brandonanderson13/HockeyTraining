@@ -1874,7 +1874,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       } catch(notifErr) {}
 
       // Install banner
-      if (typeof triggerInstallBannerAfterLogin === 'function') setTimeout(triggerInstallBannerAfterLogin, 500);
+      if (typeof triggerInstallBannerAfterLogin === 'function') setTimeout(triggerInstallBannerAfterLogin, 2000);
 
       // Notification prompt for players
       if (role === 'player') {
@@ -9740,17 +9740,20 @@ function showInstallBanner() {
   let steps = '';
   if (isIOS) {
     steps = '<div style="background:#1a1a1a;border-radius:10px;padding:14px;margin-bottom:12px;">'
-      + '<div style="font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-bottom:10px;">iPhone / iPad</div>'
+      + '<div style="font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-bottom:10px;">iPhone / iPad — Safari</div>'
       + '<div style="display:grid;gap:8px;">'
       + '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.8);">'
       + '<span style="background:#2563EB;color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">1</span>'
-      + 'Tap the <strong style="color:#fff;margin:0 3px;">Share</strong> button <span style="font-size:16px;vertical-align:middle;">⬆</span> at the bottom of Safari</div>'
+      + 'Tap the <strong style="color:#fff;margin:0 3px;">&#xFE19;</strong> menu (3 dots) at the bottom right</div>'
       + '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.8);">'
       + '<span style="background:#2563EB;color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">2</span>'
-      + 'Scroll down and tap <strong style="color:#fff;margin-left:3px;">Add to Home Screen</strong></div>'
+      + 'Tap <strong style="color:#fff;margin:0 3px;">Share &#x2B1C;&#x2197;</strong></div>'
       + '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.8);">'
       + '<span style="background:#2563EB;color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">3</span>'
-      + 'Tap <strong style="color:#fff;margin-left:3px;">Add</strong> in the top right corner</div>'
+      + 'Tap <strong style="color:#fff;margin-left:3px;">Add to Home Screen</strong></div>'
+      + '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.8);">'
+      + '<span style="background:#2563EB;color:#fff;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">4</span>'
+      + 'Tap <strong style="color:#fff;margin-left:3px;">Add</strong> in the top right</div>'
       + '</div></div>'
       + '<button onclick="confirmInstalled()" style="width:100%;padding:13px;background:#2563EB;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px;letter-spacing:.01em;">Done — I added it ✓</button>'
       + '<button onclick="permanentlyDismissBanner()" style="width:100%;padding:8px;background:none;border:none;color:rgba(255,255,255,0.25);font-size:12px;cursor:pointer;">Don&#39;t show this again</button>';
@@ -9797,7 +9800,7 @@ async function triggerAndroidInstall() {
 }
 
 function triggerInstallBannerAfterLogin() {
-  setTimeout(showInstallBanner, 4000);
+  setTimeout(showInstallBanner, 1500);
 }
 
 // ── NOTIFICATION FUNCTIONS ────────────────────────────────────────────────────
