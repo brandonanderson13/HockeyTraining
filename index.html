@@ -3115,11 +3115,11 @@ async function loadDashboard(targetId) {
 function renderPlayerDashboard(totalShots, totalMins, totalWorkouts, assignments, goals, targetId) {
   const el = document.getElementById(targetId||'dashboardContent');
   // Use goals for Done/Open counts
-  const openGoalCount = (goals||[]).length - doneGoalCount;
   const doneGoalCount = (goals||[]).filter(g => {
     const isCb = !g.target_value;
     return isCb ? !!g.completed : (g._progress !== undefined ? g._progress : (g.current_value||0)) >= g.target_value;
   }).length;
+  const openGoalCount = (goals||[]).length - doneGoalCount;
 
   const statsHtml = `
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.2rem;">
@@ -7322,13 +7322,9 @@ async function loadPlayerList(isSuperAdmin = false) {
           ${(isSuperAdmin && (!sub.organization_id || sub.organization_id === 'individual')) ? '<button onclick="editExpiration(\''+sub.id+'\',\''+sub.email+'\',\''+(sub.expires_at||'')+'\')" style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;color:#3b82f6;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Set Expires</button>' : ''}
           ${sub.email === 'brandonanderson1393@gmail.com' ? '<button onclick="editOrgLimit()" style="background:#60a5fa;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Edit Org Limit</button>' : ''}
           <button onclick="editPlayerTeam('${sub.id}','${sub.team_id||''}')" style="background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.3);color:#60a5fa;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Team</button>
-          ${(sub.role === 'player' || sub.role === 'coach') ? (sub.status === 'active' ? 
-              '<button onclick="deactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
-              '<button onclick="reactivatePlayer(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
-          ${sub.role === 'admin' && isSuperAdmin ? (sub.status === 'active' ? 
-              '<button onclick="deactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#f87171;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Deactivate</button>' : 
-              '<button onclick="reactivateAdmin(\''+sub.id+'\',\''+sub.email+'\')" style="background:#4ade80;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;">Reactivate</button>') : ''}
-          ${isSuperAdmin && sub.email !== 'brandonanderson1393@gmail.com' ? '<button onclick="deleteUserFully(\''+sub.id+'\',\''+sub.user_id+'\',\''+sub.email+'\')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-left:2px;">Delete</button>' : ''}
+          ''
+          ''
+          ${sub.email !== 'brandonanderson1393@gmail.com' ? '<button onclick="deleteUserFully(\''+sub.id+'\',\''+sub.user_id+'\',\''+sub.email+'\')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-left:2px;">Delete</button>' : ''}
         </td>
       </tr>`;
       
@@ -8973,11 +8969,8 @@ async function addCoach() {
       throw new Error('This email is already registered in your organization');
     }
     
-    // Create coach account (they'll get password reset email)
-    const { data: authData, error: authError } = await sb.auth.admin.createUser({
-      email: email,
-      email_confirm: true
-    });
+    // Invite user — sends branded invite email
+    const { data: authData, error: authError } = await sb.auth.admin.inviteUserByEmail(email);
     
     if (authError) throw authError;
     
@@ -9206,11 +9199,8 @@ async function addCoach() {
       return;
     }
     
-    // Create coach account (they'll set password via email)
-    const { data: authData, error: authError } = await sb.auth.admin.createUser({
-      email: email,
-      email_confirm: true
-    });
+    // Invite user — sends branded invite email
+    const { data: authData, error: authError } = await sb.auth.admin.inviteUserByEmail(email);
     
     if (authError) throw authError;
     
