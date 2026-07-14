@@ -9392,7 +9392,7 @@ function handleRoleChange() {
   
   if (roleSelect && teamWrapper) {
     const role = roleSelect.value;
-    teamWrapper.style.display = (role === 'player') ? 'block' : 'none';
+    teamWrapper.style.display = (role === 'player' || role === 'coach') ? 'block' : 'none';
   }
 }
 
