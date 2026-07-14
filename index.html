@@ -6868,7 +6868,7 @@ async function loadAdminPanel(user) {
             </div>
           </div>
           <div id="teamSelectWrapper">
-            <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Team <span id="teamRequiredMark" style="color:#f87171;">*</span></label>
+            <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Team</label>
             <select id="adminTeam" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;margin-bottom:10px;">
               <option value="">— Select a team —</option>
             </select>
@@ -7119,8 +7119,9 @@ async function handleAddPlayer(e) {
       status: 'active',
       role: role,
       subscription_type: 'association',
-      team_id: document.getElementById('adminTeam')?.value || null,
-      expires_at: window._adminSubscription?.expires_at || null
+      team_id: role === 'player' ? (document.getElementById('adminTeam')?.value || null) : null,
+      expires_at: window._adminSubscription?.expires_at || null,
+      force_password_reset: true
     });
     
     if (subError) {
@@ -9853,7 +9854,8 @@ function handleRoleChange() {
   const teamWrapper = document.getElementById('teamSelectWrapper');
   if (roleSelect && teamWrapper) {
     const role = roleSelect.value;
-    teamWrapper.style.display = (role === 'player' || role === 'coach') ? 'block' : 'none';
+    // Only players need a team — coaches and admins don't
+    teamWrapper.style.display = (role === 'player') ? 'block' : 'none';
   }
 }
 
