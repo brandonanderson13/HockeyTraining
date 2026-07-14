@@ -339,22 +339,23 @@ select:focus{border-color:var(--or);outline:none;}
 
 <!-- v2-nav-fix PASSWORD RESET SCREEN -->
 <div id="passwordResetScreen" style="display:none;position:fixed;inset:0;background:#0d0d0d;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;">
-  <div style="background:#141414;border:1px solid #333;border-radius:14px;padding:32px;width:100%;max-width:400px;">
-    <div style="text-align:center;margin-bottom:24px;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;margin-bottom:6px;">Set Your Password</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.5;">Your account was set up with a temporary password.<br>Please choose a new password to continue.</div>
+  <div style="background:#141414;border:1px solid #2a2a2a;border-radius:14px;padding:36px 32px;width:100%;max-width:400px;">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="width:48px;height:48px;border-radius:50%;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);margin:0 auto 16px;text-align:center;line-height:48px;font-size:22px;">🔑</div>
+      <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:-.01em;">Activate your account</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.6;">Choose a password to secure your TRAINR account.</div>
     </div>
-    <div style="display:grid;gap:12px;">
+    <div style="display:grid;gap:14px;">
       <div>
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">New Password</label>
-        <input type="password" id="newPasswordInput" placeholder="At least 8 characters" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;" onkeydown="if(event.key==='Enter')document.getElementById('confirmPasswordInput').focus()">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">New Password</label>
+        <input type="password" id="newPasswordInput" placeholder="At least 8 characters" style="width:100%;background:#0d0d0d;border:1px solid #2a2a2a;color:#fff;font-size:14px;padding:11px 12px;border-radius:7px;box-sizing:border-box;" onkeydown="if(event.key==='Enter')document.getElementById('confirmPasswordInput').focus()">
       </div>
       <div>
-        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Confirm Password</label>
-        <input type="password" id="confirmPasswordInput" placeholder="Repeat your password" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;" onkeydown="if(event.key==='Enter')submitPasswordReset()">
+        <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;display:block;">Confirm Password</label>
+        <input type="password" id="confirmPasswordInput" placeholder="Repeat your password" style="width:100%;background:#0d0d0d;border:1px solid #2a2a2a;color:#fff;font-size:14px;padding:11px 12px;border-radius:7px;box-sizing:border-box;" onkeydown="if(event.key==='Enter')submitPasswordReset()">
       </div>
       <div id="passwordResetMsg" style="display:none;font-size:12px;padding:8px 10px;border-radius:6px;"></div>
-      <button onclick="submitPasswordReset()" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:14px;font-weight:700;padding:12px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;">Set Password & Continue</button>
+      <button onclick="submitPasswordReset()" style="background:#2563EB;border:none;color:#fff;font-size:15px;font-weight:600;padding:13px;border-radius:7px;cursor:pointer;letter-spacing:.01em;margin-top:4px;">Activate account</button>
     </div>
   </div>
 </div>
@@ -2576,8 +2577,6 @@ async function confirmBulkUpload() {
     alert('Please select a team before uploading users.');
     return;
   }
-  const tempPassword = document.getElementById('bulkTempPassword')?.value.trim();
-
   if (!_bulkUsers.length) return;
 
   const showMsg = (text, color) => {
@@ -2587,9 +2586,7 @@ async function confirmBulkUpload() {
     msg.style.display = 'block';
   };
 
-  if (!tempPassword || tempPassword.length < 8) {
-    showMsg('Temp password must be at least 8 characters.', 'red'); return;
-  }
+
 
   btn.disabled = true;
   btn.textContent = 'Uploading...';
@@ -2609,8 +2606,7 @@ async function confirmBulkUpload() {
         users: _bulkUsers,
         teamId,
         orgId,
-        tempPassword
-      })
+              })
     });
 
     const result = await resp.json();
@@ -6805,10 +6801,7 @@ async function loadAdminPanel(user) {
               <option value="">Loading teams...</option>
             </select>
           </div>
-          <div>
-            <label style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;display:block;">Temporary Password <span style="color:rgba(255,255,255,0.25);font-size:9px;">(players must reset on login)</span></label>
-            <input id="bulkTempPassword" type="text" placeholder="e.g. Trainr2026!" value="Trainr2026!" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;font-family:monospace;">
-          </div>
+          
         </div>
 
         <div id="bulkDropZone" onclick="document.getElementById('bulkFileInput').click()"
@@ -6854,10 +6847,7 @@ async function loadAdminPanel(user) {
             <input type="email" id="adminEmail" required style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <div>
-              <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Temporary Password</label>
-              <input type="text" id="adminPassword" value="Trainr2026!" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
-            </div>
+            
             <div>
               <label style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;display:block;">Role</label>
               <select id="adminRole" onchange="handleRoleChange()" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:13px;padding:8px 10px;border-radius:6px;">
@@ -7054,7 +7044,6 @@ async function handleAddPlayer(e) {
   const firstName = document.getElementById('adminFirstName').value.trim();
   const lastName = document.getElementById('adminLastName').value.trim();
   const email = document.getElementById('adminEmail').value.trim();
-  const password = document.getElementById('adminPassword').value;
   const role = document.getElementById('adminRole').value;
   const msg = document.getElementById('adminAddMessage');
   
