@@ -8294,7 +8294,12 @@ async function deleteUserFully(subId, userId, email) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Delete failed');
-    alert(`✓ ${email} permanently deleted`);
+    // Show toast and refresh list
+    const _dt = document.createElement('div');
+    _dt.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid #4ade80;color:#4ade80;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;z-index:99999;';
+    _dt.textContent = `✓ ${email} removed`;
+    document.body.appendChild(_dt);
+    setTimeout(() => _dt.remove(), 2500);
     loadPlayerList(window._isSuperAdmin);
   } catch(e) { alert('Error: ' + e.message); }
 }
