@@ -3961,7 +3961,6 @@ async function saveCombinedGoal() {
       metric: title,
       notes: (desc || '') + (link ? '\n\nLink: ' + link : ''),
       link_url: link || null,
-      type: type,
       tracked_metric: trackedMetric,
       target_value: targetValue,
       current_value: 0,
@@ -8221,7 +8220,7 @@ async function deactivatePlayer(subId, email) {
 
 async function deleteUserFully(subId, userId, email) {
   if (email === 'brandonanderson1393@gmail.com') { alert('Cannot delete super admin'); return; }
-  if (!confirm(`⚠️ Permanently delete ${email}?\n\nThis will:\n• Remove them from Supabase Auth\n• Delete their subscription\n• Remove their assignments and goals\n\nThis CANNOT be undone.`)) return;
+  if (!confirm(`⚠️ Permanently delete ${email}?\n\nThis will:\n• Remove their account and login access\n• Delete their subscription\n• Remove their assignments and goals\n\nThis CANNOT be undone.`)) return;
   try {
     const sb = await getSupabaseClient();
     const { data: { session } } = await sb.auth.getSession();
