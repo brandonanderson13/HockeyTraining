@@ -5803,7 +5803,7 @@ function resetCustomization(){
 function loadCustomSettings(){
   // Sync phaseSelect from saved season on load
   setTimeout(() => {
-    const seasonToPhase = {earlyoffseason:'1', lateoffseason:'2', preseason:'3', inseason_a:'4', inseason_b:'5'};
+    const seasonToPhase = {earlyoffseason:'1', lateoffseason:'2', preseason:'3', inseason_a:'4', inseason_b:'5', recovery:'6'};
     const season = document.getElementById('cust-season')?.value || 'earlyoffseason';
     const phaseEl = document.getElementById('phaseSelect');
     if (phaseEl) phaseEl.value = seasonToPhase[season] || '1';
@@ -5827,6 +5827,10 @@ function loadCustomSettings(){
     if(s.age) {
       const ageSel = document.getElementById('cust-age');
       if(ageSel) ageSel.value = s.age;
+    }
+    if(s.season) {
+      const seasonSel = document.getElementById('cust-season');
+      if(seasonSel) seasonSel.value = s.season;
     }
     updateAgeDescription();
     updateHeader(s.name || '');
