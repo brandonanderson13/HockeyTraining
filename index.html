@@ -1682,6 +1682,21 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     window._supabaseClient = supabase;
     
     try {
+      // Handle invite/recovery token in URL hash BEFORE checking session
+      const _hash = window.location.hash;
+      if (_hash && _hash.includes('access_token')) {
+        const _hp = new URLSearchParams(_hash.replace('#', ''));
+        const _at = _hp.get('access_token');
+        const _rt = _hp.get('refresh_token');
+        const _type = _hp.get('type');
+        if (_at && _rt) {
+          await supabase.auth.setSession({ access_token: _at, refresh_token: _rt });
+          window._forcePasswordReset = (_type === 'invite' || _type === 'signup' || _type === 'recovery');
+          // Clean URL
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      }
+
       // Check if user is logged in
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       
@@ -1828,7 +1843,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       // Also detect invite/signup links from URL hash (type=invite or type=signup)
       const _hashParams = new URLSearchParams(window.location.hash.replace('#', '?').slice(1));
       const _urlType = _hashParams.get('type');
-      const _isInviteLink = _urlType === 'invite' || _urlType === 'signup';
+      const _isInviteLink = _urlType === 'invite' || _urlType === 'signup' || window._forcePasswordReset;
       if (userSub?.force_password_reset || _isInviteLink) {
         showPasswordResetScreen();
         return;
