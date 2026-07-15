@@ -6720,6 +6720,14 @@ function renderWeeks(){
       const firstXl = dex.querySelector('.xl[data-ex-key]');
       if(firstXl) updateDayCompletionBadge(firstXl);
     });
+    // Collapse all weeks except current after render
+    const curWk = window._currentWeekNum || 1;
+    c.querySelectorAll('.swk').forEach(wdiv => {
+      const wnum = wdiv.querySelector('.wnum');
+      if (!wnum) return;
+      const num = parseInt(wnum.textContent.replace('WEEK','').trim());
+      wdiv.classList.toggle('collapsed', num !== curWk);
+    });
   }, 10);
   // Load completions from Supabase to sync across devices
   setTimeout(() => {
