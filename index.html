@@ -4666,70 +4666,80 @@ async function deleteAssignment(id) {
 function viewPlayer(playerId, playerName) {
   const player = _dashPlayers.find(p=>p.user_id===playerId);
   const stats = (window._dashStatsMap||{})[playerId] || {shots:0,mins:0,workouts:0};
-  const assignments = (window._dashAssignments||[]).filter(a=>a.player_id===playerId);
   const goals = (window._dashGoals||[]).filter(g=>g.player_id===playerId);
+  const now = new Date();
 
   const existing = document.getElementById('dashPlayerModal');
   if (existing) existing.remove();
 
-  const assignRows = assignments.map(a => {
-    const sc = a.status==='completed'?'#4ade80':a.status==='in_progress'?'#fbbf24':'rgba(255,255,255,0.4)';
-    const due = a.due_date ? new Date(a.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1a1a1a;gap:10px;">
-      <div style="flex:1;min-width:0;">
-        <span style="font-size:12px;color:rgba(255,255,255,0.8);">${a.title}</span>
-        ${a.type?`<span style="font-size:10px;color:rgba(255,255,255,0.3);margin-left:6px;">${a.type}</span>`:''}
-        ${due?`<span style="font-size:10px;color:rgba(255,255,255,0.3);margin-left:6px;">· ${due}</span>`:''}
-      </div>
-      <select onchange="updateAssignmentStatus('${a.id}',this.value)" style="background:#1a1a1a;border:1px solid #333;color:${sc};font-size:11px;padding:4px 6px;border-radius:4px;flex-shrink:0;">
-        <option value="assigned" ${a.status==='assigned'?'selected':''}>Assigned</option>
-        <option value="in_progress" ${a.status==='in_progress'?'selected':''}>In Progress</option>
-        <option value="completed" ${a.status==='completed'?'selected':''}>Completed ✓</option>
-      </select>
-    </div>`;
-  }).join('') || '<div style="font-size:12px;color:rgba(255,255,255,0.3);padding:8px 0;">No assignments</div>';
-
   const goalRows = goals.map(g => {
-    const pct = g.target_value ? Math.min(100,Math.round((g.current_value||0)/g.target_value*100)) : 0;
+    const isTracked = !!g.tracked_metric;
+    const isCheckbox = !g.target_value;
+    const progress = g._progress !== undefined ? g._progress : (g.current_value||0);
+    const pct = !isCheckbox && g.target_value ? Math.min(100,Math.round(progress/g.target_value*100)) : 0;
     const bc = pct>=100?'#4ade80':pct>=50?'var(--primary-color)':'#60a5fa';
-    return `<div style="margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
-        <span style="color:rgba(255,255,255,0.8);font-weight:600;">${g.metric}</span>
-        <span style="color:rgba(255,255,255,0.4);">${g.current_value||0} / ${g.target_value} · ${pct}%</span>
+    const isDone = isCheckbox ? g.completed : progress >= (g.target_value||0);
+    const isOverdue = !isDone && g.due_date && new Date(g.due_date+'T23:59:59') < now;
+    const due = g.due_date ? new Date(g.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+    const metricLabels = {shots:'pucks',stickhandling:'mins',workouts:'days'};
+    return `<div style="padding:10px 0;border-bottom:1px solid #1a1a1a;">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:${isTracked?'6':'0'}px;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:13px;color:${isDone?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.85)'};font-weight:600;${isDone?'text-decoration:line-through;':''}">${g.metric}</span>
+            ${isTracked?'<span style="font-size:9px;font-weight:700;color:#60a5fa;background:rgba(96,165,250,0.1);padding:1px 5px;border-radius:3px;text-transform:uppercase;">Auto</span>':''}
+            ${isDone?'<span style="font-size:9px;font-weight:700;color:#4ade80;background:rgba(74,222,128,0.1);padding:1px 5px;border-radius:3px;text-transform:uppercase;">Done</span>':''}
+            ${isOverdue?'<span style="font-size:9px;font-weight:700;color:#f87171;background:rgba(248,113,113,0.1);padding:1px 5px;border-radius:3px;text-transform:uppercase;">Overdue</span>':''}
+          </div>
+          <div style="display:flex;gap:8px;margin-top:3px;flex-wrap:wrap;">
+            ${isTracked?`<span style="font-size:11px;color:rgba(255,255,255,0.4);">${progress} / ${g.target_value} ${metricLabels[g.tracked_metric]||''} · ${pct}%</span>`:''}
+            ${due?`<span style="font-size:11px;color:${isOverdue?'#f87171':'rgba(255,255,255,0.3)'};">Due ${due}</span>`:''}
+            ${g.notes?`<span style="font-size:11px;color:rgba(255,255,255,0.3);">${g.notes}</span>`:''}
+          </div>
+        </div>
+        <div onclick="toggleGoalComplete('${g.id}',${isDone})"
+          style="width:20px;height:20px;border-radius:5px;border:2px solid ${isDone?'#4ade80':'#444'};background:${isDone?'#4ade80':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;margin-left:10px;">
+          ${isDone?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+        </div>
       </div>
-      <div style="background:#1a1a1a;border-radius:4px;height:6px;"><div style="height:6px;width:${pct}%;background:${bc};border-radius:4px;"></div></div>
-      ${g.notes?`<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px;">${g.notes}</div>`:''}
+      ${isTracked&&g.target_value?`<div style="background:#1a1a1a;border-radius:4px;height:5px;margin-top:6px;"><div style="height:5px;width:${pct}%;background:${bc};border-radius:4px;"></div></div>`:''}
     </div>`;
-  }).join('') || '<div style="font-size:12px;color:rgba(255,255,255,0.3);padding:8px 0;">No goals</div>';
+  }).join('') || '<div style="font-size:12px;color:rgba(255,255,255,0.3);padding:12px 0;text-align:center;">No goals yet</div>';
+
+  const openCount = goals.filter(g=>{const isCb=!g.target_value;return isCb?!g.completed:(g._progress!==undefined?g._progress:(g.current_value||0))<g.target_value;}).length;
+  const doneCount = goals.length - openCount;
 
   const modal = document.createElement('div');
   modal.id = 'dashPlayerModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
   modal.innerHTML = `
-    <div style="background:#141414;border:1px solid #333;border-radius:12px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;">${playerName}</div>
-        <button onclick="document.getElementById('dashPlayerModal').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;">✕</button>
+    <div style="background:#141414;border:1px solid #2a2a2a;border-radius:14px;width:100%;max-width:480px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;">
+      <!-- Header -->
+      <div style="padding:18px 20px 14px;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:start;flex-shrink:0;">
+        <div>
+          <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:4px;">${playerName}</div>
+          <div style="display:flex;gap:12px;">
+            <span style="font-size:12px;color:#fb923c;">🎯 ${stats.shots} shots</span>
+            <span style="font-size:12px;color:#a78bfa;">🏒 ${stats.mins} stick mins</span>
+            <span style="font-size:12px;color:#fbbf24;">💪 ${stats.workouts} workouts</span>
+          </div>
+        </div>
+        <button onclick="document.getElementById('dashPlayerModal').remove()" style="background:rgba(255,255,255,0.07);border:none;color:rgba(255,255,255,0.5);width:30px;height:30px;border-radius:50%;font-size:18px;cursor:pointer;line-height:30px;text-align:center;flex-shrink:0;">×</button>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px;">
-        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;">${stats.shots}</div><div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Shots</div></div>
-        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;">${stats.mins}</div><div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Stick Min</div></div>
-        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:10px;text-align:center;"><div style="font-size:20px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;">${stats.workouts}</div><div style="font-size:9px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;">Workouts</div></div>
-      </div>
-      <div style="margin-bottom:16px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:8px;">Goals</div>
+      <!-- Goals -->
+      <div style="padding:16px 20px;overflow-y:auto;flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;">Goals
+            <span style="font-size:11px;color:#60a5fa;background:rgba(96,165,250,0.1);padding:1px 7px;border-radius:10px;margin-left:6px;">${openCount} open</span>
+            <span style="font-size:11px;color:#4ade80;background:rgba(74,222,128,0.1);padding:1px 7px;border-radius:10px;margin-left:4px;">${doneCount} done</span>
+          </div>
+          <button onclick="openCombinedGoalModal('${playerId}','${(playerName||'').replace(/'/g,"\'")}');document.getElementById('dashPlayerModal').remove();" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
+        </div>
         ${goalRows}
-      </div>
-      <div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:rgba(255,255,255,0.4);margin-bottom:8px;">Assignments</div>
-        ${assignRows}
-      </div>
-      <div style="display:flex;gap:8px;margin-top:16px;">
-        <button onclick="document.getElementById('dashPlayerModal').remove();openCombinedGoalModal('${playerId}','${playerName}')" style="flex:1;background:var(--primary-color);border:none;color:var(--secondary-color);font-size:12px;font-weight:700;padding:8px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
       </div>
     </div>`;
   document.body.appendChild(modal);
-  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
 
 
