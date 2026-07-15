@@ -5906,6 +5906,10 @@ function applyCustomization(){
   
   try{ 
     localStorage.setItem('tigersCustomSettings', JSON.stringify(settings));
+    // Set program start date on first apply if not already set
+    if (!localStorage.getItem('tigersProgramStart')) {
+      localStorage.setItem('tigersProgramStart', new Date().toISOString().split('T')[0]);
+    }
     console.log('✓ Saved to localStorage');
   } catch(e) {
     console.error('localStorage save failed:', e);
@@ -6328,7 +6332,7 @@ function renderWeeks(){
       const wdiv=document.createElement('div');
       wdiv.className='swk';
       const isCurrentWk = (wk.num === (window._currentWeekNum || 1));
-      if (!isCurrentWk) wdiv.classList.add('collapsed');
+      wdiv.classList.toggle('collapsed', !isCurrentWk);
       wdiv.innerHTML=`<div class="whd" onclick="toggleWeek(this.parentElement)"><div class="wnum">WEEK ${wk.num}</div><div class="wfoc">${wk.focus || ''}</div><div class="wchev">▼</div></div>`;
       
       const wbody=document.createElement('div');
@@ -6396,7 +6400,7 @@ function renderWeeks(){
   p.weeks.forEach(wk=>{
     const wdiv=document.createElement('div');wdiv.className='swk';
     const isCurrentWeek = (wk.num === (window._currentWeekNum || 1));
-    if (!isCurrentWeek) wdiv.classList.add('collapsed');
+    wdiv.classList.toggle('collapsed', !isCurrentWeek);
     wdiv.innerHTML=`<div class="whd" onclick="toggleWeek(this.parentElement)"><div class="wnum">WEEK ${wk.num}</div><div class="wfoc">${wk.focus}</div><div class="wchev">▼</div></div>`;
     const wbody=document.createElement('div');wbody.className='swb';wdiv.appendChild(wbody);
 
