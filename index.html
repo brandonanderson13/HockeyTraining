@@ -3476,8 +3476,36 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
   if (!players.length) {
     rosterHtml = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.3);font-size:13px;">No players on this team yet.</div>';
   } else {
-    rosterHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:1.5rem;">';
+    // Group players by team
+    const teamGroups = {};
     players.forEach(p => {
+      const tId = p.team_id || 'unassigned';
+      const tName = (window._dashAllTeams && window._dashAllTeams.find(t=>t.id===tId)?.team_name) || (tId==='unassigned'?'Unassigned':'Team');
+      if (!teamGroups[tId]) teamGroups[tId] = {name:tName, players:[]};
+      teamGroups[tId].players.push(p);
+    });
+    const teamIds = Object.keys(teamGroups);
+    const useTeamGroups = teamIds.length > 1;
+
+    if (useTeamGroups) {
+      rosterHtml = '<div style="margin-bottom:1.5rem;display:grid;gap:10px;">';
+      teamIds.forEach(tId => {
+        const tg = teamGroups[tId];
+        const tOpen = tg.players.reduce((n,p)=>n+(goals.filter(g=>g.player_id===p.user_id).filter(g=>{const isCb=!g.target_value;return isCb?!g.completed:(g._progress!==undefined?g._progress:(g.current_value||0))<g.target_value;}).length),0);
+        const tOverdue = tg.players.reduce((n,p)=>n+(goals.filter(g=>g.player_id===p.user_id).filter(g=>{if(!g.due_date)return false;const isCb=!g.target_value;const isDone=isCb?g.completed:(g._progress||g.current_value||0)>=(g.target_value||0);return !isDone&&new Date(g.due_date+'T23:59:59')<now;}).length),0);
+        const groupId = 'tg_'+tId.replace(/-/g,'');
+        rosterHtml += `<div style="background:#111;border:1px solid ${tOverdue?'rgba(248,113,113,0.25)':'#222'};border-radius:10px;overflow:hidden;">`;
+        rosterHtml += `<button onclick="const b=document.getElementById('${groupId}');b.style.display=b.style.display==='none'?'grid':'none';this.querySelector('.tg-chev').style.transform=b.style.display==='none'?'rotate(-90deg)':'rotate(0deg)';"
+          style="width:100%;background:none;border:none;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <span class='tg-chev' style="color:rgba(255,255,255,0.4);font-size:13px;transition:transform .2s;">▼</span>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;flex:1;text-align:left;">${tg.name}</span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.35);">${tg.players.length} player${tg.players.length!==1?'s':''}</span>
+          ${tOpen?`<span style="font-size:10px;font-weight:700;color:#60a5fa;background:rgba(96,165,250,0.1);padding:2px 8px;border-radius:10px;">${tOpen} open</span>`:''}
+          ${tOverdue?`<span style="font-size:10px;font-weight:700;color:#f87171;background:rgba(248,113,113,0.1);padding:2px 8px;border-radius:10px;">⚠ ${tOverdue} overdue</span>`:''}
+        </button>`;
+        rosterHtml += `<div id="${groupId}" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;padding:0 12px 12px;">`;
+        tg.players.forEach(p => {
+
       const s = statsMap[p.user_id] || {shots:0,mins:0,workouts:0,lastActive:null};
       const name = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
       const last = s.lastActive ? s.lastActive.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'Never';
@@ -3570,8 +3598,35 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
           <button onclick="viewPlayer('${p.user_id}','${name.replace(/'/g,"\'")}' )" style="width:100%;background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;padding:6px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">View Full Profile</button>
         </div>
       </div>`;
-    });
-    rosterHtml += '</div>';
+        });
+        rosterHtml += '</div></div>';
+      });
+      rosterHtml += '</div>';
+    } else {
+      // Single team — flat grid
+      rosterHtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:1.5rem;">';
+      players.forEach(p => {
+        const s = statsMap[p.user_id] || {shots:0,mins:0,workouts:0,lastActive:null};
+        const name = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email;
+        const last = s.lastActive ? s.lastActive.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'Never';
+        const pGoals = goals.filter(g=>g.player_id===p.user_id);
+        const pOpen = pGoals.filter(g=>{const isCb=!g.target_value;return isCb?!g.completed:(g._progress!==undefined?g._progress:(g.current_value||0))<g.target_value;});
+        const pDone = pGoals.filter(g=>{const isCb=!g.target_value;return isCb?!!g.completed:(g._progress!==undefined?g._progress:(g.current_value||0))>=(g.target_value||0);});
+        const pOverdue = pOpen.filter(g=>g.due_date && new Date(g.due_date+'T23:59:59') < now);
+        const cardId = 'pcard_' + p.user_id.replace(/-/g,'');
+        function goalRow2(g) { return goalRow(g); }
+        const openGoalRows = pOpen.map(goalRow).join('');
+        const doneGoalRows = pDone.map(goalRow).join('');
+        const cardId2 = 'pcard_' + p.user_id.replace(/-/g,'');
+        rosterHtml += `<div style="background:#0d0d0d;border:1px solid ${pOverdue.length?'rgba(248,113,113,0.3)':'#222'};border-radius:10px;overflow:hidden;">`;
+        rosterHtml += `<div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:start;"><div><div style="font-weight:700;font-size:14px;color:#fff;margin-bottom:2px;">${name}${pOverdue.length?`<span style="font-size:10px;font-weight:700;color:#f87171;background:rgba(248,113,113,0.1);padding:1px 6px;border-radius:3px;margin-left:6px;">⚠ ${pOverdue.length} Overdue</span>`:''}</div><div style="font-size:11px;color:rgba(255,255,255,0.3);">Last login: ${last}</div></div><button onclick="openCombinedGoalModal('${p.user_id}','${name.replace(/'/g,"\'")}');" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">+ Goal</button></div>`;
+        rosterHtml += `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #1a1a1a;"><div style="padding:8px;text-align:center;border-right:1px solid #1a1a1a;"><div style="font-size:15px;font-weight:800;color:#fb923c;font-family:'Barlow Condensed',sans-serif;">${s.shots}</div><div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Shots</div></div><div style="padding:8px;text-align:center;border-right:1px solid #1a1a1a;"><div style="font-size:15px;font-weight:800;color:#a78bfa;font-family:'Barlow Condensed',sans-serif;">${s.mins}</div><div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Stick Min</div></div><div style="padding:8px;text-align:center;"><div style="font-size:15px;font-weight:800;color:#fbbf24;font-family:'Barlow Condensed',sans-serif;">${s.workouts}</div><div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:.04em;">Workouts</div></div></div>`;
+        rosterHtml += pGoals.length ? `<div style="border-top:1px solid #1a1a1a;">${pOpen.length?`<div><button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.chevron').style.transform=this.nextElementSibling.style.display==='none'?'rotate(0deg)':'rotate(180deg)';" style="width:100%;background:none;border:none;border-bottom:1px solid #1a1a1a;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;"><span style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:.04em;">Open <span style="background:rgba(96,165,250,0.15);color:#60a5fa;border-radius:10px;padding:1px 7px;">${pOpen.length}</span></span><span class="chevron" style="color:rgba(255,255,255,0.3);font-size:12px;transition:transform .2s;">▼</span></button><div style="display:none;padding:4px 14px 8px;">${openGoalRows}</div></div>`:''} ${pDone.length?`<div><button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.chevron').style.transform=this.nextElementSibling.style.display==='none'?'rotate(0deg)':'rotate(180deg)';" style="width:100%;background:none;border:none;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;"><span style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;">Completed <span style="background:rgba(74,222,128,0.1);color:#4ade80;border-radius:10px;padding:1px 7px;">${pDone.length}</span></span><span class="chevron" style="color:rgba(255,255,255,0.3);font-size:12px;transition:transform .2s;">▼</span></button><div style="display:none;padding:4px 14px 8px;">${doneGoalRows}</div></div>`:''}` : `<div style="border-top:1px solid #1a1a1a;padding:10px 14px;font-size:11px;color:rgba(255,255,255,0.25);text-align:center;">No goals yet</div>`;
+        rosterHtml += `<div style="padding:8px 14px;border-top:1px solid #1a1a1a;"><button onclick="viewPlayer('${p.user_id}','${name.replace(/'/g,"\'")}')" style="width:100%;background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.5);font-size:11px;font-weight:700;padding:6px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">View Full Profile</button></div>`;
+        rosterHtml += '</div>';
+      });
+      rosterHtml += '</div>';
+    }
   }
 
   // ── Goal Tabs ───────────────────────────────────────────────────────────
@@ -3591,8 +3646,9 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
     {key:'overdue', label:'Overdue', count:goals.filter(g=>{const isCb=!g.target_value;const isDone=isCb?g.completed:(g._progress||g.current_value||0)>=(g.target_value||0);return !isDone&&g.due_date&&new Date(g.due_date+'T23:59:59')<now;}).length},
   ];
 
+  const _tId = targetId || 'dashboardContent';
   const tabsHtml = `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-    ${tabList.map(t=>`<button onclick="window._coachGoalTab='${t.key}';loadDashboard('${targetId||'dashboardContent'}')" 
+    ${tabList.map(t=>`<button onclick="event.preventDefault();window._coachGoalTab='${t.key}';filterCoachGoals('${t.key}','${_tId}')" 
       style="background:${_activeGoalTab===t.key?'var(--primary-color)':'#1a1a1a'};border:1px solid ${_activeGoalTab===t.key?'var(--primary-color)':'#333'};color:${_activeGoalTab===t.key?'var(--secondary-color)':'rgba(255,255,255,0.5)'};font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">
       ${t.label} <span style="opacity:.7;">(${t.count})</span>
     </button>`).join('')}
@@ -3657,7 +3713,10 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
     goalsHtml = filteredGoals.map(g => coachItemRow({...g, _type:'goal'})).join('');
   }
 
-  const goalsSectionHtml = `<div style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:14px 16px;">
+  // Cache args for in-place filtering
+  window._lastDashArgs = {players, statsMap, teamName, assignments, goals, targetId};
+
+  const goalsSectionHtml = `<div id="coachGoalSection_${targetId||'dashboardContent'}" style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:14px 16px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;">Goals</div>
       <button onclick="openCombinedGoalModal(null,null)" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
@@ -9598,6 +9657,78 @@ function setDashAllTime() {
 function applyDashFilter() {
   window._dashGoals = null;
   loadDashboard('dashboardContent');
+}
+
+function filterCoachGoals(tab, targetId) {
+  // Re-render just the goals section without scrolling
+  const goalSection = document.getElementById('coachGoalSection_' + (targetId||'dashboardContent'));
+  if (!goalSection || !window._lastDashArgs) return;
+  const {players, statsMap, teamName, assignments, goals} = window._lastDashArgs;
+  const now = new Date();
+  const playerMap = {};
+  players.forEach(p => { playerMap[p.user_id] = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email; });
+
+  function tabGoals(t) {
+    if (t==='open') return goals.filter(g=>{const isCb=!g.target_value;return isCb?!g.completed:(g._progress!==undefined?g._progress:(g.current_value||0))<g.target_value;});
+    if (t==='completed') return goals.filter(g=>{const isCb=!g.target_value;return isCb?!!g.completed:(g._progress!==undefined?g._progress:(g.current_value||0))>=(g.target_value||0);});
+    if (t==='overdue') return goals.filter(g=>{const isCb=!g.target_value;const isDone=isCb?g.completed:(g._progress||g.current_value||0)>=(g.target_value||0);return !isDone&&g.due_date&&new Date(g.due_date+'T23:59:59')<now;});
+    return goals;
+  }
+
+  const tabList = [
+    {key:'all',label:'All',count:goals.length},
+    {key:'open',label:'Open',count:goals.filter(g=>{const isCb=!g.target_value;return isCb?!g.completed:(g._progress!==undefined?g._progress:(g.current_value||0))<g.target_value;}).length},
+    {key:'completed',label:'Completed',count:goals.filter(g=>{const isCb=!g.target_value;return isCb?!!g.completed:(g._progress!==undefined?g._progress:(g.current_value||0))>=(g.target_value||0);}).length},
+    {key:'overdue',label:'Overdue',count:goals.filter(g=>{const isCb=!g.target_value;const isDone=isCb?g.completed:(g._progress||g.current_value||0)>=(g.target_value||0);return !isDone&&g.due_date&&new Date(g.due_date+'T23:59:59')<now;}).length},
+  ];
+
+  const metricLabels = {shots:'pucks',stickhandling:'mins',workouts:'days'};
+  const filteredGoals = tabGoals(tab);
+
+  const tabsHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">'
+    + tabList.map(t => '<button onclick="event.preventDefault();window._coachGoalTab=\'' + t.key + '\';filterCoachGoals(\'' + t.key + '\',\'' + (targetId||'dashboardContent') + '\')"'
+      + ' style="background:' + (t.key===tab?'var(--primary-color)':'#1a1a1a') + ';border:1px solid ' + (t.key===tab?'var(--primary-color)':'#333') + ';color:' + (t.key===tab?'var(--secondary-color)':'rgba(255,255,255,0.5)') + ';font-size:11px;font-weight:700;padding:6px 12px;border-radius:6px;cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;text-transform:uppercase;letter-spacing:.04em;">'
+      + t.label + ' <span style="opacity:.7;">(' + t.count + ')</span></button>').join('')
+    + '</div>';
+
+  let goalsHtml = '';
+  if (!filteredGoals.length) {
+    goalsHtml = `<div style="text-align:center;padding:24px;color:rgba(255,255,255,0.3);font-size:13px;">No ${tab==='all'?'':tab} goals.</div>`;
+  } else {
+    goalsHtml = filteredGoals.map(g => {
+      const isTracked = !!g.tracked_metric;
+      const isCheckbox = !g.target_value;
+      const progress = g._progress !== undefined ? g._progress : (g.current_value||0);
+      const pct = !isCheckbox && g.target_value ? Math.min(100,Math.round(progress/g.target_value*100)) : 0;
+      const due = g.due_date ? new Date(g.due_date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+      const isDone = isCheckbox ? g.completed : progress >= (g.target_value||0);
+      const isOverdue = !isDone && g.due_date && new Date(g.due_date+'T23:59:59') < now;
+      const pLabel = playerMap[g.player_id] || 'Unknown';
+      return `<div style="padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="openItemDetail('goal','${g.id}')">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div onclick="event.stopPropagation();toggleGoalComplete('${g.id}',${isDone})" style="width:20px;height:20px;border-radius:5px;border:2px solid ${isDone?'#4ade80':'#444'};background:${isDone?'#4ade80':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;">
+            ${isDone?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:11px;font-weight:700;color:#60a5fa;background:rgba(96,165,250,0.1);padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">Goal</span>
+              <span style="font-size:13px;font-weight:600;color:${isDone?'rgba(255,255,255,0.3)':'rgba(255,255,255,0.85)'};${isDone?'text-decoration:line-through;':''}">${g.metric}</span>
+              ${isTracked?'<span style="font-size:9px;font-weight:700;color:#60a5fa;background:rgba(96,165,250,0.1);padding:1px 5px;border-radius:3px;text-transform:uppercase;">Auto</span>':''}
+              ${isOverdue?'<span style="font-size:9px;font-weight:700;color:#f87171;background:rgba(248,113,113,0.1);padding:1px 5px;border-radius:3px;text-transform:uppercase;">Overdue</span>':''}
+            </div>
+            <div style="display:flex;gap:6px;margin-top:2px;flex-wrap:wrap;">
+              <span style="font-size:11px;color:rgba(255,255,255,0.35);">→ ${pLabel}</span>
+              ${isTracked?`<span style="font-size:10px;color:rgba(255,255,255,0.3);">· avg ${progress}/${g.target_value} ${metricLabels[g.tracked_metric]||''}</span>`:''}
+              ${due?`<span style="font-size:10px;color:${isOverdue?'#f87171':'rgba(255,255,255,0.3)'};">· Due ${due}</span>`:''}
+            </div>
+            ${isTracked&&g.target_value?`<div style="background:#1a1a1a;border-radius:3px;height:3px;margin-top:5px;"><div style="height:3px;width:${pct}%;background:#60a5fa;border-radius:3px;"></div></div>`:''}
+          </div>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;opacity:.3"><polyline points="5,2 10,7 5,12" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  goalSection.innerHTML = tabsHtml + goalsHtml;
 }
 
 // ── SETUP WIZARD ─────────────────────────────────────────────────────────
