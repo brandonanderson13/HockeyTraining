@@ -5693,8 +5693,53 @@ function toggleExComplete(checkbox){
       localStorage.removeItem(key);
     }
     updateDayCompletionBadge(xl);
-    // Note: We only sync to Supabase when the FULL day is completed, not individual exercises
+    // Save individual exercise to Supabase
+    saveExerciseCompletion(key, isCompleted);
   }catch(e){}
+}
+
+async function saveExerciseCompletion(exKey, isCompleted) {
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    if (isCompleted) {
+      await sb.from('exercise_completions').upsert({
+        user_id: user.id,
+        organization_id: window._userOrgId || 'individual',
+        completion_date: new Date().toISOString().split('T')[0],
+        exercise_name: exKey,
+        completed: true
+      }, { onConflict: 'user_id,exercise_name' });
+    } else {
+      await sb.from('exercise_completions').delete()
+        .eq('user_id', user.id)
+        .eq('exercise_name', exKey);
+    }
+  } catch(e) { console.warn('Exercise save error:', e.message); }
+}
+
+async function loadExerciseCompletions() {
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    const { data } = await sb.from('exercise_completions')
+      .select('exercise_name')
+      .eq('user_id', user.id)
+      .neq('exercise_name', 'FULL_DAY_COMPLETED');
+    if (!data) return;
+    // Restore to localStorage and mark completed in DOM
+    data.forEach(row => {
+      localStorage.setItem(row.exercise_name, '1');
+      const el = document.querySelector(`.xl[data-ex-key="${row.exercise_name}"]`);
+      if (el) {
+        el.classList.add('completed');
+        const cb = el.querySelector('.xl-check');
+        if (cb) cb.classList.add('checked');
+      }
+    });
+  } catch(e) { console.warn('Load completions error:', e.message); }
 }
 
 function updateDayCompletionBadge(xl){
@@ -6200,26 +6245,37 @@ function updateProgramStatus() {
 }
 
 
-function restartCycle() {
+async function restartCycle() {
   if (!confirm('Restart the training cycle?\n\nThis will clear all checked-off exercises so you can start fresh. Your completed workout history is preserved.')) return;
 
   // Clear all exercise completion keys from localStorage
-  // Keys follow patterns: week_day_ex format or cw_ prefix for custom
   const keysToRemove = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (!key) continue;
-    // Standard workout keys: contain '_ex' or match day completion pattern
-    if (key.match(/^w\d+_|^cw_|_ex\d+$|_ex_/)) {
+    if (key.match(/^ex_p\d+_|^cw_|^w\d+_/)) {
       keysToRemove.push(key);
     }
   }
   keysToRemove.forEach(k => localStorage.removeItem(k));
 
+  // Also delete individual exercise completions from Supabase
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (user) {
+      // Delete all non-FULL_DAY_COMPLETED records (individual exercise checks)
+      await sb.from('exercise_completions')
+        .delete()
+        .eq('user_id', user.id)
+        .neq('exercise_name', 'FULL_DAY_COMPLETED');
+    }
+  } catch(e) { console.warn('Restart Supabase clear error:', e.message); }
+
   // Reset program start date so week counter restarts
   localStorage.removeItem('tigersProgramStart');
 
-  // Re-render the weeks
+  // Re-render
   renderWeeks();
   alert('✓ Cycle restarted! All exercises cleared. Your history has been preserved.');
 }
@@ -6521,7 +6577,7 @@ function renderWeeks(){
           const yt   = (info && info.yt)   ? info.yt   : '';
 
           // Stable key for this exercise on this specific day (week + day + exercise + date)
-          const exKey = `ex_${wk.num}_${day.n}_${name}_${today}`;
+          const exKey = `ex_p${_schedulePhase}_w${wk.num}_${day.n}_${name}`;
           const isCompleted = localStorage.getItem(exKey) === '1';
 
           let itemHtml=`<div class="xl ${isCompleted ? 'completed' : ''}" data-ex-key="${exKey}">`;
@@ -6635,13 +6691,17 @@ function renderWeeks(){
     });
     c.appendChild(wdiv);
   });
-  // Initialize completion badges
+  // Initialize completion badges and restore from Supabase
   setTimeout(()=>{
     c.querySelectorAll('.dex').forEach(dex=>{
       const firstXl = dex.querySelector('.xl[data-ex-key]');
       if(firstXl) updateDayCompletionBadge(firstXl);
     });
   }, 10);
+  // Load completions from Supabase to sync across devices
+  setTimeout(() => {
+    if (typeof loadExerciseCompletions === 'function') loadExerciseCompletions();
+  }, 200);
 }
 // ---------- STICKHANDLING LOG ----------
 let stickLog   = JSON.parse(localStorage.getItem('tigersStickLog') || '[]');
