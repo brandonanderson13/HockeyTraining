@@ -1841,6 +1841,11 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
       // All checks passed
       console.log('Access granted for:', user.email);
+      // Update last_login timestamp
+      try {
+        await supabase.from('subscriptions').update({ last_login: new Date().toISOString() }).eq('user_id', user.id);
+      } catch(e) {}
+
 
       // Check forced password reset BEFORE showing anything
       // Also detect invite/signup links from URL hash (type=invite or type=signup)
@@ -3085,12 +3090,12 @@ async function loadDashboard(targetId) {
         _shotQ1,
         _stkQ1,
         _wrkQ1,
-        sb.from('user_last_login').select('user_id, last_sign_in_at').in('user_id', pIds)
+        sb.from('subscriptions').select('user_id, last_login').in('user_id', pIds)
       ]);
       (shots.data||[]).forEach(s => { if (!statsMap[s.user_id]) statsMap[s.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[s.user_id].shots+=s.total_shots||0; });
       (sticks.data||[]).forEach(s => { if (!statsMap[s.user_id]) statsMap[s.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[s.user_id].mins+=s.minutes||0; });
       (comps.data||[]).forEach(c => { if (!statsMap[c.user_id]) statsMap[c.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[c.user_id].workouts++; });
-      (logins.data||[]).forEach(l => { if (!statsMap[l.user_id]) statsMap[l.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[l.user_id].lastActive = l.last_sign_in_at ? new Date(l.last_sign_in_at) : null; });
+      (logins.data||[]).forEach(l => { if (!statsMap[l.user_id]) statsMap[l.user_id]={shots:0,mins:0,workouts:0,lastActive:null}; statsMap[l.user_id].lastActive = l.last_login ? new Date(l.last_login) : null; });
     }
 
     const _dS2 = document.getElementById('dashStart')?.value || '';
