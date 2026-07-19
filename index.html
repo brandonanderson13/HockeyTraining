@@ -1877,7 +1877,10 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       // Re-register push subscription if already granted (players only)
       try {
         if (role === 'player' && typeof Notification !== 'undefined' && Notification.permission === 'granted' && typeof registerPushSubscription === 'function' && !localStorage.getItem('trainrNotifDisabled')) {
-          setTimeout(registerPushSubscription, 3000);
+          // Only re-register if not already saved (check localStorage flag)
+          if (!localStorage.getItem('trainrPushRegistered')) {
+            setTimeout(registerPushSubscription, 3000);
+          }
         }
       } catch(notifErr) {}
 
@@ -7732,12 +7735,19 @@ async function loadAccountDetails() {
           <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">
             ${isGranted ? 'Push notifications are enabled. You will receive reminders and goal updates.' : 'Enable push notifications to receive goal reminders and updates from your coach.'}
           </p>
-          ${isGranted
-            ? '<button onclick="disableNotifications()" style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);color:#f87171;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;cursor:pointer;">Disable Notifications</button>'
-            : '<button onclick="requestNotificationPermission()" style="background:#2563EB;border:none;color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;cursor:pointer;">Enable Notifications</button>'
-          }
+          <button id="notifToggleBtn" style="${isGranted ? 'background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);color:#f87171;' : 'background:#2563EB;border:none;color:#fff;'}font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;cursor:pointer;">
+            ${isGranted ? 'Disable Notifications' : 'Enable Notifications'}
+          </button>
         </div>`;
       container.parentElement?.insertBefore(notifSection, container.nextSibling);
+      // Wire up the toggle button after DOM insertion
+      const notifBtn = document.getElementById('notifToggleBtn');
+      if (notifBtn) {
+        notifBtn.addEventListener('click', function() {
+          if (isGranted) disableNotifications();
+          else requestNotificationPermission();
+        });
+      }
     }
 
     // Hide Manage Subscription card for players and coaches — admins only
@@ -9916,6 +9926,8 @@ async function registerPushSubscription() {
     if (!saveResp.ok) {
       console.error('Push save FAILED:', saveData);
       alert('Push subscription save failed: ' + (saveData.error || 'unknown error'));
+    } else {
+      localStorage.setItem('trainrPushRegistered', '1');
     }
   } catch (err) {
     console.warn('Push subscription failed:', err);
@@ -10124,6 +10136,7 @@ async function reEnableNotifications() {
 async function disableNotifications() {
   try {
     localStorage.setItem('trainrNotifDisabled', '1');
+    localStorage.removeItem('trainrPushRegistered');
     if (!('serviceWorker' in navigator)) return;
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.getSubscription();
