@@ -19,10 +19,7 @@ module.exports = async function handler(req, res) {
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
     const { data: { user }, error: authErr } = await supabase.auth.getUser(token);
-    if (authErr || !user) {
-      console.error('Auth error:', authErr?.message);
-      return res.status(401).json({ error: 'Invalid token' });
-    }
+    if (authErr || !user) return res.status(401).json({ error: 'Invalid token' });
 
     const { subscription } = req.body;
     if (!subscription || !subscription.endpoint) {
@@ -30,33 +27,39 @@ module.exports = async function handler(req, res) {
     }
 
     console.log('Saving push subscription for user:', user.id);
-    console.log('Endpoint:', subscription.endpoint.slice(-30));
 
-    // Delete existing first
-    const { error: delError } = await supabase
+    // Check if already exists for this user
+    const { data: existing } = await supabase
       .from('push_subscriptions')
-      .delete()
-      .eq('user_id', user.id);
-    
-    if (delError) {
-      console.error('Delete error:', delError.message, delError.code);
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    let result;
+    if (existing) {
+      // Update existing
+      result = await supabase
+        .from('push_subscriptions')
+        .update({ subscription })
+        .eq('user_id', user.id)
+        .select();
+      console.log('Updated existing subscription for user:', user.id);
     } else {
-      console.log('Deleted existing subscriptions for user:', user.id);
+      // Insert new
+      result = await supabase
+        .from('push_subscriptions')
+        .insert({ user_id: user.id, subscription })
+        .select();
+      console.log('Inserted new subscription for user:', user.id);
     }
 
-    // Insert new
-    const { data: insertData, error: insertError } = await supabase
-      .from('push_subscriptions')
-      .insert({ user_id: user.id, subscription })
-      .select();
-
-    if (insertError) {
-      console.error('Insert error:', insertError.message, insertError.code, insertError.details);
-      return res.status(500).json({ error: insertError.message, code: insertError.code, details: insertError.details });
+    if (result.error) {
+      console.error('DB error:', result.error.message, result.error.code);
+      return res.status(500).json({ error: result.error.message });
     }
 
-    console.log('Push subscription inserted:', JSON.stringify(insertData));
-    return res.status(200).json({ success: true, id: insertData?.[0]?.id });
+    console.log('Push subscription saved:', result.data?.[0]?.id);
+    return res.status(200).json({ success: true, id: result.data?.[0]?.id });
 
   } catch (err) {
     console.error('save-push-subscription error:', err.message);
