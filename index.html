@@ -9914,8 +9914,6 @@ async function registerPushSubscription() {
     const actualUserId = currentUser?.id;
     if (!actualUserId) return;
     console.log('Saving push subscription for user:', actualUserId, 'role:', window._userRole);
-    const endpointUrl = subscription.endpoint;
-    await sb.from('push_subscriptions').delete().eq('subscription->>endpoint', endpointUrl).neq('user_id', actualUserId);
     const saveResp = await fetch('/api/save-push-subscription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
