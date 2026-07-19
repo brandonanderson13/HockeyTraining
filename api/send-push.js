@@ -1,12 +1,6 @@
 const webpush = require('web-push');
 const { createClient } = require('@supabase/supabase-js');
 
-webpush.setVapidDetails(
-  process.env.VAPID_EMAIL,
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
-
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -16,18 +10,20 @@ module.exports = async function handler(req, res) {
 
   try {
     const supabaseUrl = process.env.SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+    const vapidPublic = process.env.VAPID_PUBLIC_KEY;
+    const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
+    const vapidEmail = process.env.VAPID_EMAIL;
 
-    if (!supabaseUrl || !serviceKey) {
-      return res.status(500).json({ error: 'Missing env vars' });
-    }
+    console.log('Env check — SUPABASE_URL:', !!supabaseUrl, 'SERVICE_KEY:', !!serviceKey, 'VAPID_PUBLIC:', !!vapidPublic, 'VAPID_PRIVATE:', !!vapidPrivate, 'VAPID_EMAIL:', !!vapidEmail);
 
-    // Use service role client — bypasses RLS completely
-    const supabase = createClient(supabaseUrl, serviceKey, {
-      auth: { persistSession: false }
-    });
+    if (!supabaseUrl || !serviceKey) return res.status(500).json({ error: 'Missing Supabase env vars' });
+    if (!vapidPublic || !vapidPrivate || !vapidEmail) return res.status(500).json({ error: 'Missing VAPID env vars' });
 
-    // Verify caller token
+    webpush.setVapidDetails('mailto:' + vapidEmail, vapidPublic, vapidPrivate);
+
+    const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
+
     const authHeader = req.headers.authorization || '';
     const token = authHeader.replace('Bearer ', '');
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
@@ -38,34 +34,27 @@ module.exports = async function handler(req, res) {
     const { userId, title, body, url } = req.body;
     if (!userId || !title) return res.status(400).json({ error: 'userId and title required' });
 
-    console.log('Fetching subscriptions for userId:', userId);
+    console.log('send-push: looking up userId:', userId);
 
-    // Query without .single() to avoid 406
+    // List ALL rows to debug
+    const { data: allSubs, error: allErr } = await supabase
+      .from('push_subscriptions')
+      .select('id, user_id');
+    console.log('All push_subscriptions rows:', JSON.stringify(allSubs), 'error:', allErr?.message);
+
     const { data: subs, error: subErr } = await supabase
       .from('push_subscriptions')
       .select('id, subscription')
       .eq('user_id', userId);
 
-    console.log('Subscriptions found:', subs?.length ?? 0, 'error:', subErr?.message);
+    console.log('Subscriptions found for', userId, ':', subs?.length ?? 0, 'error:', subErr?.message);
 
-    if (subErr) {
-      return res.status(500).json({ error: 'DB error: ' + subErr.message });
-    }
+    if (subErr) return res.status(500).json({ error: 'DB error: ' + subErr.message });
+    if (!subs || subs.length === 0) return res.status(200).json({ sent: 0, message: 'No subscriptions found for ' + userId });
 
-    if (!subs || subs.length === 0) {
-      return res.status(200).json({ sent: 0, message: 'No subscriptions found for ' + userId });
-    }
+    const payload = JSON.stringify({ title, body: body || '', url: url || '/', icon: '/apple-touch-icon.png' });
 
-    const payload = JSON.stringify({
-      title,
-      body: body || '',
-      url: url || '/',
-      icon: '/apple-touch-icon.png'
-    });
-
-    let sent = 0;
-    let failed = 0;
-
+    let sent = 0, failed = 0;
     for (const row of subs) {
       try {
         await webpush.sendNotification(row.subscription, payload);
@@ -75,7 +64,6 @@ module.exports = async function handler(req, res) {
         console.warn('Push failed:', err.statusCode, err.message);
         if (err.statusCode === 404 || err.statusCode === 410) {
           await supabase.from('push_subscriptions').delete().eq('id', row.id);
-          console.log('Deleted expired subscription:', row.id);
         }
         failed++;
       }
