@@ -7716,6 +7716,27 @@ async function loadAccountDetails() {
     html += '</div>';
     container.innerHTML = html;
 
+    // Add notification toggle for players
+    if (sub.role === 'player') {
+      const notifSection = document.createElement('div');
+      notifSection.className = 'card';
+      const isDisabled = localStorage.getItem('trainrNotifDisabled') === '1';
+      const permission = typeof Notification !== 'undefined' ? Notification.permission : 'default';
+      const isGranted = permission === 'granted' && !isDisabled;
+      notifSection.innerHTML = `
+        <div class="ch"><span class="cht">Push Notifications</span></div>
+        <div class="cb">
+          <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">
+            ${isGranted ? 'Push notifications are enabled. You will receive reminders and goal updates.' : 'Enable push notifications to receive goal reminders and updates from your coach.'}
+          </p>
+          ${isGranted
+            ? '<button onclick="disableNotifications()" style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);color:#f87171;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;cursor:pointer;">Disable Notifications</button>'
+            : '<button onclick="requestNotificationPermission()" style="background:#2563EB;border:none;color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;cursor:pointer;">Enable Notifications</button>'
+          }
+        </div>`;
+      container.parentElement?.insertBefore(notifSection, container.nextSibling);
+    }
+
     // Hide Manage Subscription card for players and coaches — admins only
     const manageSubCard = document.getElementById('manageSubCard');
     if (manageSubCard) {
