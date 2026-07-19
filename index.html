@@ -3884,6 +3884,12 @@ async function saveAssignment() {
 
 // ── COMBINED GOAL MODAL ───────────────────────────────────────────────────
 function openCombinedGoalModal(playerId, playerName, isAll) {
+  // If _dashPlayers is empty, trigger a reload and retry
+  if (!_dashPlayers || !_dashPlayers.length) {
+    const tid = document.getElementById('dashboardContent') ? 'dashboardContent' : 'playerDashContent';
+    loadDashboard(tid).then(() => openCombinedGoalModal(playerId, playerName, isAll));
+    return;
+  }
   const existing = document.getElementById('dashModal');
   if (existing) existing.remove();
   window._goalType = 'checkbox';
