@@ -27,39 +27,41 @@ module.exports = async function handler(req, res) {
     }
 
     console.log('Saving push subscription for user:', user.id);
+    console.log('Endpoint tail:', subscription.endpoint.slice(-40));
 
-    // Check if already exists for this user
+    // Check if row already exists for this user
     const { data: existing } = await supabase
       .from('push_subscriptions')
       .select('id')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     let result;
-    if (existing) {
-      // Update existing
+    if (existing?.id) {
+      // Update subscription on existing row — never delete
       result = await supabase
         .from('push_subscriptions')
         .update({ subscription })
-        .eq('user_id', user.id)
+        .eq('id', existing.id)
         .select();
-      console.log('Updated existing subscription for user:', user.id);
+      console.log('Updated existing row:', existing.id);
     } else {
-      // Insert new
+      // Insert new row
       result = await supabase
         .from('push_subscriptions')
         .insert({ user_id: user.id, subscription })
         .select();
-      console.log('Inserted new subscription for user:', user.id);
+      console.log('Inserted new row for user:', user.id);
     }
 
     if (result.error) {
-      console.error('DB error:', result.error.message, result.error.code);
+      console.error('DB error:', result.error.message);
       return res.status(500).json({ error: result.error.message });
     }
 
-    console.log('Push subscription saved:', result.data?.[0]?.id);
-    return res.status(200).json({ success: true, id: result.data?.[0]?.id });
+    const rowId = result.data?.[0]?.id;
+    console.log('Push subscription saved, row id:', rowId);
+    return res.status(200).json({ success: true, id: rowId });
 
   } catch (err) {
     console.error('save-push-subscription error:', err.message);
