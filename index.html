@@ -7718,7 +7718,10 @@ async function loadAccountDetails() {
 
     // Add notification toggle for players
     if (sub.role === 'player') {
+      // Remove existing notification card if present
+      document.getElementById('notifSection')?.remove();
       const notifSection = document.createElement('div');
+      notifSection.id = 'notifSection';
       notifSection.className = 'card';
       const isDisabled = localStorage.getItem('trainrNotifDisabled') === '1';
       const permission = typeof Notification !== 'undefined' ? Notification.permission : 'default';
