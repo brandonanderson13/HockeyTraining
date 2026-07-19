@@ -7733,7 +7733,7 @@ async function loadAccountDetails() {
     container.innerHTML = html;
 
     // Add notification toggle for players
-    if (sub.role === 'player') {
+    if (true) { // Show push notifications for all roles
       // Remove existing notification card if present
       document.getElementById('notifSection')?.remove();
       const notifSection = document.createElement('div');
