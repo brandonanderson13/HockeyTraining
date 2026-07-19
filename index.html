@@ -4061,7 +4061,7 @@ async function saveCombinedGoal() {
     const { error } = await sb.from('goals').insert(inserts);
     if (error) throw error;
 
-    if (typeof sendGoalPushNotifications === 'function') sendGoalPushNotifications(playerIds, title, due);
+    if (typeof sendGoalPushNotifications === 'function') setTimeout(() => sendGoalPushNotifications(playerIds, title, due), 2000);
     document.getElementById('dashModal')?.remove();
     window._dashGoals = null;
     const _toast = document.createElement('div');
@@ -4295,7 +4295,7 @@ async function saveGoal() {
     const { error } = await sb.from('goals').insert(rows);
     if (error) throw error;
     showMsg(`✓ Goal${playerIds.length>1?' created for '+playerIds.length+' players':'created'}!`, 'green');
-    if (typeof sendGoalPushNotifications === 'function') sendGoalPushNotifications(playerIds, title, due);
+    if (typeof sendGoalPushNotifications === 'function') setTimeout(() => sendGoalPushNotifications(playerIds, title, due), 2000);
     document.getElementById('dashModal')?.remove();
     window._dashGoals = null;
     const _t2 = document.createElement('div');
@@ -7739,7 +7739,7 @@ async function loadAccountDetails() {
             ${isGranted ? 'Disable Notifications' : 'Enable Notifications'}
           </button>
         </div>`;
-      container.parentElement?.insertBefore(notifSection, container.nextSibling);
+      container.after(notifSection);
       // Wire up the toggle button after DOM insertion
       const notifBtn = document.getElementById('notifToggleBtn');
       if (notifBtn) {
@@ -10152,13 +10152,10 @@ async function disableNotifications() {
         else console.log('Push subscription deleted for user:', uid);
       }
     }
-    const notifCardBody2 = document.getElementById('notifCardBody');
-    if (notifCardBody2) {
-      notifCardBody2.innerHTML = '<p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Notifications have been disabled.</p>'
-        + '<button onclick="reEnableNotifications()" class="btn-o" style="margin:0;">Re-enable Notifications</button>';
-    }
     const nudge = document.getElementById('notifNudge');
     if (nudge) nudge.remove();
+    // Refresh account page to show updated state
+    if (typeof loadAccountDetails === 'function') loadAccountDetails();
   } catch(e) { console.warn('disableNotifications error:', e); alert('Error: ' + e.message); }
 }
 
