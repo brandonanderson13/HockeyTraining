@@ -10131,7 +10131,13 @@ async function disableNotifications() {
       await sub.unsubscribe();
       const sb = await getSupabaseClient();
       const { data: { session } } = await sb.auth.getSession();
-      if (session?.access_token) await sb.from('push_subscriptions').delete().eq('user_id', window._userId);
+      const { data: { user: curUser } } = await sb.auth.getUser();
+      const uid = curUser?.id || window._userId;
+      if (uid) {
+        const { error: delErr } = await sb.from('push_subscriptions').delete().eq('user_id', uid);
+        if (delErr) console.warn('Delete push sub error:', delErr.message);
+        else console.log('Push subscription deleted for user:', uid);
+      }
     }
     const notifCardBody2 = document.getElementById('notifCardBody');
     if (notifCardBody2) {
