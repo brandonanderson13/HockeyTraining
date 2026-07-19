@@ -9906,12 +9906,17 @@ async function registerPushSubscription() {
     const saveResp = await fetch('/api/save-push-subscription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ subscription })
+      body: JSON.stringify({ subscription, userId: actualUserId })
     });
     const saveData = await saveResp.json();
     console.log('Push subscription save response:', saveResp.status, saveData);
+    if (!saveResp.ok) {
+      console.error('Push save FAILED:', saveData);
+      alert('Push subscription save failed: ' + (saveData.error || 'unknown error'));
+    }
   } catch (err) {
     console.warn('Push subscription failed:', err);
+    alert('Push subscription error: ' + err.message);
   }
 }
 
