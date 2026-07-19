@@ -9907,7 +9907,6 @@ function urlBase64ToUint8Array(base64String) {
 
 async function registerPushSubscription() {
   try {
-    if (window._userRole && window._userRole !== 'player') return;
     if (!('PushManager' in window)) return;
     if (!('serviceWorker' in navigator)) return;
     if (typeof Notification === 'undefined') return;
