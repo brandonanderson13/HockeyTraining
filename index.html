@@ -9798,7 +9798,13 @@ async function loadMessages() {
   const teamBar = document.getElementById('msgTeamBar');
   const isAdmin = role === 'admin' || role === 'super_admin';
 
-  if (isAdmin && window._dashAllTeams && window._dashAllTeams.length > 1) {
+  // Ensure teams are loaded for admin
+  if (isAdmin && (!window._dashAllTeams || !window._dashAllTeams.length)) {
+    const { data: allT } = await sb.from('teams').select('id, team_name').eq('organization_id', orgId).order('team_name');
+    window._dashAllTeams = allT || [];
+  }
+
+  if (isAdmin && window._dashAllTeams && window._dashAllTeams.length > 0) {
     if (!_msgTeamId) _msgTeamId = window._dashAllTeams[0]?.id || null;
     const opts = (window._dashAllTeams || []).map(t => '<option value="' + t.id + '"' + (t.id===_msgTeamId?' selected':'') + '>' + t.team_name + '</option>').join('');
     teamBar.innerHTML = '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;"><span style="font-size:12px;color:rgba(255,255,255,0.4);">Team:</span><select onchange="switchMsgTeam(this.value)" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:6px 12px;border-radius:6px;">' + opts + '</select><button onclick="clearAllMessages()" style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);color:#f87171;font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;text-transform:uppercase;letter-spacing:.04em;">Clear Thread</button></div>';
