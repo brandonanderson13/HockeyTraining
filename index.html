@@ -10169,10 +10169,15 @@ async function disableNotifications() {
       const { data: { session } } = await sb.auth.getSession();
       const { data: { user: curUser } } = await sb.auth.getUser();
       const uid = curUser?.id || window._userId;
-      if (uid) {
-        const { error: delErr } = await sb.from('push_subscriptions').delete().eq('user_id', uid);
-        if (delErr) console.warn('Delete push sub error:', delErr.message);
-        else console.log('Push subscription deleted for user:', uid);
+      const token = session?.access_token;
+      if (uid && token) {
+        const delResp = await fetch('/api/delete-push-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ userId: uid })
+        });
+        const delData = await delResp.json();
+        console.log('Delete push sub response:', delResp.status, delData);
       }
     }
     const nudge = document.getElementById('notifNudge');
