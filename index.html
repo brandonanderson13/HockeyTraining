@@ -303,6 +303,7 @@ select:focus{border-color:var(--or);outline:none;}
 <div class="nav">
   <button class="nb" id="dashTab" onclick="showSec('dashboard')" style="display:none;">Dashboard</button>
   <button class="nb active" id="homeTab" onclick="showSec('home')">Home</button>
+  <button class="nb" id="messagesTab" onclick="showSec('messages')">Messages <span id="msgBadge" style="display:none;background:#f87171;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:3px;vertical-align:middle;"></span></button>
   <button class="nb" id="programTab" onclick="showSec('schedule')">Program</button>
   <button class="nb" id="progressTab" onclick="showSec('baseline')">Progress</button>
   <button class="nb" id="nutritionTab" onclick="showSec('nutrition')">Nutrition</button>
@@ -374,6 +375,19 @@ select:focus{border-color:var(--or);outline:none;}
 </div>
 
 <!-- OVERVIEW -->
+<div id="messages" class="sec" style="display:none;">
+  <div id="messagesContent" style="display:flex;flex-direction:column;height:calc(100vh - 120px);max-width:700px;margin:0 auto;">
+    <div id="msgTeamBar" style="margin-bottom:12px;"></div>
+    <div id="msgThread" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 0 12px;"></div>
+    <div id="msgInput" style="display:flex;gap:8px;padding-top:10px;border-top:1px solid #222;">
+      <input id="msgText" type="text" placeholder="Message your team..." maxlength="500"
+        style="flex:1;background:#1a1a1a;border:1px solid #333;color:#fff;font-size:14px;padding:10px 14px;border-radius:8px;outline:none;"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}">
+      <button onclick="sendMessage()" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:13px;font-weight:700;padding:10px 18px;border-radius:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;">Send</button>
+    </div>
+  </div>
+</div>
+
 <div id="home" class="sec">
   <div id="homeContent">
     <div id="homeQuickLog"></div>
@@ -1863,6 +1877,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       showSec(landingTab);
       if (landingTab === 'home') loadHomeSec(); // reload with correct role
       try { checkShowWizard(); } catch(e) { console.warn('Wizard check error:', e); }
+      // Check unread messages
+      setTimeout(checkUnreadMessages, 3000);
       // Hide loading overlay now that everything is ready
       const loader = document.getElementById('appLoader');
       if (loader) { loader.style.transition = 'opacity 0.3s'; loader.style.opacity = '0'; setTimeout(() => loader.remove(), 350); }
@@ -4825,6 +4841,10 @@ function showSec(id){
   // Load account details when Account tab is shown
   if (id === 'account') {
     loadAccountDetails();
+  }
+
+  if (id === 'messages') {
+    loadMessages();
   }
   
   // Update program status when Training Plan is shown
@@ -9752,6 +9772,240 @@ function filterCoachGoals(tab, targetId) {
     }).join('');
   }
   goalSection.innerHTML = tabsHtml + goalsHtml;
+}
+
+// ── MESSAGING ────────────────────────────────────────────────────────────────
+
+let _msgTeamId = null;
+let _msgOrgId = null;
+let _msgRealtimeChannel = null;
+let _msgLastRead = null;
+
+async function loadMessages() {
+  const sb = await getSupabaseClient();
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+
+  const role = window._userRole;
+  const orgId = window._userOrgId || 'individual';
+  _msgOrgId = orgId;
+
+  // Get user's team
+  const { data: sub } = await sb.from('subscriptions').select('team_id, first_name, last_name, role').eq('user_id', user.id).single();
+  const userTeamId = sub?.team_id || null;
+
+  // Admin/coach: show team selector if multiple teams
+  const teamBar = document.getElementById('msgTeamBar');
+  const isAdmin = role === 'admin' || role === 'super_admin';
+
+  if (isAdmin && window._dashAllTeams && window._dashAllTeams.length > 1) {
+    if (!_msgTeamId) _msgTeamId = window._dashAllTeams[0]?.id || null;
+    const opts = (window._dashAllTeams || []).map(t => '<option value="' + t.id + '"' + (t.id===_msgTeamId?' selected':'') + '>' + t.team_name + '</option>').join('');
+    teamBar.innerHTML = '<div style="display:flex;gap:8px;align-items:center;"><span style="font-size:12px;color:rgba(255,255,255,0.4);">Team:</span><select onchange="switchMsgTeam(this.value)" style="background:#1a1a1a;border:1px solid #333;color:#fff;font-size:13px;padding:6px 12px;border-radius:6px;">' + opts + '</select></div>';
+  } else {
+    _msgTeamId = userTeamId;
+    if (_msgTeamId) {
+      const tName = (window._dashAllTeams||[]).find(t=>t.id===_msgTeamId)?.team_name || 'Team';
+      teamBar.innerHTML = `<div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;">${tName}</div>`;
+    } else {
+      teamBar.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,0.4);">No team assigned yet.</div>';
+    }
+  }
+
+  await renderMessages();
+  await markMessagesRead();
+  subscribeToMessages();
+}
+
+function switchMsgTeam(teamId) {
+  _msgTeamId = teamId;
+  if (_msgRealtimeChannel) {
+    const sb_temp = window._supabaseClient;
+    if (sb_temp) sb_temp.removeChannel(_msgRealtimeChannel);
+  }
+  renderMessages();
+  markMessagesRead();
+  subscribeToMessages();
+}
+
+async function renderMessages() {
+  const thread = document.getElementById('msgThread');
+  if (!thread) return;
+  thread.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.3);font-size:13px;">Loading...</div>';
+
+  const sb = await getSupabaseClient();
+  const { data: { user } } = await sb.auth.getUser();
+
+  let q = sb.from('messages').select('*').eq('org_id', _msgOrgId).order('created_at', { ascending: true }).limit(100);
+  if (_msgTeamId) q = q.eq('team_id', _msgTeamId);
+  else q = q.is('team_id', null);
+
+  const { data: msgs, error } = await q;
+  if (error) { thread.innerHTML = '<div style="text-align:center;padding:20px;color:#f87171;">Error loading messages.</div>'; return; }
+
+  if (!msgs || msgs.length === 0) {
+    thread.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.25);font-size:13px;">No messages yet. Say something!</div>';
+    return;
+  }
+
+  thread.innerHTML = msgs.map(m => {
+    const isMe = m.sender_id === user.id;
+    const time = new Date(m.created_at).toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
+    const day = new Date(m.created_at).toLocaleDateString('en-US', {month:'short',day:'numeric'});
+    const roleColor = m.sender_role === 'admin' || m.sender_role === 'super_admin' || m.sender_role === 'coach' ? '#fb923c' : '#60a5fa';
+    const roleLabel = m.sender_role === 'admin' || m.sender_role === 'super_admin' ? 'Admin' : m.sender_role === 'coach' ? 'Coach' : 'Player';
+    return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px;">
+      <div style="display:flex;align-items:center;gap:6px;${isMe?'flex-direction:row-reverse;':''}">
+        <span style="font-size:11px;font-weight:700;color:${isMe?'rgba(255,255,255,0.5)':roleColor};">${isMe?'You':m.sender_name}</span>
+        <span style="font-size:9px;font-weight:700;color:${roleColor};background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;text-transform:uppercase;">${roleLabel}</span>
+        <span style="font-size:10px;color:rgba(255,255,255,0.25);">${day} ${time}</span>
+      </div>
+      <div style="max-width:75%;background:${isMe?'var(--primary-color)':'#1e1e1e'};color:${isMe?'var(--secondary-color)':'rgba(255,255,255,0.85)'};padding:8px 12px;border-radius:${isMe?'12px 12px 4px 12px':'12px 12px 12px 4px'};font-size:14px;line-height:1.5;word-break:break-word;">
+        ${m.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Scroll to bottom
+  thread.scrollTop = thread.scrollHeight;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('msgText');
+  const content = input?.value?.trim();
+  if (!content) return;
+
+  const sb = await getSupabaseClient();
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+
+  const { data: sub } = await sb.from('subscriptions').select('first_name, last_name, role').eq('user_id', user.id).single();
+  const senderName = [sub?.first_name, sub?.last_name].filter(Boolean).join(' ') || user.email;
+  const senderRole = sub?.role || 'player';
+
+  const msg = {
+    org_id: _msgOrgId,
+    team_id: _msgTeamId || null,
+    sender_id: user.id,
+    sender_name: senderName,
+    sender_role: senderRole,
+    content
+  };
+
+  const { error } = await sb.from('messages').insert(msg);
+  if (error) { alert('Error sending message: ' + error.message); return; }
+
+  input.value = '';
+  await renderMessages();
+  await markMessagesRead();
+
+  // Send push to team members
+  try {
+    const { data: session } = await sb.auth.getSession();
+    const token = session?.session?.access_token;
+    if (token && _msgTeamId) {
+      // Get team members except sender
+      const { data: members } = await sb.from('subscriptions').select('user_id').eq('team_id', _msgTeamId).neq('user_id', user.id);
+      if (members?.length) {
+        for (const m of members) {
+          fetch('/api/send-push', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({
+              userId: m.user_id,
+              title: senderName + ' (' + roleLabel(senderRole) + ')',
+              body: content.slice(0, 100),
+              url: '/'
+            })
+          });
+        }
+      }
+    }
+  } catch(e) { console.warn('Message push error:', e); }
+}
+
+function roleLabel(role) {
+  if (role === 'admin' || role === 'super_admin') return 'Admin';
+  if (role === 'coach') return 'Coach';
+  return 'Player';
+}
+
+async function markMessagesRead() {
+  if (!_msgOrgId) return;
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    await sb.from('message_reads').upsert({
+      user_id: user.id,
+      org_id: _msgOrgId,
+      team_id: _msgTeamId || null,
+      last_read_at: new Date().toISOString()
+    }, { onConflict: 'user_id,org_id,team_id' });
+    updateMsgBadge(0);
+  } catch(e) {}
+}
+
+async function checkUnreadMessages() {
+  if (!window._userOrgId) return;
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+    const { data: sub } = await sb.from('subscriptions').select('team_id').eq('user_id', user.id).single();
+    const teamId = sub?.team_id || null;
+
+    // Get last read
+    const { data: readData } = await sb.from('message_reads')
+      .select('last_read_at').eq('user_id', user.id).eq('org_id', window._userOrgId)
+      .eq('team_id', teamId || '00000000-0000-0000-0000-000000000000').maybeSingle();
+    const lastRead = readData?.last_read_at || '1970-01-01';
+
+    // Count unread
+    let q = sb.from('messages').select('id', { count: 'exact', head: true })
+      .eq('org_id', window._userOrgId).neq('sender_id', user.id).gt('created_at', lastRead);
+    if (teamId) q = q.eq('team_id', teamId);
+    else q = q.is('team_id', null);
+
+    const { count } = await q;
+    updateMsgBadge(count || 0);
+  } catch(e) {}
+}
+
+function updateMsgBadge(count) {
+  const badge = document.getElementById('msgBadge');
+  if (!badge) return;
+  if (count > 0) {
+    badge.style.display = 'inline';
+    badge.textContent = count > 99 ? '99+' : count;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function subscribeToMessages() {
+  if (!_msgOrgId) return;
+  try {
+    getSupabaseClient().then(sb => {
+      if (_msgRealtimeChannel) sb.removeChannel(_msgRealtimeChannel);
+      _msgRealtimeChannel = sb.channel('messages_' + (_msgTeamId || 'org'))
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: _msgTeamId ? `team_id=eq.${_msgTeamId}` : `org_id=eq.${_msgOrgId}`
+        }, (payload) => {
+          console.log('[Realtime] New message:', payload.new?.sender_name);
+          renderMessages();
+          // Only update badge if not on messages tab
+          const msgSec = document.getElementById('messages');
+          if (msgSec?.style.display === 'none') {
+            checkUnreadMessages();
+          }
+        })
+        .subscribe();
+    });
+  } catch(e) {}
 }
 
 // ── SETUP WIZARD ─────────────────────────────────────────────────────────
