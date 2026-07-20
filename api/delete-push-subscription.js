@@ -26,7 +26,7 @@ module.exports = async function handler(req, res) {
       .eq('user_id', user.id);
 
     if (error) {
-      console.error('Delete push sub error:', error.message);
+      console.error('Delete error:', error.message);
       return res.status(500).json({ error: error.message });
     }
 
