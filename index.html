@@ -9913,10 +9913,20 @@ async function registerPushSubscription() {
     const reg = await navigator.serviceWorker.ready;
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') return;
-    const subscription = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-    });
+    console.log('Attempting push subscription, SW state:', reg.active?.state);
+    console.log('PushManager available:', 'PushManager' in window);
+    console.log('Notification permission:', Notification.permission);
+    let subscription;
+    try {
+      subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    } catch(subErr) {
+      console.error('pushManager.subscribe failed:', subErr.name, subErr.message);
+      alert('Push subscription failed: ' + subErr.message + ' (' + subErr.name + ')');
+      return;
+    }
     console.log('Push subscription obtained:', subscription.endpoint.slice(-20));
     const sb = await getSupabaseClient();
     const { data: { session } } = await sb.auth.getSession();
