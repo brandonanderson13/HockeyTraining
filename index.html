@@ -7753,13 +7753,17 @@ async function loadAccountDetails() {
           </button>
         </div>`;
       container.after(notifSection);
-      // Wire up the toggle button after DOM insertion
+      // Wire up button with direct onclick after insertion
       const notifBtn = document.getElementById('notifToggleBtn');
       if (notifBtn) {
-        notifBtn.addEventListener('click', function() {
-          if (isGranted) disableNotifications();
+        notifBtn.onclick = function() {
+          const curDisabled = localStorage.getItem('trainrNotifDisabled') === '1';
+          const curPermission = typeof Notification !== 'undefined' ? Notification.permission : 'default';
+          const curGranted = curPermission === 'granted' && !curDisabled;
+          console.log('Notif btn clicked. curGranted:', curGranted, 'curDisabled:', curDisabled, 'permission:', curPermission);
+          if (curGranted) disableNotifications();
           else requestNotificationPermission();
-        });
+        };
       }
     }
 
