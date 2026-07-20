@@ -15,12 +15,19 @@ module.exports = async function handler(req, res) {
     const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
     const vapidEmail = process.env.VAPID_EMAIL;
 
-    console.log('Env check — SUPABASE_URL:', !!supabaseUrl, 'SERVICE_KEY:', !!serviceKey, 'VAPID_PUBLIC:', !!vapidPublic, 'VAPID_PRIVATE:', !!vapidPrivate, 'VAPID_EMAIL:', !!vapidEmail);
-
     if (!supabaseUrl || !serviceKey) return res.status(500).json({ error: 'Missing Supabase env vars' });
     if (!vapidPublic || !vapidPrivate || !vapidEmail) return res.status(500).json({ error: 'Missing VAPID env vars' });
 
-    webpush.setVapidDetails('mailto:' + vapidEmail, vapidPublic, vapidPrivate);
+    // Log key lengths to verify they are correct
+    console.log('VAPID public key length:', vapidPublic.length);
+    console.log('VAPID private key length:', vapidPrivate.length);
+    console.log('VAPID email:', vapidEmail);
+
+    webpush.setVapidDetails(
+      vapidEmail.startsWith('mailto:') ? vapidEmail : 'mailto:' + vapidEmail,
+      vapidPublic,
+      vapidPrivate
+    );
 
     const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
 
@@ -34,42 +41,40 @@ module.exports = async function handler(req, res) {
     const { userId, title, body, url } = req.body;
     if (!userId || !title) return res.status(400).json({ error: 'userId and title required' });
 
-    console.log('send-push: looking up userId:', userId);
-
-    // List ALL rows to debug
-    const { data: allSubs, error: allErr } = await supabase
-      .from('push_subscriptions')
-      .select('id, user_id');
-    console.log('All push_subscriptions rows:', JSON.stringify(allSubs), 'error:', allErr?.message);
-
     const { data: subs, error: subErr } = await supabase
       .from('push_subscriptions')
       .select('id, subscription')
       .eq('user_id', userId);
 
-    console.log('Subscriptions found for', userId, ':', subs?.length ?? 0, 'error:', subErr?.message);
-
+    console.log('Subscriptions found:', subs?.length ?? 0);
     if (subErr) return res.status(500).json({ error: 'DB error: ' + subErr.message });
-    if (!subs || subs.length === 0) return res.status(200).json({ sent: 0, message: 'No subscriptions found for ' + userId });
+    if (!subs || subs.length === 0) return res.status(200).json({ sent: 0, message: 'No subscriptions' });
 
-    const payload = JSON.stringify({ title, body: body || '', url: url || '/', icon: '/apple-touch-icon.png' });
+    const payload = JSON.stringify({
+      title,
+      body: body || '',
+      url: url || '/',
+      icon: '/apple-touch-icon.png',
+      badge: '/apple-touch-icon.png'
+    });
 
     let sent = 0, failed = 0;
     for (const row of subs) {
       try {
+        console.log('Sending to endpoint:', row.subscription.endpoint?.slice(-30));
         await webpush.sendNotification(row.subscription, payload);
         sent++;
-        console.log('Push sent successfully to subscription', row.id);
+        console.log('Push sent OK');
       } catch (err) {
-        console.warn('Push failed:', err.statusCode, err.message);
+        console.error('Push error - status:', err.statusCode, 'body:', err.body, 'headers:', JSON.stringify(err.headers));
         if (err.statusCode === 404 || err.statusCode === 410) {
           await supabase.from('push_subscriptions').delete().eq('id', row.id);
+          console.log('Deleted expired subscription');
         }
         failed++;
       }
     }
 
-    console.log('Push result — sent:', sent, 'failed:', failed);
     return res.status(200).json({ sent, failed });
 
   } catch (err) {
