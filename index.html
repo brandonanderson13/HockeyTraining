@@ -9806,7 +9806,8 @@ async function loadMessages() {
     _msgTeamId = userTeamId;
     if (_msgTeamId) {
       const tName = (window._dashAllTeams||[]).find(t=>t.id===_msgTeamId)?.team_name || 'Team';
-      teamBar.innerHTML = `<div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;">${tName}</div>`;
+      const clearBtn = (role === 'admin' || role === 'super_admin') ? '<button onclick="clearAllMessages()" style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);color:#f87171;font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;cursor:pointer;font-family:sans-serif;text-transform:uppercase;letter-spacing:.04em;margin-left:10px;">Clear Thread</button>' : '';
+      teamBar.innerHTML = `<div style="display:flex;align-items:center;"><div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;">${tName}</div>${clearBtn}</div>`;
     } else {
       teamBar.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,0.4);">No team assigned yet.</div>';
     }
@@ -9848,17 +9849,20 @@ async function renderMessages() {
     return;
   }
 
+  const isAdminUser = window._userRole === 'admin' || window._userRole === 'super_admin';
   thread.innerHTML = msgs.map(m => {
     const isMe = m.sender_id === user.id;
     const time = new Date(m.created_at).toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
     const day = new Date(m.created_at).toLocaleDateString('en-US', {month:'short',day:'numeric'});
     const roleColor = m.sender_role === 'admin' || m.sender_role === 'super_admin' || m.sender_role === 'coach' ? '#fb923c' : '#60a5fa';
-    const roleLabel = m.sender_role === 'admin' || m.sender_role === 'super_admin' ? 'Admin' : m.sender_role === 'coach' ? 'Coach' : 'Player';
-    return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px;">
+    const rLabel = m.sender_role === 'admin' || m.sender_role === 'super_admin' ? 'Admin' : m.sender_role === 'coach' ? 'Coach' : 'Player';
+    const canDelete = isAdminUser || isMe;
+    return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px;position:relative;" class="msg-row">
       <div style="display:flex;align-items:center;gap:6px;${isMe?'flex-direction:row-reverse;':''}">
         <span style="font-size:11px;font-weight:700;color:${isMe?'rgba(255,255,255,0.5)':roleColor};">${isMe?'You':m.sender_name}</span>
-        <span style="font-size:9px;font-weight:700;color:${roleColor};background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;text-transform:uppercase;">${roleLabel}</span>
+        <span style="font-size:9px;font-weight:700;color:${roleColor};background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;text-transform:uppercase;">${rLabel}</span>
         <span style="font-size:10px;color:rgba(255,255,255,0.25);">${day} ${time}</span>
+        ${canDelete ? `<button onclick="deleteMessage('${m.id}')" style="background:none;border:none;color:rgba(255,255,255,0.2);cursor:pointer;font-size:14px;padding:0 2px;line-height:1;" title="Delete">×</button>` : ''}
       </div>
       <div style="max-width:75%;background:${isMe?'var(--primary-color)':'#1e1e1e'};color:${isMe?'var(--secondary-color)':'rgba(255,255,255,0.85)'};padding:8px 12px;border-radius:${isMe?'12px 12px 4px 12px':'12px 12px 12px 4px'};font-size:14px;line-height:1.5;word-break:break-word;">
         ${m.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}
@@ -9928,6 +9932,35 @@ function roleLabel(role) {
   if (role === 'admin' || role === 'super_admin') return 'Admin';
   if (role === 'coach') return 'Coach';
   return 'Player';
+}
+
+async function deleteMessage(msgId) {
+  if (!confirm('Delete this message?')) return;
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('messages').delete().eq('id', msgId);
+    if (error) throw error;
+    renderMessages();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function clearAllMessages() {
+  if (!confirm('Clear ALL messages in this thread? This cannot be undone.')) return;
+  try {
+    const sb = await getSupabaseClient();
+    let q = sb.from('messages').delete().eq('org_id', _msgOrgId);
+    if (_msgTeamId) q = q.eq('team_id', _msgTeamId);
+    else q = q.is('team_id', null);
+    const { error } = await q;
+    if (error) throw error;
+    renderMessages();
+    // Show toast
+    const t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid #4ade80;color:#4ade80;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;z-index:99999;';
+    t.textContent = '✓ Thread cleared';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2500);
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 async function markMessagesRead() {
