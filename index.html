@@ -1877,8 +1877,8 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
       // Re-register push subscription if already granted (players only)
       try {
         if (role === 'player' && typeof Notification !== 'undefined' && Notification.permission === 'granted' && typeof registerPushSubscription === 'function' && !localStorage.getItem('trainrNotifDisabled')) {
-          // Only re-register if not already saved (check localStorage flag)
-          if (!localStorage.getItem('trainrPushRegistered')) {
+          // Auto-register on login only if not disabled and not already registered
+          if (!localStorage.getItem('trainrNotifDisabled') && !localStorage.getItem('trainrPushRegistered')) {
             setTimeout(registerPushSubscription, 3000);
           }
         }
@@ -4069,7 +4069,7 @@ async function saveCombinedGoal() {
     const { error } = await sb.from('goals').insert(inserts);
     if (error) throw error;
 
-    if (typeof sendGoalPushNotifications === 'function') setTimeout(() => sendGoalPushNotifications(playerIds, title, due), 2000);
+    if (typeof sendGoalPushNotifications === 'function') { const _pids = Array.isArray(playerIds) ? playerIds : Array.from(playerIds||[]); setTimeout(() => sendGoalPushNotifications(_pids, title, due), 2000); }
     document.getElementById('dashModal')?.remove();
     window._dashGoals = null;
     const _toast = document.createElement('div');
@@ -4305,7 +4305,7 @@ async function saveGoal() {
     const { error } = await sb.from('goals').insert(rows);
     if (error) throw error;
     showMsg(`✓ Goal${playerIds.length>1?' created for '+playerIds.length+' players':'created'}!`, 'green');
-    if (typeof sendGoalPushNotifications === 'function') setTimeout(() => sendGoalPushNotifications(playerIds, title, due), 2000);
+    if (typeof sendGoalPushNotifications === 'function') { const _pids2 = Array.isArray(playerIds) ? playerIds : Array.from(playerIds||[]); setTimeout(() => sendGoalPushNotifications(_pids2, title, due), 2000); }
     document.getElementById('dashModal')?.remove();
     window._dashGoals = null;
     const _t2 = document.createElement('div');
@@ -10123,13 +10123,16 @@ function triggerInstallBannerAfterLogin() {
 async function requestNotificationPermission() {
   try {
     localStorage.removeItem('trainrNotifDisabled');
+    localStorage.removeItem('trainrPushRegistered');
     if (typeof Notification === 'undefined') { alert('Notifications are not supported on this device.'); return; }
-    const permission = await Notification.requestPermission();
+    // If already granted, skip prompt and just re-register
+    const alreadyGranted = Notification.permission === 'granted';
+    const permission = alreadyGranted ? 'granted' : await Notification.requestPermission();
     if (permission === 'granted') {
       await registerPushSubscription();
       if (typeof loadAccountDetails === 'function') loadAccountDetails();
     } else {
-      alert('Notifications were not allowed. You can enable them in your browser settings.');
+      alert('Notifications were not allowed. You can enable them in your browser/device settings.');
     }
   } catch(e) { console.warn('requestNotificationPermission error:', e); }
 }
