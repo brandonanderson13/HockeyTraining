@@ -291,192 +291,95 @@
     <!-- ASSOCIATION PRICING -->
   <div id="associationPricing" style="display:none;">
     
-    <!-- SELECT TIER -->
-    <div style="margin-bottom:32px;">
-      <div style="text-align:center;margin-bottom:14px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--primary-color);">Select</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:4px;">Up to 20 players · Perfect for a single team</div>
-      </div>
-      <div class="pricing-grid" style="max-width:600px;margin:0 auto;">
-        <div class="price-card" onclick="selectAssociationPlan(20, 49, 'monthly')" id="select-monthly">
-          <div class="card-header">
-            <div class="seats">Monthly</div>
-            <div class="price">$49</div>
-            <div class="period">per month</div>
-            <div class="per-player">$2.45 per player</div>
-          </div>
-          <div class="features">
-            <div><span>✓</span>Up to 20 players</div>
-            <div><span>✓</span>Year-round training program</div>
-            <div><span>✓</span>Player progress tracking</div>
-            <div><span>✓</span>Leaderboard</div>
-            <div><span>✓</span>Admin dashboard</div>
-          </div>
-        </div>
-        <div class="price-card" onclick="selectAssociationPlan(20, 499, 'annual')" id="select-annual">
-          <div class="card-header">
-            <div class="seats">Annual</div>
-            <div class="price">$499</div>
-            <div class="period">per year</div>
-            <div class="per-player" style="color:#4ade80;">Save $89 · 2 months free</div>
-          </div>
-          <div class="features">
-            <div><span>✓</span>Up to 20 players</div>
-            <div><span>✓</span>Year-round training program</div>
-            <div><span>✓</span>Player progress tracking</div>
-            <div><span>✓</span>Leaderboard</div>
-            <div><span>✓</span>Admin dashboard</div>
-          </div>
-        </div>
+    <!-- ALL PLANS INCLUDE EVERYTHING -->
+    <div style="text-align:center;margin-bottom:32px;padding:16px;background:rgba(255,255,255,0.04);border-radius:10px;max-width:900px;margin-left:auto;margin-right:auto;">
+      <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:10px;">Every plan includes full access to all features:</div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;font-size:12px;color:rgba(255,255,255,0.8);">
+        <span>✓ Year-round training program</span>
+        <span>✓ Admin dashboard</span>
+        <span>✓ Team management</span>
+        <span>✓ Custom workout upload</span>
+        <span>✓ Coach dashboard</span>
+        <span>✓ Player progress tracking</span>
+        <span>✓ Leaderboards</span>
+        <span>✓ Shot & stickhandling logs</span>
       </div>
     </div>
 
-    <!-- ELITE TIER -->
-    <div style="margin-bottom:32px;">
-      <div style="text-align:center;margin-bottom:14px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--primary-color);">Elite</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:4px;">Up to 50 players · Great for small associations</div>
-      </div>
-      <div class="pricing-grid" style="max-width:600px;margin:0 auto;">
-        <div class="price-card" onclick="selectAssociationPlan(50, 99, 'monthly')" id="elite-monthly">
-          <div class="card-header">
-            <div class="seats">Monthly</div>
-            <div class="price">$99</div>
-            <div class="period">per month</div>
-            <div class="per-player">$1.98 per player</div>
-          </div>
-          <div class="features">
-            <div><span>✓</span>Up to 50 players</div>
-            <div><span>✓</span>Everything in Select</div>
-            <div><span>✓</span>Team management</div>
-            <div><span>✓</span>Custom workout upload</div>
-            <div><span>✓</span>Coach dashboard</div>
-          </div>
-        </div>
-        <div class="price-card" onclick="selectAssociationPlan(50, 999, 'annual')" id="elite-annual">
-          <div class="card-header">
-            <div class="seats">Annual</div>
-            <div class="price">$999</div>
-            <div class="period">per year</div>
-            <div class="per-player" style="color:#4ade80;">Save $189 · 2 months free</div>
-          </div>
-          <div class="features">
-            <div><span>✓</span>Up to 50 players</div>
-            <div><span>✓</span>Everything in Select</div>
-            <div><span>✓</span>Team management</div>
-            <div><span>✓</span>Custom workout upload</div>
-            <div><span>✓</span>Coach dashboard</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- PRICING CARDS -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;max-width:1100px;margin:0 auto 32px;">
 
-    <!-- PREMIER TIER -->
-    <div style="margin-bottom:32px;">
-      <div style="text-align:center;margin-bottom:14px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--primary-color);">Premier</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:4px;">Up to 150 players · Built for growing associations</div>
-      </div>
-      <div class="pricing-grid" style="max-width:600px;margin:0 auto;">
-        <div class="price-card" onclick="selectAssociationPlan(150, 299, 'monthly')" id="premier-monthly">
-          <div class="card-header">
-            <div class="seats">Monthly</div>
-            <div class="price">$299</div>
-            <div class="period">per month</div>
-            <div class="per-player">$1.99 per player</div>
-          </div>
-          <div class="features">
-            <div><span>✓</span>Up to 150 players</div>
-            <div><span>✓</span>Everything in Elite</div>
-            <div><span>✓</span>Multiple teams</div>
-            <div><span>✓</span>Full analytics dashboard</div>
-            <div><span>✓</span>Email support</div>
-          </div>
+      <!-- SELECT -->
+      <div style="background:#111;border:1px solid #333;border-radius:12px;padding:28px;text-align:center;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:0.04em;">SELECT</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin:4px 0 20px;">Up to 20 players</div>
+        <div style="font-size:42px;font-weight:800;color:var(--primary-color);line-height:1;">$49</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;">per month</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">$2.45 / player</div>
+        <div style="border-top:1px solid #222;padding-top:16px;margin-bottom:20px;">
+          <div style="font-size:13px;color:#4ade80;">Annual: $499 <span style="color:rgba(255,255,255,0.4);font-size:11px;">· save $89</span></div>
         </div>
-        <div class="price-card" onclick="selectAssociationPlan(150, 2999, 'annual')" id="premier-annual">
-          <div class="card-header">
-            <div class="seats">Annual</div>
-            <div class="price">$2,999</div>
-            <div class="period">per year</div>
-            <div class="per-player" style="color:#4ade80;">Save $589 · 2 months free</div>
-          </div>
-          <div class="features">
-            <div><span>✓</span>Up to 150 players</div>
-            <div><span>✓</span>Everything in Elite</div>
-            <div><span>✓</span>Multiple teams</div>
-            <div><span>✓</span>Full analytics dashboard</div>
-            <div><span>✓</span>Email support</div>
-          </div>
-        </div>
+        <button onclick="selectAssociationPlan(20, 49, 'monthly')" style="width:100%;background:var(--primary-color);color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:8px;">MONTHLY — $49</button>
+        <button onclick="selectAssociationPlan(20, 499, 'annual')" style="width:100%;background:transparent;color:var(--primary-color);border:2px solid var(--primary-color);padding:12px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">ANNUAL — $499</button>
       </div>
-    </div>
 
-    <!-- PREMIER+ TIER -->
-    <div style="margin-bottom:32px;">
-      <div style="text-align:center;margin-bottom:14px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:var(--primary-color);">Premier+</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:4px;">Up to 300 players · For large associations</div>
-      </div>
-      <div class="pricing-grid" style="max-width:600px;margin:0 auto;">
-        <div class="price-card" onclick="selectAssociationPlan(300, 599, 'monthly')" id="premierplus-monthly">
-          <div class="card-header">
-            <div class="seats">Monthly</div>
-            <div class="price">$599</div>
-            <div class="period">per month</div>
-            <div class="per-player">$2.00 per player</div>
-          </div>
-          <div class="features">
-            <div><span>✓</span>Up to 300 players</div>
-            <div><span>✓</span>Everything in Premier</div>
-            <div><span>✓</span>Unlimited teams</div>
-            <div><span>✓</span>Priority support</div>
-            <div><span>✓</span>Onboarding assistance</div>
-          </div>
+      <!-- ELITE -->
+      <div style="background:#111;border:1px solid #333;border-radius:12px;padding:28px;text-align:center;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:0.04em;">ELITE</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin:4px 0 20px;">Up to 50 players</div>
+        <div style="font-size:42px;font-weight:800;color:var(--primary-color);line-height:1;">$109</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;">per month</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">$2.18 / player</div>
+        <div style="border-top:1px solid #222;padding-top:16px;margin-bottom:20px;">
+          <div style="font-size:13px;color:#4ade80;">Annual: $1,099 <span style="color:rgba(255,255,255,0.4);font-size:11px;">· save $209</span></div>
         </div>
-        <div class="price-card" onclick="selectAssociationPlan(300, 5999, 'annual')" id="premierplus-annual">
-          <div class="card-header">
-            <div class="seats">Annual</div>
-            <div class="price">$5,999</div>
-            <div class="period">per year</div>
-            <div class="per-player" style="color:#4ade80;">Save $1,189 · 2 months free</div>
-          </div>
-          <div class="features">
-            <div><span>✓</span>Up to 300 players</div>
-            <div><span>✓</span>Everything in Premier</div>
-            <div><span>✓</span>Unlimited teams</div>
-            <div><span>✓</span>Priority support</div>
-            <div><span>✓</span>Onboarding assistance</div>
-          </div>
-        </div>
+        <button onclick="selectAssociationPlan(50, 109, 'monthly')" style="width:100%;background:var(--primary-color);color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:8px;">MONTHLY — $109</button>
+        <button onclick="selectAssociationPlan(50, 1099, 'annual')" style="width:100%;background:transparent;color:var(--primary-color);border:2px solid var(--primary-color);padding:12px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">ANNUAL — $1,099</button>
       </div>
-    </div>
 
-    <!-- ENTERPRISE TIER -->
-    <div style="margin-bottom:32px;">
-      <div style="text-align:center;margin-bottom:14px;">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;color:#60a5fa;">Enterprise</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:4px;">300+ players · Leagues & large organizations</div>
-      </div>
-      <div style="max-width:600px;margin:0 auto;">
-        <div class="price-card" style="text-align:center;">
-          <div class="card-header">
-            <div class="seats">Custom Pricing</div>
-            <div class="price" style="font-size:36px;">Contact Us</div>
-            <div class="period">tailored to your organization</div>
-          </div>
-          <div class="features">
-            <div><span>✓</span>Unlimited players</div>
-            <div><span>✓</span>Unlimited coaches & teams</div>
-            <div><span>✓</span>Dedicated account manager</div>
-            <div><span>✓</span>Custom integrations</div>
-            <div><span>✓</span>Custom workout upload</div>
-            <div><span>✓</span>SLA & priority support</div>
-          </div>
-          <a href="mailto:brandonanderson1393@gmail.com?subject=TRAINR Enterprise Inquiry&body=Hi, I'm interested in the Enterprise plan. Our organization has approximately [X] players." style="display:block;margin-top:16px;background:#60a5fa;color:#fff;padding:14px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;text-decoration:none;text-align:center;">CONTACT US</a>
+      <!-- PREMIER - MOST POPULAR -->
+      <div style="background:#111;border:2px solid var(--primary-color);border-radius:12px;padding:28px;text-align:center;position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--primary-color);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:0.06em;">MOST POPULAR</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:0.04em;">PREMIER</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin:4px 0 20px;">Up to 150 players</div>
+        <div style="font-size:42px;font-weight:800;color:var(--primary-color);line-height:1;">$299</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;">per month</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">$1.99 / player</div>
+        <div style="border-top:1px solid #222;padding-top:16px;margin-bottom:20px;">
+          <div style="font-size:13px;color:#4ade80;">Annual: $2,999 <span style="color:rgba(255,255,255,0.4);font-size:11px;">· save $589</span></div>
         </div>
+        <button onclick="selectAssociationPlan(150, 299, 'monthly')" style="width:100%;background:var(--primary-color);color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:8px;">MONTHLY — $299</button>
+        <button onclick="selectAssociationPlan(150, 2999, 'annual')" style="width:100%;background:transparent;color:var(--primary-color);border:2px solid var(--primary-color);padding:12px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">ANNUAL — $2,999</button>
       </div>
-    </div>
 
+      <!-- PREMIER+ -->
+      <div style="background:#111;border:1px solid #333;border-radius:12px;padding:28px;text-align:center;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:0.04em;">PREMIER+</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin:4px 0 20px;">Up to 300 players</div>
+        <div style="font-size:42px;font-weight:800;color:var(--primary-color);line-height:1;">$549</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;">per month</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">$1.83 / player</div>
+        <div style="border-top:1px solid #222;padding-top:16px;margin-bottom:20px;">
+          <div style="font-size:13px;color:#4ade80;">Annual: $5,499 <span style="color:rgba(255,255,255,0.4);font-size:11px;">· save $1,089</span></div>
+        </div>
+        <button onclick="selectAssociationPlan(300, 549, 'monthly')" style="width:100%;background:var(--primary-color);color:#fff;border:none;padding:12px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:8px;">MONTHLY — $549</button>
+        <button onclick="selectAssociationPlan(300, 5499, 'annual')" style="width:100%;background:transparent;color:var(--primary-color);border:2px solid var(--primary-color);padding:12px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;cursor:pointer;">ANNUAL — $5,499</button>
+      </div>
+
+      <!-- ENTERPRISE -->
+      <div style="background:#111;border:1px solid #60a5fa;border-radius:12px;padding:28px;text-align:center;">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:0.04em;">ENTERPRISE</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin:4px 0 20px;">300+ players</div>
+        <div style="font-size:42px;font-weight:800;color:#60a5fa;line-height:1;">Custom</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:4px;">pricing</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">Tailored to your organization</div>
+        <div style="border-top:1px solid #222;padding-top:16px;margin-bottom:20px;">
+          <div style="font-size:13px;color:#60a5fa;">Dedicated account manager</div>
+        </div>
+        <a href="mailto:brandonanderson1393@gmail.com?subject=TRAINR Enterprise Inquiry&body=Hi, I am interested in the Enterprise plan for TRAINR. Our organization has approximately [X] players." style="display:block;width:100%;background:#60a5fa;color:#fff;padding:12px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;text-decoration:none;box-sizing:border-box;">CONTACT US</a>
+      </div>
+
+    </div>
 
   <div class="form-section" id="customerForm" style="display:none;">
     <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;text-transform:uppercase;color:var(--primary-color);margin-bottom:16px;text-align:center;">Your Information</h3>
