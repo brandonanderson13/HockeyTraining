@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { priceAmount, interval, customerEmail, customerName, metadata, successUrl, cancelUrl } = req.body;
+  const { priceAmount, interval, customerEmail, customerName, metadata, planLabel, successUrl, cancelUrl } = req.body;
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -15,8 +15,8 @@ export default async function handler(req, res) {
         price_data: {
           currency: 'usd',
           product_data: {
-            name: (metadata?.organization_name ? metadata.organization_name + ' — ' : '') + 'TRAINR Hockey Training',
-            description: 'Annual hockey development program — off-ice training, skills, and conditioning.',
+            name: 'TRAINR Hockey',
+            description: planLabel || 'Training Program',
           },
           unit_amount: priceAmount,
           recurring: { interval: interval || 'month' },
