@@ -200,7 +200,7 @@
     transition: background 0.2s;
   }
   
-  button.cta:hover { background: #c96819; }
+  button.cta:hover { filter: brightness(0.85); }
   button.cta:disabled { background: #444; color: #888; cursor: not-allowed; }
   
   .subtext {
@@ -394,9 +394,9 @@
         <input type="text" id="lastName" required placeholder="Johnson">
       </div>
     </div>
-    <div>
+    <div id="orgFieldWrapper">
       <label>Association / Team Name</label>
-      <input type="text" id="organizationId" required placeholder="e.g. Delano Youth Hockey Association (or 'Individual' if none)" oninput="updateSubscribeBranding()" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;font-family:'Barlow',sans-serif;margin-bottom:14px;">
+      <input type="text" id="organizationId" placeholder="e.g. Delano Youth Hockey Association" oninput="updateSubscribeBranding()" style="width:100%;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:14px;padding:10px 12px;border-radius:6px;font-family:'Barlow',sans-serif;margin-bottom:14px;">
     </div>
     
     <div>
@@ -453,6 +453,16 @@ function showCustomerForm() {
   document.getElementById('customerForm').style.display = 'block';
   document.getElementById('customerForm').scrollIntoView({ behavior: 'smooth' });
   
+  const orgWrapper = document.getElementById('orgFieldWrapper');
+  const orgInput = document.getElementById('organizationId');
+  if (selectedPlan.type === 'individual') {
+    orgWrapper.style.display = 'none';
+    orgInput.required = false;
+  } else {
+    orgWrapper.style.display = 'block';
+    orgInput.required = true;
+  }
+  
   const summary = document.getElementById('selectedPlanSummary');
   if (selectedPlan.type === 'individual') {
     const price = selectedPlan.plan === 'monthly' ? '$19.99/month' : '$149.99/year';
@@ -473,8 +483,10 @@ async function proceedToCheckout() {
   const firstName = document.getElementById('firstName').value.trim();
   const lastName = document.getElementById('lastName').value.trim();
   const email = document.getElementById('email').value.trim();
-  const organizationId = document.getElementById('organizationId').value.trim();
-  const orgName = organizationId || 'Individual';
+  const organizationId = selectedPlan.type === 'individual'
+    ? 'individual'
+    : document.getElementById('organizationId').value.trim();
+  const orgName = selectedPlan.type === 'individual' ? 'Individual' : organizationId;
   
   if (!firstName || !lastName || !email) {
     const msg = document.getElementById('message');
