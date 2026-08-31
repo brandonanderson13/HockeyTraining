@@ -6,15 +6,17 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-// Fallback: map monthly price amount (cents) to seat limit
+// Fallback: map monthly/annual price amount (cents) to seat limit
 // in case metadata.seat_limit is not set on the Stripe product
 const PRICE_TO_SEAT_LIMIT = {
-  9900:   20,   // $99/mo  — Select
-  99900:  20,   // $999/yr — Select
-  17900:  60,   // $179/mo — Elite
-  179900: 60,   // $1799/yr — Elite
-  29900:  120,  // $299/mo — Premier
-  299900: 120,  // $2999/yr — Premier
+  4900:   20,   // $49/mo   — Select
+  49900:  20,   // $499/yr  — Select
+  10900:  50,   // $109/mo  — Elite
+  109900: 50,   // $1,099/yr — Elite
+  29900:  150,  // $299/mo  — Premier
+  299900: 150,  // $2,999/yr — Premier
+  54900:  300,  // $549/mo  — Premier+
+  549900: 300,  // $5,499/yr — Premier+
 };
 
 module.exports = async function handler(req, res) {
