@@ -1488,6 +1488,12 @@ async function renewalSignOut() {
 </script>
 
 <script>
+// Declared early so no code path can reference these before they exist
+let _msgTeamId = null;
+let _msgOrgId = null;
+let _msgRealtimeChannel = null;
+let _msgLastRead = null;
+
 // ═══════════════════════════════════════════════════════════════════════════
 // SUPABASE AUTH CHECK - Verifies user is logged in with active subscription
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2168,7 +2174,7 @@ function saveBaselineResults(){
 }
 
 function buildTracker(){
-  const tb=document.getElementById('trackerBody');tb.innerHTML='';
+  const tb=document.getElementById('trackerBody');if(!tb)return;tb.innerHTML='';
   testRows.forEach((t,i)=>{
     const tr=document.createElement('tr');
     tr.innerHTML=`<td><div style="font-size:12px;color:rgba(255,255,255,0.78);">${t.name}</div><div style="font-size:10px;color:rgba(255,255,255,0.28);">${t.unit}</div></td><td><input type="number" step="0.1" placeholder="—" id="base_${i}"></td><td><input type="number" step="0.1" placeholder="—" id="final_${i}"></td><td id="diff_${i}" class="rd sam">—</td>`;
@@ -9651,11 +9657,7 @@ function filterCoachGoals(tab, targetId) {
 }
 
 // ── MESSAGING ────────────────────────────────────────────────────────────────
-
-let _msgTeamId = null;
-let _msgOrgId = null;
-let _msgRealtimeChannel = null;
-let _msgLastRead = null;
+// (_msgTeamId, _msgOrgId, _msgRealtimeChannel, _msgLastRead are declared at the top of this script block)
 
 async function loadMessages() {
   const sb = await getSupabaseClient();
