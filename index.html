@@ -1493,6 +1493,7 @@ let _msgTeamId = null;
 let _msgOrgId = null;
 let _msgRealtimeChannel = null;
 let _msgLastRead = null;
+let allPlayers = []; // Store all player data for filtering
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SUPABASE AUTH CHECK - Verifies user is logged in with active subscription
@@ -7682,8 +7683,7 @@ async function loadAccountDetails() {
 }
 
 
-let allPlayers = []; // Store all player data for filtering
-
+// allPlayers is declared at the top of this script block
 function filterPlayers() {
   const search = document.getElementById('playerSearch').value.toLowerCase();
   const roleFilter = document.getElementById('roleFilter').value;
