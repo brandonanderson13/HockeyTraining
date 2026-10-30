@@ -160,7 +160,7 @@ async function loadLeaderboard() {
       if (startDate) query = query.gte('session_date', startDate);
       if (endDate) query = query.lte('session_date', endDate);
       const { data: sessions } = await query;
-      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('organization_id', orgId);
+      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('role', 'player').eq('organization_id', orgId);
       
       const shotsByUser = {};
       if (sessions) {
@@ -183,7 +183,7 @@ async function loadLeaderboard() {
       if (startDate) query = query.gte('session_date', startDate);
       if (endDate) query = query.lte('session_date', endDate);
       const { data: sessions } = await query;
-      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('organization_id', orgId);
+      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('role', 'player').eq('organization_id', orgId);
       
       const minsByUser = {};
       if (sessions) {
@@ -207,7 +207,7 @@ async function loadLeaderboard() {
       if (endDate) query = query.lte('completion_date', endDate);
       const { data: completions } = await query;
       
-      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('organization_id', orgId);
+      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('role', 'player').eq('organization_id', orgId);
       
       const workoutsByUser = {};
       if (completions) {
