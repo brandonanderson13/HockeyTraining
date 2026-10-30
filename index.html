@@ -3505,10 +3505,6 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
       return `<div style="padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="openItemDetail('goal','${g.id}')">
         <div style="display:flex;align-items:center;gap:10px;">
           <input type="checkbox" class="goal-select-cb" data-goal-id="${g.id}" onclick="event.stopPropagation();updateGoalSelection('${_tId}')" style="width:15px;height:15px;flex-shrink:0;cursor:pointer;accent-color:#60a5fa;">
-          <div onclick="event.stopPropagation();toggleGoalComplete('${g.id}',${isDone})"
-            style="width:20px;height:20px;border-radius:5px;border:2px solid ${isDone?'#4ade80':'#444'};background:${isDone?'#4ade80':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;">
-            ${isDone?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
-          </div>
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
               <span style="font-size:11px;font-weight:700;color:#60a5fa;background:rgba(96,165,250,0.1);padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">Goal</span>
