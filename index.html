@@ -7243,7 +7243,7 @@ async function handleAddPlayer(e) {
       status: 'active',
       role: role,
       subscription_type: 'association',
-      team_id: role === 'player' ? (document.getElementById('adminTeam')?.value || null) : null,
+      team_id: (role === 'player' || role === 'coach') ? (document.getElementById('adminTeam')?.value || null) : null,
       expires_at: window._adminSubscription?.expires_at || null,
       force_password_reset: true
     });
@@ -7258,16 +7258,21 @@ async function handleAddPlayer(e) {
       console.error('Subscription insert error:', subError);
       throw new Error('Failed to create subscription: ' + subError.message);
     }
-    
 
-    
+    // For coaches, also link them on the teams table itself (teams.coach_id)
+    const selectedTeamId = document.getElementById('adminTeam')?.value || null;
+    if (role === 'coach' && selectedTeamId) {
+      await sb.from('teams').update({ coach_id: authData.userId }).eq('id', selectedTeamId);
+    }
+
     msg.style.color = '#4ade80';
-    msg.textContent = `✓ Player added! Password reset email sent to ${email}`;
+    msg.textContent = `✓ ${role === 'coach' ? 'Coach' : 'Player'} added! Password reset email sent to ${email}`;
     msg.style.display = 'block';
     document.getElementById('adminFirstName').value = '';
     document.getElementById('adminLastName').value = '';
     document.getElementById('adminEmail').value = '';
     loadPlayerList(window._isSuperAdmin);
+    loadTeams();
     
   } catch (error) {
     msg.style.color = '#f87171';
@@ -9255,22 +9260,23 @@ async function loadTeams() {
       return;
     }
     
-    // Get coaches for assignment
+    // Get coaches for assignment — grouped by team (supports multiple coaches per team)
     const { data: coaches } = await sb
       .from('subscriptions')
-      .select('user_id, first_name, last_name, email')
+      .select('user_id, team_id, first_name, last_name, email')
       .eq('organization_id', window._userOrgId)
       .eq('role', 'coach');
-    
-    const coachMap = {};
-    (coaches || []).forEach(c => coachMap[c.user_id] = c);
+
+    const coachesByTeam = {};
+    (coaches || []).forEach(c => { if (c.team_id) { if (!coachesByTeam[c.team_id]) coachesByTeam[c.team_id] = []; coachesByTeam[c.team_id].push(c); } });
     const { data: allPlayersT } = await sb.from('subscriptions').select('user_id, team_id, first_name, last_name, email').eq('role', 'player').eq('organization_id', window._userOrgId || 'individual');
     const playersByTeam = {};
     (allPlayersT || []).forEach(p => { if (p.team_id) { if (!playersByTeam[p.team_id]) playersByTeam[p.team_id] = []; playersByTeam[p.team_id].push(p); } });
     let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
     for (const team of teams) {
-      const coach = coachMap[team.coach_id];
-      const coachName = coach ? ([coach.first_name, coach.last_name].filter(Boolean).join(' ') || coach.email) : 'No coach assigned';
+      const teamCoaches = coachesByTeam[team.id] || [];
+      const coachNames = teamCoaches.map(c => [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email);
+      const coachName = coachNames.length ? coachNames.join(', ') : 'No coach assigned';
       const players = playersByTeam[team.id] || [];
       let rosterHtml = players.length ? players.map(p => { const n = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email; return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1a1a1a;font-size:12px;"><span style="color:rgba(255,255,255,0.75);">${n}</span><span style="color:#60a5fa;font-size:10px;font-weight:700;text-transform:uppercase;">Player</span></div>`; }).join('') : '<div style="font-size:11px;color:rgba(255,255,255,0.3);padding:4px 0;">No players assigned</div>';
       const detailId = 'roster-' + team.id;
