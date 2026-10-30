@@ -3504,6 +3504,7 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
       const pLabel = playerMap[g.player_id] || 'Unknown';
       return `<div style="padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="openItemDetail('goal','${g.id}')">
         <div style="display:flex;align-items:center;gap:10px;">
+          <input type="checkbox" class="goal-select-cb" data-goal-id="${g.id}" onclick="event.stopPropagation();updateGoalSelection('${_tId}')" style="width:15px;height:15px;flex-shrink:0;cursor:pointer;accent-color:#60a5fa;">
           <div onclick="event.stopPropagation();toggleGoalComplete('${g.id}',${isDone})"
             style="width:20px;height:20px;border-radius:5px;border:2px solid ${isDone?'#4ade80':'#444'};background:${isDone?'#4ade80':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;">
             ${isDone?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
@@ -3529,12 +3530,17 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
   }
 
   const goalsSectionHtml = `<div id="coachGoalSection_${_tId}" style="background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:14px 16px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px;flex-wrap:wrap;">
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#fff;">Goals</div>
-      <button onclick="openCombinedGoalModal(null,null)" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="goalDeleteSelectedBtn_${_tId}" onclick="deleteSelectedGoals('${_tId}')" style="display:none;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">Delete Selected (<span id="goalSelectedCount_${_tId}">0</span>)</button>
+        <button onclick="openCombinedGoalModal(null,null)" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
+      </div>
     </div>
     ${tabsHtml}
-    ${goalsListHtml}
+    <div id="goalsListScroll_${_tId}" style="max-height:420px;overflow-y:auto;">
+      ${goalsListHtml}
+    </div>
   </div>`;
 
   el.innerHTML = summaryHtml + rosterHtml + goalsSectionHtml;
@@ -4266,6 +4272,36 @@ async function deleteGoal(id) {
     const _dTarget = document.getElementById('dashboardContent')?.closest('.sec')?.style.display !== 'none' ? 'dashboardContent' : 'playerDashContent';
     loadDashboard(_dTarget);
   } catch(e) { alert('Error: ' + e.message); }
+}
+
+function updateGoalSelection(targetId) {
+  const scrollEl = document.getElementById('goalsListScroll_' + targetId);
+  if (!scrollEl) return;
+  const checked = scrollEl.querySelectorAll('.goal-select-cb:checked');
+  const btn = document.getElementById('goalDeleteSelectedBtn_' + targetId);
+  const countEl = document.getElementById('goalSelectedCount_' + targetId);
+  if (countEl) countEl.textContent = checked.length;
+  if (btn) btn.style.display = checked.length > 0 ? 'inline-block' : 'none';
+}
+
+async function deleteSelectedGoals(targetId) {
+  const scrollEl = document.getElementById('goalsListScroll_' + targetId);
+  if (!scrollEl) return;
+  const ids = Array.from(scrollEl.querySelectorAll('.goal-select-cb:checked')).map(cb => cb.dataset.goalId);
+  if (!ids.length) return;
+
+  if (!confirm(`Delete ${ids.length} selected goal${ids.length !== 1 ? 's' : ''}? This cannot be undone.`)) return;
+
+  try {
+    const sb = await getSupabaseClient();
+    const { error } = await sb.from('goals').delete().in('id', ids);
+    if (error) throw error;
+    window._dashGoals = (window._dashGoals || []).filter(g => !ids.includes(g.id));
+    const _dTarget = document.getElementById('dashboardContent')?.closest('.sec')?.style.display !== 'none' ? 'dashboardContent' : 'playerDashContent';
+    loadDashboard(_dTarget);
+  } catch (e) {
+    alert('Error: ' + e.message);
+  }
 }
 
 async function deleteGoalComment(commentId, goalId) {
