@@ -1495,6 +1495,35 @@ let _msgRealtimeChannel = null;
 let _msgLastRead = null;
 let allPlayers = []; // Store all player data for filtering
 
+// Cache for aggregated player stats (shots/minutes/workouts) so rapid
+// admin-panel reloads don't re-hit the database every time
+let _orgStatsCache = { orgId: null, data: null, timestamp: 0 };
+const ORG_STATS_CACHE_MS = 5 * 60 * 1000; // 5 minutes
+
+async function getOrgPlayerStats(sb, orgId, forceRefresh = false) {
+  const now = Date.now();
+  if (!forceRefresh && _orgStatsCache.orgId === orgId && _orgStatsCache.data && (now - _orgStatsCache.timestamp) < ORG_STATS_CACHE_MS) {
+    return _orgStatsCache.data;
+  }
+
+  const { data, error } = await sb.rpc('get_org_player_stats', { org_id: orgId });
+  const statsByUser = {};
+  if (error) {
+    console.error('Error loading player stats:', error);
+  } else if (data) {
+    data.forEach(row => {
+      statsByUser[row.user_id] = {
+        shots: row.shots || 0,
+        mins: row.mins || 0,
+        workouts: row.workouts || 0
+      };
+    });
+  }
+
+  _orgStatsCache = { orgId, data: statsByUser, timestamp: now };
+  return statsByUser;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // SUPABASE AUTH CHECK - Verifies user is logged in with active subscription
 // ═══════════════════════════════════════════════════════════════════════════
@@ -7280,36 +7309,8 @@ async function loadPlayerList(isSuperAdmin = false) {
     if (error) throw error;
     
     // Query workout stats filtered by org
-    let shootingQuery = sb.from('shooting_sessions').select('user_id, total_shots').eq('organization_id', orgId);
-    let stickQuery = sb.from('stickhandling_sessions').select('user_id, minutes').eq('organization_id', orgId);
-    let completionsQuery = sb.from('exercise_completions').select('user_id, exercise_name').eq('organization_id', orgId);
-    
-    const { data: shootingSessions } = await shootingQuery;
-    const { data: stickSessions } = await stickQuery;
-    const { data: completions } = await completionsQuery;
-    
-    // Aggregate by user
-    const statsByUser = {};
-    if (shootingSessions) {
-      shootingSessions.forEach(s => {
-        if (!statsByUser[s.user_id]) statsByUser[s.user_id] = {shots:0, mins:0, workouts:0};
-        statsByUser[s.user_id].shots += s.total_shots || 0;
-      });
-    }
-    if (stickSessions) {
-      stickSessions.forEach(s => {
-        if (!statsByUser[s.user_id]) statsByUser[s.user_id] = {shots:0, mins:0, workouts:0};
-        statsByUser[s.user_id].mins += s.minutes || 0;
-      });
-    }
-    if (completions) {
-      // Only count full day completions, not individual exercises
-      const fullDayCompletions = completions.filter(c => c.exercise_name === 'FULL_DAY_COMPLETED');
-      fullDayCompletions.forEach(c => {
-        if (!statsByUser[c.user_id]) statsByUser[c.user_id] = {shots:0, mins:0, workouts:0};
-        statsByUser[c.user_id].workouts += 1;
-      });
-    }
+    // Pre-aggregated server-side (see get_org_player_stats SQL function), with a short client cache
+    const statsByUser = await getOrgPlayerStats(sb, orgId);
     
     // NOW update the stats display
     const statTotal = document.getElementById('statTotal');
