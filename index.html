@@ -7368,7 +7368,7 @@ async function loadPlayerList(isSuperAdmin = false) {
       }
     }
     
-    if (statTotal) statTotal.textContent = subs.length;
+    if (statTotal) statTotal.textContent = playerCount;
     if (statActive) statActive.textContent = subs.filter(s => s.status === 'active').length;
     
     // Calculate grand totals
