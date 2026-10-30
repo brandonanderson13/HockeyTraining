@@ -7756,12 +7756,15 @@ function renderTeamsRoster(people) {
   }
 
   // Association accounts — group by team, with coaches listed above players within each team
+  const validTeamIds = new Set(teams.map(t => t.id));
   const byTeam = {};
   const unassigned = [];
   const admins = [];
   people.forEach(p => {
     if (p.role === 'admin') { admins.push(p); return; }
-    if (p.team_id) {
+    // Treat a team_id that doesn't match any existing team the same as having none at all —
+    // protects against orphaned references (e.g. from a deleted team) silently hiding people
+    if (p.team_id && validTeamIds.has(p.team_id)) {
       if (!byTeam[p.team_id]) byTeam[p.team_id] = [];
       byTeam[p.team_id].push(p);
     } else {
@@ -8979,29 +8982,6 @@ async function createTeam() {
   }
 }
 
-async function deleteTeam(id, name) {
-  if (!confirm(`Delete team "${name}"?\n\nPlayers on this team will be unassigned.`)) return;
-  
-  try {
-    const sb = await getSupabaseClient();
-    
-    // Unassign players first
-    await sb.from('subscriptions')
-      .update({ team_id: null })
-      .eq('team_id', id);
-    
-    // Delete team
-    const { error } = await sb.from('teams').delete().eq('id', id);
-    if (error) throw error;
-    
-    loadTeams();
-  populateTeamDropdown();
-  populateAdminTeamDropdown();
-  } catch (error) {
-    alert('Error: ' + error.message);
-  }
-}
-
 async function assignCoachToTeam(teamId, teamName) {
   // Load coaches for selection
   const sb = await getSupabaseClient();
@@ -9258,18 +9238,24 @@ function loadTeams() {
 }
 
 async function deleteTeam(teamId, teamName) {
-  if (!confirm(`Delete team "${teamName}"?\n\nPlayers on this team will be unassigned.`)) return;
+  if (!confirm(`Delete team "${teamName}"?\n\nPlayers and coaches on this team will be unassigned (not deleted).`)) return;
   
   try {
     const sb = await getSupabaseClient();
+
+    // Unassign everyone on this team BEFORE deleting it, so nobody is left
+    // pointing at a team_id that no longer exists
+    const { error: unassignError } = await sb.from('subscriptions')
+      .update({ team_id: null })
+      .eq('team_id', teamId);
+    if (unassignError) throw unassignError;
+
     const { error } = await sb.from('teams').delete().eq('id', teamId);
-    
     if (error) throw error;
     
     loadTeams();
-  populateTeamDropdown();
-  populateAdminTeamDropdown();
-    loadPlayers(); // Refresh player list
+    populateTeamDropdown();
+    populateAdminTeamDropdown();
   } catch (error) {
     alert('Error: ' + error.message);
   }
