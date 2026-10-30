@@ -6910,7 +6910,10 @@ async function loadAdminPanel(user) {
     </div>` : ''}
     
     <div class="card" style="margin-bottom:1rem;" id="teamsCard">
-      <div class="ch"><span class="cht">Teams</span></div>
+      <div class="ch">
+        <span class="cht">Teams</span>
+        <button onclick="refreshPlayerList()" style="margin-left:auto;background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.5);font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;">Refresh</button>
+      </div>
       <div class="cb">
         <p style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:14px;">Create teams to organize your players and coaches.</p>
         <div style="display:flex;gap:8px;margin-bottom:12px;">
@@ -6918,6 +6921,25 @@ async function loadAdminPanel(user) {
           <button onclick="createTeam()" class="btn-o" style="margin:0;">Create Team</button>
         </div>
         <div id="teamMsg" style="font-size:12px;display:none;margin-bottom:8px;"></div>
+
+        <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input type="text" id="playerSearch" placeholder="Search by name or email..." style="flex:1;min-width:180px;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:6px 10px;border-radius:4px;" oninput="filterPlayers()">
+          <select id="roleFilter" onchange="filterPlayers()" style="background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:6px 10px;border-radius:4px;">
+            <option value="">All Roles</option>
+            <option value="player">Players Only</option>
+            <option value="coach">Coaches Only</option>
+          </select>
+          <select id="statusFilter" onchange="filterPlayers()" style="background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:6px 10px;border-radius:4px;">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <select id="teamFilter" onchange="filterPlayers()" style="background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:6px 10px;border-radius:4px;">
+            <option value="">All Teams</option>
+          </select>
+        </div>
+
         <div id="teamsList">Loading...</div>
       </div>
     </div>
@@ -7077,28 +7099,7 @@ async function loadAdminPanel(user) {
       </div>
     </div>
 
-        <div class="card">
-      <div class="ch">
-        <span class="cht">All Players</span>
-        <button onclick="refreshPlayerList()" style="margin-left:auto;background:#1a1a1a;border:1px solid #333;color:rgba(255,255,255,0.5);font-size:11px;padding:4px 10px;border-radius:4px;cursor:pointer;">Refresh</button>
-      </div>
-      <div class="cb">
-        <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;">
-          <input type="text" id="playerSearch" placeholder="Search by name or email..." style="flex:1;background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:6px 10px;border-radius:4px;" oninput="filterPlayers()">
-          <select id="roleFilter" onchange="filterPlayers()" style="background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:6px 10px;border-radius:4px;">
-            <option value="">All Roles</option>
-            <option value="admin">Admins Only</option>
-            <option value="player">Players Only</option>
-            <option value="coach">Coaches Only</option>
-          </select>
 
-          <select id="teamFilter" onchange="filterPlayers()" style="background:#0d0d0d;border:1px solid #333;color:#fff;font-size:12px;padding:6px 10px;border-radius:4px;">
-            <option value="">All Teams</option>
-          </select>
-        </div>
-        <div id="playerListContainer">Loading...</div>
-      </div>
-    </div>
   `;
   
   // Hide add player form if not super admin AND not association admin
@@ -7302,27 +7303,55 @@ async function resendInvite(userId, email, btnEl) {
   }
 }
 
+function buildPersonRow(sub, loginStatusMap, isSuperAdmin) {
+  const isExpired = sub.expires_at && new Date(sub.expires_at) < new Date();
+  const statusColor = sub.status === 'active' && !isExpired ? '#4ade80' : (sub.status === 'pending' ? '#fb923c' : '#f87171');
+  const statusText = isExpired ? 'Expired' : sub.status;
+  const roleLabel = sub.role === 'admin' ? 'Admin' : sub.role === 'coach' ? 'Coach' : 'Player';
+  const roleColor = sub.role === 'admin' ? 'var(--primary-color)' : sub.role === 'coach' ? '#fbbf24' : '#60a5fa';
+  const displayName = (sub.first_name || sub.last_name) ? `${sub.first_name || ''} ${sub.last_name || ''}`.trim() : '—';
+  const isMe = sub.email === 'brandonanderson1393@gmail.com';
+
+  return `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1a1a1a;flex-wrap:wrap;">
+    <div style="flex:1;min-width:160px;">
+      <div style="font-size:13px;color:rgba(255,255,255,0.85);font-weight:600;">${displayName} <span style="color:${roleColor};font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-left:6px;">${roleLabel}</span></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);">${sub.email} · <span style="color:${statusColor};">${statusText}</span></div>
+    </div>
+    <div style="white-space:nowrap;">
+      ${!loginStatusMap[sub.user_id] ? '<button onclick="resendInvite(\''+sub.user_id+'\',\''+sub.email+'\',this)" style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);color:#4ade80;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Resend Invite</button>' : '<button disabled title="This user has already logged in" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.25);font-size:10px;padding:4px 8px;border-radius:4px;cursor:not-allowed;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Resend Invite</button>'}
+      ${sub.stripe_subscription_id ? '<button onclick="adminCancelStripe(\''+sub.id+'\',\''+sub.email+'\',\''+sub.stripe_subscription_id+'\')" style="background:#fb923c;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Cancel</button>' : ''}
+      ${(isSuperAdmin && (!sub.organization_id || sub.organization_id === 'individual')) ? '<button onclick="editExpiration(\''+sub.id+'\',\''+sub.email+'\',\''+(sub.expires_at||'')+'\')" style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;color:#3b82f6;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Set Expires</button>' : ''}
+      ${isMe ? '<button onclick="editOrgLimit()" style="background:#60a5fa;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Edit Org Limit</button>' : ''}
+      ${(!isMe && sub.role !== 'admin') ? '<button onclick="editPlayerTeam(\''+sub.id+'\',\''+(sub.team_id||'')+'\')" style="background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.3);color:#60a5fa;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Team</button>' : ''}
+      ${!isMe ? '<button onclick="deleteUserFully(\''+sub.id+'\',\''+sub.user_id+'\',\''+sub.email+'\')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-left:2px;">Delete</button>' : ''}
+    </div>
+  </div>`;
+}
+
 async function loadPlayerList(isSuperAdmin = false) {
-  const container = document.getElementById('playerListContainer');
+  const container = document.getElementById('teamsList');
   if (!container) return;
   container.innerHTML = 'Loading...';
   
   try {
     const sb = await getSupabaseClient();
-    
-    // Fetch teams for team name lookup
-    const { data: teamsData } = await sb.from('teams').select('id, team_name').eq('organization_id', window._userOrgId || 'individual');
-    const teamNameMap = {};
-    (teamsData || []).forEach(t => { teamNameMap[t.id] = t.team_name; });
+    const orgId = window._userOrgId || 'individual';
+
+    // Fetch teams (associations only — "individual" org has no team concept)
+    let teams = [];
+    if (orgId !== 'individual') {
+      const { data: teamsData } = await sb.from('teams').select('id, team_name').eq('organization_id', orgId).eq('is_active', true).order('team_name');
+      teams = teamsData || [];
+    }
+    window._teamsForRoster = teams;
+
     // Populate team filter dropdown
     const teamFilterEl = document.getElementById('teamFilter');
-    if (teamFilterEl && teamsData) {
+    if (teamFilterEl) {
       teamFilterEl.innerHTML = '<option value="">All Teams</option>' +
-        teamsData.map(t => `<option value="${t.id}">${t.team_name}</option>`).join('');
+        teams.map(t => `<option value="${t.id}">${t.team_name}</option>`).join('');
     }
 
-    // Always filter by the current org (super admin picks org on login)
-    const orgId = window._userOrgId || 'individual';
     let query = sb.from('subscriptions').select('*');
     if (orgId === 'individual') {
       // Show users with org = 'individual' OR null (no association)
@@ -7352,11 +7381,10 @@ async function loadPlayerList(isSuperAdmin = false) {
       }
     }
     
-    // Query workout stats filtered by org
     // Pre-aggregated server-side (see get_org_player_stats SQL function), with a short client cache
     const statsByUser = await getOrgPlayerStats(sb, orgId);
     
-    // NOW update the stats display
+    // Quick Stats summary cards (unrelated to the per-row display, still useful)
     const statTotal = document.getElementById('statTotal');
     const statActive = document.getElementById('statActive');
     const statTotalShots = document.getElementById('statTotalShots');
@@ -7365,7 +7393,6 @@ async function loadPlayerList(isSuperAdmin = false) {
     
     const playerCount = subs.filter(s => s.role === 'player').length; // Don't count admins
     
-    // Calculate org-wide seat limit — use org table value as source of truth
     const maxSeats = window._orgSeatLimit || (() => {
       const orgAdmins = subs.filter(s => s.role === 'admin' && s.seat_limit);
       return orgAdmins.length > 0
@@ -7382,26 +7409,20 @@ async function loadPlayerList(isSuperAdmin = false) {
     if (playersUsedDetailEl) playersUsedDetailEl.textContent = playerCount;
     if (orgSeatLimitEl) orgSeatLimitEl.textContent = maxSeats === 999999 ? 'unlimited' : maxSeats;
     
-    // Update My Subscription card plan limit
     const mySubPlanLimit = document.getElementById('mySubPlanLimit');
     if (mySubPlanLimit) mySubPlanLimit.textContent = maxSeats === 999999 ? 'Unlimited Players' : maxSeats + ' Players';
     
-    // Calculate and show remaining players
     const _displayLimit = window._orgSeatLimit || window._adminSubscription?.seat_limit;
     if (_displayLimit) {
       const limit = _displayLimit;
       if (limit !== 999999) {
         const remaining = limit - playerCount;
-        
-        // Update Add Player header
         if (playersRemainingEl) {
           playersRemainingEl.textContent = remaining > 0 
             ? `${remaining} seat${remaining === 1 ? '' : 's'} remaining`
             : 'At player limit — upgrade to add more';
           playersRemainingEl.style.color = remaining > 0 ? 'rgba(255,255,255,0.4)' : '#f87171';
         }
-        
-        // Update My Subscription card
         const playersRemainingTextEl = document.getElementById('seatsRemainingText');
         if (playersRemainingTextEl) {
           playersRemainingTextEl.textContent = remaining > 0
@@ -7415,7 +7436,6 @@ async function loadPlayerList(isSuperAdmin = false) {
     if (statTotal) statTotal.textContent = playerCount;
     if (statActive) statActive.textContent = subs.filter(s => s.status === 'active').length;
     
-    // Calculate grand totals
     let grandTotalShots = 0, grandTotalMins = 0, grandTotalWorkouts = 0;
     Object.values(statsByUser).forEach(s => {
       grandTotalShots += s.shots;
@@ -7429,48 +7449,23 @@ async function loadPlayerList(isSuperAdmin = false) {
     
     if (!subs || subs.length === 0) {
       container.innerHTML = '<p style="color:rgba(255,255,255,0.4);font-size:13px;padding:20px;text-align:center;">No players yet</p>';
+      allPlayers = [];
       return;
     }
     
-    const showExpiresColumn = orgId === 'individual';
-    let html = '<div class="player-table-wrapper"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1400px;"><thead><tr style="border-bottom:1px solid #222;"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Name</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Team</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Email</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Role</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Status</th>' + (showExpiresColumn ? '<th style="text-align:center;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Expires</th>' : '') + '<th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;">Actions</th></tr></thead><tbody>';
-    
-    // Store players for filtering
+    window._showExpiresColumn = orgId === 'individual';
+
     allPlayers = [];
-    
     subs.forEach(sub => {
       const isExpired = sub.expires_at && new Date(sub.expires_at) < new Date();
-      const statusColor = sub.status === 'active' && !isExpired ? '#4ade80' : (sub.status === 'pending' ? '#fb923c' : '#f87171');
       const statusText = isExpired ? 'Expired' : sub.status;
-      const roleColor = sub.role === 'admin' ? 'var(--primary-color)' : 'rgba(255,255,255,0.5)';
-      
-      const stats = statsByUser[sub.user_id] || {shots:0, mins:0, workouts:0};
-      
       const displayName = (sub.first_name || sub.last_name) 
         ? `${sub.first_name || ''} ${sub.last_name || ''}`.trim()
         : '—';
-      
-      const teamName = sub.team_id ? (teamNameMap[sub.team_id] || '—') : '—';
-      const rowHtml = `<tr style="border-bottom:1px solid #1a1a1a;">
-        <td style="padding:10px 8px;color:rgba(255,255,255,0.85);font-weight:600;">${displayName}</td>
-        <td style="padding:10px 8px;color:rgba(255,255,255,0.55);font-size:11px;">${teamName}</td>
-        <td style="padding:10px 8px;color:rgba(255,255,255,0.5);font-size:11px;">${sub.email}</td>
-        <td style="padding:10px 8px;color:${roleColor};font-weight:600;">${sub.role || 'player'}</td>
-        <td style="padding:10px 8px;color:${statusColor};font-weight:600;">${statusText}</td>
-        ${showExpiresColumn ? `<td style="padding:10px 8px;text-align:center;font-size:10px;">
-          ${sub.expires_at ? 
-            `<span style="color:rgba(255,255,255,0.5);">${new Date(sub.expires_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'})}</span>` 
-            : '<span style="color:rgba(255,255,255,0.25);">—</span>'}
-        </td>` : ''}
-        <td style="padding:10px 8px;white-space:nowrap;">
-          ${!loginStatusMap[sub.user_id] ? '<button onclick="resendInvite(\''+sub.user_id+'\',\''+sub.email+'\',this)" style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);color:#4ade80;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Resend Invite</button>' : '<button disabled title="This user has already logged in" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.25);font-size:10px;padding:4px 8px;border-radius:4px;cursor:not-allowed;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Resend Invite</button>'}
-          ${sub.stripe_subscription_id ? '<button onclick="adminCancelStripe(\''+sub.id+'\',\''+sub.email+'\',\''+sub.stripe_subscription_id+'\')" style="background:#fb923c;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Cancel</button>' : ''}
-          ${(isSuperAdmin && (!sub.organization_id || sub.organization_id === 'individual')) ? '<button onclick="editExpiration(\''+sub.id+'\',\''+sub.email+'\',\''+(sub.expires_at||'')+'\')" style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;color:#3b82f6;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Set Expires</button>' : ''}
-          ${sub.email === 'brandonanderson1393@gmail.com' ? '<button onclick="editOrgLimit()" style="background:#60a5fa;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Edit Org Limit</button>' : ''}
-          <button onclick="editPlayerTeam('${sub.id}','${sub.team_id||''}')" style="background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.3);color:#60a5fa;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Team</button>
-          ${sub.email !== 'brandonanderson1393@gmail.com' ? '<button onclick="deleteUserFully(\''+sub.id+'\',\''+sub.user_id+'\',\''+sub.email+'\')" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-left:2px;">Delete</button>' : ''}
-        </td>
-      </tr>`;
+      const teamObj = teams.find(t => t.id === sub.team_id);
+      const teamName = teamObj ? teamObj.team_name : '—';
+
+      const rowHtml = buildPersonRow(sub, loginStatusMap, isSuperAdmin);
       
       allPlayers.push({
         name: displayName,
@@ -7478,16 +7473,12 @@ async function loadPlayerList(isSuperAdmin = false) {
         team_id: sub.team_id || '',
         email: sub.email,
         role: sub.role || 'player',
-        status: statusText,
-        players: sub.seat_limit || 0,
-        shots: stats.shots,
-        mins: stats.mins,
-        workouts: stats.workouts,
+        status: sub.status, // raw status, used for filtering (statusText above is just for display)
         html: rowHtml
       });
     });
     
-    renderPlayerTable(allPlayers);
+    renderTeamsRoster(allPlayers);
     
   } catch (error) {
     container.innerHTML = '<p style="color:#f87171;padding:20px;">Error: ' + error.message + '</p>';
@@ -7731,7 +7722,7 @@ async function loadAccountDetails() {
 function filterPlayers() {
   const search = document.getElementById('playerSearch').value.toLowerCase();
   const roleFilter = document.getElementById('roleFilter').value;
-  const statusFilter = '';
+  const statusFilter = document.getElementById('statusFilter')?.value || '';
   const teamFilter = document.getElementById('teamFilter')?.value || '';
 
   const filtered = allPlayers.filter(p => {
@@ -7739,63 +7730,104 @@ function filterPlayers() {
       (p.name && p.name.toLowerCase().includes(search)) ||
       (p.email && p.email.toLowerCase().includes(search));
     const matchesRole = !roleFilter || p.role === roleFilter;
-    const matchesStatus = !statusFilter || p.status === statusFilter;
+    const matchesStatus = !statusFilter || (p.status || '').toLowerCase() === statusFilter;
     const matchesTeam = !teamFilter || p.team_id === teamFilter;
     return matchesSearch && matchesRole && matchesStatus && matchesTeam;
   });
 
-  renderPlayerTable(filtered);
+  renderTeamsRoster(filtered);
 }
 
-function renderPlayerTable(players) {
-  const container = document.getElementById('playerListContainer');
+function renderTeamsRoster(people) {
+  const container = document.getElementById('teamsList');
   if (!container) return;
-  
-  if (players.length === 0) {
-    container.innerHTML = '<p style="color:rgba(255,255,255,0.4);padding:20px;text-align:center;">No players match your filters</p>';
+
+  const orgId = window._userOrgId || 'individual';
+  const teams = window._teamsForRoster || [];
+
+  // Individual (non-association) accounts have no team concept — flat list
+  if (orgId === 'individual') {
+    if (!people.length) {
+      container.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.4);font-size:12px;">No players match your filters</div>';
+      return;
+    }
+    container.innerHTML = '<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:4px 12px;">' + people.map(p => p.html).join('') + '</div>';
     return;
   }
-  
-  let html = '<div class="player-table-wrapper"><table style="width:100%;border-collapse:collapse;font-size:11px;min-width:1400px;"><thead><tr style="border-bottom:1px solid #222;"><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'name\')">Name ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'team\')">Team ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'email\')">Email ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'role\')">Role ↕</th><th style="text-align:left;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'status\')">Status ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'shots\')">Shots ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'mins\')">Stick Min ↕</th><th style="text-align:right;padding:8px;color:rgba(255,255,255,0.5);font-family:Barlow Condensed;font-size:10px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;" onclick="sortPlayers(\'workouts\')">Workouts ↕</th></tr></thead><tbody>';
-  
-  players.forEach(p => {
-    html += p.html;
-  });
-  
-  html += '</tbody></table></div>';
-  container.innerHTML = html;
-}
 
-let sortColumn = 'name';
-let sortDirection = 'asc';
-
-function sortPlayers(column) {
-  if (sortColumn === column) {
-    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
-  } else {
-    sortColumn = column;
-    sortDirection = 'asc';
-  }
-  
-  allPlayers.sort((a, b) => {
-    let aVal = a[column] || '';
-    let bVal = b[column] || '';
-    
-    if (typeof aVal === 'number') {
-      return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
-    }
-    
-    aVal = String(aVal).toLowerCase();
-    bVal = String(bVal).toLowerCase();
-    
-    if (sortDirection === 'asc') {
-      return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+  // Association accounts — group by team, with coaches listed above players within each team
+  const byTeam = {};
+  const unassigned = [];
+  const admins = [];
+  people.forEach(p => {
+    if (p.role === 'admin') { admins.push(p); return; }
+    if (p.team_id) {
+      if (!byTeam[p.team_id]) byTeam[p.team_id] = [];
+      byTeam[p.team_id].push(p);
     } else {
-      return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+      unassigned.push(p);
     }
   });
-  
-  filterPlayers();
+
+  let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+
+  if (!teams.length) {
+    html += '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.4);font-size:12px;">No teams yet — create one above to get started.</div>';
+  }
+
+  for (const team of teams) {
+    const members = byTeam[team.id] || [];
+    const coaches = members.filter(m => m.role === 'coach');
+    const players = members.filter(m => m.role === 'player');
+    const detailId = 'roster-' + team.id;
+    const summaryParts = [];
+    if (coaches.length) summaryParts.push(coaches.length + ' coach' + (coaches.length !== 1 ? 'es' : ''));
+    summaryParts.push(players.length + ' player' + (players.length !== 1 ? 's' : ''));
+
+    html += `<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;overflow:hidden;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;cursor:pointer;" onclick="const d=document.getElementById('${detailId}');const open=d.style.display==='block';d.style.display=open?'none':'block';this.querySelector('.arr').textContent=open?'▶':'▼';">
+        <div><span style="font-weight:700;font-size:14px;color:#fff;">${team.team_name}</span><span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:8px;">${summaryParts.join(' · ')}</span></div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="arr" style="font-size:10px;color:rgba(255,255,255,0.3);">▶</span>
+          <button onclick="event.stopPropagation();deleteTeam('${team.id}','${team.team_name}')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;cursor:pointer;">Delete Team</button>
+        </div>
+      </div>
+      <div id="${detailId}" style="display:none;border-top:1px solid #1a1a1a;padding:4px 12px;">
+        ${coaches.length ? '<div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin:8px 0 2px;">Coaches</div>' + coaches.map(c => c.html).join('') : ''}
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin:8px 0 2px;">Players</div>
+        ${players.length ? players.map(p => p.html).join('') : '<div style="font-size:11px;color:rgba(255,255,255,0.3);padding:4px 0;">No players assigned</div>'}
+      </div>
+    </div>`;
+  }
+
+  if (unassigned.length) {
+    const detailId = 'roster-unassigned';
+    html += `<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;overflow:hidden;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;cursor:pointer;" onclick="const d=document.getElementById('${detailId}');const open=d.style.display==='block';d.style.display=open?'none':'block';this.querySelector('.arr').textContent=open?'▶':'▼';">
+        <div><span style="font-weight:700;font-size:14px;color:#fff;">Unassigned</span><span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:8px;">${unassigned.length} ${unassigned.length !== 1 ? 'people' : 'person'}</span></div>
+        <span class="arr" style="font-size:10px;color:rgba(255,255,255,0.3);">▶</span>
+      </div>
+      <div id="${detailId}" style="display:none;border-top:1px solid #1a1a1a;padding:4px 12px;">
+        ${unassigned.map(p => p.html).join('')}
+      </div>
+    </div>`;
+  }
+
+  if (admins.length) {
+    const detailId = 'roster-admins';
+    html += `<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;overflow:hidden;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;cursor:pointer;" onclick="const d=document.getElementById('${detailId}');const open=d.style.display==='block';d.style.display=open?'none':'block';this.querySelector('.arr').textContent=open?'▶':'▼';">
+        <div><span style="font-weight:700;font-size:14px;color:#fff;">Admins</span><span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:8px;">${admins.length}</span></div>
+        <span class="arr" style="font-size:10px;color:rgba(255,255,255,0.3);">▶</span>
+      </div>
+      <div id="${detailId}" style="display:none;border-top:1px solid #1a1a1a;padding:4px 12px;">
+        ${admins.map(p => p.html).join('')}
+      </div>
+    </div>`;
+  }
+
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 
@@ -8911,61 +8943,8 @@ function toggleCustomComplete(checkbox, exId, dayKey, totalExercises) {
 // TEAMS MANAGEMENT
 // ============================================
 
-async function loadTeams() {
-  const container = document.getElementById('teamsList');
-  if (!container) return;
-  
-  try {
-    const sb = await getSupabaseClient();
-    const _teamsOrgId = window._userOrgId || 'individual';
-    const { data, error } = await sb.from('teams')
-      .select(`
-        *,
-        coach:subscriptions!coach_id(email, first_name, last_name)
-      `)
-      .eq('organization_id', _teamsOrgId)
-      .order('team_name');
-    
-    if (error) throw error;
-    
-    if (!data || data.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.4);font-size:12px;">No teams yet</div>';
-      return;
-    }
-    
-    let html = '<div style="display:flex;flex-direction:column;gap:8px;">';
-    for (const team of data) {
-      // Count players
-      const {count} = await sb.from('subscriptions')
-        .select('*', {count: 'exact', head: true})
-        .eq('team_id', team.id)
-        .eq('role', 'player');
-      
-      const coachName = [team.coach?.first_name, team.coach?.last_name].filter(Boolean).join(' ') || team.coach?.email || 'No coach';
-      
-      html += `
-        <div style="background:#0d0d0d;border:1px solid #222;border-radius:6px;padding:12px;display:flex;justify-content:space-between;align-items:center;">
-          <div style="flex:1;">
-            <div style="font-weight:600;font-size:14px;color:#fff;margin-bottom:4px;">${team.team_name}</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.4);">Coach: ${coachName} · ${count || 0} players</div>
-          </div>
-          <div style="display:flex;gap:6px;">
-            <button onclick="assignCoachToTeam('${team.id}','${team.team_name}')" class="btn-sm" style="background:#60a5fa;">Assign Coach</button>
-            <button onclick="deleteTeam('${team.id}','${team.team_name}')" class="btn-sm" style="background:#f87171;">Delete</button>
-          </div>
-        </div>
-      `;
-    }
-    html += '</div>';
-    container.innerHTML = html;
-    
-  } catch (error) {
-    container.innerHTML = `<div style="color:#f87171;font-size:12px;">Error: ${error.message}</div>`;
-  }
-}
-
 async function createTeam() {
-  const input = document.getElementById('newTeamName');
+  const input = document.getElementById('teamNameInput');
   const msg = document.getElementById('teamMsg');
   
   const name = input.value.trim();
@@ -9271,61 +9250,11 @@ async function createTeam() {
   }
 }
 
-async function loadTeams() {
-  const container = document.getElementById('teamsList');
-  if (!container) return;
-  
-  try {
-    const sb = await getSupabaseClient();
-    
-    // Get teams with coach info
-    const { data: teams, error } = await sb
-      .from('teams')
-      .select(`
-        id,
-        team_name,
-        coach_id,
-        created_at
-      `)
-      .eq('organization_id', window._userOrgId || 'individual')
-      .eq('is_active', true)
-      .order('team_name');
-    
-    if (error) throw error;
-    
-    if (!teams || teams.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.4);font-size:12px;">No teams yet</div>';
-      return;
-    }
-    
-    // Get coaches for assignment — grouped by team (supports multiple coaches per team)
-    const { data: coaches } = await sb
-      .from('subscriptions')
-      .select('user_id, team_id, first_name, last_name, email')
-      .eq('organization_id', window._userOrgId)
-      .eq('role', 'coach');
-
-    const coachesByTeam = {};
-    (coaches || []).forEach(c => { if (c.team_id) { if (!coachesByTeam[c.team_id]) coachesByTeam[c.team_id] = []; coachesByTeam[c.team_id].push(c); } });
-    const { data: allPlayersT } = await sb.from('subscriptions').select('user_id, team_id, first_name, last_name, email').eq('role', 'player').eq('organization_id', window._userOrgId || 'individual');
-    const playersByTeam = {};
-    (allPlayersT || []).forEach(p => { if (p.team_id) { if (!playersByTeam[p.team_id]) playersByTeam[p.team_id] = []; playersByTeam[p.team_id].push(p); } });
-    let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
-    for (const team of teams) {
-      const teamCoaches = coachesByTeam[team.id] || [];
-      const coachNames = teamCoaches.map(c => [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email);
-      const coachName = coachNames.length ? coachNames.join(', ') : 'No coach assigned';
-      const players = playersByTeam[team.id] || [];
-      let rosterHtml = players.length ? players.map(p => { const n = [p.first_name, p.last_name].filter(Boolean).join(' ') || p.email; return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1a1a1a;font-size:12px;"><span style="color:rgba(255,255,255,0.75);">${n}</span><span style="color:#60a5fa;font-size:10px;font-weight:700;text-transform:uppercase;">Player</span></div>`; }).join('') : '<div style="font-size:11px;color:rgba(255,255,255,0.3);padding:4px 0;">No players assigned</div>';
-      const detailId = 'roster-' + team.id;
-      html += `<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;overflow:hidden;"><div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;cursor:pointer;" onclick="const d=document.getElementById('${detailId}');const open=d.style.display==='block';d.style.display=open?'none':'block';this.querySelector('.arr').textContent=open?'▶':'▼';"><div><span style="font-weight:700;font-size:14px;color:#fff;">${team.team_name}</span><span style="font-size:11px;color:rgba(255,255,255,0.4);margin-left:8px;">${players.length} player${players.length!==1?'s':''} · Coach: ${coachName}</span></div><div style="display:flex;gap:8px;align-items:center;"><span class="arr" style="font-size:10px;color:rgba(255,255,255,0.3);">▶</span><button onclick="event.stopPropagation();deleteTeam('${team.id}','${team.team_name}')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;cursor:pointer;">Delete</button></div></div><div id="${detailId}" style="display:none;border-top:1px solid #1a1a1a;padding:10px 12px;"><div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Coach</div><div style="font-size:12px;color:rgba(255,255,255,0.75);margin-bottom:10px;">${coachName}</div><div style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Players</div>${rosterHtml}</div></div>`;
-    }
-    html += '</div>';
-    container.innerHTML = html;
-    
-  } catch (error) {
-    container.innerHTML = '<div style="color:#f87171;font-size:12px;">Error: ' + error.message + '</div>';
-  }
+// Teams and the player/coach roster are now rendered together by loadPlayerList().
+// loadTeams() is kept only so existing call sites (create/delete team, assign coach, etc.)
+// continue to work without needing to be found and updated individually.
+function loadTeams() {
+  loadPlayerList(window._isSuperAdmin);
 }
 
 async function deleteTeam(teamId, teamName) {
