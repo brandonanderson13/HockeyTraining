@@ -7319,6 +7319,7 @@ function buildPersonRow(sub, loginStatusMap, isSuperAdmin) {
     </div>
     <div style="white-space:nowrap;">
       ${!loginStatusMap[sub.user_id] ? '<button onclick="resendInvite(\''+sub.user_id+'\',\''+sub.email+'\',this)" style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);color:#4ade80;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Resend Invite</button>' : '<button disabled title="This user has already logged in" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.25);font-size:10px;padding:4px 8px;border-radius:4px;cursor:not-allowed;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Resend Invite</button>'}
+      ${!loginStatusMap[sub.user_id] ? '<button onclick="editPlayerEmail(\''+sub.id+'\',\''+sub.user_id+'\',\''+sub.email+'\')" style="background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.3);color:#60a5fa;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Edit Email</button>' : ''}
       ${sub.stripe_subscription_id ? '<button onclick="adminCancelStripe(\''+sub.id+'\',\''+sub.email+'\',\''+sub.stripe_subscription_id+'\')" style="background:#fb923c;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Cancel</button>' : ''}
       ${(isSuperAdmin && (!sub.organization_id || sub.organization_id === 'individual')) ? '<button onclick="editExpiration(\''+sub.id+'\',\''+sub.email+'\',\''+(sub.expires_at||'')+'\')" style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;color:#3b82f6;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Set Expires</button>' : ''}
       ${isMe ? '<button onclick="editOrgLimit()" style="background:#60a5fa;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:4px;cursor:pointer;font-family:Barlow Condensed;font-weight:700;text-transform:uppercase;margin-right:4px;">Edit Org Limit</button>' : ''}
@@ -8220,6 +8221,30 @@ async function editOrgExpiration(orgId, orgName, currentExpires) {
     loadSuperAdminSubs();
   } catch(e) {
     alert('Error: ' + e.message);
+  }
+}
+
+async function editPlayerEmail(subId, userId, currentEmail) {
+  const newEmail = prompt(`Edit email for ${currentEmail}\n\nThis only works for people who haven't logged in yet. A fresh invite will be sent to the new address.\n\nEnter the corrected email:`, currentEmail);
+
+  if (newEmail === null) return; // Cancelled
+  if (newEmail.trim() === '' || newEmail.trim().toLowerCase() === currentEmail.toLowerCase()) return;
+
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch('/api/admin-edit-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session?.access_token },
+      body: JSON.stringify({ subId, userId, newEmail: newEmail.trim() })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update email');
+
+    alert(`✓ Email updated to ${data.email} and a fresh invite was sent.`);
+    loadPlayerList(window._isSuperAdmin);
+  } catch (error) {
+    alert('Error: ' + error.message);
   }
 }
 
