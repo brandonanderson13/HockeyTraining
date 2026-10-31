@@ -3758,6 +3758,7 @@ function openCombinedGoalModal(playerId, playerName, isAll) {
   window._goalType = 'checkbox';
   window._combinedPlayerId = playerId;
   window._combinedIsAll = isAll;
+  window._combinedMetric = null; // Reset so a stale metric from a previous goal can't silently carry over
   const today = new Date().toISOString().split('T')[0];
   const role = window._userRole;
   const isPlayer = role === 'player';
