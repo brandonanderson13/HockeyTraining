@@ -4402,7 +4402,7 @@ function openItemDetail(type, id) {
         <div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Due</div><div style="display:flex;align-items:center;gap:6px;"><input type="date" id="detailGoalDueDate" value="${dueDateVal}" style="background:transparent;border:none;border-bottom:1px solid #333;color:rgba(255,255,255,0.7);font-size:13px;font-weight:600;padding:2px 0;flex:1;cursor:pointer;"><button onclick="updateItemDueDate('goal','${item.id}',this.previousElementSibling.value)" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;white-space:nowrap;">Save</button></div></div>
         ${isCoach?`<div style="background:#0d0d0d;border-radius:6px;padding:10px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;">Player</div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">${pName}</div></div>`:''}
       </div>
-      ${item.notes?`<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px 14px;margin-bottom:16px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Coach Notes</div><div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;font-style:italic;">${item.notes}</div></div>`:''}
+      ${item.notes?`<div style="background:#0d0d0d;border:1px solid #222;border-radius:8px;padding:12px 14px;margin-bottom:16px;"><div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Coach Notes</div><div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;font-style:italic;">${linkify(item.notes)}</div></div>`:''}
       ${item.target_value && !item.tracked_metric && item.target_value > 0 ? (
         !isDone ? `
         <div style="margin-bottom:6px;font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:.04em;">Update Progress</div>
@@ -9764,6 +9764,19 @@ async function renderMessages() {
     return;
   }
 
+  // Fetch likes for all visible messages in one batched call
+  let likesByMessage = {};
+  try {
+    const { data: likes } = await sb.from('message_likes').select('message_id, user_id').in('message_id', msgs.map(m => m.id));
+    (likes || []).forEach(l => {
+      if (!likesByMessage[l.message_id]) likesByMessage[l.message_id] = { count: 0, likedByMe: false };
+      likesByMessage[l.message_id].count++;
+      if (l.user_id === user.id) likesByMessage[l.message_id].likedByMe = true;
+    });
+  } catch (e) {
+    console.warn('Could not load message likes:', e);
+  }
+
   const isAdminUser = window._userRole === 'admin' || window._userRole === 'super_admin';
   thread.innerHTML = msgs.map(m => {
     const isMe = m.sender_id === user.id;
@@ -9772,6 +9785,7 @@ async function renderMessages() {
     const roleColor = m.sender_role === 'admin' || m.sender_role === 'super_admin' || m.sender_role === 'coach' ? '#fb923c' : '#60a5fa';
     const rLabel = m.sender_role === 'admin' || m.sender_role === 'super_admin' ? 'Admin' : m.sender_role === 'coach' ? 'Coach' : 'Player';
     const canDelete = isAdminUser || isMe;
+    const likeInfo = likesByMessage[m.id] || { count: 0, likedByMe: false };
     return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:4px;" class="msg-row">
       <div style="display:flex;align-items:center;gap:6px;${isMe?'flex-direction:row-reverse;':''}">
         <span style="font-size:12px;font-weight:600;color:${isMe?'rgba(255,255,255,0.45)':'rgba(255,255,255,0.7)'};">${isMe?'You':m.sender_name}</span>
@@ -9780,13 +9794,40 @@ async function renderMessages() {
         ${canDelete ? `<button onclick="deleteMessage('${m.id}')" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:15px;padding:0 3px;line-height:1;transition:color .15s;" onmouseover="this.style.color='rgba(248,113,113,0.7)'" onmouseout="this.style.color='rgba(255,255,255,0.15)'" title="Delete message">×</button>` : ''}
       </div>
       <div style="max-width:72%;background:${isMe?'var(--primary-color)':' #1c1c1c'};color:${isMe?'var(--secondary-color)':'rgba(255,255,255,0.88)'};padding:9px 13px;border-radius:${isMe?'14px 14px 4px 14px':'14px 14px 14px 4px'};font-size:14px;line-height:1.55;word-break:break-word;border:${isMe?'none':'1px solid #2a2a2a'};">
-        ${m.content.replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+        ${linkify(m.content)}
       </div>
+      <button onclick="toggleMessageLike('${m.id}')" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;padding:2px 4px;font-size:12px;color:${likeInfo.likedByMe ? '#f87171' : 'rgba(255,255,255,0.3)'};">
+        <span>${likeInfo.likedByMe ? '❤️' : '🤍'}</span>${likeInfo.count > 0 ? `<span style="font-size:11px;">${likeInfo.count}</span>` : ''}
+      </button>
     </div>`;
   }).join('');
 
   // Scroll to bottom
   thread.scrollTop = thread.scrollHeight;
+}
+
+async function toggleMessageLike(messageId) {
+  try {
+    const sb = await getSupabaseClient();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+
+    const { data: existing } = await sb.from('message_likes')
+      .select('id')
+      .eq('message_id', messageId)
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (existing) {
+      await sb.from('message_likes').delete().eq('id', existing.id);
+    } else {
+      await sb.from('message_likes').insert({ message_id: messageId, user_id: user.id });
+    }
+
+    renderMessages();
+  } catch (e) {
+    console.error('Error toggling like:', e);
+  }
 }
 
 async function sendMessage() {
@@ -9841,6 +9882,18 @@ async function sendMessage() {
       }
     }
   } catch(e) { console.warn('Message push error:', e); }
+}
+
+function linkify(text) {
+  if (!text) return '';
+  // Escape HTML first so pasted markup can't inject anything, then turn plain
+  // URLs into real clickable links (http/https or bare www.something.com).
+  const escaped = String(text).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const urlPattern = /((https?:\/\/|www\.)[^\s<]+)/gi;
+  return escaped.replace(urlPattern, (match) => {
+    const href = match.startsWith('http') ? match : 'https://' + match;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color:var(--primary-color);text-decoration:underline;word-break:break-all;">${match}</a>`;
+  });
 }
 
 function roleLabel(role) {
