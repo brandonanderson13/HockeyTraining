@@ -346,9 +346,10 @@ select:focus{border-color:var(--or);outline:none;}
     <div id="msgThread" style="flex:1;overflow-y:auto;padding:8px 16px 8px 4px;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;min-height:0;"></div>
     <!-- Input bar -->
     <div style="flex-shrink:0;padding-top:10px;border-top:1px solid #1e1e1e;display:flex;gap:8px;align-items:flex-end;">
-      <input id="msgText" type="text" placeholder="Message your team..." maxlength="500"
-        style="flex:1;background:#111;border:1px solid #2a2a2a;color:#fff;font-size:14px;padding:11px 14px;border-radius:10px;outline:none;font-family:system-ui,sans-serif;"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}">
+      <textarea id="msgText" placeholder="Message your team..." maxlength="500" rows="1"
+        style="flex:1;background:#111;border:1px solid #2a2a2a;color:#fff;font-size:14px;padding:11px 14px;border-radius:10px;outline:none;font-family:system-ui,sans-serif;resize:none;max-height:120px;overflow-y:auto;line-height:1.4;"
+        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
       <button onclick="sendMessage()"
         style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:13px;font-weight:700;padding:11px 20px;border-radius:10px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;flex-shrink:0;">Send</button>
     </div>
@@ -9744,6 +9745,30 @@ function switchMsgTeam(teamId) {
   subscribeToMessages();
 }
 
+function buildMessageRowHtml(m, currentUserId, likeInfoRaw, isAdminUser) {
+  const isMe = m.sender_id === currentUserId;
+  const time = new Date(m.created_at).toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
+  const day = new Date(m.created_at).toLocaleDateString('en-US', {month:'short',day:'numeric'});
+  const roleColor = m.sender_role === 'admin' || m.sender_role === 'super_admin' || m.sender_role === 'coach' ? '#fb923c' : '#60a5fa';
+  const rLabel = m.sender_role === 'admin' || m.sender_role === 'super_admin' ? 'Admin' : m.sender_role === 'coach' ? 'Coach' : 'Player';
+  const canDelete = isAdminUser || isMe;
+  const likeInfo = likeInfoRaw || { count: 0, likedByMe: false };
+  return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:4px;" class="msg-row" data-msg-id="${m.id}">
+    <div style="display:flex;align-items:center;gap:6px;${isMe?'flex-direction:row-reverse;':''}">
+      <span style="font-size:12px;font-weight:600;color:${isMe?'rgba(255,255,255,0.45)':'rgba(255,255,255,0.7)'};">${isMe?'You':m.sender_name}</span>
+      <span style="font-size:9px;font-weight:700;color:${roleColor};background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;">${rLabel}</span>
+      <span style="font-size:10px;color:rgba(255,255,255,0.2);">${day} · ${time}</span>
+      ${canDelete ? `<button onclick="deleteMessage('${m.id}')" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:15px;padding:0 3px;line-height:1;transition:color .15s;" onmouseover="this.style.color='rgba(248,113,113,0.7)'" onmouseout="this.style.color='rgba(255,255,255,0.15)'" title="Delete message">×</button>` : ''}
+    </div>
+    <div style="max-width:72%;background:${isMe?'var(--primary-color)':' #1c1c1c'};color:${isMe?'var(--secondary-color)':'rgba(255,255,255,0.88)'};padding:9px 13px;border-radius:${isMe?'14px 14px 4px 14px':'14px 14px 14px 4px'};font-size:14px;line-height:1.55;word-break:break-word;border:${isMe?'none':'1px solid #2a2a2a'};">
+      ${linkify(m.content, isMe ? 'var(--secondary-color)' : 'var(--primary-color)')}
+    </div>
+    <button onclick="toggleMessageLike('${m.id}')" class="msg-like-btn" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;padding:2px 4px;font-size:12px;color:${likeInfo.likedByMe ? '#f87171' : 'rgba(255,255,255,0.3)'};">
+      <span>${likeInfo.likedByMe ? '❤️' : '🤍'}</span>${likeInfo.count > 0 ? `<span style="font-size:11px;">${likeInfo.count}</span>` : ''}
+    </button>
+  </div>`;
+}
+
 async function renderMessages() {
   const thread = document.getElementById('msgThread');
   if (!thread) return;
@@ -9778,29 +9803,7 @@ async function renderMessages() {
   }
 
   const isAdminUser = window._userRole === 'admin' || window._userRole === 'super_admin';
-  thread.innerHTML = msgs.map(m => {
-    const isMe = m.sender_id === user.id;
-    const time = new Date(m.created_at).toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
-    const day = new Date(m.created_at).toLocaleDateString('en-US', {month:'short',day:'numeric'});
-    const roleColor = m.sender_role === 'admin' || m.sender_role === 'super_admin' || m.sender_role === 'coach' ? '#fb923c' : '#60a5fa';
-    const rLabel = m.sender_role === 'admin' || m.sender_role === 'super_admin' ? 'Admin' : m.sender_role === 'coach' ? 'Coach' : 'Player';
-    const canDelete = isAdminUser || isMe;
-    const likeInfo = likesByMessage[m.id] || { count: 0, likedByMe: false };
-    return `<div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:4px;" class="msg-row">
-      <div style="display:flex;align-items:center;gap:6px;${isMe?'flex-direction:row-reverse;':''}">
-        <span style="font-size:12px;font-weight:600;color:${isMe?'rgba(255,255,255,0.45)':'rgba(255,255,255,0.7)'};">${isMe?'You':m.sender_name}</span>
-        <span style="font-size:9px;font-weight:700;color:${roleColor};background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px;text-transform:uppercase;letter-spacing:.04em;">${rLabel}</span>
-        <span style="font-size:10px;color:rgba(255,255,255,0.2);">${day} · ${time}</span>
-        ${canDelete ? `<button onclick="deleteMessage('${m.id}')" style="background:none;border:none;color:rgba(255,255,255,0.15);cursor:pointer;font-size:15px;padding:0 3px;line-height:1;transition:color .15s;" onmouseover="this.style.color='rgba(248,113,113,0.7)'" onmouseout="this.style.color='rgba(255,255,255,0.15)'" title="Delete message">×</button>` : ''}
-      </div>
-      <div style="max-width:72%;background:${isMe?'var(--primary-color)':' #1c1c1c'};color:${isMe?'var(--secondary-color)':'rgba(255,255,255,0.88)'};padding:9px 13px;border-radius:${isMe?'14px 14px 4px 14px':'14px 14px 14px 4px'};font-size:14px;line-height:1.55;word-break:break-word;border:${isMe?'none':'1px solid #2a2a2a'};">
-        ${linkify(m.content)}
-      </div>
-      <button onclick="toggleMessageLike('${m.id}')" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;padding:2px 4px;font-size:12px;color:${likeInfo.likedByMe ? '#f87171' : 'rgba(255,255,255,0.3)'};">
-        <span>${likeInfo.likedByMe ? '❤️' : '🤍'}</span>${likeInfo.count > 0 ? `<span style="font-size:11px;">${likeInfo.count}</span>` : ''}
-      </button>
-    </div>`;
-  }).join('');
+  thread.innerHTML = msgs.map(m => buildMessageRowHtml(m, user.id, likesByMessage[m.id], isAdminUser)).join('');
 
   // Scroll to bottom
   thread.scrollTop = thread.scrollHeight;
@@ -9824,7 +9827,18 @@ async function toggleMessageLike(messageId) {
       await sb.from('message_likes').insert({ message_id: messageId, user_id: user.id });
     }
 
-    renderMessages();
+    // Update just this one message's like button in place — no full thread re-render,
+    // so the rest of the conversation and scroll position stay completely untouched
+    const { data: likes } = await sb.from('message_likes').select('user_id').eq('message_id', messageId);
+    const count = likes?.length || 0;
+    const likedByMe = (likes || []).some(l => l.user_id === user.id);
+
+    const row = document.querySelector(`.msg-row[data-msg-id="${messageId}"]`);
+    const btn = row?.querySelector('.msg-like-btn');
+    if (btn) {
+      btn.style.color = likedByMe ? '#f87171' : 'rgba(255,255,255,0.3)';
+      btn.innerHTML = `<span>${likedByMe ? '❤️' : '🤍'}</span>${count > 0 ? `<span style="font-size:11px;">${count}</span>` : ''}`;
+    }
   } catch (e) {
     console.error('Error toggling like:', e);
   }
@@ -9852,11 +9866,22 @@ async function sendMessage() {
     content
   };
 
-  const { error } = await sb.from('messages').insert(msg);
+  const { data: inserted, error } = await sb.from('messages').insert(msg).select().single();
   if (error) { alert('Error sending message: ' + error.message); return; }
 
   input.value = '';
-  await renderMessages();
+  input.style.height = 'auto';
+
+  // Append just the new message to the thread instead of re-rendering everything —
+  // keeps the rest of the conversation and scroll position from flashing/jumping
+  const thread = document.getElementById('msgThread');
+  if (thread && inserted) {
+    thread.insertAdjacentHTML('beforeend', buildMessageRowHtml(inserted, user.id, null, window._userRole === 'admin' || window._userRole === 'super_admin'));
+    thread.scrollTop = thread.scrollHeight;
+  } else {
+    await renderMessages();
+  }
+
   await markMessagesRead();
 
   // Send push to team members
@@ -9884,15 +9909,16 @@ async function sendMessage() {
   } catch(e) { console.warn('Message push error:', e); }
 }
 
-function linkify(text) {
+function linkify(text, linkColor) {
   if (!text) return '';
   // Escape HTML first so pasted markup can't inject anything, then turn plain
   // URLs into real clickable links (http/https or bare www.something.com).
+  const color = linkColor || 'var(--primary-color)';
   const escaped = String(text).replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const urlPattern = /((https?:\/\/|www\.)[^\s<]+)/gi;
   return escaped.replace(urlPattern, (match) => {
     const href = match.startsWith('http') ? match : 'https://' + match;
-    return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color:var(--primary-color);text-decoration:underline;word-break:break-all;">${match}</a>`;
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color:${color};text-decoration:underline;word-break:break-all;">${match}</a>`;
   });
 }
 
@@ -9995,9 +10021,19 @@ function subscribeToMessages() {
           schema: 'public',
           table: 'messages',
           filter: _msgTeamId ? `team_id=eq.${_msgTeamId}` : `org_id=eq.${_msgOrgId}`
-        }, (payload) => {
+        }, async (payload) => {
           console.log('[Realtime] New message:', payload.new?.sender_name);
-          renderMessages();
+          const { data: { user: currentUser } } = await sb.auth.getUser();
+          // Skip appending our own message again — sendMessage() already added it locally
+          if (currentUser && payload.new?.sender_id !== currentUser.id) {
+            const thread = document.getElementById('msgThread');
+            if (thread) {
+              thread.insertAdjacentHTML('beforeend', buildMessageRowHtml(payload.new, currentUser.id, null, window._userRole === 'admin' || window._userRole === 'super_admin'));
+              thread.scrollTop = thread.scrollHeight;
+            } else {
+              renderMessages();
+            }
+          }
           // Only update badge if not on messages tab
           const msgSec = document.getElementById('messages');
           if (msgSec?.style.display === 'none') {
