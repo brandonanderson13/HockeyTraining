@@ -4915,6 +4915,17 @@ async function syncStickhandlingSession(sessionData) {
 async function syncCompletedWorkout(dex) {
   try {
     console.log('syncCompletedWorkout called', dex);
+
+    // Guard against accidental double-fire (e.g. a double-tap on the last checkbox
+    // triggering this twice in the same instant) without blocking a genuine redo
+    // later on — only skips if the exact same week/day fired again within 3 seconds.
+    const fireKey = dex?.closest('.swk')?.querySelector('.wnum')?.textContent + '|' + dex?.previousElementSibling?.textContent;
+    const now = Date.now();
+    if (window._lastWorkoutSync && window._lastWorkoutSync.key === fireKey && (now - window._lastWorkoutSync.time) < 3000) {
+      console.log('Skipping duplicate fire within 3s window');
+      return;
+    }
+    window._lastWorkoutSync = { key: fireKey, time: now };
     
     // Extract week and day from the dex element
     const weekEl = dex.closest('.swk');
@@ -4948,8 +4959,10 @@ async function syncCompletedWorkout(dex) {
       return;
     }
     
-    // Record this as one completed workout
-    const result = await sb.from('exercise_completions').upsert({
+    // Record this as a completed workout. This is a plain insert (not an upsert) on
+    // purpose: completing the same week/day again after a reset/restart should log
+    // as a brand new completion and count again, not get silently blocked or overwritten.
+    const result = await sb.from('exercise_completions').insert({
       user_id: user.id,
       organization_id: window._userOrgId || 'delano',
       completion_date: today,
@@ -4957,9 +4970,9 @@ async function syncCompletedWorkout(dex) {
       day_name: dayName,
       exercise_name: 'FULL_DAY_COMPLETED',
       completed: true
-    }, { onConflict: 'user_id,completion_date,week_number,day_name,exercise_name' });
+    });
     
-    console.log('Supabase upsert result:', result);
+    console.log('Supabase insert result:', result);
     
     if (result.error) {
       console.error('Supabase error:', result.error);
