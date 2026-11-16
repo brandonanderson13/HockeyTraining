@@ -3534,7 +3534,7 @@ function renderCoachDashboard(players, statsMap, teamName, assignments, goals, t
         <button onclick="openCombinedGoalModal(null,null)" style="background:var(--primary-color);border:none;color:var(--secondary-color);font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em;">+ Goal</button>
       </div>
     </div>
-    ${tabsHtml}
+    <div id="goalTabs_${_tId}">${tabsHtml}</div>
     <div id="goalsListScroll_${_tId}" style="max-height:420px;overflow-y:auto;">
       ${goalsListHtml}
     </div>
@@ -9663,9 +9663,7 @@ function filterCoachGoals(tab, targetId) {
       const pLabel = playerMap[g.player_id] || 'Unknown';
       return `<div style="padding:9px 0;border-bottom:1px solid #1a1a1a;cursor:pointer;" onclick="openItemDetail('goal','${g.id}')">
         <div style="display:flex;align-items:center;gap:10px;">
-          <div onclick="event.stopPropagation();toggleGoalComplete('${g.id}',${isDone})" style="width:20px;height:20px;border-radius:5px;border:2px solid ${isDone?'#4ade80':'#444'};background:${isDone?'#4ade80':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;">
-            ${isDone?'<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#0d0d0d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
-          </div>
+          <input type="checkbox" class="goal-select-cb" data-goal-id="${g.id}" onclick="event.stopPropagation();updateGoalSelection('${targetId||'dashboardContent'}')" style="width:15px;height:15px;flex-shrink:0;cursor:pointer;accent-color:#60a5fa;">
           <div style="flex:1;min-width:0;">
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
               <span style="font-size:11px;font-weight:700;color:#60a5fa;background:rgba(96,165,250,0.1);padding:1px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.04em;">Goal</span>
@@ -9685,7 +9683,14 @@ function filterCoachGoals(tab, targetId) {
       </div>`;
     }).join('');
   }
-  goalSection.innerHTML = tabsHtml + goalsHtml;
+
+  // Update just the tabs and the list — leave the header (title, Delete Selected,
+  // + Goal buttons) completely untouched so they don't get wiped on every tab click
+  const tabsEl = document.getElementById('goalTabs_' + (targetId||'dashboardContent'));
+  const listEl = document.getElementById('goalsListScroll_' + (targetId||'dashboardContent'));
+  if (tabsEl) tabsEl.innerHTML = tabsHtml;
+  if (listEl) listEl.innerHTML = goalsHtml;
+  updateGoalSelection(targetId||'dashboardContent');
 }
 
 // ── MESSAGING ────────────────────────────────────────────────────────────────
