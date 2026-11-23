@@ -51,15 +51,15 @@
     <h1><span id="orgName">Delano</span> <span id="teamName">Tigers</span> Leaderboard</h1>
     <p>Top performers — updated live</p>
   </div>
-  
+
   <div class="reset-info" id="resetInfo">Loading period...</div>
-  
+
   <div class="tabs">
     <button class="tab-btn active" onclick="switchBoard('shots')" id="tabShots">Most Shots</button>
     <button class="tab-btn" onclick="switchBoard('stickhandling')" id="tabStick">Most Stickhandling</button>
     <button class="tab-btn" onclick="switchBoard('workouts')" id="tabWorkouts">Most Workouts</button>
   </div>
-  
+
   <div class="leaderboard">
     <div id="leaderboardContent" class="loading">Loading...</div>
   </div>
@@ -124,9 +124,15 @@ applyLeaderboardBranding();
 
 let currentBoard = 'shots';
 
+// Players table used by the public leaderboard. This is a restricted view
+// (not the raw `subscriptions` table) that only exposes the columns needed
+// here — no emails, no Stripe IDs — and is readable by anonymous visitors.
+// See create_leaderboard_anon_access.sql for how it's set up.
+const PLAYERS_TABLE = 'public_leaderboard_players';
+
 async function loadLeaderboard() {
   const content = document.getElementById('leaderboardContent');
-  
+
   // Update period display
   const resetInfo = document.getElementById('resetInfo');
   if (startDate && endDate) {
@@ -143,7 +149,7 @@ async function loadLeaderboard() {
   } else {
     resetInfo.textContent = 'All-time stats';
   }
-  
+
   // Update header if no name param passed
   // Use resolved name from branding fetch, don't overwrite with fallback
   const displayName = resolvedOrgName || orgName;
@@ -151,24 +157,24 @@ async function loadLeaderboard() {
     document.getElementById('orgName').textContent = orgId === 'individual' ? 'Individual' : orgId.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
     document.getElementById('teamName').textContent = orgId === 'individual' ? 'Players' : '';
   }
-  
+
   try {
     let players = [];
-    
+
     if (currentBoard === 'shots') {
       let query = sb.from('shooting_sessions').select('user_id, total_shots').eq('organization_id', orgId);
       if (startDate) query = query.gte('session_date', startDate);
       if (endDate) query = query.lte('session_date', endDate);
       const { data: sessions } = await query;
-      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('role', 'player').eq('organization_id', orgId);
-      
+      const { data: subs } = await sb.from(PLAYERS_TABLE).select('user_id, first_name, last_name').eq('status', 'active').eq('role', 'player').eq('organization_id', orgId);
+
       const shotsByUser = {};
       if (sessions) {
         sessions.forEach(s => {
           shotsByUser[s.user_id] = (shotsByUser[s.user_id] || 0) + (s.total_shots || 0);
         });
       }
-      
+
       if (subs) {
         players = subs
           .filter(s => shotsByUser[s.user_id] > 0)
@@ -183,15 +189,15 @@ async function loadLeaderboard() {
       if (startDate) query = query.gte('session_date', startDate);
       if (endDate) query = query.lte('session_date', endDate);
       const { data: sessions } = await query;
-      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('role', 'player').eq('organization_id', orgId);
-      
+      const { data: subs } = await sb.from(PLAYERS_TABLE).select('user_id, first_name, last_name').eq('status', 'active').eq('role', 'player').eq('organization_id', orgId);
+
       const minsByUser = {};
       if (sessions) {
         sessions.forEach(s => {
           minsByUser[s.user_id] = (minsByUser[s.user_id] || 0) + (s.minutes || 0);
         });
       }
-      
+
       if (subs) {
         players = subs
           .filter(s => minsByUser[s.user_id] > 0)
@@ -206,16 +212,16 @@ async function loadLeaderboard() {
       if (startDate) query = query.gte('completion_date', startDate);
       if (endDate) query = query.lte('completion_date', endDate);
       const { data: completions } = await query;
-      
-      const { data: subs } = await sb.from('subscriptions').select('user_id, first_name, last_name').eq('status', 'active').eq('role', 'player').eq('organization_id', orgId);
-      
+
+      const { data: subs } = await sb.from(PLAYERS_TABLE).select('user_id, first_name, last_name').eq('status', 'active').eq('role', 'player').eq('organization_id', orgId);
+
       const workoutsByUser = {};
       if (completions) {
         completions.forEach(c => {
           workoutsByUser[c.user_id] = (workoutsByUser[c.user_id] || 0) + 1;
         });
       }
-      
+
       if (subs) {
         players = subs
           .filter(s => workoutsByUser[s.user_id] > 0)
@@ -226,14 +232,14 @@ async function loadLeaderboard() {
           .sort((a, b) => b.value - a.value);
       }
     }
-    
+
     if (!players || players.length === 0) {
       content.innerHTML = '<div class="empty">No data yet — start logging sessions to see the leaderboard!</div>';
       return;
     }
-    
+
     let html = '<table><thead><tr><th class="num">#</th><th>Player</th><th class="stat">' + (currentBoard === 'shots' ? 'Shots' : (currentBoard === 'stickhandling' ? 'Minutes' : 'Workouts')) + '</th></tr></thead><tbody>';
-    
+
     players.forEach((p, i) => {
       const rank = i + 1;
       const rowClass = rank === 1 ? 'top1' : (rank === 2 ? 'top2' : (rank === 3 ? 'top3' : ''));
@@ -243,10 +249,10 @@ async function loadLeaderboard() {
         <td class="stat">${p.value.toLocaleString()}</td>
       </tr>`;
     });
-    
+
     html += '</tbody></table>';
     content.innerHTML = html;
-    
+
   } catch (error) {
     console.error('Leaderboard error:', error);
     content.innerHTML = '<div class="empty">Error loading: ' + error.message + '</div>';
